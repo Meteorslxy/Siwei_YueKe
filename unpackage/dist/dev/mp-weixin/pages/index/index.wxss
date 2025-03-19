@@ -1,0 +1,294 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.index-container {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+/* 搜索栏 */
+.search-bar {
+  background-color: var(--theme-color);
+  padding: 16rpx 30rpx;
+}
+.search-bar .search-input {
+  height: 70rpx;
+  background-color: #fff;
+  border-radius: 35rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+}
+.search-bar .search-input .iconfont {
+  font-size: 36rpx;
+  color: #999;
+  margin-right: 10rpx;
+}
+.search-bar .search-input .placeholder {
+  color: #999;
+  font-size: 28rpx;
+}
+/* 功能导航菜单 */
+.nav-menu {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20rpx 0;
+  background-color: #fff;
+}
+.nav-menu .nav-item {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+}
+.nav-menu .nav-item .nav-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+.nav-menu .nav-item .nav-text {
+  font-size: 24rpx;
+  color: var(--text-color);
+}
+/* 资讯区域 */
+.news-section {
+  margin-top: 20rpx;
+  background-color: #fff;
+  padding: 20rpx 0;
+}
+.news-section .section-header {
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+  margin-bottom: 20rpx;
+}
+.news-section .section-header .section-tag {
+  width: 8rpx;
+  height: 32rpx;
+  background-color: var(--theme-color);
+  margin-right: 16rpx;
+  border-radius: 4rpx;
+}
+.news-section .section-header .section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-color);
+}
+.news-section .news-scroll {
+  white-space: nowrap;
+}
+.news-section .news-scroll .news-item {
+  display: inline-block;
+  width: 600rpx;
+  margin-right: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.news-section .news-scroll .news-item:first-child {
+  margin-left: 30rpx;
+}
+.news-section .news-scroll .news-item .news-image {
+  width: 600rpx;
+  height: 300rpx;
+}
+.news-section .news-scroll .news-item .news-content {
+  padding: 20rpx;
+}
+.news-section .news-scroll .news-item .news-content .news-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 10rpx;
+  display: block;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+.news-section .news-scroll .news-item .news-content .news-desc {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+/* 推荐课程区域 */
+.course-section {
+  margin-top: 20rpx;
+  background-color: #fff;
+  padding: 20rpx 0;
+}
+.course-section .section-header {
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+  margin-bottom: 20rpx;
+}
+.course-section .section-header .section-tag {
+  width: 8rpx;
+  height: 32rpx;
+  background-color: var(--theme-color);
+  margin-right: 16rpx;
+  border-radius: 4rpx;
+}
+.course-section .section-header .section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  flex: 1;
+}
+.course-section .section-header .section-more {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+  display: flex;
+  align-items: center;
+}
+.course-section .section-header .section-more .iconfont {
+  margin-left: 4rpx;
+  font-size: 24rpx;
+}
+.course-section .course-list {
+  padding: 0 30rpx;
+}
+.course-section .course-list .course-item {
+  margin-bottom: 30rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.course-section .course-list .course-item .course-image {
+  width: 100%;
+  height: 300rpx;
+}
+.course-section .course-list .course-item .course-content {
+  padding: 20rpx;
+}
+.course-section .course-list .course-item .course-content .course-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 16rpx;
+  display: flex;
+}
+.course-section .course-list .course-item .course-content .course-title .school-tag {
+  color: var(--theme-color);
+  margin-right: 10rpx;
+}
+.course-section .course-list .course-item .course-content .course-info {
+  display: flex;
+  margin-bottom: 16rpx;
+  font-size: 24rpx;
+  color: var(--text-color-grey);
+}
+.course-section .course-list .course-item .course-content .course-info .course-location {
+  margin-right: 30rpx;
+}
+.course-section .course-list .course-item .course-content .course-teacher {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.course-section .course-list .course-item .course-content .course-teacher .teacher-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+.course-section .course-list .course-item .course-content .course-teacher .teacher-name {
+  font-size: 28rpx;
+  color: var(--text-color);
+  margin-right: 16rpx;
+}
+.course-section .course-list .course-item .course-content .course-teacher .teacher-title {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+}
+.course-section .course-list .course-item .course-content .course-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.course-section .course-list .course-item .course-content .course-bottom .course-price {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #FF3B30;
+}
+.course-section .course-list .course-item .course-content .course-bottom .course-status {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+}
+.course-section .course-list .course-item .course-content .course-bottom .course-status .max-students {
+  margin-right: 20rpx;
+}
+

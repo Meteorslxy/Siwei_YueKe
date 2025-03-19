@@ -1,0 +1,220 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.course-container {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+/* 筛选区域 */
+.filter-area {
+  background-color: #fff;
+  /* 年级筛选 */
+  /* 学科选项卡 */
+}
+.filter-area .grade-filter {
+  position: relative;
+}
+.filter-area .grade-filter .selected-grade {
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.filter-area .grade-filter .selected-grade .label {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+.filter-area .grade-filter .selected-grade .iconfont {
+  font-size: 24rpx;
+  margin-left: 8rpx;
+}
+.filter-area .grade-filter .grade-dropdown {
+  position: absolute;
+  top: 80rpx;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+.filter-area .grade-filter .grade-dropdown .grade-option {
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  border-bottom: 1rpx solid var(--border-color-light);
+}
+.filter-area .grade-filter .grade-dropdown .grade-option.active {
+  color: var(--theme-color);
+  font-weight: bold;
+}
+.filter-area .subject-scroll {
+  white-space: nowrap;
+  border-bottom: 1rpx solid var(--border-color-light);
+}
+.filter-area .subject-scroll .subject-item {
+  display: inline-block;
+  padding: 0 30rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 28rpx;
+  position: relative;
+}
+.filter-area .subject-scroll .subject-item.active {
+  color: var(--theme-color);
+  font-weight: bold;
+}
+.filter-area .subject-scroll .subject-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  width: 30rpx;
+  height: 4rpx;
+  background-color: var(--theme-color);
+  border-radius: 2rpx;
+}
+/* 课程列表 */
+.course-list {
+  padding: 20rpx;
+}
+.course-list .course-item {
+  display: flex;
+  margin-bottom: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+}
+.course-list .course-item .course-logo {
+  width: 220rpx;
+  height: 220rpx;
+  overflow: hidden;
+}
+.course-list .course-item .course-logo .logo-image {
+  width: 100%;
+  height: 100%;
+}
+.course-list .course-item .course-content {
+  flex: 1;
+  padding: 16rpx;
+  position: relative;
+}
+.course-list .course-item .course-content .course-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 12rpx;
+}
+.course-list .course-item .course-content .course-title .school-tag {
+  color: var(--theme-color);
+  margin-right: 6rpx;
+}
+.course-list .course-item .course-content .course-info {
+  font-size: 24rpx;
+  color: var(--text-color-grey);
+  margin-bottom: 8rpx;
+  display: flex;
+  align-items: center;
+}
+.course-list .course-item .course-content .course-info .location-icon, .course-list .course-item .course-content .course-info .time-icon {
+  font-size: 24rpx;
+  margin-right: 8rpx;
+}
+.course-list .course-item .course-content .course-teacher {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+}
+.course-list .course-item .course-content .course-teacher .teacher-avatar {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  margin-right: 10rpx;
+}
+.course-list .course-item .course-content .course-teacher .teacher-name {
+  font-size: 24rpx;
+  color: var(--text-color);
+  margin-right: 10rpx;
+}
+.course-list .course-item .course-content .course-teacher .teacher-title {
+  font-size: 22rpx;
+  color: var(--text-color-light);
+}
+.course-list .course-item .course-content .course-price {
+  position: absolute;
+  right: 16rpx;
+  bottom: 16rpx;
+}
+.course-list .course-item .course-content .course-price .price-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #FF3B30;
+}
+

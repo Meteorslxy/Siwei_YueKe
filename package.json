@@ -1,0 +1,39 @@
+{
+  "name": "yueke-app",
+  "version": "1.0.0",
+  "description": "约课小程序",
+  "main": "main.js",
+  "scripts": {
+    "dev": "uni -p mp-weixin",
+    "build": "uni build -p mp-weixin"
+  },
+  "keywords": [
+    "uniapp",
+    "约课",
+    "小程序"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@dcloudio/uni-app": "^2.0.2",
+    "@dcloudio/uni-app-plus": "^2.0.2",
+    "@dcloudio/uni-h5": "^2.0.2",
+    "@dcloudio/uni-mp-weixin": "^2.0.2",
+    "@dcloudio/uni-ui": "^1.4.20"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-cli-shared": "^2.0.2",
+    "@dcloudio/vue-cli-plugin-uni": "^2.0.2"
+  },
+  "cloudfunction-config": {
+		"memorySize": 256,
+		"timeout": 5,
+		"triggers": [{
+				"name": "myTrigger",
+				"type": "timer",
+				"config": "0 0 2 1 * * *"
+		}],
+		"path": "",
+		"runtime": "Nodejs18"
+	}
+} 

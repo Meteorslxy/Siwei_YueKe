@@ -1,0 +1,108 @@
+@font-face {
+  font-family: "iconfont";
+  src: url('iconfont.ttf') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-home:before {
+  content: "\e600";
+}
+
+.icon-course:before {
+  content: "\e601";
+}
+
+.icon-schedule:before {
+  content: "\e602";
+}
+
+.icon-user:before {
+  content: "\e603";
+}
+
+.icon-search:before {
+  content: "\e604";
+}
+
+.icon-location:before {
+  content: "\e605";
+}
+
+.icon-time:before {
+  content: "\e606";
+}
+
+.icon-phone:before {
+  content: "\e607";
+}
+
+.icon-contact:before {
+  content: "\e608";
+}
+
+.icon-right:before {
+  content: "\e609";
+}
+
+.icon-left:before {
+  content: "\e60a";
+}
+
+.icon-up:before {
+  content: "\e60b";
+}
+
+.icon-down:before {
+  content: "\e60c";
+}
+
+.icon-favorite:before {
+  content: "\e60d";
+}
+
+.icon-teacher:before {
+  content: "\e60e";
+}
+
+.icon-student:before {
+  content: "\e60f";
+}
+
+.icon-pending:before {
+  content: "\e610";
+}
+
+.icon-confirmed:before {
+  content: "\e611";
+}
+
+.icon-finished:before {
+  content: "\e612";
+}
+
+.icon-cancelled:before {
+  content: "\e613";
+}
+
+.icon-all:before {
+  content: "\e614";
+}
+
+.icon-feedback:before {
+  content: "\e615";
+}
+
+.icon-about:before {
+  content: "\e616";
+}
+
+.icon-setting:before {
+  content: "\e617";
+} 

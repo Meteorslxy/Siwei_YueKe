@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "名师介绍",
+  "navigationBarBackgroundColor": "#FF8D3C",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "teacher-card": "/components/teacher-card/teacher-card",
+    "empty-tip": "/components/empty-tip/empty-tip",
+    "load-more": "/components/load-more/load-more"
+  }
+}
