@@ -1,7 +1,8 @@
 {
   "description": "项目配置文件。",
   "packOptions": {
-    "ignore": []
+    "ignore": [],
+    "include": []
   },
   "setting": {
     "urlCheck": false,
@@ -9,29 +10,21 @@
     "postcss": true,
     "minified": true,
     "newFeature": true,
-    "bigPackageSizeSupport": true
-  },
-  "compileType": "miniprogram",
-  "libVersion": "",
-  "appid": "wx64b3a851f619fc04",
-  "projectname": "约课小程序",
-  "condition": {
-    "search": {
-      "current": -1,
-      "list": []
-    },
-    "conversation": {
-      "current": -1,
-      "list": []
-    },
-    "game": {
-      "current": -1,
-      "list": []
-    },
-    "miniprogram": {
-      "current": -1,
-      "list": []
+    "bigPackageSizeSupport": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
     }
   },
-  "cloudfunctionRoot": "uniCloud-aliyun/cloudfunctions/"
+  "compileType": "miniprogram",
+  "libVersion": "3.7.11",
+  "appid": "wx6e610d9b47f85ffc",
+  "projectname": "约课小程序",
+  "condition": {},
+  "cloudfunctionRoot": "uniCloud-aliyun/cloudfunctions/",
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
+  }
 }

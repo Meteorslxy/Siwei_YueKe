@@ -1,25 +1,51 @@
 <template>
   <view class="course-container">
-    <!-- 筛选区域 -->
-    <view class="filter-area">
-      <!-- 年级筛选 -->
-      <view class="grade-filter">
-        <view class="selected-grade" @click="toggleGradeSelect">
-          <text class="label">{{selectedGradeText}}</text>
-          <text class="iconfont" :class="isGradeSelectShow ? 'icon-up' : 'icon-down'"></text>
+    <!-- 顶部背景 -->
+    <view class="header-background" :style="{ paddingTop: statusBarHeight + 'px' }">
+      <!-- 筛选区域 -->
+      <view class="filter-section">
+        <!-- 多选筛选 -->
+        <view class="filter-dropdown">
+          <view class="filter-item" @click="toggleGradeFilter">
+            <text class="filter-text">{{selectedGradeText}}</text>
+            <view class="arrow-icon" :class="{ 'arrow-up': isGradeFilterShow }"></view>
+          </view>
+          <view class="filter-dropdown-content" v-if="isGradeFilterShow">
+            <view class="dropdown-title">选择年级</view>
+            <view class="dropdown-options">
+              <view 
+                class="dropdown-option" 
+                v-for="(grade, index) in gradeGroups" 
+                :key="index"
+                :class="{ active: selectedGradeGroup === grade.value }"
+                @click="selectGradeGroup(grade.value)">
+                {{grade.label}}
+              </view>
+            </view>
+          </view>
         </view>
-        <view class="grade-dropdown" v-if="isGradeSelectShow">
-          <view 
-            class="grade-option" 
-            v-for="(grade, index) in gradeOptions" 
-            :key="index"
-            :class="{ active: selectedGrade === grade.value }"
-            @click="selectGrade(grade.value)">
-            {{grade.label}}
+
+        <view class="filter-dropdown">
+          <view class="filter-item" @click="toggleSchoolFilter">
+            <text class="filter-text">{{selectedSchoolText}}</text>
+            <view class="arrow-icon" :class="{ 'arrow-up': isSchoolFilterShow }"></view>
+          </view>
+          <view class="filter-dropdown-content" v-if="isSchoolFilterShow">
+            <view class="dropdown-title">选择校区</view>
+            <view class="dropdown-options">
+              <view 
+                class="dropdown-option" 
+                v-for="(school, index) in schoolOptions" 
+                :key="index"
+                :class="{ active: selectedSchool === school.value }"
+                @click="selectSchool(school.value)">
+                {{school.label}}
+              </view>
+            </view>
           </view>
         </view>
       </view>
-      
+
       <!-- 学科选项卡 -->
       <scroll-view class="subject-scroll" scroll-x show-scrollbar="false">
         <view 
@@ -40,8 +66,12 @@
         v-for="(item, index) in courseList" 
         :key="index"
         @click="navigateTo(`/pages/course/detail?id=${item._id}`)">
-        <view class="course-logo">
-          <image class="logo-image" :src="item.coverImage" mode="aspectFill"></image>
+        <view class="course-left">
+          <view class="course-brand-logo">
+            <text class="brand-text">思维</text>
+            <text class="brand-text sm">拓展</text>
+          </view>
+          <image class="course-logo" :src="item.coverImage" mode="aspectFill"></image>
         </view>
         <view class="course-content">
           <view class="course-title">
@@ -80,19 +110,26 @@
 export default {
   data() {
     return {
+      // 状态栏高度
+      statusBarHeight: 0,
+      
       // 年级筛选相关
-      isGradeSelectShow: false,
-      selectedGrade: 'all',
-      gradeOptions: [
+      isGradeFilterShow: false,
+      selectedGradeGroup: 'all',
+      gradeGroups: [
         { label: '全部', value: 'all' },
-        { label: '一年级', value: 'grade1' },
-        { label: '二年级', value: 'grade2' },
-        { label: '三年级', value: 'grade3' },
-        { label: '四年级', value: 'grade4' },
-        { label: '五年级', value: 'grade5' },
-        { label: '六年级', value: 'grade6' },
-        { label: '初中', value: 'junior' },
-        { label: '高中', value: 'senior' }
+        { label: '小学', value: 'primary' },
+        { label: '初中', value: 'junior' }
+      ],
+      
+      // 校区筛选相关
+      isSchoolFilterShow: false,
+      selectedSchool: 'all',
+      schoolOptions: [
+        { label: '全部校区', value: 'all' },
+        { label: '雨花台校区', value: 'yuhuatai' },
+        { label: '大行宫校区', value: 'daxinggong' },
+        { label: '闵行校区', value: 'minxing' }
       ],
       
       // 学科筛选相关
@@ -117,11 +154,16 @@ export default {
   },
   computed: {
     selectedGradeText() {
-      const found = this.gradeOptions.find(item => item.value === this.selectedGrade)
+      const found = this.gradeGroups.find(item => item.value === this.selectedGradeGroup)
       return found ? found.label : '全部'
+    },
+    selectedSchoolText() {
+      const found = this.schoolOptions.find(item => item.value === this.selectedSchool)
+      return found ? found.label : '全部校区'
     }
   },
   onLoad() {
+    this.getStatusBarHeight()
     this.loadCourseList()
   },
   onPullDownRefresh() {
@@ -136,17 +178,49 @@ export default {
     }
   },
   methods: {
-    // 切换年级筛选下拉框
-    toggleGradeSelect() {
-      this.isGradeSelectShow = !this.isGradeSelectShow
+    // 获取状态栏高度
+    getStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync()
+        this.statusBarHeight = systemInfo.statusBarHeight || 20
+      } catch (e) {
+        console.error('获取状态栏高度失败:', e)
+        this.statusBarHeight = 20
+      }
     },
     
-    // 选择年级
-    selectGrade(grade) {
-      if (this.selectedGrade === grade) return
+    // 切换年级筛选下拉框
+    toggleGradeFilter() {
+      this.isGradeFilterShow = !this.isGradeFilterShow
+      if (this.isGradeFilterShow) {
+        this.isSchoolFilterShow = false
+      }
+    },
+    
+    // 切换校区筛选下拉框
+    toggleSchoolFilter() {
+      this.isSchoolFilterShow = !this.isSchoolFilterShow
+      if (this.isSchoolFilterShow) {
+        this.isGradeFilterShow = false
+      }
+    },
+    
+    // 选择年级组
+    selectGradeGroup(gradeGroup) {
+      if (this.selectedGradeGroup === gradeGroup) return
       
-      this.selectedGrade = grade
-      this.isGradeSelectShow = false
+      this.selectedGradeGroup = gradeGroup
+      this.isGradeFilterShow = false
+      this.resetList()
+      this.loadCourseList()
+    },
+    
+    // 选择校区
+    selectSchool(school) {
+      if (this.selectedSchool === school) return
+      
+      this.selectedSchool = school
+      this.isSchoolFilterShow = false
       this.resetList()
       this.loadCourseList()
     },
@@ -177,12 +251,14 @@ export default {
       if (this.isLoading) return Promise.resolve()
       
       this.isLoading = true
+      this.loadMoreStatus = 'loading'
       
       try {
         // 使用API接口调用云函数
         const params = {
-          gradeLevel: this.selectedGrade !== 'all' ? this.selectedGrade : '',
+          gradeLevel: this.selectedGradeGroup !== 'all' ? this.selectedGradeGroup : '',
           subject: this.selectedSubject !== 'all' ? this.selectedSubject : '',
+          school: this.selectedSchool !== 'all' ? this.selectedSchool : '',
           limit: this.limit,
           skip: (this.page - 1) * this.limit
         };
@@ -286,47 +362,82 @@ export default {
   background-color: $bg-color;
 }
 
+/* 顶部背景 */
+.header-background {
+  width: 100%;
+  background-color: #EC7A49; /* 与用户页面一致的颜色 */
+  padding-bottom: 120rpx;
+}
+
 /* 筛选区域 */
-.filter-area {
-  background-color: #fff;
+.filter-section {
+  padding: 40rpx 30rpx 30rpx;
+  display: flex;
+  gap: 20rpx;
+}
+
+.filter-dropdown {
+  position: relative;
+  flex: 1;
   
-  /* 年级筛选 */
-  .grade-filter {
-    position: relative;
+  .filter-item {
+    height: 70rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    padding: 0 20rpx;
     
-    .selected-grade {
-      height: 80rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      
-      .label {
-        font-size: 32rpx;
-        font-weight: bold;
-      }
-      
-      .iconfont {
-        font-size: 24rpx;
-        margin-left: 8rpx;
-      }
+    .filter-text {
+      font-size: 28rpx;
+      font-weight: bold;
+      margin-right: 6rpx;
     }
     
-    .grade-dropdown {
-      position: absolute;
-      top: 80rpx;
-      left: 0;
-      width: 100%;
-      background-color: #fff;
-      box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
-      z-index: 10;
+    .arrow-icon {
+      width: 0;
+      height: 0;
+      border-left: 10rpx solid transparent;
+      border-right: 10rpx solid transparent;
+      border-top: 10rpx solid #fff;
+      margin-left: 0;
+      transition: transform 0.3s;
       
-      .grade-option {
+      &.arrow-up {
+        transform: rotate(180deg);
+      }
+    }
+  }
+  
+  .filter-dropdown-content {
+    position: absolute;
+    top: 80rpx;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 12rpx;
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    
+    .dropdown-title {
+      height: 70rpx;
+      line-height: 70rpx;
+      text-align: center;
+      font-size: 28rpx;
+      color: $text-color-light;
+      border-bottom: 1rpx solid $border-color-light;
+    }
+    
+    .dropdown-options {
+      max-height: 350rpx;
+      overflow-y: auto;
+      
+      .dropdown-option {
         height: 80rpx;
         line-height: 80rpx;
         text-align: center;
         font-size: 28rpx;
-        border-bottom: 1rpx solid $border-color-light;
+        color: $text-color;
         
         &.active {
           color: $theme-color;
@@ -335,35 +446,37 @@ export default {
       }
     }
   }
+}
+
+/* 学科选项卡 */
+.subject-scroll {
+  white-space: nowrap;
+  padding: 0 20rpx;
+  margin-top: 20rpx;
   
-  /* 学科选项卡 */
-  .subject-scroll {
-    white-space: nowrap;
-    border-bottom: 1rpx solid $border-color-light;
+  .subject-item {
+    display: inline-block;
+    padding: 0 30rpx;
+    height: 70rpx;
+    line-height: 70rpx;
+    font-size: 28rpx;
+    position: relative;
+    color: rgba(255,255,255,0.8);
     
-    .subject-item {
-      display: inline-block;
-      padding: 0 30rpx;
-      height: 80rpx;
-      line-height: 80rpx;
-      font-size: 28rpx;
-      position: relative;
+    &.active {
+      color: #fff;
+      font-weight: bold;
       
-      &.active {
-        color: $theme-color;
-        font-weight: bold;
-        
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 30rpx;
-          height: 4rpx;
-          background-color: $theme-color;
-          border-radius: 2rpx;
-        }
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30rpx;
+        height: 4rpx;
+        background-color: #fff;
+        border-radius: 2rpx;
       }
     }
   }
@@ -371,34 +484,64 @@ export default {
 
 /* 课程列表 */
 .course-list {
-  padding: 20rpx;
+  padding: 20rpx 30rpx 30rpx;
+  margin-top: -100rpx;
+  position: relative;
+  z-index: 10;
   
   .course-item {
     display: flex;
-    margin-bottom: 20rpx;
+    margin-bottom: 30rpx;
     background-color: #fff;
-    border-radius: 12rpx;
+    border-radius: 16rpx;
     overflow: hidden;
-    box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
     
-    .course-logo {
-      width: 220rpx;
+    .course-left {
+      width: 180rpx;
       height: 220rpx;
-      overflow: hidden;
+      position: relative;
       
-      .logo-image {
+      .course-brand-logo {
+        position: absolute;
+        top: 10rpx;
+        left: 10rpx;
+        width: 80rpx;
+        height: 80rpx;
+        background-color: $theme-color;
+        border-radius: 10rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-weight: bold;
+        
+        .brand-text {
+          font-size: 28rpx;
+          line-height: 1.2;
+        }
+        
+        .brand-text.sm {
+          font-size: 22rpx;
+          line-height: 1.2;
+        }
+      }
+      
+      .course-logo {
         width: 100%;
         height: 100%;
+        object-fit: cover;
       }
     }
     
     .course-content {
       flex: 1;
-      padding: 16rpx;
+      padding: 20rpx;
       position: relative;
       
       .course-title {
-        font-size: 30rpx;
+        font-size: 28rpx;
         font-weight: bold;
         color: $text-color;
         margin-bottom: 12rpx;
@@ -458,6 +601,10 @@ export default {
         }
       }
     }
+  }
+
+  .course-item:first-child {
+    margin-top: 10rpx;
   }
 }
 </style> 

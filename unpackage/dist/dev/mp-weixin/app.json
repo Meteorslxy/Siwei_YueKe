@@ -31,19 +31,19 @@
       {
         "pagePath": "pages/index/index",
         "iconPath": "static/images/tabbar/home.png",
-        "selectedIconPath": "static/images/tabbar/home-active.png",
+        "selectedIconPath": "static/images/tabbar/home_cur.png",
         "text": "首页"
       },
       {
         "pagePath": "pages/course/course",
         "iconPath": "static/images/tabbar/course.png",
-        "selectedIconPath": "static/images/tabbar/course-active.png",
+        "selectedIconPath": "static/images/tabbar/course_cur.png",
         "text": "课程"
       },
       {
         "pagePath": "pages/user/user",
-        "iconPath": "static/images/tabbar/user.png",
-        "selectedIconPath": "static/images/tabbar/user-active.png",
+        "iconPath": "static/images/tabbar/my.png",
+        "selectedIconPath": "static/images/tabbar/my_cur.png",
         "text": "我的"
       }
     ]

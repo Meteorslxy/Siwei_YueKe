@@ -68,67 +68,104 @@
   min-height: 100vh;
   background-color: var(--bg-color);
 }
+/* 顶部背景 */
+.header-background {
+  width: 100%;
+  background-color: #EC7A49;
+  /* 与用户页面一致的颜色 */
+  padding-bottom: 120rpx;
+}
 /* 筛选区域 */
-.filter-area {
-  background-color: #fff;
-  /* 年级筛选 */
-  /* 学科选项卡 */
+.filter-section {
+  padding: 40rpx 30rpx 30rpx;
+  display: flex;
+  gap: 20rpx;
 }
-.filter-area .grade-filter {
+.filter-dropdown {
   position: relative;
+  flex: 1;
 }
-.filter-area .grade-filter .selected-grade {
-  height: 80rpx;
+.filter-dropdown .filter-item {
+  height: 70rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  color: #fff;
+  padding: 0 20rpx;
 }
-.filter-area .grade-filter .selected-grade .label {
-  font-size: 32rpx;
+.filter-dropdown .filter-item .filter-text {
+  font-size: 28rpx;
   font-weight: bold;
+  margin-right: 6rpx;
 }
-.filter-area .grade-filter .selected-grade .iconfont {
-  font-size: 24rpx;
-  margin-left: 8rpx;
+.filter-dropdown .filter-item .arrow-icon {
+  width: 0;
+  height: 0;
+  border-left: 10rpx solid transparent;
+  border-right: 10rpx solid transparent;
+  border-top: 10rpx solid #fff;
+  margin-left: 0;
+  transition: -webkit-transform 0.3s;
+  transition: transform 0.3s;
+  transition: transform 0.3s, -webkit-transform 0.3s;
 }
-.filter-area .grade-filter .grade-dropdown {
+.filter-dropdown .filter-item .arrow-icon.arrow-up {
+  -webkit-transform: rotate(180deg);
+          transform: rotate(180deg);
+}
+.filter-dropdown .filter-dropdown-content {
   position: absolute;
   top: 80rpx;
   left: 0;
   width: 100%;
   background-color: #fff;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
+  z-index: 100;
 }
-.filter-area .grade-filter .grade-dropdown .grade-option {
+.filter-dropdown .filter-dropdown-content .dropdown-title {
+  height: 70rpx;
+  line-height: 70rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--text-color-light);
+  border-bottom: 1rpx solid var(--border-color-light);
+}
+.filter-dropdown .filter-dropdown-content .dropdown-options {
+  max-height: 350rpx;
+  overflow-y: auto;
+}
+.filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option {
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
   font-size: 28rpx;
-  border-bottom: 1rpx solid var(--border-color-light);
+  color: var(--text-color);
 }
-.filter-area .grade-filter .grade-dropdown .grade-option.active {
+.filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option.active {
   color: var(--theme-color);
   font-weight: bold;
 }
-.filter-area .subject-scroll {
+/* 学科选项卡 */
+.subject-scroll {
   white-space: nowrap;
-  border-bottom: 1rpx solid var(--border-color-light);
+  padding: 0 20rpx;
+  margin-top: 20rpx;
 }
-.filter-area .subject-scroll .subject-item {
+.subject-scroll .subject-item {
   display: inline-block;
   padding: 0 30rpx;
-  height: 80rpx;
-  line-height: 80rpx;
+  height: 70rpx;
+  line-height: 70rpx;
   font-size: 28rpx;
   position: relative;
+  color: rgba(255, 255, 255, 0.8);
 }
-.filter-area .subject-scroll .subject-item.active {
-  color: var(--theme-color);
+.subject-scroll .subject-item.active {
+  color: #fff;
   font-weight: bold;
 }
-.filter-area .subject-scroll .subject-item.active::after {
+.subject-scroll .subject-item.active::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -137,37 +174,64 @@
           transform: translateX(-50%);
   width: 30rpx;
   height: 4rpx;
-  background-color: var(--theme-color);
+  background-color: #fff;
   border-radius: 2rpx;
 }
 /* 课程列表 */
 .course-list {
-  padding: 20rpx;
+  padding: 20rpx 30rpx 30rpx;
+  margin-top: -100rpx;
+  position: relative;
+  z-index: 10;
 }
 .course-list .course-item {
   display: flex;
-  margin-bottom: 20rpx;
+  margin-bottom: 30rpx;
   background-color: #fff;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
-.course-list .course-item .course-logo {
-  width: 220rpx;
+.course-list .course-item .course-left {
+  width: 180rpx;
   height: 220rpx;
-  overflow: hidden;
+  position: relative;
 }
-.course-list .course-item .course-logo .logo-image {
+.course-list .course-item .course-left .course-brand-logo {
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  width: 80rpx;
+  height: 80rpx;
+  background-color: var(--theme-color);
+  border-radius: 10rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-weight: bold;
+}
+.course-list .course-item .course-left .course-brand-logo .brand-text {
+  font-size: 28rpx;
+  line-height: 1.2;
+}
+.course-list .course-item .course-left .course-brand-logo .brand-text.sm {
+  font-size: 22rpx;
+  line-height: 1.2;
+}
+.course-list .course-item .course-left .course-logo {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 .course-list .course-item .course-content {
   flex: 1;
-  padding: 16rpx;
+  padding: 20rpx;
   position: relative;
 }
 .course-list .course-item .course-content .course-title {
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: bold;
   color: var(--text-color);
   margin-bottom: 12rpx;
@@ -216,5 +280,8 @@
   font-size: 32rpx;
   font-weight: bold;
   color: #FF3B30;
+}
+.course-list .course-item:first-child {
+  margin-top: 10rpx;
 }
 
