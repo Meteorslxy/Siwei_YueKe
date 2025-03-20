@@ -132,40 +132,32 @@ export default {
     getTeacherDetail() {
       uni.showLoading({ title: '加载中' });
       
-      // 这里假设有一个获取教师详情的接口
-      wx.cloud.callFunction({
-        name: 'getTeacherDetail',
-        data: {
-          teacherId: this.teacherId
-        },
-        success: res => {
-          if (res.result && res.result.data) {
-            this.teacher = res.result.data;
-            uni.setNavigationBarTitle({ title: this.teacher.name });
-          } else {
-            uni.showToast({
-              title: '获取教师信息失败',
-              icon: 'none'
-            });
-          }
-        },
-        fail: err => {
-          console.error('获取教师详情失败', err);
+      // 使用uniCloud调用云函数
+      this.$api.teacher.getTeacherDetail(this.teacherId).then(res => {
+        if (res && res.data) {
+          this.teacher = res.data;
+          uni.setNavigationBarTitle({ title: this.teacher.name });
+        } else {
           uni.showToast({
             title: '获取教师信息失败',
             icon: 'none'
           });
-        },
-        complete: () => {
-          uni.hideLoading();
-          
-          // 初始加载课程列表
-          if (this.currentTab === 1) {
-            this.getCourseList();
-          } else if (this.currentTab === 2) {
-            this.getReviewList();
-          }
         }
+        uni.hideLoading();
+        
+        // 初始加载课程列表
+        if (this.currentTab === 1) {
+          this.getCourseList();
+        } else if (this.currentTab === 2) {
+          this.getReviewList();
+        }
+      }).catch(err => {
+        console.error('获取教师详情失败', err);
+        uni.showToast({
+          title: '获取教师信息失败',
+          icon: 'none'
+        });
+        uni.hideLoading();
       });
     },
     

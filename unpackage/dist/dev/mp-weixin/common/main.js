@@ -249,6 +249,16 @@ var _default = {
     console.log('App Hide');
   },
   methods: {
+    // 获取系统信息
+    getSystemInfo: function getSystemInfo() {
+      try {
+        var systemInfo = uni.getSystemInfoSync();
+        this.globalData.systemInfo = systemInfo;
+        console.log('系统信息获取成功:', systemInfo);
+      } catch (e) {
+        console.error('获取系统信息失败:', e);
+      }
+    },
     // 检查登录状态
     checkLoginStatus: function checkLoginStatus() {
       try {
