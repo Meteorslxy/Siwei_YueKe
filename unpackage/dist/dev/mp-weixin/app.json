@@ -11,9 +11,7 @@
     "pages/course/lectures",
     "pages/teacher/list",
     "pages/booking/create",
-    "pages/school/detail",
-    "pages/admin/import-data",
-    "pages/admin/testCloud"
+    "pages/school/detail"
   ],
   "subPackages": [],
   "window": {
@@ -50,16 +48,16 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "你的位置信息将用于查找附近的校区"
+      "desc": "获取您的位置信息用于查找附近的课程"
     }
   },
   "requiredPrivateInfos": [
     "getLocation"
   ],
-  "plugins": {},
-  "uniCloud": {
-    "provider": "aliyun",
-    "spaceId": "mp-db123abc-4def-5678-9abc-123456789012"
-  },
+  "renderer": "webview",
+  "lazyCodeLoading": "requiredComponents",
+  "skylineRenderingEngine": false,
+  "uniCloud": true,
+  "cloud": false,
   "usingComponents": {}
 }

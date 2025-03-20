@@ -82,42 +82,8 @@
     </view>
 
     <!-- 管理功能区域 -->
-    <view class="section admin-section" v-if="isAdmin">
-      <view class="section-title">
-        <text>管理功能</text>
-      </view>
-      <view class="admin-menu">
-        <view class="menu-item" @click="navigateTo('/pages/admin/import-data')">
-          <view class="item-icon">
-            <text class="iconfont icon-data"></text>
-          </view>
-          <view class="item-info">
-            <text class="item-name">数据导入</text>
-            <text class="item-desc">导入系统数据</text>
-          </view>
-          <text class="iconfont icon-right"></text>
-        </view>
-        <view class="menu-item" @click="navigateTo('/pages/admin/testCloud')">
-          <view class="item-icon">
-            <text class="iconfont icon-cloud"></text>
-          </view>
-          <view class="item-info">
-            <text class="item-name">云函数测试</text>
-            <text class="item-desc">测试云函数连接</text>
-          </view>
-          <text class="iconfont icon-right"></text>
-        </view>
-        <view class="menu-item" @click="navigateTo('/pages/admin/cloudTest')">
-          <view class="item-icon">
-            <text class="iconfont icon-cloud"></text>
-          </view>
-          <view class="item-info">
-            <text class="item-name">阿里云高级测试</text>
-            <text class="item-desc">阿里云连接诊断工具</text>
-          </view>
-          <text class="iconfont icon-right"></text>
-        </view>
-      </view>
+    <view class="section admin-section" v-if="false">
+      <!-- 已禁用管理功能 -->
     </view>
   </view>
 </template>

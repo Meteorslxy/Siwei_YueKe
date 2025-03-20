@@ -96,24 +96,6 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white"
             }
-        },
-        {
-            "path": "pages/admin/import-data",
-            "style": {
-                "navigationBarTitleText": "数据导入工具",
-                "navigationBarBackgroundColor": "#EC7A49",
-                "navigationBarTextStyle": "white",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/admin/testCloud",
-            "style": {
-                "navigationBarTitleText": "云函数测试",
-                "navigationBarBackgroundColor": "#EC7A49",
-                "navigationBarTextStyle": "white",
-                "enablePullDownRefresh": false
-            }
         }
     ],
     "globalStyle": {

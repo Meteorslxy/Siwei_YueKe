@@ -16,9 +16,6 @@ export default {
     
     // 测试云函数连接
     this.testCloudConnection()
-    
-    // 初始化数据库
-    this.initAppDatabase()
   },
   onShow: function() {
     console.log('App Show')
@@ -26,18 +23,7 @@ export default {
   onHide: function() {
     console.log('App Hide')
   },
-  methods: {
-    // 获取系统信息
-    getSystemInfo() {
-      try {
-        const systemInfo = uni.getSystemInfoSync()
-        this.globalData.systemInfo = systemInfo
-        console.log('系统信息:', systemInfo)
-      } catch (e) {
-        console.error('获取系统信息失败:', e)
-      }
-    },
-    
+  methods: {  
     // 检查登录状态
     checkLoginStatus() {
       try {
@@ -69,21 +55,6 @@ export default {
           return false;
         }
         
-        try {
-          // 确保UniCloud已正确初始化
-          if (!uniCloud.hasInit) {
-            console.log('在App.vue中初始化UniCloud');
-            uniCloud.init({
-              provider: 'aliyun',
-              spaceId: this.globalData.$spaceId,
-              clientSecret: '6YQCnJGxPGKuluPbkDTiyg==',
-              endpoint: 'https://api.next.bspapp.com'
-            });
-          }
-        } catch (e) {
-          console.error('初始化UniCloud出错:', e);
-        }
-        
         // 直接使用uniCloud调用云函数
         console.log('正在测试云函数连接...');
         const result = await uniCloud.callFunction({
@@ -98,73 +69,11 @@ export default {
           console.log('云函数连接成功');
           return true;
         } else {
-          // 尝试模拟成功
-          console.log('云函数返回异常，但不影响应用使用');
-          return true;
-        }
-      } catch (error) {
-        console.error('云函数连接测试失败:', error);
-        // 即使云函数测试失败，应用也可以继续使用（使用模拟数据）
-        return true;
-      }
-    },
-    
-    // 初始化数据库
-    async initAppDatabase() {
-      try {
-        console.log('开始初始化应用数据库...');
-        
-        // 最多重试3次
-        let retryCount = 0;
-        const maxRetries = 3;
-        let success = false;
-        let lastError = null;
-        
-        while (retryCount < maxRetries && !success) {
-          try {
-            if (retryCount > 0) {
-              console.log(`第${retryCount}次重试初始化数据库...`);
-              // 等待一小段时间再重试
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-            
-            const result = await uniCloud.callFunction({
-              name: 'initApp'
-            });
-            
-            console.log('初始化应用数据库结果:', result);
-            
-            if (result && result.result && result.result.success) {
-              console.log('应用数据库初始化成功');
-              success = true;
-              return true;
-            } else {
-              const errorMsg = result && result.result ? result.result.message : '未知错误';
-              throw new Error('初始化失败: ' + errorMsg);
-            }
-          } catch (err) {
-            lastError = err;
-            retryCount++;
-            console.warn(`初始化数据库失败 (${retryCount}/${maxRetries}):`, err.message);
-          }
-        }
-        
-        if (!success) {
-          console.warn('多次尝试初始化数据库均失败，将使用模拟数据', lastError);
-          uni.showToast({
-            title: '使用本地数据展示',
-            icon: 'none',
-            duration: 2000
-          });
+          console.warn('云函数测试返回异常结果');
           return false;
         }
       } catch (error) {
-        console.error('应用数据库初始化出错:', error);
-        uni.showToast({
-          title: '初始化失败，使用本地数据',
-          icon: 'none',
-          duration: 2000
-        });
+        console.error('云函数连接测试失败:', error);
         return false;
       }
     }

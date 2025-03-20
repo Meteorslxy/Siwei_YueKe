@@ -1,0 +1,1 @@
+<block wx:if="{{show}}"><view class="empty-container data-v-378268bc"><image class="empty-image data-v-378268bc" src="/static/images/empty.png" mode="aspectFit"></image><text class="empty-text data-v-378268bc">{{tip}}</text></view></block>

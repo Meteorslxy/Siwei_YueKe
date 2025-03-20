@@ -1,0 +1,684 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 全局CSS变量 */
+page {
+    /* 主题色 */
+    --theme-color: #FF6B00;
+    --theme-color-light: #FFE9D6;
+    --theme-color-dark: #F37121;
+
+    /* 文字颜色 */
+    --text-color: #333333;
+    --text-color-inverse: #ffffff;
+    --text-color-grey: #666666;
+    --text-color-light: #999999;
+
+    /* 背景颜色 */
+    --bg-color: #F7F7F7;
+    --bg-color-white: #FFFFFF;
+    --bg-color-grey: #F2F2F2;
+
+    /* 边框颜色 */
+    --border-color: #DDDDDD;
+    --border-color-light: #EEEEEE;
+
+    /* 尺寸变量 */
+    --uni-size-grid: 8rpx;
+
+    /* 文字尺寸 */
+    --font-size-xs: 22rpx;
+    --font-size-sm: 24rpx;
+    --font-size-base: 28rpx;
+    --font-size-lg: 32rpx;
+    --font-size-xl: 36rpx;
+    --font-size-xxl: 40rpx;
+
+    /* 图片尺寸 */
+    --img-size-sm: 80rpx;
+    --img-size-base: 120rpx;
+    --img-size-lg: 160rpx;
+
+    /* 水平间距 */
+    --spacing-xs: 10rpx;
+    --spacing-sm: 20rpx;
+    --spacing-base: 30rpx;
+    --spacing-lg: 40rpx;
+    --spacing-xl: 50rpx;
+
+    /* 垂直间距 */
+    --spacing-col-sm: 8rpx;
+    --spacing-col-base: 16rpx;
+    --spacing-col-lg: 24rpx;
+
+    /* 边框半径 */
+    --border-radius-sm: 4rpx;
+    --border-radius-base: 8rpx;
+    --border-radius-lg: 12rpx;
+    --border-radius-circle: 50%;
+
+    /* 阴影 */
+    --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+    --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+
+    /* 透明度 */
+    --opacity-disabled: 0.3;
+    /* 组件禁用态的透明度 */
+
+    /* 组件变量 */
+    /* 导航栏 */
+    --navbar-height: 88rpx;
+    --navbar-bg-color: #ffffff;
+
+    /* 选项卡 */
+    --tab-height: 100rpx;
+}
+/* 定义图标字体 */
+@font-face {
+    font-family: "iconfont";
+    src: url(data:font/ttf;base64,) format('truetype');
+}
+.iconfont {
+    font-family: "iconfont" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.icon-home:before {
+    content: "\e600";
+}
+.icon-course:before {
+    content: "\e601";
+}
+.icon-schedule:before {
+    content: "\e602";
+}
+.icon-user:before {
+    content: "\e603";
+}
+.icon-search:before {
+    content: "\e604";
+}
+.icon-location:before {
+    content: "\e605";
+}
+.icon-time:before {
+    content: "\e606";
+}
+.icon-phone:before {
+    content: "\e607";
+}
+.icon-contact:before {
+    content: "\e608";
+}
+.icon-right:before {
+    content: "\e609";
+}
+.icon-left:before {
+    content: "\e60a";
+}
+.icon-up:before {
+    content: "\e60b";
+}
+.icon-down:before {
+    content: "\e60c";
+}
+.icon-favorite:before {
+    content: "\e60d";
+}
+.icon-teacher:before {
+    content: "\e60e";
+}
+.icon-student:before {
+    content: "\e60f";
+}
+.icon-pending:before {
+    content: "\e610";
+}
+.icon-confirmed:before {
+    content: "\e611";
+}
+.icon-finished:before {
+    content: "\e612";
+}
+.icon-cancelled:before {
+    content: "\e613";
+}
+.icon-all:before {
+    content: "\e614";
+}
+/* 基础样式 */
+/* 页面根元素 */
+uni-page-body,
+page {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+/* 页面内容区域 */
+.container {
+    flex: 1;
+    padding: var(--spacing-base);
+    width: 100%;
+    box-sizing: border-box;
+}
+/* 文字样式 */
+text {
+    font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Segoe UI, Arial, Roboto, "PingFang SC", "miui", "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
+    font-size: var(--font-size-base);
+    color: var(--text-color);
+    line-height: 1.5;
+}
+/* 清除浮动 */
+.clearfix::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+/* 1px边框 */
+.border-bottom {
+    position: relative;
+}
+.border-bottom::after {
+    content: " ";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: 1px;
+    border-bottom: 1px solid var(--border-color);
+    -webkit-transform-origin: 0 100%;
+            transform-origin: 0 100%;
+    -webkit-transform: scaleY(0.5);
+            transform: scaleY(0.5);
+}
+/* 圆角 */
+.rounded {
+    border-radius: var(--border-radius-base);
+}
+/* 阴影 */
+.shadow {
+    box-shadow: var(--box-shadow);
+}
+/* 卡片 */
+.card {
+    background-color: #fff;
+    border-radius: var(--border-radius-base);
+    margin-bottom: var(--spacing-base);
+    padding: var(--spacing-base);
+    box-shadow: var(--box-shadow);
+}
+/* 标题 */
+.title {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: var(--spacing-base);
+}
+/* 小标题 */
+.subtitle {
+    font-size: var(--font-size-base);
+    color: var(--text-color-grey);
+    margin-bottom: var(--spacing-sm);
+}
+/* 页面加载中 */
+.page-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: var(--bg-color);
+    background-size: 30%;
+}
+
+
+.empty-container.data-v-378268bc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+.empty-image.data-v-378268bc {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+.empty-text.data-v-378268bc {
+  font-size: 28rpx;
+  color: #999;
+}
+
+
+.load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  margin: 20rpx 0;
+}
+.loading {
+  display: flex;
+  align-items: center;
+}
+.loading-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid #f2f2f2;
+  border-top: 4rpx solid #FF6B00;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  -webkit-animation: spin 1s linear infinite;
+          animation: spin 1s linear infinite;
+}
+@-webkit-keyframes spin {
+0% { -webkit-transform: rotate(0deg); transform: rotate(0deg);
+}
+100% { -webkit-transform: rotate(360deg); transform: rotate(360deg);
+}
+}
+@keyframes spin {
+0% { -webkit-transform: rotate(0deg); transform: rotate(0deg);
+}
+100% { -webkit-transform: rotate(360deg); transform: rotate(360deg);
+}
+}
+.loading-text, .text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+
+.course-card {
+  display: flex;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+}
+.course-image {
+  width: 220rpx;
+  height: 220rpx;
+  position: relative;
+}
+.course-image image {
+  width: 100%;
+  height: 100%;
+}
+.course-tag {
+  position: absolute;
+  top: 16rpx;
+  left: 0;
+  background-color: #FF6B00;
+  color: #fff;
+  font-size: 22rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 0 6rpx 6rpx 0;
+}
+.course-info {
+  flex: 1;
+  padding: 16rpx;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.course-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+  line-height: 1.4;
+  color: #333;
+}
+.course-school, .course-time {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+  display: flex;
+  align-items: center;
+}
+.school-icon, .time-icon {
+  font-size: 24rpx;
+  margin-right: 8rpx;
+  color: #999;
+}
+.course-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+.course-price {
+  display: flex;
+  align-items: baseline;
+}
+.price-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #FF3B30;
+}
+.price-original {
+  font-size: 24rpx;
+  color: #999;
+  text-decoration: line-through;
+  margin-left: 8rpx;
+}
+.book-btn {
+  height: 56rpx;
+  line-height: 56rpx;
+  background-color: #FF6B00;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 0 20rpx;
+  border-radius: 28rpx;
+}
+
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.booking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  background-color: #fff;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.booking-item .booking-info {
+  flex: 1;
+  overflow: hidden;
+}
+.booking-item .booking-info .course-name {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.booking-item .booking-info .booking-meta {
+  display: flex;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+.booking-item .booking-info .booking-meta .booking-id {
+  margin-right: 20rpx;
+}
+.booking-item .booking-info .school-info {
+  font-size: 26rpx;
+  color: #666;
+}
+.booking-item .booking-info .school-info .school-name {
+  margin-right: 20rpx;
+}
+.booking-item .booking-status {
+  font-size: 28rpx;
+  font-weight: 500;
+  padding-left: 20rpx;
+}
+
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.teacher-card {
+  display: flex;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  background-color: #fff;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.teacher-card .teacher-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  margin-right: 20rpx;
+}
+.teacher-card .teacher-avatar .avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.teacher-card .teacher-info {
+  flex: 1;
+}
+.teacher-card .teacher-info .teacher-name {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+.teacher-card .teacher-info .teacher-name .teacher-title {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 20rpx;
+  font-weight: normal;
+}
+.teacher-card .teacher-info .teacher-school {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+.teacher-card .teacher-info .teacher-desc {
+  font-size: 24rpx;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
