@@ -160,6 +160,40 @@ export default {
     }
   },
   methods: {
+    // 获取预约数量
+    async getBookingCount() {
+      if (!this.hasUserInfo) return;
+      
+      try {
+        const result = await this.$api.user.getBookingCount({
+          userId: this.userInfo.id || ''
+        });
+        
+        if (result && result.data) {
+          this.bookingStats = result.data;
+        } else {
+          // 使用模拟数据
+          this.bookingStats = {
+            total: 0,
+            pending: 0,
+            confirmed: 0,
+            finished: 0,
+            cancelled: 0
+          };
+        }
+      } catch (error) {
+        console.error('获取预约统计失败:', error);
+        // 使用模拟数据
+        this.bookingStats = {
+          total: 0,
+          pending: 0,
+          confirmed: 0,
+          finished: 0,
+          cancelled: 0
+        };
+      }
+    },
+    
     // 检查登录状态
     checkLoginStatus() {
       const userInfo = uni.getStorageSync('userInfo')

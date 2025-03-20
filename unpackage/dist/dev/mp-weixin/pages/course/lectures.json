@@ -1,9 +1,0 @@
-{
-  "navigationBarTitleText": "热点讲座",
-  "navigationBarBackgroundColor": "#FF8D3C",
-  "navigationBarTextStyle": "white",
-  "usingComponents": {
-    "empty-tip": "/components/empty-tip/empty-tip",
-    "load-more": "/components/load-more/load-more"
-  }
-}

@@ -351,6 +351,79 @@ export default {
     // 页面导航
     navigateTo(url) {
       uni.navigateTo({ url })
+    },
+    
+    // 加载课程列表
+    async loadCourseList() {
+      if (this.isLoading) return;
+      
+      this.isLoading = true;
+      try {
+        // 构建查询参数
+        const params = {
+          page: this.page,
+          pageSize: this.limit
+        };
+        
+        // 添加筛选条件
+        if (this.selectedGradeGroup !== 'all') {
+          params.gradeGroup = this.selectedGradeGroup;
+        }
+        
+        if (this.selectedSchool !== 'all') {
+          params.schoolId = this.selectedSchool;
+        }
+        
+        // 调用云函数获取课程列表
+        const result = await this.$api.course.getCourseList(params);
+        
+        // 处理返回结果
+        if (result && result.data) {
+          if (this.page === 1) {
+            this.courseList = result.data;
+          } else {
+            this.courseList = [...this.courseList, ...result.data];
+          }
+          
+          this.total = result.total || this.courseList.length;
+          
+          // 更新加载状态
+          if (this.courseList.length >= this.total) {
+            this.loadMoreStatus = 'noMore';
+          } else {
+            this.loadMoreStatus = 'more';
+          }
+        } else {
+          if (this.page === 1) {
+            this.courseList = [];
+          }
+          this.loadMoreStatus = 'noMore';
+        }
+      } catch (error) {
+        console.error('获取课程列表失败:', error);
+        uni.showToast({
+          title: '获取课程列表失败',
+          icon: 'none'
+        });
+        this.loadMoreStatus = 'more';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    // 重置列表
+    resetList() {
+      this.page = 1;
+      this.courseList = [];
+      this.total = 0;
+      this.loadMoreStatus = 'more';
+    },
+    
+    // 加载更多
+    loadMore() {
+      if (this.isLoading) return;
+      this.page++;
+      this.loadCourseList();
     }
   }
 }

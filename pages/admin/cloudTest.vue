@@ -14,12 +14,6 @@
         <text class="value">{{spaceId}}</text>
         <text class="copy-btn" @tap="copySpaceId">复制</text>
       </view>
-      <view class="info-item">
-        <text class="label">当前模式:</text>
-        <text class="value" :class="isDevMode ? 'warning' : 'success'">
-          {{isDevMode ? '模拟数据模式' : '云服务模式'}}
-        </text>
-      </view>
     </view>
     
     <view class="mode-selector">
@@ -78,9 +72,6 @@
     <view class="actions">
       <button type="default" @tap="checkCloudFiles">检查云函数文件</button>
       <button type="default" @tap="resetCloudEnv">重置云环境</button>
-      <button type="warn" @tap="toggleDevMode">
-        {{isDevMode ? '切换到云服务模式' : '切换到模拟数据模式'}}
-      </button>
     </view>
     
     <view class="log-section" v-if="logs.length > 0">
@@ -101,7 +92,6 @@ export default {
   data() {
     return {
       spaceId: '',
-      isDevMode: false,
       currentMode: 'basic', // 默认测试模式
       testModes: [
         { name: '基础连接测试', value: 'basic' },
@@ -124,7 +114,6 @@ export default {
   },
   onLoad() {
     this.spaceId = getApp().globalData.$spaceId || '-';
-    this.isDevMode = getApp().globalData.$isDevMode || false;
     this.addLog('info', '页面加载完成，云环境ID: ' + this.spaceId);
   },
   methods: {
@@ -164,7 +153,7 @@ export default {
       
       try {
         const result = await uni.cloud.callFunction({
-          name: 'test',
+          name: 'yuekeCloudTest',
           data: {
             message: '常规测试 ' + new Date().toLocaleString(),
             testMode: this.currentMode
@@ -190,22 +179,58 @@ export default {
       this.addLog('info', `开始初始化测试，模式: ${this.currentMode}...`);
       
       try {
-        // 先清除并重新初始化uni.cloud
-        if (uni.cloud) {
-          this.addLog('info', '重新初始化云环境...');
-          uni.cloud.init({
-            provider: 'aliyun',
-            spaceId: this.spaceId,
-            endpoint: 'https://api.next.bspapp.com'
-          });
+        // 先检查uni.cloud是否存在
+        if (typeof uni === 'undefined') {
+          throw new Error('uni对象不存在，可能在不兼容的环境中运行');
         }
         
+        if (!uni.cloud) {
+          throw new Error('uni.cloud对象不存在，平台可能不支持云函数');
+        }
+        
+        // 获取系统信息添加到请求中
+        const systemInfo = uni.getSystemInfoSync();
+        this.addLog('info', `当前系统信息: ${JSON.stringify({
+          platform: systemInfo.platform,
+          system: systemInfo.system,
+          SDKVersion: systemInfo.SDKVersion
+        })}`);
+        
+        // 确保设备ID存在
+        let deviceId = uni.getStorageSync('uni_deviceId');
+        if (!deviceId) {
+          deviceId = 'mp-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
+          uni.setStorageSync('uni_deviceId', deviceId);
+        }
+        this.addLog('info', `设备ID: ${deviceId}`);
+        
+        // 重新初始化uni.cloud
+        this.addLog('info', '重新初始化云环境...');
+        uni.cloud.init({
+          provider: 'aliyun',
+          spaceId: this.spaceId,
+          endpoint: 'https://api.next.bspapp.com'
+        });
+        
+        this.addLog('info', '云环境初始化完成，准备调用云函数...');
+        
+        const requestParams = {
+          message: '初始化测试 ' + new Date().toLocaleString(),
+          testMode: this.currentMode,
+          // 添加额外验证信息
+          clientInfo: {
+            platform: systemInfo.platform,
+            system: systemInfo.system,
+            deviceId: deviceId
+          },
+          timestamp: Date.now()
+        };
+        
+        this.addLog('info', `请求参数: ${JSON.stringify(requestParams)}`);
+        
         const result = await uni.cloud.callFunction({
-          name: 'test',
-          data: {
-            message: '初始化测试 ' + new Date().toLocaleString(),
-            testMode: this.currentMode
-          }
+          name: 'yuekeCloudTest',
+          data: requestParams
         });
         
         this.addLog('success', `初始化测试成功: ${JSON.stringify(result.result)}`);
@@ -230,10 +255,10 @@ export default {
         // 使用Promise方式，以便获取更详细的错误信息
         const promise = new Promise((resolve, reject) => {
           uni.cloud.callFunction({
-            name: 'test',
+            name: 'yuekeCloudTest',
             data: { 
               message: '错误处理测试',
-              testMode: this.currentMode
+              testMode: 'error' // 强制触发错误
             },
             success: (res) => resolve(res),
             fail: (err) => reject(err)
@@ -291,8 +316,8 @@ export default {
       uni.showModal({
         title: '云函数文件检查',
         content: '请在HBuilderX中检查以下文件是否存在：\n' +
-                 '1. uniCloud-aliyun/cloudfunctions/test/index.js\n' +
-                 '2. uniCloud-aliyun/cloudfunctions/test/package.json\n\n' +
+                 '1. uniCloud-aliyun/cloudfunctions/yuekeCloudTest/index.js\n' +
+                 '2. uniCloud-aliyun/cloudfunctions/yuekeCloudTest/package.json\n\n' +
                  '并确保这些文件已上传部署到阿里云。',
         showCancel: false
       });
@@ -323,19 +348,6 @@ export default {
           icon: 'none'
         });
       }
-    },
-    
-    // 切换开发模式
-    toggleDevMode() {
-      this.isDevMode = !this.isDevMode;
-      getApp().globalData.$isDevMode = this.isDevMode;
-      
-      this.addLog('info', `已切换到${this.isDevMode ? '模拟数据' : '云服务'}模式`);
-      
-      uni.showToast({
-        title: `已切换到${this.isDevMode ? '模拟数据' : '云服务'}模式`,
-        icon: 'none'
-      });
     },
     
     // 复制云环境ID

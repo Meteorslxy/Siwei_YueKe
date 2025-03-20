@@ -129,31 +129,29 @@ export default {
       }
     },
     
-    // 获取资讯数据
+    // 获取资讯列表
     async getNews() {
       try {
-        // 调用云函数获取资讯
-        const res = await wx.cloud.callFunction({
-          name: 'getNews',
-          data: {
-            limit: 5
-          }
-        })
+        // 调用API获取资讯
+        const result = await this.$api.course.getNewsList({
+          page: 1,
+          pageSize: 5
+        });
         
-        if (res.result && res.result.success) {
-          this.newsList = res.result.data
+        if (result && result.data) {
+          this.newsList = result.data;
         } else {
-          // 临时使用模拟数据
+          // 使用模拟数据
           this.newsList = [
             {
-              _id: '1',
+              id: '1',
               title: '四维工作室春季游学课程时间...',
               digest: '尊敬的各位家长朋友，春季游学课程将于3月开始，敬请关注',
               coverImage: '/static/images/news/news1.jpg',
               publishTime: new Date('2023-02-15')
             },
             {
-              _id: '2',
+              id: '2',
               title: '四维工作室热烈祝贺学员杯赛季...',
               digest: '尊敬的各位家长朋友，热烈祝贺我校学员在数学竞赛中获得一等奖',
               coverImage: '/static/images/news/news2.jpg',
@@ -166,14 +164,14 @@ export default {
         // 使用模拟数据
         this.newsList = [
           {
-            _id: '1',
+            id: '1',
             title: '四维工作室春季游学课程时间...',
             digest: '尊敬的各位家长朋友，春季游学课程将于3月开始，敬请关注',
             coverImage: '/static/images/news/news1.jpg',
             publishTime: new Date('2023-02-15')
           },
           {
-            _id: '2',
+            id: '2',
             title: '四维工作室热烈祝贺学员杯赛季...',
             digest: '尊敬的各位家长朋友，热烈祝贺我校学员在数学竞赛中获得一等奖',
             coverImage: '/static/images/news/news2.jpg',
@@ -186,19 +184,15 @@ export default {
     // 获取推荐课程
     async getRecommendCourses() {
       try {
-        // 调用云函数获取推荐课程
-        const res = await wx.cloud.callFunction({
-          name: 'getCourses',
-          data: {
-            featured: true,
-            limit: 5
-          }
-        })
+        // 调用API获取推荐课程
+        const result = await this.$api.course.getRecommendCourses({
+          limit: 4
+        });
         
-        if (res.result && res.result.success) {
-          this.recommendCourses = res.result.data
+        if (result && result.data) {
+          this.recommendCourses = result.data;
         } else {
-          // 临时使用模拟数据
+          // 使用模拟数据
           this.recommendCourses = [
             {
               _id: '1',

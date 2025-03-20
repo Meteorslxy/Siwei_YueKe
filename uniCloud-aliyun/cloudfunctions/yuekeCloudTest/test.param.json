@@ -1,0 +1,21 @@
+{
+  "description": "云函数测试参数",
+  "params": {
+    "message": "这是一条测试消息",
+    "testMode": "basic"
+  },
+  "context": {
+    "SPACEINFO": {
+      "provider": "aliyun",
+      "spaceId": "mp-d0c06b27-ec33-40fe-b28b-337811bd2f29"
+    },
+    "CLIENTINFO": {
+      "platform": "mp-weixin",
+      "appId": "wx12345",
+      "deviceId": "test-device"
+    },
+    "CLIENTIP": "127.0.0.1"
+  },
+  "method": "GET",
+  "queryStringParameters": {}
+} 
