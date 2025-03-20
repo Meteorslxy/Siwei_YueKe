@@ -11,20 +11,18 @@
     "minified": true,
     "newFeature": true,
     "bigPackageSizeSupport": true,
-    "checkSiteMap": false,
-    "enhance": false,
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
-    },
-    "ignoreUploadUnusedFiles": true
+    }
   },
   "compileType": "miniprogram",
-  "libVersion": "3.7.10",
-  "appid": "wx64b3a851f619fc04",
+  "libVersion": "3.7.11",
+  "appid": "wx6e610d9b47f85ffc",
   "projectname": "约课小程序",
   "condition": {},
+  "cloudfunctionRoot": "uniCloud-aliyun/cloudfunctions/",
   "editorSetting": {
     "tabIndent": "insertSpaces",
     "tabSize": 2

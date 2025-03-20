@@ -23,7 +23,7 @@ Vue.prototype.$spaceId = spaceId
 
 // 添加全局数据对象 - 确保在小程序环境中可以通过getApp()访问
 if (!App.globalData) {
-  App.globalData = {};
+    App.globalData = {};
 }
 App.globalData.$spaceId = spaceId;
 // 初始设置为true，防止启动过程中显示问题
@@ -31,27 +31,35 @@ App.globalData.$isDevMode = true;
 
 // 全局混入
 Vue.mixin({
-  methods: {
-    // 统一的页面跳转方法
-    navigateTo(url) {
-      uni.navigateTo({ url })
-    },
-    
-    // 返回上一页
-    navigateBack(delta = 1) {
-      uni.navigateBack({ delta })
-    },
-    
-    // 重定向
-    redirectTo(url) {
-      uni.redirectTo({ url })
-    },
-    
-    // 切换选项卡
-    switchTab(url) {
-      uni.switchTab({ url })
+    methods: {
+        // 统一的页面跳转方法
+        navigateTo(url) {
+            uni.navigateTo({
+                url
+            })
+        },
+
+        // 返回上一页
+        navigateBack(delta = 1) {
+            uni.navigateBack({
+                delta
+            })
+        },
+
+        // 重定向
+        redirectTo(url) {
+            uni.redirectTo({
+                url
+            })
+        },
+
+        // 切换选项卡
+        switchTab(url) {
+            uni.switchTab({
+                url
+            })
+        }
     }
-  }
 })
 
 // 全局样式变量
@@ -135,6 +143,6 @@ Vue.prototype.$testConnection = async function(testMode = 'basic') {
 };
 
 const app = new Vue({
-  ...App
+    ...App
 })
-app.$mount() 
+app.$mount()

@@ -1,6 +1,7 @@
 {
-  "navigationBarTitleText": "四维教育",
-  "navigationBarBackgroundColor": "#FF8D3C",
+  "navigationBarTitleText": "",
+  "navigationBarBackgroundColor": "#ffffff",
   "navigationBarTextStyle": "white",
+  "navigationStyle": "custom",
   "usingComponents": {}
 }

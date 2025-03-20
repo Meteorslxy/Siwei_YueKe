@@ -1,30 +1,29 @@
 <template>
   <view class="index-container">
-    <!-- 顶部搜索框 -->
-    <view class="search-bar">
-      <view class="search-input" @click="navigateTo('/pages/course/search')">
-        <text class="iconfont icon-search"></text>
-        <text class="placeholder">搜索课程</text>
-      </view>
+    <!-- 顶部背景图片 -->
+    <view class="header-background" :style="{ paddingTop: statusBarHeight + 'px' }">
+      <image class="bg-image" src="/static/images/home.jpg" mode="widthFix"></image>
     </view>
     
     <!-- 功能导航菜单 -->
-    <view class="nav-menu">
-      <view class="nav-item" @click="navigateTo('/pages/course/featured')">
-        <image class="nav-icon" src="/static/images/icons/featured.png" mode="aspectFit"></image>
-        <text class="nav-text">精选好课</text>
-      </view>
-      <view class="nav-item" @click="navigateTo('/pages/course/lectures')">
-        <image class="nav-icon" src="/static/images/icons/lecture.png" mode="aspectFit"></image>
-        <text class="nav-text">热点讲座</text>
-      </view>
-      <view class="nav-item" @click="navigateTo('/pages/teacher/list')">
-        <image class="nav-icon" src="/static/images/icons/teacher.png" mode="aspectFit"></image>
-        <text class="nav-text">名师介绍</text>
-      </view>
-      <view class="nav-item" @click="navigateTo('/pages/school/detail')">
-        <image class="nav-icon" src="/static/images/icons/school.png" mode="aspectFit"></image>
-        <text class="nav-text">校区介绍</text>
+    <view class="nav-card">
+      <view class="nav-menu">
+        <view class="nav-item" @click="switchTab('/pages/course/course')">
+          <image class="nav-icon" src="/static/images/icons/featured.png" mode="aspectFit"></image>
+          <text class="nav-text">精选好课</text>
+        </view>
+        <view class="nav-item" @click="navigateTo('/pages/course/lectures')">
+          <image class="nav-icon" src="/static/images/icons/lecture.png" mode="aspectFit"></image>
+          <text class="nav-text">热点讲座</text>
+        </view>
+        <view class="nav-item" @click="navigateTo('/pages/teacher/list')">
+          <image class="nav-icon" src="/static/images/icons/teacher.png" mode="aspectFit"></image>
+          <text class="nav-text">名师介绍</text>
+        </view>
+        <view class="nav-item" @click="navigateTo('/pages/school/detail')">
+          <image class="nav-icon" src="/static/images/icons/school.png" mode="aspectFit"></image>
+          <text class="nav-text">校区介绍</text>
+        </view>
       </view>
     </view>
     
@@ -54,7 +53,7 @@
       <view class="section-header">
         <view class="section-tag"></view>
         <text class="section-title">推荐课程</text>
-        <view class="section-more" @click="navigateTo('/pages/course/course')">
+        <view class="section-more" @click="switchTab('/pages/course/course')">
           <text>更多</text>
           <text class="iconfont icon-right"></text>
         </view>
@@ -100,12 +99,15 @@ export default {
   data() {
     return {
       newsList: [],
-      recommendCourses: []
+      recommendCourses: [],
+      statusBarHeight: 0
     }
   },
   onLoad() {
     this.getNews()
     this.getRecommendCourses()
+    // 获取状态栏高度
+    this.getStatusBarHeight()
   },
   onPullDownRefresh() {
     Promise.all([
@@ -116,6 +118,17 @@ export default {
     })
   },
   methods: {
+    // 获取状态栏高度
+    getStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync()
+        this.statusBarHeight = systemInfo.statusBarHeight || 20
+      } catch (e) {
+        console.error('获取状态栏高度失败:', e)
+        this.statusBarHeight = 20
+      }
+    },
+    
     // 获取资讯数据
     async getNews() {
       try {
@@ -296,6 +309,11 @@ export default {
     // 页面导航
     navigateTo(url) {
       uni.navigateTo({ url })
+    },
+
+    // 切换到课程页面
+    switchTab(url) {
+      uni.switchTab({ url })
     }
   }
 }
@@ -307,38 +325,36 @@ export default {
   background-color: $bg-color;
 }
 
-/* 搜索栏 */
-.search-bar {
-  background-color: $theme-color;
-  padding: 16rpx 30rpx;
+/* 顶部背景图片 */
+.header-background {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
   
-  .search-input {
-    height: 70rpx;
-    background-color: #fff;
-    border-radius: 35rpx;
-    display: flex;
-    align-items: center;
-    padding: 0 30rpx;
-    
-    .iconfont {
-      font-size: 36rpx;
-      color: #999;
-      margin-right: 10rpx;
-    }
-    
-    .placeholder {
-      color: #999;
-      font-size: 28rpx;
-    }
+  .bg-image {
+    width: 100%;
+    display: block;
   }
 }
 
 /* 功能导航菜单 */
+.nav-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin: -100rpx 30rpx 0;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
 .nav-menu {
   display: flex;
   flex-wrap: wrap;
-  padding: 20rpx 0;
+  padding: 10rpx 0;
   background-color: #fff;
+  margin-top: 0;
   
   .nav-item {
     width: 25%;
@@ -362,9 +378,11 @@ export default {
 
 /* 资讯区域 */
 .news-section {
-  margin-top: 20rpx;
+  margin: 30rpx 30rpx 0;
   background-color: #fff;
   padding: 20rpx 0;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
   
   .section-header {
     display: flex;
@@ -442,9 +460,11 @@ export default {
 
 /* 推荐课程区域 */
 .course-section {
-  margin-top: 20rpx;
+  margin: 30rpx 30rpx 0;
   background-color: #fff;
   padding: 20rpx 0;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
   
   .section-header {
     display: flex;

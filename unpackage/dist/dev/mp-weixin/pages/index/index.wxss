@@ -68,34 +68,33 @@
   min-height: 100vh;
   background-color: var(--bg-color);
 }
-/* 搜索栏 */
-.search-bar {
-  background-color: var(--theme-color);
-  padding: 16rpx 30rpx;
+/* 顶部背景图片 */
+.header-background {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
 }
-.search-bar .search-input {
-  height: 70rpx;
-  background-color: #fff;
-  border-radius: 35rpx;
-  display: flex;
-  align-items: center;
-  padding: 0 30rpx;
-}
-.search-bar .search-input .iconfont {
-  font-size: 36rpx;
-  color: #999;
-  margin-right: 10rpx;
-}
-.search-bar .search-input .placeholder {
-  color: #999;
-  font-size: 28rpx;
+.header-background .bg-image {
+  width: 100%;
+  display: block;
 }
 /* 功能导航菜单 */
+.nav-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin: -100rpx 30rpx 0;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
 .nav-menu {
   display: flex;
   flex-wrap: wrap;
-  padding: 20rpx 0;
+  padding: 10rpx 0;
   background-color: #fff;
+  margin-top: 0;
 }
 .nav-menu .nav-item {
   width: 25%;
@@ -115,9 +114,11 @@
 }
 /* 资讯区域 */
 .news-section {
-  margin-top: 20rpx;
+  margin: 30rpx 30rpx 0;
   background-color: #fff;
   padding: 20rpx 0;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
 .news-section .section-header {
   display: flex;
@@ -184,9 +185,11 @@
 }
 /* 推荐课程区域 */
 .course-section {
-  margin-top: 20rpx;
+  margin: 30rpx 30rpx 0;
   background-color: #fff;
   padding: 20rpx 0;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
 .course-section .section-header {
   display: flex;

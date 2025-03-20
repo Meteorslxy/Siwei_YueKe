@@ -9888,9 +9888,15 @@ module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exp
 
 /***/ }),
 /* 29 */
+<<<<<<< HEAD
 /*!*****************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json ***!
   \*****************************************************************************/
+=======
+/*!*******************************************************************!*\
+  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages.json ***!
+  \*******************************************************************/
+>>>>>>> b0ee5fa6de3af772311cd95b9854e5e2ef00e4b1
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -10431,7 +10437,11 @@ var b = "development" === "development",
   k = "true" === undefined || !0 === undefined,
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
+<<<<<<< HEAD
   A = T({"address":["127.0.0.1","192.168.96.1","192.168.31.38"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+=======
+  A = T({"address":["127.0.0.1","192.168.1.3","172.27.96.1"],"servePort":7001,"debugPort":9001,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","C:/Users/Administrator/Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+>>>>>>> b0ee5fa6de3af772311cd95b9854e5e2ef00e4b1
   O = T([{"provider":"aliyun","spaceName":"yueke-demo","spaceId":"mp-d0c06b27-ec33-40fe-b28b-337811bd2f29","clientSecret":"c3DWEyYRkArWA6mZ2b+gxQ==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
@@ -18434,9 +18444,15 @@ module.exports = _isNativeFunction, module.exports.__esModule = true, module.exp
 
 /***/ }),
 /* 37 */
+<<<<<<< HEAD
 /*!**********************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"origin-pages-json"} ***!
   \**********************************************************************************************************/
+=======
+/*!************************************************************************************************!*\
+  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages.json?{"type":"origin-pages-json"} ***!
+  \************************************************************************************************/
+>>>>>>> b0ee5fa6de3af772311cd95b9854e5e2ef00e4b1
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18451,16 +18467,18 @@ var _default = {
   "pages": [{
     "path": "pages/index/index",
     "style": {
-      "navigationBarTitleText": "四维教育",
-      "navigationBarBackgroundColor": "#FF8D3C",
-      "navigationBarTextStyle": "white"
+      "navigationBarTitleText": "",
+      "navigationBarBackgroundColor": "#ffffff",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
     }
   }, {
     "path": "pages/course/course",
     "style": {
-      "navigationBarTitleText": "课程",
+      "navigationBarTitleText": "",
       "navigationBarBackgroundColor": "#FF8D3C",
-      "navigationBarTextStyle": "white"
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
     }
   }, {
     "path": "pages/user/user",
@@ -18571,17 +18589,17 @@ var _default = {
     "list": [{
       "pagePath": "pages/index/index",
       "iconPath": "static/images/tabbar/home.png",
-      "selectedIconPath": "static/images/tabbar/home-active.png",
+      "selectedIconPath": "static/images/tabbar/home_cur.png",
       "text": "首页"
     }, {
       "pagePath": "pages/course/course",
       "iconPath": "static/images/tabbar/course.png",
-      "selectedIconPath": "static/images/tabbar/course-active.png",
+      "selectedIconPath": "static/images/tabbar/course_cur.png",
       "text": "课程"
     }, {
       "pagePath": "pages/user/user",
-      "iconPath": "static/images/tabbar/user.png",
-      "selectedIconPath": "static/images/tabbar/user-active.png",
+      "iconPath": "static/images/tabbar/my.png",
+      "selectedIconPath": "static/images/tabbar/my_cur.png",
       "text": "我的"
     }]
   }
@@ -18590,9 +18608,15 @@ exports.default = _default;
 
 /***/ }),
 /* 38 */
+<<<<<<< HEAD
 /*!*********************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"stat"} ***!
   \*********************************************************************************************/
+=======
+/*!***********************************************************************************!*\
+  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages.json?{"type":"stat"} ***!
+  \***********************************************************************************/
+>>>>>>> b0ee5fa6de3af772311cd95b9854e5e2ef00e4b1
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18613,9 +18637,9 @@ exports.default = _default;
 /* 40 */,
 /* 41 */,
 /* 42 */
-/*!*******************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/admin/mock-data.js ***!
-  \*******************************************************************************************/
+/*!*********************************************************************************!*\
+  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/admin/mock-data.js ***!
+  \*********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18932,9 +18956,9 @@ function normalizeComponent (
 
 /***/ }),
 /* 46 */
-/*!***************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/global.js ***!
-  \***************************************************************************************/
+/*!*****************************************************************************!*\
+  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/components/global.js ***!
+  \*****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19005,9 +19029,9 @@ _vue.default.component('teacher-card', _teacherCard.default);
 /* 80 */,
 /* 81 */,
 /* 82 */
-/*!*******************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/index.js ***!
-  \*******************************************************************************/
+/*!*********************************************************************!*\
+  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/api/index.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19194,9 +19218,9 @@ exports.default = _default;
 
 /***/ }),
 /* 83 */
-/*!*********************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/request.js ***!
-  \*********************************************************************************/
+/*!***********************************************************************!*\
+  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/api/request.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
