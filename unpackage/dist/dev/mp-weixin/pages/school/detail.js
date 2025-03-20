@@ -197,37 +197,72 @@ exports.default = void 0;
 //
 //
 //
-//
 var _default = {
   data: function data() {
     return {
       statusBarHeight: 0,
       showPicker: false,
       selectedSchool: {
-        id: 'yuhuatai',
-        name: '雨花台校区',
-        address: '南京市雨花区XX街道XX号',
-        introduction: '于2020年建设，主要面向......所授课程包括......为主。',
-        mapImage: '/static/images/school/map-yuhuatai.jpg'
+        id: 'jnwd',
+        name: '江宁万达校区',
+        address: '南京市江宁区万达广场XX号',
+        introduction: '于2020年建设，主要面向江宁区学生，提供全面的教学服务。',
+        mapImage: '/static/images/school/jnwd.png'
       },
       schoolList: [{
-        id: 'yuhuatai',
-        name: '雨花台校区',
-        address: '南京市雨花区XX街道XX号',
-        introduction: '于2020年建设，主要面向......所授课程包括......为主。',
-        mapImage: '/static/images/school/map-yuhuatai.jpg'
+        id: 'jnwd',
+        name: '江宁万达校区',
+        address: '南京市江宁区万达广场XX号',
+        introduction: '于2020年建设，主要面向江宁区学生，提供全面的教学服务。',
+        mapImage: '/static/images/school/jnwd.png'
       }, {
-        id: 'daxinggong',
+        id: 'jnhjhy',
+        name: '江宁黄金海岸',
+        address: '南京市江宁区黄金海岸XX街区XX号',
+        introduction: '于2019年建设，环境优雅，设施完善，是学习的理想场所。',
+        mapImage: '/static/images/school/jnhjhy.png'
+      }, {
+        id: 'dxg',
         name: '大行宫校区',
-        address: '南京市秦淮区XX路XX号',
-        introduction: '于2018年建设，主要面向......所授课程包括......为主。',
-        mapImage: '/static/images/school/map-daxinggong.jpg'
+        address: '南京市秦淮区大行宫XX路XX号',
+        introduction: '于2018年建设，位于市中心，交通便利，师资力量雄厚。',
+        mapImage: '/static/images/school/dxg.png'
       }, {
-        id: 'minxing',
-        name: '闵行校区',
-        address: '上海市闵行区XX路XX号',
-        introduction: '于2021年建设，主要面向......所授课程包括......为主。',
-        mapImage: '/static/images/school/map-minxing.jpg'
+        id: 'xjk',
+        name: '新街口校区',
+        address: '南京市玄武区新街口XX街XX号',
+        introduction: '于2017年建设，我校最早成立的校区之一，拥有丰富的教学经验。',
+        mapImage: '/static/images/school/xjk.png'
+      }, {
+        id: 'yh',
+        name: '雨花校区',
+        address: '南京市雨花台区XX路XX号',
+        introduction: '于2020年建设，环境幽静，适合专注学习，课程设置丰富。',
+        mapImage: '/static/images/school/yh.png'
+      }, {
+        id: 'qb',
+        name: '桥北校区',
+        address: '南京市桥北区XX街XX号',
+        introduction: '于2021年建设，新兴校区，设施先进，师资优良。',
+        mapImage: '/static/images/school/qb.png'
+      }, {
+        id: 'at',
+        name: '奥体校区',
+        address: '南京市建邺区奥体中心附近XX路XX号',
+        introduction: '于2019年建设，位于奥体中心附近，环境优美，交通便利。',
+        mapImage: '/static/images/school/at.png'
+      }, {
+        id: 'lj',
+        name: '龙江校区',
+        address: '南京市鼓楼区龙江XX路XX号',
+        introduction: '于2020年建设，位于龙江地区，社区氛围浓厚，适合学生发展。',
+        mapImage: '/static/images/school/lj.png'
+      }, {
+        id: 'lh',
+        name: '六合校区',
+        address: '南京市六合区XX广场XX号',
+        introduction: '于2021年建设，我校最新校区之一，设施完善，师资力量强大。',
+        mapImage: '/static/images/school/lh.png'
       }]
     };
   },
