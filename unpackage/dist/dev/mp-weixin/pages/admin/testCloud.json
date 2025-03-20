@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "云函数测试",
+  "navigationBarBackgroundColor": "#EC7A49",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "usingComponents": {}
+}
