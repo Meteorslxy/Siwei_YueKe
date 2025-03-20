@@ -99,51 +99,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "recyclableRender", function() { return recyclableRender; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "components", function() { return components; });
 var components
-try {
-  components = {
-    teacherCard: function () {
-      return __webpack_require__.e(/*! import() | components/teacher-card/teacher-card */ "components/teacher-card/teacher-card").then(__webpack_require__.bind(null, /*! @/components/teacher-card/teacher-card.vue */ 75))
-    },
-    courseCard: function () {
-      return __webpack_require__.e(/*! import() | components/course-card/course-card */ "components/course-card/course-card").then(__webpack_require__.bind(null, /*! @/components/course-card/course-card.vue */ 61))
-    },
-    emptyTip: function () {
-      return __webpack_require__.e(/*! import() | components/empty-tip/empty-tip */ "components/empty-tip/empty-tip").then(__webpack_require__.bind(null, /*! @/components/empty-tip/empty-tip.vue */ 47))
-    },
-    loadMore: function () {
-      return __webpack_require__.e(/*! import() | components/load-more/load-more */ "components/load-more/load-more").then(__webpack_require__.bind(null, /*! @/components/load-more/load-more.vue */ 54))
-    },
-  }
-} catch (e) {
-  if (
-    e.message.indexOf("Cannot find module") !== -1 &&
-    e.message.indexOf(".vue") !== -1
-  ) {
-    console.error(e.message)
-    console.error("1. 排查组件名称拼写是否正确")
-    console.error(
-      "2. 排查组件是否符合 easycom 规范，文档：https://uniapp.dcloud.net.cn/collocation/pages?id=easycom"
-    )
-    console.error(
-      "3. 若组件不符合 easycom 规范，需手动引入，并在 components 中注册该组件"
-    )
-  } else {
-    throw e
-  }
-}
 var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  var g0 = _vm.currentTab === 1 ? _vm.courseList.length : null
-  _vm.$mp.data = Object.assign(
-    {},
-    {
-      $root: {
-        g0: g0,
-      },
-    }
-  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -177,40 +136,12 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni, wx) {
+/* WEBPACK VAR INJECTION */(function(uni) {
 
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -270,198 +201,67 @@ var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/
 var _default = {
   data: function data() {
     return {
-      schoolId: '',
-      school: {
-        name: '',
-        address: '',
-        phone: '',
-        introduction: '',
-        gallery: [],
-        teachers: [],
-        facilities: []
+      statusBarHeight: 0,
+      showPicker: false,
+      selectedSchool: {
+        id: 'yuhuatai',
+        name: '雨花台校区',
+        address: '南京市雨花区XX街道XX号',
+        introduction: '于2020年建设，主要面向......所授课程包括......为主。',
+        mapImage: '/static/images/school/map-yuhuatai.jpg'
       },
-      tabs: [{
-        name: '学校简介',
-        id: 'intro'
+      schoolList: [{
+        id: 'yuhuatai',
+        name: '雨花台校区',
+        address: '南京市雨花区XX街道XX号',
+        introduction: '于2020年建设，主要面向......所授课程包括......为主。',
+        mapImage: '/static/images/school/map-yuhuatai.jpg'
       }, {
-        name: '课程列表',
-        id: 'courses'
+        id: 'daxinggong',
+        name: '大行宫校区',
+        address: '南京市秦淮区XX路XX号',
+        introduction: '于2018年建设，主要面向......所授课程包括......为主。',
+        mapImage: '/static/images/school/map-daxinggong.jpg'
       }, {
-        name: '环境设施',
-        id: 'facility'
-      }],
-      currentTab: 0,
-      courseList: [],
-      page: 1,
-      pageSize: 10,
-      loading: false,
-      loadMoreStatus: 'more',
-      hasMore: true
+        id: 'minxing',
+        name: '闵行校区',
+        address: '上海市闵行区XX路XX号',
+        introduction: '于2021年建设，主要面向......所授课程包括......为主。',
+        mapImage: '/static/images/school/map-minxing.jpg'
+      }]
     };
   },
-  onLoad: function onLoad(options) {
-    if (options.id) {
-      this.schoolId = options.id;
-      this.getSchoolDetail();
-    }
+  onLoad: function onLoad() {
+    this.getStatusBarHeight();
   },
   methods: {
-    // 获取学校详情
-    getSchoolDetail: function getSchoolDetail() {
-      var _this = this;
-      uni.showLoading({
-        title: '加载中'
-      });
-
-      // 这里假设有一个获取学校详情的接口
-      wx.cloud.callFunction({
-        name: 'getSchoolDetail',
-        data: {
-          schoolId: this.schoolId
-        },
-        success: function success(res) {
-          if (res.result && res.result.data) {
-            _this.school = res.result.data;
-            uni.setNavigationBarTitle({
-              title: _this.school.name
-            });
-          } else {
-            uni.showToast({
-              title: '获取学校信息失败',
-              icon: 'none'
-            });
-          }
-        },
-        fail: function fail(err) {
-          console.error('获取学校详情失败', err);
-          uni.showToast({
-            title: '获取学校信息失败',
-            icon: 'none'
-          });
-        },
-        complete: function complete() {
-          uni.hideLoading();
-
-          // 初始加载课程列表
-          if (_this.currentTab === 1) {
-            _this.getCourseList();
-          }
-        }
-      });
-    },
-    // 切换标签
-    switchTab: function switchTab(index) {
-      if (this.currentTab === index) return;
-      this.currentTab = index;
-
-      // 切换到课程列表时加载课程
-      if (index === 1 && this.courseList.length === 0) {
-        this.getCourseList();
+    // 获取状态栏高度
+    getStatusBarHeight: function getStatusBarHeight() {
+      try {
+        var systemInfo = uni.getSystemInfoSync();
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
+      } catch (e) {
+        console.error('获取状态栏高度失败:', e);
+        this.statusBarHeight = 20;
       }
     },
-    // 获取学校课程列表
-    getCourseList: function getCourseList() {
-      var _this2 = this;
-      if (this.loading) return;
-      this.loading = true;
-      this.loadMoreStatus = 'loading';
-
-      // 构建请求参数
-      var params = {
-        page: this.page,
-        pageSize: this.pageSize,
-        schoolId: this.schoolId
-      };
-      uni.showLoading({
-        title: '加载中'
-      });
-
-      // 调用获取课程列表接口
-      this.$api.course.getCourseList(params).then(function (res) {
-        var list = res.data || [];
-        if (_this2.page === 1) {
-          _this2.courseList = list;
-        } else {
-          _this2.courseList = [].concat((0, _toConsumableArray2.default)(_this2.courseList), (0, _toConsumableArray2.default)(list));
-        }
-        _this2.hasMore = list.length === _this2.pageSize;
-        _this2.loadMoreStatus = _this2.hasMore ? 'more' : 'noMore';
-      }).catch(function (err) {
-        console.error('获取课程列表失败', err);
-        uni.showToast({
-          title: '获取课程列表失败',
-          icon: 'none'
-        });
-        _this2.loadMoreStatus = 'more';
-      }).finally(function () {
-        _this2.loading = false;
-        uni.hideLoading();
-      });
+    // 显示校区选择器
+    showSchoolPicker: function showSchoolPicker() {
+      this.showPicker = true;
     },
-    // 加载更多课程
-    loadMore: function loadMore() {
-      if (this.hasMore && !this.loading && this.currentTab === 1) {
-        this.page++;
-        this.getCourseList();
-      }
+    // 隐藏校区选择器
+    hidePicker: function hidePicker() {
+      this.showPicker = false;
     },
-    // 打开地图导航
-    openLocation: function openLocation() {
-      if (!this.school.latitude || !this.school.longitude) {
-        uni.showToast({
-          title: '暂无定位信息',
-          icon: 'none'
-        });
-        return;
-      }
-      uni.openLocation({
-        latitude: this.school.latitude,
-        longitude: this.school.longitude,
-        name: this.school.name,
-        address: this.school.address,
-        fail: function fail() {
-          uni.showToast({
-            title: '打开地图失败',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    // 拨打电话
-    callPhone: function callPhone() {
-      if (!this.school.phone) {
-        uni.showToast({
-          title: '暂无联系电话',
-          icon: 'none'
-        });
-        return;
-      }
-      uni.makePhoneCall({
-        phoneNumber: this.school.phone,
-        fail: function fail() {
-          uni.showToast({
-            title: '拨打电话失败',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    // 点击课程
-    onCourseClick: function onCourseClick(course) {
-      uni.navigateTo({
-        url: "/pages/course/detail?id=".concat(course._id)
-      });
-    },
-    // 点击预约
-    onBookClick: function onBookClick(course) {
-      uni.navigateTo({
-        url: "/pages/booking/create?id=".concat(course._id)
-      });
+    // 选择校区
+    selectSchool: function selectSchool(school) {
+      this.selectedSchool = school;
+      this.hidePicker();
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 

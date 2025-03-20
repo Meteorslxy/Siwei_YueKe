@@ -73,10 +73,14 @@
   width: 100%;
   overflow: hidden;
   position: relative;
+  padding-top: 0 !important;
+  /* 覆盖内联样式的paddingTop */
 }
 .header-background .bg-image {
   width: 100%;
   display: block;
+  margin-top: 0rpx;
+  /* 增大向上移动的距离 */
 }
 /* 功能导航菜单 */
 .nav-card {
@@ -216,9 +220,14 @@
   display: flex;
   align-items: center;
 }
-.course-section .section-header .section-more .iconfont {
-  margin-left: 4rpx;
-  font-size: 24rpx;
+.course-section .section-header .section-more .more-arrow {
+  width: 12rpx;
+  height: 12rpx;
+  border-top: 2rpx solid var(--text-color-light);
+  border-right: 2rpx solid var(--text-color-light);
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  margin-left: 8rpx;
 }
 .course-section .course-list {
   padding: 0 30rpx;

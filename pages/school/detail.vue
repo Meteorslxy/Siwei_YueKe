@@ -1,78 +1,52 @@
 <template>
   <view class="school-detail">
-    <view class="school-header">
-      <swiper class="banner" indicator-dots autoplay circular>
-        <swiper-item v-for="(item, index) in school.gallery || []" :key="index">
-          <image :src="item" mode="aspectFill"></image>
-        </swiper-item>
-      </swiper>
-      
-      <view class="school-info">
-        <view class="school-name">{{school.name}}</view>
-        <view class="school-address" @click="openLocation">
-          <text class="iconfont icon-location"></text>
-          <text>{{school.address}}</text>
-          <text class="navigate">导航</text>
-        </view>
-        <view class="school-phone" @click="callPhone">
-          <text class="iconfont icon-phone"></text>
-          <text>{{school.phone}}</text>
-          <text class="call">拨打</text>
+    <!-- 顶部背景 -->
+    <view class="header-background" :style="{ paddingTop: statusBarHeight + 'px' }">
+      <!-- 校区选择 -->
+      <view class="school-selector">
+        <view class="selector-label">选择校区</view>
+        <view class="selector-box" @click="showSchoolPicker">
+          <text>{{selectedSchool.name}}</text>
+          <view class="arrow-icon"></view>
         </view>
       </view>
     </view>
     
-    <view class="school-tabs">
-      <view 
-        v-for="(tab, index) in tabs" 
-        :key="index" 
-        class="tab-item" 
-        :class="{ active: currentTab === index }"
-        @click="switchTab(index)"
-      >
-        {{tab.name}}
+    <!-- 校区信息卡片 -->
+    <view class="school-card">
+      <view class="card-section">
+        <view class="section-title">详细地址：</view>
+        <view class="address-content">{{selectedSchool.address}}</view>
+      </view>
+      
+      <!-- 地图展示 -->
+      <view class="map-container">
+        <image class="map-image" :src="selectedSchool.mapImage" mode="aspectFill"></image>
+        <view class="map-marker"></view>
+      </view>
+      
+      <view class="card-section">
+        <view class="section-title">校区介绍：</view>
+        <view class="intro-content">{{selectedSchool.introduction}}</view>
       </view>
     </view>
     
-    <view class="school-content">
-      <!-- 学校简介 -->
-      <view v-if="currentTab === 0" class="intro-container">
-        <view class="section-title">学校简介</view>
-        <view class="intro-text">{{school.introduction}}</view>
-        
-        <view class="section-title">师资力量</view>
-        <view class="teacher-list">
-          <teacher-card 
-            v-for="(teacher, index) in school.teachers" 
-            :key="teacher._id || index" 
-            :teacher="teacher"
-          ></teacher-card>
+    <!-- 校区选择弹窗 -->
+    <view class="school-picker" v-if="showPicker">
+      <view class="picker-mask" @click="hidePicker"></view>
+      <view class="picker-content">
+        <view class="picker-header">
+          <text>选择校区</text>
+          <text class="close-icon" @click="hidePicker">×</text>
         </view>
-      </view>
-      
-      <!-- 课程列表 -->
-      <view v-if="currentTab === 1" class="course-container">
-        <view v-if="courseList.length > 0" class="course-list">
-          <course-card 
-            v-for="(course, index) in courseList" 
-            :key="course._id || index" 
-            :course="course"
-            @click="onCourseClick"
-            @book="onBookClick"
-          ></course-card>
-        </view>
-        <empty-tip v-else tip="暂无课程" :show="!loading"></empty-tip>
-        
-        <load-more :status="loadMoreStatus" @click="loadMore"></load-more>
-      </view>
-      
-      <!-- 环境设施 -->
-      <view v-if="currentTab === 2" class="facility-container">
-        <view class="section-title">环境设施</view>
-        <view class="facility-list">
-          <view class="facility-item" v-for="(item, index) in school.facilities || []" :key="index">
-            <image :src="item.image" mode="aspectFill"></image>
-            <view class="facility-name">{{item.name}}</view>
+        <view class="picker-options">
+          <view 
+            class="picker-option" 
+            v-for="(school, index) in schoolList" 
+            :key="index"
+            :class="{ active: selectedSchool.id === school.id }"
+            @click="selectSchool(school)">
+            {{school.name}}
           </view>
         </view>
       </view>
@@ -84,196 +58,69 @@
 export default {
   data() {
     return {
-      schoolId: '',
-      school: {
-        name: '',
-        address: '',
-        phone: '',
-        introduction: '',
-        gallery: [],
-        teachers: [],
-        facilities: []
+      statusBarHeight: 0,
+      showPicker: false,
+      selectedSchool: {
+        id: 'yuhuatai',
+        name: '雨花台校区',
+        address: '南京市雨花区XX街道XX号',
+        introduction: '于2020年建设，主要面向......所授课程包括......为主。',
+        mapImage: '/static/images/school/map-yuhuatai.jpg'
       },
-      tabs: [
-        { name: '学校简介', id: 'intro' },
-        { name: '课程列表', id: 'courses' },
-        { name: '环境设施', id: 'facility' }
-      ],
-      currentTab: 0,
-      courseList: [],
-      page: 1,
-      pageSize: 10,
-      loading: false,
-      loadMoreStatus: 'more',
-      hasMore: true
+      schoolList: [
+        {
+          id: 'yuhuatai',
+          name: '雨花台校区',
+          address: '南京市雨花区XX街道XX号',
+          introduction: '于2020年建设，主要面向......所授课程包括......为主。',
+          mapImage: '/static/images/school/map-yuhuatai.jpg'
+        },
+        {
+          id: 'daxinggong',
+          name: '大行宫校区',
+          address: '南京市秦淮区XX路XX号',
+          introduction: '于2018年建设，主要面向......所授课程包括......为主。',
+          mapImage: '/static/images/school/map-daxinggong.jpg'
+        },
+        {
+          id: 'minxing',
+          name: '闵行校区',
+          address: '上海市闵行区XX路XX号',
+          introduction: '于2021年建设，主要面向......所授课程包括......为主。',
+          mapImage: '/static/images/school/map-minxing.jpg'
+        }
+      ]
     }
   },
-  onLoad(options) {
-    if (options.id) {
-      this.schoolId = options.id;
-      this.getSchoolDetail();
-    }
+  onLoad() {
+    this.getStatusBarHeight();
   },
   methods: {
-    // 获取学校详情
-    getSchoolDetail() {
-      uni.showLoading({ title: '加载中' });
-      
-      // 这里假设有一个获取学校详情的接口
-      wx.cloud.callFunction({
-        name: 'getSchoolDetail',
-        data: {
-          schoolId: this.schoolId
-        },
-        success: res => {
-          if (res.result && res.result.data) {
-            this.school = res.result.data;
-            uni.setNavigationBarTitle({ title: this.school.name });
-          } else {
-            uni.showToast({
-              title: '获取学校信息失败',
-              icon: 'none'
-            });
-          }
-        },
-        fail: err => {
-          console.error('获取学校详情失败', err);
-          uni.showToast({
-            title: '获取学校信息失败',
-            icon: 'none'
-          });
-        },
-        complete: () => {
-          uni.hideLoading();
-          
-          // 初始加载课程列表
-          if (this.currentTab === 1) {
-            this.getCourseList();
-          }
-        }
-      });
-    },
-    
-    // 切换标签
-    switchTab(index) {
-      if (this.currentTab === index) return;
-      this.currentTab = index;
-      
-      // 切换到课程列表时加载课程
-      if (index === 1 && this.courseList.length === 0) {
-        this.getCourseList();
+    // 获取状态栏高度
+    getStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync();
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
+      } catch (e) {
+        console.error('获取状态栏高度失败:', e);
+        this.statusBarHeight = 20;
       }
     },
     
-    // 获取学校课程列表
-    getCourseList() {
-      if (this.loading) return;
-      
-      this.loading = true;
-      this.loadMoreStatus = 'loading';
-      
-      // 构建请求参数
-      const params = {
-        page: this.page,
-        pageSize: this.pageSize,
-        schoolId: this.schoolId
-      };
-      
-      uni.showLoading({ title: '加载中' });
-      
-      // 调用获取课程列表接口
-      this.$api.course.getCourseList(params)
-        .then(res => {
-          const list = res.data || [];
-          
-          if (this.page === 1) {
-            this.courseList = list;
-          } else {
-            this.courseList = [...this.courseList, ...list];
-          }
-          
-          this.hasMore = list.length === this.pageSize;
-          this.loadMoreStatus = this.hasMore ? 'more' : 'noMore';
-        })
-        .catch(err => {
-          console.error('获取课程列表失败', err);
-          uni.showToast({
-            title: '获取课程列表失败',
-            icon: 'none'
-          });
-          this.loadMoreStatus = 'more';
-        })
-        .finally(() => {
-          this.loading = false;
-          uni.hideLoading();
-        });
+    // 显示校区选择器
+    showSchoolPicker() {
+      this.showPicker = true;
     },
     
-    // 加载更多课程
-    loadMore() {
-      if (this.hasMore && !this.loading && this.currentTab === 1) {
-        this.page++;
-        this.getCourseList();
-      }
+    // 隐藏校区选择器
+    hidePicker() {
+      this.showPicker = false;
     },
     
-    // 打开地图导航
-    openLocation() {
-      if (!this.school.latitude || !this.school.longitude) {
-        uni.showToast({
-          title: '暂无定位信息',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      uni.openLocation({
-        latitude: this.school.latitude,
-        longitude: this.school.longitude,
-        name: this.school.name,
-        address: this.school.address,
-        fail: () => {
-          uni.showToast({
-            title: '打开地图失败',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    
-    // 拨打电话
-    callPhone() {
-      if (!this.school.phone) {
-        uni.showToast({
-          title: '暂无联系电话',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      uni.makePhoneCall({
-        phoneNumber: this.school.phone,
-        fail: () => {
-          uni.showToast({
-            title: '拨打电话失败',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    
-    // 点击课程
-    onCourseClick(course) {
-      uni.navigateTo({
-        url: `/pages/course/detail?id=${course._id}`
-      });
-    },
-    
-    // 点击预约
-    onBookClick(course) {
-      uni.navigateTo({
-        url: `/pages/booking/create?id=${course._id}`
-      });
+    // 选择校区
+    selectSchool(school) {
+      this.selectedSchool = school;
+      this.hidePicker();
     }
   }
 }
@@ -281,141 +128,173 @@ export default {
 
 <style lang="scss">
 .school-detail {
+  min-height: 100vh;
+  background-color: $bg-color;
+}
+
+/* 顶部背景 */
+.header-background {
+  background-color: #EC7A49;
+  padding-bottom: 180rpx;
+  position: relative;
+}
+
+/* 校区选择器 */
+.school-selector {
   display: flex;
-  flex-direction: column;
-  background-color: #f7f7f7;
+  align-items: center;
+  padding: 0rpx 30rpx 25rpx;
+  margin-top: -30rpx;
+  justify-content: center;
   
-  .school-header {
-    background-color: #fff;
-    margin-bottom: 20rpx;
-    
-    .banner {
-      width: 100%;
-      height: 400rpx;
-      
-      image {
-        width: 100%;
-        height: 100%;
-      }
-    }
-    
-    .school-info {
-      padding: 30rpx;
-      
-      .school-name {
-        font-size: 36rpx;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 20rpx;
-      }
-      
-      .school-address, .school-phone {
-        display: flex;
-        align-items: center;
-        font-size: 28rpx;
-        color: #666;
-        margin-bottom: 16rpx;
-        
-        .iconfont {
-          font-size: 28rpx;
-          color: #999;
-          margin-right: 10rpx;
-        }
-        
-        .navigate, .call {
-          margin-left: auto;
-          color: #FF6B00;
-        }
-      }
-    }
+  .selector-label {
+    color: #fff;
+    font-size: 28rpx;
+    margin-right: 50rpx;
+    white-space: nowrap;
   }
   
-  .school-tabs {
+  .selector-box {
+    width: 400rpx;
+    height: 65rpx;
+    background-color: #fff;
+    border-radius: 8rpx;
     display: flex;
-    background-color: #fff;
-    padding: 0 20rpx;
-    border-bottom: 1rpx solid #eee;
-    margin-bottom: 20rpx;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15rpx;
+    font-size: 26rpx;
     
-    .tab-item {
-      flex: 1;
-      height: 80rpx;
-      line-height: 80rpx;
-      text-align: center;
-      font-size: 28rpx;
-      color: #666;
-      position: relative;
-      
-      &.active {
-        color: #FF6B00;
-        font-weight: 500;
-        
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 40rpx;
-          height: 4rpx;
-          background-color: #FF6B00;
-          border-radius: 2rpx;
-        }
-      }
+    .arrow-icon {
+      width: 0;
+      height: 0;
+      border-left: 8rpx solid transparent;
+      border-right: 8rpx solid transparent;
+      border-top: 8rpx solid #666;
+    }
+  }
+}
+
+/* 校区信息卡片 */
+.school-card {
+  margin: 0 30rpx;
+  background-color: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  padding: 30rpx;
+  margin-top: -130rpx;
+  position: relative;
+  z-index: 10;
+  
+  .card-section {
+    margin-bottom: 30rpx;
+    
+    &:last-child {
+      margin-bottom: 0;
     }
   }
   
-  .school-content {
-    flex: 1;
-    padding: 0 20rpx 20rpx;
+  .section-title {
+    font-size: 30rpx;
+    font-weight: bold;
+    color: $text-color;
+    margin-bottom: 10rpx;
+  }
+  
+  .address-content, .intro-content {
+    font-size: 28rpx;
+    color: $text-color-grey;
+    line-height: 1.6;
+  }
+  
+  .map-container {
+    width: 100%;
+    height: 300rpx;
+    background-color: #f5f5f5;
+    margin-bottom: 30rpx;
+    position: relative;
+    border-radius: 8rpx;
+    overflow: hidden;
     
-    .section-title {
-      font-size: 32rpx;
-      font-weight: bold;
-      color: #333;
-      margin: 30rpx 0 20rpx;
-      position: relative;
-      padding-left: 20rpx;
+    .map-image {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .map-marker {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 40rpx;
+      height: 40rpx;
+      background-color: $theme-color;
+      border-radius: 50%;
+      border: 6rpx solid rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+/* 校区选择弹窗 */
+.school-picker {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  
+  .picker-mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .picker-content {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #fff;
+    border-top-left-radius: 20rpx;
+    border-top-right-radius: 20rpx;
+    overflow: hidden;
+    
+    .picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30rpx;
+      border-bottom: 1rpx solid $border-color-light;
       
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 6rpx;
-        height: 30rpx;
-        background-color: #FF6B00;
-        border-radius: 3rpx;
+      .close-icon {
+        font-size: 40rpx;
+        color: $text-color-light;
       }
     }
     
-    .intro-text {
-      font-size: 28rpx;
-      color: #666;
-      line-height: 1.6;
-    }
-    
-    .facility-list {
-      display: flex;
-      flex-wrap: wrap;
-      margin: 0 -10rpx;
+    .picker-options {
+      max-height: 600rpx;
+      overflow-y: auto;
       
-      .facility-item {
-        width: calc(50% - 20rpx);
-        margin: 10rpx;
+      .picker-option {
+        height: 100rpx;
+        line-height: 100rpx;
+        padding: 0 30rpx;
+        font-size: 30rpx;
+        border-bottom: 1rpx solid $border-color-light;
         
-        image {
-          width: 100%;
-          height: 200rpx;
-          border-radius: 8rpx;
+        &.active {
+          color: $theme-color;
+          font-weight: bold;
         }
         
-        .facility-name {
-          font-size: 26rpx;
-          color: #666;
-          margin-top: 10rpx;
-          text-align: center;
+        &:last-child {
+          border-bottom: none;
         }
       }
     }

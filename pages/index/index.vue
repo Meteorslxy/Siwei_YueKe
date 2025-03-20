@@ -2,7 +2,7 @@
   <view class="index-container">
     <!-- 顶部背景图片 -->
     <view class="header-background" :style="{ paddingTop: statusBarHeight + 'px' }">
-      <image class="bg-image" src="/static/images/home.jpg" mode="widthFix"></image>
+      <image class="bg-image" src="/static/images/home.png" mode="widthFix"></image>
     </view>
     
     <!-- 功能导航菜单 -->
@@ -55,7 +55,7 @@
         <text class="section-title">推荐课程</text>
         <view class="section-more" @click="switchTab('/pages/course/course')">
           <text>更多</text>
-          <text class="iconfont icon-right"></text>
+          <view class="more-arrow"></view>
         </view>
       </view>
       
@@ -330,10 +330,12 @@ export default {
   width: 100%;
   overflow: hidden;
   position: relative;
+  padding-top: 0 !important; /* 覆盖内联样式的paddingTop */
   
   .bg-image {
     width: 100%;
     display: block;
+    margin-top: 0rpx; /* 增大向上移动的距离 */
   }
 }
 
@@ -493,9 +495,13 @@ export default {
       display: flex;
       align-items: center;
       
-      .iconfont {
-        margin-left: 4rpx;
-        font-size: 24rpx;
+      .more-arrow {
+        width: 12rpx;
+        height: 12rpx;
+        border-top: 2rpx solid $text-color-light;
+        border-right: 2rpx solid $text-color-light;
+        transform: rotate(45deg);
+        margin-left: 8rpx;
       }
     }
   }

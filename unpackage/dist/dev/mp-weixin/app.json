@@ -19,12 +19,12 @@
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "四维教育",
-    "navigationBarBackgroundColor": "#FF8D3C",
+    "navigationBarBackgroundColor": "#EC7A49",
     "backgroundColor": "#F8F8F8"
   },
   "tabBar": {
     "color": "#7A7E83",
-    "selectedColor": "#FF8D3C",
+    "selectedColor": "#EC7A49",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [

@@ -79,7 +79,7 @@
   left: 0;
   width: 100%;
   height: 260rpx;
-  background: linear-gradient(to right, #FF9500, #FF5E3A);
+  background-color: #EC7A49;
 }
 .user-info-section .user-info {
   position: absolute;
@@ -159,9 +159,9 @@
   position: relative;
   width: 25%;
 }
-.menu-section .menu-group .menu-content .menu-item .item-icon {
-  font-size: 48rpx;
-  color: var(--theme-color);
+.menu-section .menu-group .menu-content .menu-item .item-icon-img {
+  width: 56rpx;
+  height: 56rpx;
   margin-bottom: 10rpx;
 }
 .menu-section .menu-group .menu-content .menu-item .item-text {

@@ -259,15 +259,15 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 //
 //
 //
-//
 var _default = {
   data: function data() {
     return {
       userInfo: {},
       hasUserInfo: false,
       bookingCounts: {
-        pending: 0,
-        confirmed: 0
+        usable: 0,
+        expired: 0,
+        canceled: 0
       },
       isDev: false,
       // 是否为开发环境
@@ -416,8 +416,9 @@ var _default = {
                 } else {
                   // 模拟数据
                   _this3.bookingCounts = {
-                    pending: 1,
-                    confirmed: 2
+                    usable: 1,
+                    expired: 2,
+                    canceled: 0
                   };
                 }
                 _context2.next = 13;
@@ -428,8 +429,9 @@ var _default = {
                 console.error('获取预约数量失败', _context2.t0);
                 // 模拟数据
                 _this3.bookingCounts = {
-                  pending: 1,
-                  confirmed: 2
+                  usable: 1,
+                  expired: 2,
+                  canceled: 0
                 };
               case 13:
               case "end":
@@ -478,8 +480,9 @@ var _default = {
             _this4.userInfo = {};
             _this4.hasUserInfo = false;
             _this4.bookingCounts = {
-              pending: 0,
-              confirmed: 0
+              usable: 0,
+              expired: 0,
+              canceled: 0
             };
             uni.showToast({
               title: '已退出登录',

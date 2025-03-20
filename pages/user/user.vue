@@ -25,22 +25,21 @@
         <view class="menu-title">预约记录</view>
         <view class="menu-content">
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=all')">
-            <text class="item-icon iconfont icon-all"></text>
+            <image class="item-icon-img" src="/static/images/my/all.png" mode="aspectFit"></image>
             <text class="item-text">全部</text>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=pending')">
-            <text class="item-icon iconfont icon-pending"></text>
-            <text class="item-text">待确认</text>
-            <text v-if="bookingCounts.pending > 0" class="item-badge">{{bookingCounts.pending}}</text>
+          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=usable')">
+            <image class="item-icon-img" src="/static/images/my/use.png" mode="aspectFit"></image>
+            <text class="item-text">可使用</text>
+            <text v-if="bookingCounts.usable > 0" class="item-badge">{{bookingCounts.usable}}</text>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=confirmed')">
-            <text class="item-icon iconfont icon-confirmed"></text>
-            <text class="item-text">已确认</text>
-            <text v-if="bookingCounts.confirmed > 0" class="item-badge">{{bookingCounts.confirmed}}</text>
+          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=expired')">
+            <image class="item-icon-img" src="/static/images/my/out.png" mode="aspectFit"></image>
+            <text class="item-text">已过期</text>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=finished')">
-            <text class="item-icon iconfont icon-finished"></text>
-            <text class="item-text">已完成</text>
+          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=canceled')">
+            <image class="item-icon-img" src="/static/images/my/cancal.png" mode="aspectFit"></image>
+            <text class="item-text">已取消</text>
           </view>
         </view>
       </view>
@@ -120,8 +119,9 @@ export default {
       userInfo: {},
       hasUserInfo: false,
       bookingCounts: {
-        pending: 0,
-        confirmed: 0
+        usable: 0,
+        expired: 0,
+        canceled: 0
       },
       isDev: false, // 是否为开发环境
       isAdmin: false // 是否为管理员
@@ -241,16 +241,18 @@ export default {
         } else {
           // 模拟数据
           this.bookingCounts = {
-            pending: 1,
-            confirmed: 2
+            usable: 1,
+            expired: 2,
+            canceled: 0
           }
         }
       } catch (e) {
         console.error('获取预约数量失败', e)
         // 模拟数据
         this.bookingCounts = {
-          pending: 1,
-          confirmed: 2
+          usable: 1,
+          expired: 2,
+          canceled: 0
         }
       }
     },
@@ -295,8 +297,9 @@ export default {
             this.userInfo = {}
             this.hasUserInfo = false
             this.bookingCounts = {
-              pending: 0,
-              confirmed: 0
+              usable: 0,
+              expired: 0,
+              canceled: 0
             }
             
             uni.showToast({
@@ -328,7 +331,7 @@ export default {
     left: 0;
     width: 100%;
     height: 260rpx;
-    background: linear-gradient(to right, #FF9500, #FF5E3A);
+    background-color: #EC7A49;
   }
   
   .user-info {
@@ -416,9 +419,9 @@ export default {
         position: relative;
         width: 25%;
         
-        .item-icon {
-          font-size: 48rpx;
-          color: $theme-color;
+        .item-icon-img {
+          width: 56rpx;
+          height: 56rpx;
           margin-bottom: 10rpx;
         }
         

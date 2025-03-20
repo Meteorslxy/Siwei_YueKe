@@ -18460,7 +18460,7 @@ var _default = {
     "path": "pages/course/course",
     "style": {
       "navigationBarTitleText": "",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white",
       "navigationStyle": "custom"
     }
@@ -18468,77 +18468,77 @@ var _default = {
     "path": "pages/user/user",
     "style": {
       "navigationBarTitleText": "我的",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/course/detail",
     "style": {
       "navigationBarTitleText": "课程详情",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/teacher/detail",
     "style": {
       "navigationBarTitleText": "教师详情",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/login/login",
     "style": {
       "navigationBarTitleText": "登录",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/booking/list",
     "style": {
       "navigationBarTitleText": "我的预约",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/course/featured",
     "style": {
       "navigationBarTitleText": "精选好课",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/course/lectures",
     "style": {
       "navigationBarTitleText": "热点讲座",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/teacher/list",
     "style": {
       "navigationBarTitleText": "名师介绍",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/booking/create",
     "style": {
       "navigationBarTitleText": "课程预约",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/school/detail",
     "style": {
       "navigationBarTitleText": "校区详情",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/admin/import-data",
     "style": {
       "navigationBarTitleText": "数据导入工具",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white",
       "enablePullDownRefresh": false
     }
@@ -18546,7 +18546,7 @@ var _default = {
     "path": "pages/admin/testCloud",
     "style": {
       "navigationBarTitleText": "云函数测试",
-      "navigationBarBackgroundColor": "#FF8D3C",
+      "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white",
       "enablePullDownRefresh": false
     }
@@ -18554,12 +18554,12 @@ var _default = {
   "globalStyle": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "四维教育",
-    "navigationBarBackgroundColor": "#FF8D3C",
+    "navigationBarBackgroundColor": "#EC7A49",
     "backgroundColor": "#F8F8F8"
   },
   "tabBar": {
     "color": "#7A7E83",
-    "selectedColor": "#FF8D3C",
+    "selectedColor": "#EC7A49",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [{

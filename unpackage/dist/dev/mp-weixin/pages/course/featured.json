@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "精选好课",
-  "navigationBarBackgroundColor": "#FF8D3C",
+  "navigationBarBackgroundColor": "#EC7A49",
   "navigationBarTextStyle": "white",
   "usingComponents": {
     "course-card": "/components/course-card/course-card",
