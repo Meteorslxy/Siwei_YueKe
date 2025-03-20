@@ -35,6 +35,7 @@ exports.main = async (event, context) => {
     
     return {
       code: 0,
+      success: true,
       data: list.data,
       total,
       message: '获取课程列表成功'
@@ -43,6 +44,7 @@ exports.main = async (event, context) => {
     console.error('获取课程列表失败:', error);
     return {
       code: -1,
+      success: false,
       data: [],
       message: '获取课程列表失败: ' + error.message
     };

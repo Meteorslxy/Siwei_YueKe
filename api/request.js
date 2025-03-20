@@ -246,6 +246,25 @@ function request(options = {}) {
     }
     
     // 正常调用云函数 - 使用uniCloud
+    // 先确保阿里云环境正确初始化
+    const spaceId = getApp().globalData.$spaceId || 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29';
+    
+    // 微信小程序特殊处理 - 只使用阿里云UniCloud
+    // #ifdef MP-WEIXIN
+    console.log(`微信小程序环境下调用云函数[${name}]，使用阿里云UniCloud，spaceId: ${spaceId}`);
+    // 确保uni.cloud已初始化
+    if (uni.cloud && !uni.cloud._aliyunInit) {
+      console.log('在request.js中初始化uni.cloud');
+      uni.cloud.init({
+        provider: 'aliyun',
+        spaceId: spaceId,
+        endpoint: 'https://api.next.bspapp.com'
+      });
+      uni.cloud._aliyunInit = true;
+    }
+    // #endif
+    
+    console.log(`调用阿里云云函数[${name}]，环境ID: ${spaceId}`);
     uni.cloud.callFunction({
       name,
       data,

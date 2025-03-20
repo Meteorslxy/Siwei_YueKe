@@ -13,7 +13,8 @@
     "pages/booking/create",
     "pages/school/detail",
     "pages/admin/import-data",
-    "pages/admin/testCloud"
+    "pages/admin/testCloud",
+    "pages/admin/cloudTest"
   ],
   "subPackages": [],
   "window": {
@@ -50,16 +51,14 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "你的位置信息将用于查找附近的校区"
+      "desc": "获取您的位置信息用于地图导航"
     }
   },
   "requiredPrivateInfos": [
     "getLocation"
   ],
-  "plugins": {},
-  "uniCloud": {
-    "provider": "aliyun",
-    "spaceId": "mp-db123abc-4def-5678-9abc-123456789012"
-  },
+  "uniCloud": true,
+  "renderer": "webview",
+  "lazyCodeLoading": "requiredComponents",
   "usingComponents": {}
 }

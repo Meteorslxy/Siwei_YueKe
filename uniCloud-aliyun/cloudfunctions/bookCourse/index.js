@@ -1,12 +1,7 @@
-// 云函数入口文件
-const cloud = require('wx-server-sdk')
-const config = require('../config')
-
-cloud.init({
-  env: config.env
-})
-
-const db = cloud.database()
+'use strict';
+// 阿里云云函数入口文件
+const db = uniCloud.database();
+const dbCmd = db.command;
 
 // 云函数入口函数
 exports.main = async (event, context) => {
@@ -16,72 +11,78 @@ exports.main = async (event, context) => {
     studentName,
     contactPhone,
     remark
-  } = event
+  } = event;
   
   if (!courseId || !userId) {
     return {
+      code: -1,
       success: false,
-      errMsg: '课程ID和用户ID不能为空'
-    }
+      message: '课程ID和用户ID不能为空'
+    };
   }
   
   try {
     // 验证课程是否存在
-    const courseResult = await db.collection(config.collections.courses)
+    const courseResult = await db.collection('courses')
       .doc(courseId)
-      .get()
+      .get();
     
     if (!courseResult.data) {
       return {
+        code: -1,
         success: false,
-        errMsg: '课程不存在'
-      }
+        message: '课程不存在'
+      };
     }
     
-    const course = courseResult.data
+    const course = courseResult.data;
     
     // 验证名额是否已满
     if (course.enrollCount >= course.maxEnroll) {
       return {
+        code: -1,
         success: false,
-        errMsg: '该课程名额已满'
-      }
+        message: '该课程名额已满'
+      };
     }
     
     // 创建预约记录
-    const bookingResult = await db.collection(config.collections.bookings).add({
-      data: {
-        courseId,
-        userId,
-        courseName: course.title,
-        teacherName: course.teacherName,
-        schoolId: course.schoolId,
-        schoolName: course.schoolName,
-        startTime: course.startTime,
-        endTime: course.endTime,
-        studentName,
-        contactPhone,
-        remark,
-        status: 'pending', // 待确认
-        createTime: db.serverDate()
-      }
-    })
+    const bookingResult = await db.collection('bookings').add({
+      courseId,
+      userId,
+      courseName: course.title,
+      teacherName: course.teacherName,
+      schoolId: course.schoolId,
+      schoolName: course.schoolName,
+      startTime: course.startTime,
+      endTime: course.endTime,
+      studentName,
+      contactPhone,
+      remark,
+      status: 'pending', // 待确认
+      createTime: new Date()
+    });
     
     // 更新课程报名人数
-    await db.collection(config.collections.courses).doc(courseId).update({
-      data: {
-        enrollCount: db.command.inc(1)
-      }
-    })
+    await db.collection('courses').doc(courseId).update({
+      enrollCount: dbCmd.inc(1)
+    });
     
     return {
+      code: 0,
       success: true,
-      bookingId: bookingResult._id
-    }
+      data: {
+        bookingId: bookingResult.id
+      },
+      message: '预约成功'
+    };
   } catch (err) {
+    console.error('预约失败:', err);
     return {
+      code: -1,
       success: false,
-      errMsg: err.message || '预约失败'
-    }
+      data: null,
+      message: err.message || '预约失败'
+    };
   }
-} 
+}; 

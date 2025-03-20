@@ -1,6 +1,13 @@
 import Vue from 'vue'
 import App from './App'
 
+// 云服务空间ID - 全局唯一定义 (UniCloud)
+const spaceId = 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29' // UniCloud阿里云空间ID
+
+// #ifdef MP-WEIXIN
+console.log('微信小程序环境 - 只使用UniCloud阿里云');
+// #endif
+
 // 全局组件注册
 import './components/global.js'
 
@@ -12,8 +19,6 @@ Vue.config.productionTip = false
 
 App.mpType = 'app'
 
-// 云服务空间ID - 全局唯一定义 (UniCloud)
-const spaceId = 'mp-db123abc-4def-5678-9abc-123456789012' // UniCloud阿里云空间ID
 Vue.prototype.$spaceId = spaceId
 
 // 添加全局数据对象 - 确保在小程序环境中可以通过getApp()访问
@@ -21,6 +26,8 @@ if (!App.globalData) {
   App.globalData = {};
 }
 App.globalData.$spaceId = spaceId;
+// 初始设置为true，防止启动过程中显示问题
+App.globalData.$isDevMode = true;
 
 // 全局混入
 Vue.mixin({
@@ -51,50 +58,54 @@ Vue.mixin({
 const themeColor = 'var(--theme-color)' // 使用CSS变量
 Vue.prototype.$themeColor = themeColor
 
-// 开发调试辅助：默认尝试使用真实数据
-Vue.prototype.$isDevMode = false; // 默认尝试使用真实数据，仅在云函数不可用时会自动切换为true
+// 开发调试辅助：默认使用模拟数据，先显示界面
+Vue.prototype.$isDevMode = true; // 默认先使用模拟数据，保证界面显示
 
 // 初始化UniCloud云服务
 if (uni.cloud) {
   console.log('正在初始化UniCloud阿里云服务...');
   
-  // 初始化uniCloud
+  // 强制使用阿里云初始化
   uni.cloud.init({
     provider: 'aliyun', // 服务商，切换为阿里云
     spaceId, // 服务空间ID
-    clientSecret: '', // 阿里云不需要填写secret
     endpoint: 'https://api.next.bspapp.com', // 阿里云服务空间地址
   });
   
-  // 测试云环境连接
-  uni.cloud.callFunction({
-    name: 'test',
-    data: { message: '测试UniCloud阿里云' }
-  }).then(res => {
-    console.log('云函数测试成功:', res.result);
-    Vue.prototype.$isDevMode = false; // 测试成功后可以使用真实数据
-  }).catch(err => {
-    console.error('云函数测试失败:', err);
-    console.warn('将使用模拟数据');
-    Vue.prototype.$isDevMode = true; // 测试失败后使用模拟数据
-    
-    // 提示用户需要创建云服务空间
-    uni.showModal({
-      title: 'UniCloud配置错误',
-      content: '请确保已在HBuilderX中创建阿里云服务空间，并将空间ID更新到main.js中的spaceId变量',
-      showCancel: false
+  console.log('UniCloud阿里云环境初始化完成');
+  uni.cloud._aliyunInit = true;
+  
+  // 测试云环境连接 - 延迟执行，确保小程序先启动
+  setTimeout(() => {
+    console.log('延迟测试云函数连接');
+    uni.cloud.callFunction({
+      name: 'test',
+      data: { 
+        message: '测试UniCloud阿里云',
+        testMode: 'basic'
+      }
+    }).then(res => {
+      console.log('云函数测试成功:', res.result);
+      Vue.prototype.$isDevMode = false; // 测试成功后可以使用真实数据
+      App.globalData.$isDevMode = false;
+    }).catch(err => {
+      console.error('云函数测试失败:', err);
+      console.warn('将使用模拟数据');
+      Vue.prototype.$isDevMode = true; // 测试失败后使用模拟数据
+      App.globalData.$isDevMode = true;
     });
-  });
+  }, 2000);
 }
 
 // 测试云函数连接方法
-Vue.prototype.$testConnection = async function() {
+Vue.prototype.$testConnection = async function(testMode = 'basic') {
   try {
-    console.log('正在测试阿里云函数连接...');
+    console.log(`正在测试阿里云函数连接，模式: ${testMode}...`);
     const result = await uni.cloud.callFunction({
       name: 'test',
       data: {
-        message: '来自前端的测试消息 - ' + new Date().toLocaleString()
+        message: '来自前端的测试消息 - ' + new Date().toLocaleString(),
+        testMode
       }
     });
     
@@ -105,6 +116,8 @@ Vue.prototype.$testConnection = async function() {
         title: '云函数连接成功',
         icon: 'success'
       });
+      Vue.prototype.$isDevMode = false;
+      App.globalData.$isDevMode = false;
       return result.result;
     } else {
       throw new Error(result.result?.message || '未知错误');
@@ -116,6 +129,7 @@ Vue.prototype.$testConnection = async function() {
       icon: 'none'
     });
     Vue.prototype.$isDevMode = true; // 切换到开发模式
+    App.globalData.$isDevMode = true;
     throw error;
   }
 };

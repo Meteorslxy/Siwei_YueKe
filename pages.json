@@ -113,6 +113,15 @@
         "navigationBarTextStyle": "white",
         "enablePullDownRefresh": false
       }
+    },
+    {
+      "path": "pages/admin/cloudTest",
+      "style": {
+        "navigationBarTitleText": "阿里云连接测试",
+        "navigationBarBackgroundColor": "#FF8D3C",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": false
+      }
     }
   ],
   "globalStyle": {

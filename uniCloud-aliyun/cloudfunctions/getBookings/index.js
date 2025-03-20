@@ -1,12 +1,7 @@
-// 云函数入口文件
-const cloud = require('wx-server-sdk')
-const config = require('../config')
-
-cloud.init({
-  env: config.env
-})
-
-const db = cloud.database()
+'use strict';
+// 阿里云云函数入口文件
+const db = uniCloud.database();
+const dbCmd = db.command;
 
 // 云函数入口函数
 exports.main = async (event, context) => {
@@ -15,65 +10,66 @@ exports.main = async (event, context) => {
     status, 
     limit = 10, 
     skip = 0 
-  } = event
+  } = event;
   
   if (!userId) {
     return {
+      code: -1,
       success: false,
       message: '用户ID不能为空'
-    }
+    };
   }
   
   try {
     // 构建查询条件
-    const query = { userId }
+    const query = { userId };
     
     // 如果指定了状态，添加到查询条件中
     if (status) {
-      query.status = status
+      query.status = status;
     }
     
     // 查询符合条件的总数
-    const countResult = await db.collection(config.collections.bookings)
+    const countResult = await db.collection('bookings')
       .where(query)
-      .count()
+      .count();
     
-    const total = countResult.total
+    const total = countResult.total;
     
     // 查询预约记录
-    const bookingResult = await db.collection(config.collections.bookings)
+    const bookingResult = await db.collection('bookings')
       .where(query)
       .skip(skip)
       .limit(limit)
       .orderBy('createTime', 'desc')
-      .get()
+      .get();
     
     // 获取所有关联的课程ID
     const courseIds = bookingResult.data
       .map(booking => booking.courseId)
-      .filter((id, index, self) => self.indexOf(id) === index) // 去重
+      .filter((id, index, self) => self.indexOf(id) === index); // 去重
     
     // 查询课程信息
-    const courseMap = {}
+    const courseMap = {};
     
     if (courseIds.length > 0) {
-      const courseResult = await db.collection(config.collections.courses)
+      const courseResult = await db.collection('courses')
         .where({
-          _id: db.command.in(courseIds)
+          _id: dbCmd.in(courseIds)
         })
-        .get()
+        .get();
       
       courseResult.data.forEach(course => {
-        courseMap[course._id] = course
-      })
+        courseMap[course._id] = course;
+      });
     }
     
     // 将课程信息添加到预约记录中
     const bookings = bookingResult.data.map(booking => {
-      const course = courseMap[booking.courseId] || {}
+      const course = courseMap[booking.courseId] || {};
       
       // 格式化预约编号
-      const bookingId = booking._id.slice(-10).toUpperCase()
+      const bookingId = booking._id.slice(-10).toUpperCase();
       
       return {
         _id: booking._id,
@@ -89,19 +85,23 @@ exports.main = async (event, context) => {
         remark: booking.remark,
         status: booking.status,
         createTime: booking.createTime
-      }
-    })
+      };
+    });
     
     return {
+      code: 0,
       success: true,
       total,
-      data: bookings
-    }
+      data: bookings,
+      message: '获取预约记录成功'
+    };
   } catch (err) {
-    console.error('获取预约记录失败:', err)
+    console.error('获取预约记录失败:', err);
     return {
+      code: -1,
       success: false,
+      data: [],
       message: err.message || '获取预约记录失败'
-    }
+    };
   }
-} 
+}; 

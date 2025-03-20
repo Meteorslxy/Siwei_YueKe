@@ -1,7 +1,10 @@
-// 云开发环境配置
+'use strict';
+
+// UniCloud阿里云环境配置
 module.exports = {
-  // 云环境ID，需要替换成你自己的环境ID
-  env: 'tcb-zz6pckedn3bishi-6cu741161bd8',
+  // 云环境配置
+  provider: 'aliyun',
+  spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29',
   
   // 数据库集合
   collections: {

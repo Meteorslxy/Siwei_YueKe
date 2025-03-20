@@ -8,7 +8,7 @@
             "mp-weixin" : {
                 "launchtype" : "remote"
             },
-            "provider" : "tcb",
+            "provider" : "aliyun",
             "type" : "uniCloud"
         }
     ]

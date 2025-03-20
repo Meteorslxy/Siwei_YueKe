@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "阿里云连接测试",
+  "navigationBarBackgroundColor": "#FF8D3C",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "usingComponents": {}
+}

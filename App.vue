@@ -3,20 +3,22 @@ export default {
   globalData: {
     userInfo: null,
     systemInfo: null,
-    $spaceId: 'mp-db123abc-4def-5678-9abc-123456789012', // UniCloud阿里云空间ID
-    $isDevMode: false // 是否使用模拟数据
+    $spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29', // UniCloud阿里云空间ID
+    $isDevMode: true // 默认使用模拟数据，确保界面先显示
   },
   onLaunch: function() {
     console.log('App Launch')
-    
-    // 测试云函数连接
-    this.testCloudConnection()
     
     // 获取设备信息
     this.getSystemInfo()
     
     // 获取用户登录状态
     this.checkLoginStatus()
+    
+    // 延迟测试云函数连接，确保界面先显示
+    setTimeout(() => {
+      this.testCloudConnection()
+    }, 1500)
   },
   onShow: function() {
     console.log('App Show')
@@ -25,6 +27,7 @@ export default {
     console.log('App Hide')
   },
   methods: {
+	  
     // 获取系统信息
     getSystemInfo() {
       try {
@@ -49,26 +52,44 @@ export default {
     },
 
     // 测试云函数连接
-    testCloudConnection() {
-      console.log('正在测试阿里云函数连接...');
-      uni.cloud.callFunction({
-        name: 'test',
-        data: {
-          message: '应用启动测试'
-        }
-      }).then(res => {
-        console.log('阿里云函数连接测试结果:', res.result);
-        if (res.result && res.result.code === 0) {
-          // 云函数连接成功，继续初始化数据库
-          this.initCloudDatabase();
+    async testCloudConnection() {
+      if (!uni.cloud || !uni.cloud.init) {
+        console.error('uni.cloud未初始化');
+        this.setDevMode(true);
+        return false;
+      }
+      
+      try {
+        console.log('重新初始化阿里云环境...');
+        // 确保重新初始化阿里云环境
+        uni.cloud.init({
+          provider: 'aliyun',
+          spaceId: this.$spaceId, // 使用全局定义的空间ID
+          endpoint: 'https://api.next.bspapp.com',
+        });
+        
+        console.log('正在测试云函数连接...');
+        const result = await uni.cloud.callFunction({
+          name: 'test',
+          data: {
+            message: '测试云函数连接 - ' + new Date().toLocaleString()
+          }
+        });
+        
+        console.log('云函数测试结果:', result);
+        if (result.result && result.result.code === 0) {
+          console.log('云函数连接成功，切换到生产模式');
+          this.setDevMode(false);
+          return true;
         } else {
-          throw new Error(res.result?.message || '测试返回异常结果');
+          throw new Error('云函数返回异常');
         }
-      }).catch(err => {
-        console.error('阿里云函数连接测试失败:', err);
-        // 连接失败时自动使用模拟数据
-        getApp().globalData.$isDevMode = true;
-      });
+      } catch (error) {
+        console.error('云函数连接测试失败:', error);
+        console.warn('切换到开发模式，使用模拟数据');
+        this.setDevMode(true);
+        return false;
+      }
     },
 
     // 初始化云数据库
@@ -85,7 +106,7 @@ export default {
       }).catch(err => {
         console.error('数据库初始化失败，降级使用模拟数据:', err);
         // 初始化失败时自动使用模拟数据
-        getApp().globalData.$isDevMode = true;
+        this.globalData.$isDevMode = true;
       });
     },
     

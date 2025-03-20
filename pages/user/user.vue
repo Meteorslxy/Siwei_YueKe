@@ -108,6 +108,16 @@
           </view>
           <text class="iconfont icon-right"></text>
         </view>
+        <view class="menu-item" @click="navigateTo('/pages/admin/cloudTest')">
+          <view class="item-icon">
+            <text class="iconfont icon-cloud"></text>
+          </view>
+          <view class="item-info">
+            <text class="item-name">阿里云高级测试</text>
+            <text class="item-desc">阿里云连接诊断工具</text>
+          </view>
+          <text class="iconfont icon-right"></text>
+        </view>
       </view>
     </view>
   </view>
