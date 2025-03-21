@@ -109,29 +109,60 @@ export default {
     }
   },
   onLoad(options) {
-    if (options.id) {
-      this.courseId = options.id
-      this.fetchCourseDetail()
+    console.log('课程详情页接收参数:', options);
+    if (options && options.id) {
+      this.courseId = options.id;
+      console.log('课程ID:', this.courseId);
+      // 直接使用MongoDB ObjectId格式获取课程详情
+      this.fetchCourseDetail();
+    } else {
+      console.error('未接收到有效的课程ID');
+      uni.showToast({
+        title: '参数错误',
+        icon: 'none'
+      });
+      // 使用模拟数据
+      this.useMockData();
     }
   },
   methods: {
     // 获取课程详情
     async fetchCourseDetail() {
+      // 验证课程ID是否有效
+      if (!this.courseId) {
+        console.error('课程ID为空，无法获取详情');
+        this.useMockData();
+        return;
+      }
+      
       try {
         // 显示加载提示
         uni.showLoading({
           title: '加载中...'
         });
         
-        // 使用API接口获取课程详情
+        console.log('开始获取课程详情，ID:', this.courseId);
+        
+        // 直接使用MongoDB ObjectId格式调用API
         const result = await this.$api.course.getCourseDetail(this.courseId);
         
         // 隐藏加载提示
         uni.hideLoading();
         
+        console.log('课程详情API返回结果:', result);
+        
         if (result && result.data) {
-          this.courseInfo = result.data;
-          console.log('课程详情:', this.courseInfo);
+          // 处理返回的数组数据 - 获取第一个元素作为课程信息
+          if (Array.isArray(result.data) && result.data.length > 0) {
+            this.courseInfo = result.data[0];
+            console.log('课程详情数据(数组第一项):', this.courseInfo);
+          } else {
+            this.courseInfo = result.data;
+            console.log('课程详情数据(对象):', this.courseInfo);
+          }
+          
+          // 预处理数据，确保所有字段都有值
+          this.processCourseData();
         } else {
           // 获取失败时使用模拟数据
           console.error('获取课程详情失败: 未找到数据');
@@ -150,6 +181,45 @@ export default {
           title: '获取课程详情失败',
           icon: 'none'
         });
+      }
+    },
+    
+    // 预处理课程数据，确保所有需要的字段都存在
+    processCourseData() {
+      if (!this.courseInfo) return;
+      
+      console.log('预处理课程数据:', this.courseInfo);
+      
+      // 确保基本字段有默认值
+      this.courseInfo.title = this.courseInfo.title || '未命名课程';
+      this.courseInfo.price = this.courseInfo.price || 0;
+      this.courseInfo.teacherName = this.courseInfo.teacherName || '未指定';
+      this.courseInfo.location = this.courseInfo.location || '未指定';
+      this.courseInfo.startTime = this.courseInfo.startTime || '';
+      this.courseInfo.endTime = this.courseInfo.endTime || '';
+      this.courseInfo.description = this.courseInfo.description || '暂无课程详情';
+      this.courseInfo.enrolled = this.courseInfo.enrolled || 0;
+      this.courseInfo.capacity = this.courseInfo.capacity || 20;
+      
+      // 预加载教师头像
+      if (this.courseInfo.teacherAvatar) {
+        this.preloadTeacherAvatar();
+      }
+      
+      console.log('预处理后的课程数据:', this.courseInfo);
+    },
+    
+    // 预加载教师头像
+    async preloadTeacherAvatar() {
+      if (!this.courseInfo.teacherAvatar) return;
+      
+      try {
+        const avatarResult = await this.$api.file.getImage(this.courseInfo.teacherAvatar);
+        if (avatarResult && avatarResult.data && avatarResult.data.url) {
+          this.courseInfo.teacherAvatarUrl = avatarResult.data.url;
+        }
+      } catch (error) {
+        console.error('加载教师头像失败:', error);
       }
     },
     

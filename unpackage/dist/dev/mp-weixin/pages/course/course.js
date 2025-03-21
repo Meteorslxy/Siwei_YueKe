@@ -574,10 +574,39 @@ var _default = {
       }
       return formattedStart;
     },
-    // 页面导航
-    navigateTo: function navigateTo(url) {
+    // 页面导航到课程详情
+    navigateToCourseDetail: function navigateToCourseDetail(course) {
+      console.log('准备导航到课程详情，课程数据:', course);
+      // 优先使用_id，备选使用id
+      var courseId = course._id || course.id;
+      if (!courseId) {
+        console.error('课程ID无效，无法导航到详情页');
+        uni.showToast({
+          title: '课程数据异常',
+          icon: 'none'
+        });
+        return;
+      }
+      console.log('导航到课程详情，ID:', courseId);
       uni.navigateTo({
-        url: url
+        url: "/pages/course/detail?id=".concat(courseId),
+        fail: function fail(err) {
+          console.error('导航到课程详情失败:', err);
+          uni.showToast({
+            title: '页面跳转失败',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    // 原页面导航方法保留，但修改逻辑
+    navigateTo: function navigateTo(url) {
+      console.log('通用导航:', url);
+      uni.navigateTo({
+        url: url,
+        fail: function fail(err) {
+          console.error('页面导航失败:', err);
+        }
       });
     }
   }

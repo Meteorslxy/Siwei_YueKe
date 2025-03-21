@@ -23,10 +23,34 @@ const courseApi = {
   // 获取课程详情
   getCourseDetail(id) {
     console.log('调用getCourseDetail，ID:', id);
+    
+    // 确保ID参数有效
+    if (!id || id === 'undefined' || id === 'null') {
+      console.error('getCourseDetail: ID参数无效:', id);
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '课程ID不能为空'
+      });
+    }
+    
+    // 使用courseId作为参数名，与云函数期望一致
     return request({
       name: 'getCourseDetail',
-      data: { id }
-    }).then(res => debugAPI('getCourseDetail返回', res));
+      data: { courseId: id }
+    }).then(res => {
+      console.log('getCourseDetail原始返回:', res);
+      
+      // 如果返回的data为空但有_id字段，将其规范化
+      if (res && !res.data && res._id) {
+        return {
+          ...res,
+          data: res
+        };
+      }
+      
+      return debugAPI('getCourseDetail返回', res);
+    });
   },
   
   // 获取新闻列表

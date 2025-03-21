@@ -65,13 +65,13 @@
         class="course-item" 
         v-for="(item, index) in courseList" 
         :key="index"
-        @click="navigateTo(`/pages/course/detail?id=${item._id}`)">
+        @click="navigateToCourseDetail(item)">
         <view class="course-left">
           <view class="course-brand-logo">
             <text class="brand-text">思维</text>
             <text class="brand-text sm">拓展</text>
           </view>
-          <image class="course-logo" :src="item.coverImage" mode="aspectFill"></image>
+          <image class="course-logo" :src="item.coverImage || item.image" mode="aspectFill"></image>
         </view>
         <view class="course-content">
           <view class="course-title">
@@ -361,9 +361,43 @@ export default {
       return formattedStart
     },
     
-    // 页面导航
+    // 页面导航到课程详情
+    navigateToCourseDetail(course) {
+      console.log('准备导航到课程详情，课程数据:', course);
+      // 优先使用_id，备选使用id
+      const courseId = course._id || course.id;
+      
+      if (!courseId) {
+        console.error('课程ID无效，无法导航到详情页');
+        uni.showToast({
+          title: '课程数据异常',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      console.log('导航到课程详情，ID:', courseId);
+      uni.navigateTo({
+        url: `/pages/course/detail?id=${courseId}`,
+        fail: (err) => {
+          console.error('导航到课程详情失败:', err);
+          uni.showToast({
+            title: '页面跳转失败',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    
+    // 原页面导航方法保留，但修改逻辑
     navigateTo(url) {
-      uni.navigateTo({ url })
+      console.log('通用导航:', url);
+      uni.navigateTo({ 
+        url,
+        fail: (err) => {
+          console.error('页面导航失败:', err);
+        }
+      });
     }
   }
 }
