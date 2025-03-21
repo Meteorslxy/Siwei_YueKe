@@ -149,9 +149,148 @@ const lectureApi = {
   }
 }
 
+// 文件相关API
+const fileApi = {
+  // 上传图片
+  uploadImage(base64Data, fileName, fileType) {
+    console.log('调用uploadImage, 文件名:', fileName, '类型:', fileType);
+    
+    // 参数检查
+    if (!base64Data) {
+      console.error('uploadImage: 缺少图片数据');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少图片数据'
+      });
+    }
+    
+    console.log('上传图片, base64长度:', base64Data.length);
+    
+    return request({
+      name: 'uploadImage',
+      data: {
+        base64Data,
+        fileName,
+        fileType
+      },
+      showLoading: false // 组件内已有loading
+    }).then(res => {
+      console.log('uploadImage返回成功:', res);
+      return res;
+    }).catch(err => {
+      console.error('uploadImage返回错误:', err);
+      return {
+        code: -1,
+        success: false,
+        message: err.message || '上传图片失败'
+      };
+    });
+  },
+  
+  // 获取单张图片
+  getImage(imageId) {
+    console.log('调用getImage，ID:', imageId);
+    
+    if (!imageId) {
+      console.error('getImage: 缺少图片ID');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少图片ID'
+      });
+    }
+    
+    return request({
+      name: 'getImage',
+      data: { imageId }
+    }).then(res => {
+      console.log('getImage返回:', res);
+      
+      // 处理不同的返回数据结构
+      if (res && res.imageData && res.imageData.base64Data) {
+        // 如果有base64数据，创建data.url结构便于统一处理
+        return {
+          ...res,
+          data: {
+            url: 'data:image/jpeg;base64,' + res.imageData.base64Data
+          }
+        };
+      } else if (res && res.imageData && res.imageData.url) {
+        // 将imageData.url提升到data.url
+        return {
+          ...res,
+          data: {
+            url: res.imageData.url
+          }
+        };
+      }
+      return res;
+    });
+  },
+  
+  // 获取多张图片
+  getImageList(options = {}) {
+    return request({
+      name: 'getImageList',
+      data: options
+    });
+  },
+  
+  // 删除图片
+  deleteImage(imageId) {
+    if (!imageId) {
+      console.error('deleteImage: 缺少图片ID');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少图片ID'
+      });
+    }
+    
+    return request({
+      name: 'deleteImage',
+      data: { imageId }
+    });
+  }
+}
+
+// 管理后台相关API
+const adminApi = {
+  // 上传各种内容（教师、讲座、课程、新闻等）
+  uploadContent(data) {
+    if (!data.type) {
+      console.error('uploadContent: 缺少内容类型');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少内容类型'
+      });
+    }
+    
+    if (!data.data) {
+      console.error('uploadContent: 缺少内容数据');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少内容数据'
+      });
+    }
+    
+    console.log(`上传${data.type}内容`);
+    
+    return request({
+      name: 'uploadContent',
+      data
+    });
+  }
+}
+
 export default {
   course: courseApi,
   user: userApi,
   teacher: teacherApi,
-  lecture: lectureApi
+  lecture: lectureApi,
+  file: fileApi,
+  admin: adminApi
 } 

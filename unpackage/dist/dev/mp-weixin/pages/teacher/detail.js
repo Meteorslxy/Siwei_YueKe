@@ -132,6 +132,7 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
+  var m0 = _vm.getImageUrl(_vm.teacher.avatarId || _vm.teacher.avatar)
   var g0 =
     _vm.currentTab === 0
       ? !_vm.teacher.experiences || _vm.teacher.experiences.length === 0
@@ -146,10 +147,10 @@ var render = function () {
     _vm.currentTab === 2 && g3 > 0
       ? _vm.__map(_vm.reviewList, function (review, index) {
           var $orig = _vm.__get_orig(review)
-          var m0 = _vm.formatDate(review.createTime)
+          var m1 = _vm.formatDate(review.createTime)
           return {
             $orig: $orig,
-            m0: m0,
+            m1: m1,
           }
         })
       : null
@@ -157,6 +158,7 @@ var render = function () {
     {},
     {
       $root: {
+        m0: m0,
         g0: g0,
         g1: g1,
         g2: g2,
@@ -305,6 +307,7 @@ var _default = {
         name: '',
         title: '',
         avatar: '',
+        avatarId: '',
         introduction: '',
         experiences: [],
         awards: []
@@ -330,7 +333,9 @@ var _default = {
       loadMoreStatus: 'more',
       reviewLoadMoreStatus: 'more',
       hasMore: true,
-      hasMoreReviews: true
+      hasMoreReviews: true,
+      imageCache: {},
+      defaultAvatar: '/static/images/default-avatar.png'
     };
   },
   onLoad: function onLoad(options) {
@@ -350,10 +355,33 @@ var _default = {
       // 使用uniCloud调用云函数
       this.$api.teacher.getTeacherDetail(this.teacherId).then(function (res) {
         if (res && res.data) {
-          _this.teacher = res.data;
+          console.log('教师原始数据:', JSON.stringify(res.data));
+
+          // 确保数据中有avatarId字段，如果没有尝试其他可能的字段名
+          var teacherData = res.data;
+          if (!teacherData.avatarId && teacherData.avatarID) {
+            teacherData.avatarId = teacherData.avatarID;
+          }
+          if (!teacherData.avatarId && teacherData.avatar_id) {
+            teacherData.avatarId = teacherData.avatar_id;
+          }
+          _this.teacher = teacherData;
+          console.log('教师处理后数据:', _this.teacher);
+          console.log('头像ID:', _this.teacher.avatarId);
           uni.setNavigationBarTitle({
             title: _this.teacher.name
           });
+
+          // 预加载头像
+          if (_this.teacher.avatarId) {
+            console.log('预加载头像ID:', _this.teacher.avatarId);
+            _this.preloadImage(_this.teacher.avatarId);
+          } else if (_this.teacher.avatar) {
+            console.log('预加载头像(avatar):', _this.teacher.avatar);
+            _this.preloadImage(_this.teacher.avatar);
+          } else {
+            console.log('教师没有头像数据');
+          }
         } else {
           uni.showToast({
             title: '获取教师信息失败',
@@ -512,6 +540,75 @@ var _default = {
       if (!timestamp) return '';
       var date = new Date(timestamp);
       return "".concat(date.getFullYear(), "-").concat((date.getMonth() + 1).toString().padStart(2, '0'), "-").concat(date.getDate().toString().padStart(2, '0'));
+    },
+    // 获取图片URL
+    getImageUrl: function getImageUrl(imageId) {
+      console.log('获取图片URL:', imageId);
+
+      // 如果是路径格式，直接返回
+      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+        console.log('使用路径格式图片:', imageId);
+        return imageId;
+      }
+
+      // 尝试从缓存获取
+      if (imageId && this.imageCache[imageId]) {
+        console.log('从缓存获取图片:', imageId);
+        return this.imageCache[imageId];
+      }
+
+      // 如果有ID但没缓存，尝试加载
+      if (imageId) {
+        console.log('尝试加载图片:', imageId);
+        this.preloadImage(imageId);
+      }
+
+      // 返回默认头像
+      console.log('使用默认头像');
+      return this.defaultAvatar;
+    },
+    // 预加载图片
+    preloadImage: function preloadImage(imageId) {
+      var _this4 = this;
+      console.log('预加载图片开始:', imageId);
+
+      // 如果已经是URL格式，直接缓存
+      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+        this.imageCache[imageId] = imageId;
+        console.log('已缓存URL格式图片:', imageId);
+        return;
+      }
+
+      // 调用API获取图片URL
+      this.$api.file.getImage(imageId).then(function (res) {
+        console.log('预加载图片完整结果:', JSON.stringify(res));
+
+        // 处理不同格式的返回数据
+        if (res && res.data && res.data.url) {
+          // 处理包含data.url的情况
+          _this4.imageCache[imageId] = res.data.url;
+          console.log('已缓存图片URL:', res.data.url);
+          // 强制视图更新
+          _this4.$forceUpdate();
+        } else if (res && res.imageData && res.imageData.url) {
+          // 处理包含imageData.url的情况
+          _this4.imageCache[imageId] = res.imageData.url;
+          console.log('从imageData获取到图片URL:', res.imageData.url);
+          // 强制视图更新
+          _this4.$forceUpdate();
+        } else if (res && res.imageData && res.imageData.base64Data) {
+          // 处理base64数据的情况
+          var base64Url = 'data:image/jpeg;base64,' + res.imageData.base64Data;
+          _this4.imageCache[imageId] = base64Url;
+          console.log('从imageData.base64Data生成图片URL');
+          // 强制视图更新
+          _this4.$forceUpdate();
+        } else {
+          console.error('获取图片URL失败,返回数据结构不正确:', res);
+        }
+      }).catch(function (err) {
+        console.error('获取图片失败:', err);
+      });
     }
   }
 };

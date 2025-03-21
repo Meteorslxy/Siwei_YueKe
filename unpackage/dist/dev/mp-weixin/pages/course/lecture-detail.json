@@ -1,5 +1,8 @@
 {
   "navigationBarTitleText": "讲座详情",
   "navigationBarBackgroundColor": "#EC7A49",
-  "navigationBarTextStyle": "white"
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "empty-tip": "/components/empty-tip/empty-tip"
+  }
 }

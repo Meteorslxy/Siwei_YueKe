@@ -68,6 +68,12 @@
             <text class="list-text">设置</text>
             <text class="list-arrow iconfont icon-right"></text>
           </view>
+          <!-- 图片上传 -->
+          <view class="menu-list-item" @click="navigateTo('/pages/user/upload-image')">
+            <text class="list-icon iconfont icon-upload"></text>
+            <text class="list-text">图片上传</text>
+            <text class="list-arrow iconfont icon-right"></text>
+          </view>
           <!-- 管理员工具入口 - 开发环境可见 -->
           <view v-if="isDev" class="menu-list-item" @click="navigateTo('/pages/admin/import-data')">
             <text class="list-icon iconfont icon-setting"></text>
@@ -84,6 +90,11 @@
     <!-- 管理功能区域 -->
     <view class="section admin-section" v-if="false">
       <!-- 已禁用管理功能 -->
+    </view>
+
+    <!-- 管理员入口按钮 -->
+    <view class="menu-section">
+      <view class="admin-entry-btn" @click="navigateToAdminLogin">管理员入口</view>
     </view>
   </view>
 </template>
@@ -271,6 +282,13 @@ export default {
     navigateTo(url) {
       uni.navigateTo({
         url: url
+      })
+    },
+    
+    // 管理员登录入口
+    navigateToAdminLogin() {
+      uni.navigateTo({
+        url: '/pages/admin/login'
       })
     },
     
@@ -498,6 +516,18 @@ export default {
     border-radius: 12rpx;
     font-size: 32rpx;
     color: #FF3B30;
+  }
+  
+  .admin-entry-btn {
+    margin-top: 20rpx;
+    height: 90rpx;
+    line-height: 90rpx;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 12rpx;
+    font-size: 32rpx;
+    color: #2C405A;
+    border: 1px solid #eee;
   }
 }
 

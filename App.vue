@@ -3,7 +3,8 @@ export default {
   globalData: {
     userInfo: null,
     systemInfo: null,
-    $spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29' // UniCloud阿里云空间ID
+    $spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29', // UniCloud阿里云空间ID
+    currentPage: null, // 当前页面对象引用
   },
   onLaunch: function() {
     console.log('App Launch')
@@ -16,6 +17,16 @@ export default {
     
     // 测试云函数连接
     this.testCloudConnection()
+
+    // 初始化全局页面引用
+    uni.$on('page-ready', (pageVm) => {
+      if (pageVm && pageVm.$page) {
+        console.log('页面准备就绪:', pageVm.$page.fullPath);
+        this.globalData.currentPage = pageVm;
+      } else {
+        console.error('无效的页面实例:', pageVm);
+      }
+    });
   },
   onShow: function() {
     console.log('App Show')
@@ -87,6 +98,18 @@ export default {
         console.error('云函数连接测试失败:', error);
         return false;
       }
+    },
+
+    onReady() {
+      // 页面就绪时通知App
+      setTimeout(() => {
+        if (this) { // 确保this是有效的
+          uni.$emit('page-ready', this);
+          console.log('页面准备完成，已通知App');
+        } else {
+          console.error('当前页面实例无效');
+        }
+      }, 100);
     }
   }
 }

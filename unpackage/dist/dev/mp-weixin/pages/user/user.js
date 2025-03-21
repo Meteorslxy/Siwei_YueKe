@@ -213,6 +213,17 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -455,6 +466,12 @@ var _default = {
     navigateTo: function navigateTo(url) {
       uni.navigateTo({
         url: url
+      });
+    },
+    // 管理员登录入口
+    navigateToAdminLogin: function navigateToAdminLogin() {
+      uni.navigateTo({
+        url: '/pages/admin/login'
       });
     },
     // 打开反馈页面

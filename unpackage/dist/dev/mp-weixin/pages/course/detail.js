@@ -148,7 +148,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(wx, uni) {
+/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -277,41 +277,54 @@ var _default = {
     fetchCourseDetail: function fetchCourseDetail() {
       var _this = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var res;
+        var result;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.prev = 0;
-                _context.next = 3;
-                return wx.cloud.callFunction({
-                  name: 'getCourseDetail',
-                  data: {
-                    courseId: _this.courseId
-                  }
+                // 显示加载提示
+                uni.showLoading({
+                  title: '加载中...'
                 });
-              case 3:
-                res = _context.sent;
-                if (res.result && res.result.success) {
-                  _this.courseInfo = res.result.data;
+
+                // 使用API接口获取课程详情
+                _context.next = 4;
+                return _this.$api.course.getCourseDetail(_this.courseId);
+              case 4:
+                result = _context.sent;
+                // 隐藏加载提示
+                uni.hideLoading();
+                if (result && result.data) {
+                  _this.courseInfo = result.data;
+                  console.log('课程详情:', _this.courseInfo);
                 } else {
-                  // 使用模拟数据
+                  // 获取失败时使用模拟数据
+                  console.error('获取课程详情失败: 未找到数据');
                   _this.useMockData();
                 }
-                _context.next = 11;
+                _context.next = 15;
                 break;
-              case 7:
-                _context.prev = 7;
+              case 9:
+                _context.prev = 9;
                 _context.t0 = _context["catch"](0);
+                // 隐藏加载提示
+                uni.hideLoading();
                 console.error('获取课程详情失败:', _context.t0);
                 // 加载失败，使用模拟数据
                 _this.useMockData();
-              case 11:
+
+                // 显示错误提示
+                uni.showToast({
+                  title: '获取课程详情失败',
+                  icon: 'none'
+                });
+              case 15:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[0, 7]]);
+        }, _callee, null, [[0, 9]]);
       }))();
     },
     // 使用模拟数据
@@ -366,7 +379,7 @@ var _default = {
     submitBooking: function submitBooking() {
       var _this2 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var phoneReg, userInfo, userId, res;
+        var phoneReg, userInfo, userId, result;
         return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -408,21 +421,19 @@ var _default = {
                 _context2.prev = 11;
                 // 获取用户ID（实际应从登录状态获取）
                 userInfo = getApp().globalData.userInfo || {};
-                userId = userInfo.userId || 'temp_user_id'; // 调用云函数预约课程
+                userId = userInfo.userId || 'temp_user_id'; // 使用API接口调用预约课程
                 _context2.next = 16;
-                return wx.cloud.callFunction({
-                  name: 'bookCourse',
-                  data: {
-                    courseId: _this2.courseId,
-                    userId: userId,
-                    studentName: _this2.bookingForm.studentName,
-                    contactPhone: _this2.bookingForm.contactPhone,
-                    remark: _this2.bookingForm.remark
-                  }
+                return _this2.$api.course.bookCourse({
+                  courseId: _this2.courseId,
+                  userId: userId,
+                  studentName: _this2.bookingForm.studentName,
+                  contactPhone: _this2.bookingForm.contactPhone,
+                  remark: _this2.bookingForm.remark
                 });
               case 16:
-                res = _context2.sent;
-                if (res.result && res.result.success) {
+                result = _context2.sent;
+                uni.hideLoading();
+                if (result && result.success) {
                   uni.showToast({
                     title: '预约成功',
                     icon: 'success'
@@ -440,36 +451,32 @@ var _default = {
                   _this2.fetchCourseDetail();
                 } else {
                   uni.showToast({
-                    title: res.result.message || '预约失败',
+                    title: result.message || '预约失败',
                     icon: 'none'
                   });
                 }
-                _context2.next = 24;
+                _context2.next = 25;
                 break;
-              case 20:
-                _context2.prev = 20;
+              case 21:
+                _context2.prev = 21;
                 _context2.t0 = _context2["catch"](11);
                 console.error('预约课程失败:', _context2.t0);
                 uni.showToast({
                   title: '预约失败，请稍后重试',
                   icon: 'none'
                 });
-              case 24:
-                _context2.prev = 24;
-                uni.hideLoading();
-                return _context2.finish(24);
-              case 27:
+              case 25:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[11, 20, 24, 27]]);
+        }, _callee2, null, [[11, 21]]);
       }))();
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 

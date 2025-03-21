@@ -118,24 +118,38 @@ export default {
     // 获取课程详情
     async fetchCourseDetail() {
       try {
-        // 调用云函数获取课程详情
-        const res = await wx.cloud.callFunction({
-          name: 'getCourseDetail',
-          data: {
-            courseId: this.courseId
-          }
-        })
+        // 显示加载提示
+        uni.showLoading({
+          title: '加载中...'
+        });
         
-        if (res.result && res.result.success) {
-          this.courseInfo = res.result.data
+        // 使用API接口获取课程详情
+        const result = await this.$api.course.getCourseDetail(this.courseId);
+        
+        // 隐藏加载提示
+        uni.hideLoading();
+        
+        if (result && result.data) {
+          this.courseInfo = result.data;
+          console.log('课程详情:', this.courseInfo);
         } else {
-          // 使用模拟数据
-          this.useMockData()
+          // 获取失败时使用模拟数据
+          console.error('获取课程详情失败: 未找到数据');
+          this.useMockData();
         }
-      } catch (e) {
-        console.error('获取课程详情失败:', e)
+      } catch (error) {
+        // 隐藏加载提示
+        uni.hideLoading();
+        
+        console.error('获取课程详情失败:', error);
         // 加载失败，使用模拟数据
-        this.useMockData()
+        this.useMockData();
+        
+        // 显示错误提示
+        uni.showToast({
+          title: '获取课程详情失败',
+          icon: 'none'
+        });
       }
     },
     
@@ -205,78 +219,75 @@ export default {
         uni.showToast({
           title: '请输入学生姓名',
           icon: 'none'
-        })
-        return
+        });
+        return;
       }
       
       if (!this.bookingForm.contactPhone) {
         uni.showToast({
           title: '请输入联系电话',
           icon: 'none'
-        })
-        return
+        });
+        return;
       }
       
-      const phoneReg = /^1[3-9]\d{9}$/
+      const phoneReg = /^1[3-9]\d{9}$/;
       if (!phoneReg.test(this.bookingForm.contactPhone)) {
         uni.showToast({
           title: '手机号格式不正确',
           icon: 'none'
-        })
-        return
+        });
+        return;
       }
       
       uni.showLoading({
         title: '提交中...'
-      })
+      });
       
       try {
         // 获取用户ID（实际应从登录状态获取）
-        const userInfo = getApp().globalData.userInfo || {}
-        const userId = userInfo.userId || 'temp_user_id'
+        const userInfo = getApp().globalData.userInfo || {};
+        const userId = userInfo.userId || 'temp_user_id';
         
-        // 调用云函数预约课程
-        const res = await wx.cloud.callFunction({
-          name: 'bookCourse',
-          data: {
-            courseId: this.courseId,
-            userId: userId,
-            studentName: this.bookingForm.studentName,
-            contactPhone: this.bookingForm.contactPhone,
-            remark: this.bookingForm.remark
-          }
-        })
+        // 使用API接口调用预约课程
+        const result = await this.$api.course.bookCourse({
+          courseId: this.courseId,
+          userId: userId,
+          studentName: this.bookingForm.studentName,
+          contactPhone: this.bookingForm.contactPhone,
+          remark: this.bookingForm.remark
+        });
         
-        if (res.result && res.result.success) {
+        uni.hideLoading();
+        
+        if (result && result.success) {
           uni.showToast({
             title: '预约成功',
             icon: 'success'
-          })
+          });
           
           // 重置表单
           this.bookingForm = {
             studentName: '',
             contactPhone: '',
             remark: ''
-          }
-          this.showBookingForm = false
+          };
+          this.showBookingForm = false;
           
           // 刷新课程信息
-          this.fetchCourseDetail()
+          this.fetchCourseDetail();
         } else {
           uni.showToast({
-            title: res.result.message || '预约失败',
+            title: result.message || '预约失败',
             icon: 'none'
-          })
+          });
         }
       } catch (e) {
-        console.error('预约课程失败:', e)
+        console.error('预约课程失败:', e);
         uni.showToast({
           title: '预约失败，请稍后重试',
           icon: 'none'
-        })
-      } finally {
-        uni.hideLoading()
+        });
       }
     }
   }

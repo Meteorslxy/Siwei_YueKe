@@ -104,6 +104,78 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white"
             }
+        },
+        {
+            "path": "pages/user/upload-image",
+            "style": {
+                "navigationBarTitleText": "图片上传",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/login",
+            "style": {
+                "navigationBarTitleText": "管理员登录",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/dashboard",
+            "style": {
+                "navigationBarTitleText": "管理控制台",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/teacher",
+            "style": {
+                "navigationBarTitleText": "教师管理",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/course",
+            "style": {
+                "navigationBarTitleText": "课程管理",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/lecture",
+            "style": {
+                "navigationBarTitleText": "讲座管理",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/news",
+            "style": {
+                "navigationBarTitleText": "新闻动态管理",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/booking",
+            "style": {
+                "navigationBarTitleText": "预约管理",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/admin/content-upload/index",
+            "style": {
+                "navigationBarTitleText": "内容上传",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
         }
     ],
     "globalStyle": {

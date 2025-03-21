@@ -80,11 +80,16 @@
           </view>
           <view class="course-info">
             <text class="location-icon iconfont icon-location"></text>
-            <text class="location-text">{{item.schoolName}}</text>
+            <text class="location-text">{{item.schoolName || item.location}}</text>
           </view>
           <view class="course-info">
             <text class="time-icon iconfont icon-time"></text>
             <text class="time-text">{{formatCourseTime(item.startTime, item.endTime)}}</text>
+          </view>
+          <view class="course-info">
+            <text class="tag-icon iconfont icon-tag"></text>
+            <text class="subject-text">{{item.subjects || '未分类'}}</text>
+            <text class="level-text" v-if="item.educationalStages">| {{item.educationalStages}}</text>
           </view>
           <view class="course-teacher">
             <image class="teacher-avatar" :src="item.teacherAvatar" mode="aspectFill"></image>
@@ -118,8 +123,8 @@ export default {
       selectedGradeGroup: 'all',
       gradeGroups: [
         { label: '全部', value: 'all' },
-        { label: '小学', value: 'primary' },
-        { label: '初中', value: 'junior' }
+        { label: '小学', value: '小学' },
+        { label: '初中', value: '初中' }
       ],
       
       // 校区筛选相关
@@ -127,20 +132,20 @@ export default {
       selectedSchool: 'all',
       schoolOptions: [
         { label: '全部校区', value: 'all' },
-        { label: '雨花台校区', value: 'yuhuatai' },
-        { label: '大行宫校区', value: 'daxinggong' },
-        { label: '闵行校区', value: 'minxing' }
+        { label: '雨花台校区', value: '雨花台校区' },
+        { label: '大行宫校区', value: '大行宫校区' },
+        { label: '闵行校区', value: '闵行校区' }
       ],
       
       // 学科筛选相关
       selectedSubject: 'all',
       subjectOptions: [
         { label: '全部', value: 'all' },
-        { label: '语文', value: 'chinese' },
-        { label: '数学', value: 'math' },
-        { label: '英语', value: 'english' },
-        { label: '物理', value: 'physics' },
-        { label: '化学', value: 'chemistry' }
+        { label: '语文', value: '语文' },
+        { label: '数学', value: '数学' },
+        { label: '英语', value: '英语' },
+        { label: '物理', value: '物理' },
+        { label: '化学', value: '化学' }
       ],
       
       // 课程列表相关
@@ -234,130 +239,28 @@ export default {
       this.loadCourseList()
     },
     
-    // 重置列表数据
+    // 重置列表
     resetList() {
-      this.page = 1
-      this.courseList = []
+      this.page = 1;
+      this.courseList = [];
+      this.total = 0;
+      this.loadMoreStatus = 'more';
     },
     
     // 加载更多
     loadMore() {
-      this.page++
-      this.loadCourseList()
+      if (this.isLoading) return;
+      this.page++;
+      this.loadCourseList();
     },
     
     // 获取课程列表
-    async fetchCourses() {
-      if (this.isLoading) return Promise.resolve()
-      
-      this.isLoading = true
-      this.loadMoreStatus = 'loading'
-      
-      try {
-        // 使用API接口调用云函数
-        const params = {
-          gradeLevel: this.selectedGradeGroup !== 'all' ? this.selectedGradeGroup : '',
-          subject: this.selectedSubject !== 'all' ? this.selectedSubject : '',
-          school: this.selectedSchool !== 'all' ? this.selectedSchool : '',
-          limit: this.limit,
-          skip: (this.page - 1) * this.limit
-        };
-        
-        const result = await this.$api.course.getCourseList(params);
-        
-        if (result && result.success) {
-          const newList = result.data
-          this.total = result.total
-          
-          if (this.page === 1) {
-            this.courseList = newList
-          } else {
-            this.courseList = [...this.courseList, ...newList]
-          }
-          
-          // 更新加载状态
-          this.loadMoreStatus = this.courseList.length >= this.total ? 'noMore' : 'more'
-        } else {
-          // 模拟数据
-          this.useMockData()
-        }
-      } catch (e) {
-        console.error('获取课程列表失败:', e)
-        // 加载失败，使用模拟数据
-        this.useMockData()
-      }
-      
-      this.isLoading = false
-      return Promise.resolve()
-    },
-    
-    // 使用模拟数据
-    useMockData() {
-      const mockData = [
-        {
-          _id: '1',
-          title: '三年级浪漫暑假班',
-          school: '雨花台',
-          schoolName: '雨花台校区',
-          teacherName: '刘星宇',
-          teacherTitle: '小学教师',
-          teacherAvatar: '/static/images/teacher/teacher1.jpg',
-          coverImage: '/static/images/course/course1.jpg',
-          price: 4000,
-          startTime: '2023-07-01 15:30',
-          endTime: '2023-07-17 15:30'
-        },
-        {
-          _id: '2',
-          title: '四年级提优暑假班',
-          school: '大行宫',
-          schoolName: '大行宫校区',
-          teacherName: '刘星宇',
-          teacherTitle: '小学教师',
-          teacherAvatar: '/static/images/teacher/teacher1.jpg',
-          coverImage: '/static/images/course/course2.jpg',
-          price: 4000,
-          startTime: '2023-07-08 08:30',
-          endTime: '2023-07-10 08:30'
-        }
-      ]
-      
-      if (this.page === 1) {
-        this.courseList = mockData
-      } else {
-        this.courseList = [...this.courseList, ...mockData]
-      }
-      
-      this.total = 10
-      this.loadMoreStatus = this.courseList.length >= this.total ? 'noMore' : 'more'
-    },
-    
-    // 格式化课程时间
-    formatCourseTime(startTime, endTime) {
-      if (!startTime) return ''
-      
-      const start = new Date(startTime)
-      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`
-      
-      if (endTime) {
-        const end = new Date(endTime)
-        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`
-        return `${formattedStart}-${formattedEnd}`
-      }
-      
-      return formattedStart
-    },
-    
-    // 页面导航
-    navigateTo(url) {
-      uni.navigateTo({ url })
-    },
-    
-    // 加载课程列表
     async loadCourseList() {
       if (this.isLoading) return;
       
       this.isLoading = true;
+      this.loadMoreStatus = 'loading';
+      
       try {
         // 构建查询参数
         const params = {
@@ -367,25 +270,56 @@ export default {
         
         // 添加筛选条件
         if (this.selectedGradeGroup !== 'all') {
-          params.gradeGroup = this.selectedGradeGroup;
+          params.educationalStages = this.selectedGradeGroup;
         }
         
         if (this.selectedSchool !== 'all') {
-          params.schoolId = this.selectedSchool;
+          params.location = this.selectedSchool;
         }
+        
+        if (this.selectedSubject !== 'all') {
+          params.subjects = this.selectedSubject;
+        }
+        
+        console.log('发送课程查询参数:', params);
         
         // 调用云函数获取课程列表
         const result = await this.$api.course.getCourseList(params);
+        console.log('云函数返回结果:', result);
         
         // 处理返回结果
         if (result && result.data) {
-          if (this.page === 1) {
-            this.courseList = result.data;
-          } else {
-            this.courseList = [...this.courseList, ...result.data];
+          let filteredData = [...result.data];
+          
+          // 前端再次过滤数据，确保结果正确
+          if (this.selectedGradeGroup !== 'all') {
+            filteredData = filteredData.filter(item => 
+              item.educationalStages === this.selectedGradeGroup
+            );
           }
           
-          this.total = result.total || this.courseList.length;
+          if (this.selectedSchool !== 'all') {
+            filteredData = filteredData.filter(item => 
+              item.location === this.selectedSchool || 
+              item.schoolName === this.selectedSchool
+            );
+          }
+          
+          if (this.selectedSubject !== 'all') {
+            filteredData = filteredData.filter(item => 
+              item.subjects === this.selectedSubject
+            );
+          }
+          
+          console.log('前端过滤后的数据:', filteredData);
+          
+          if (this.page === 1) {
+            this.courseList = filteredData;
+          } else {
+            this.courseList = [...this.courseList, ...filteredData];
+          }
+          
+          this.total = filteredData.length;
           
           // 更新加载状态
           if (this.courseList.length >= this.total) {
@@ -411,19 +345,25 @@ export default {
       }
     },
     
-    // 重置列表
-    resetList() {
-      this.page = 1;
-      this.courseList = [];
-      this.total = 0;
-      this.loadMoreStatus = 'more';
+    // 格式化课程时间
+    formatCourseTime(startTime, endTime) {
+      if (!startTime) return ''
+      
+      const start = new Date(startTime)
+      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`
+      
+      if (endTime) {
+        const end = new Date(endTime)
+        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`
+        return `${formattedStart}-${formattedEnd}`
+      }
+      
+      return formattedStart
     },
     
-    // 加载更多
-    loadMore() {
-      if (this.isLoading) return;
-      this.page++;
-      this.loadCourseList();
+    // 页面导航
+    navigateTo(url) {
+      uni.navigateTo({ url })
     }
   }
 }
@@ -632,9 +572,18 @@ export default {
         display: flex;
         align-items: center;
         
-        .location-icon, .time-icon {
+        .location-icon, .time-icon, .tag-icon {
           font-size: 24rpx;
           margin-right: 8rpx;
+        }
+        
+        .subject-text {
+          color: #4CAF50;
+          margin-right: 6rpx;
+        }
+        
+        .level-text {
+          color: #888;
         }
       }
       

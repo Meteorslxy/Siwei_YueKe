@@ -1,0 +1,8 @@
+{
+  "name": "deleteImage",
+  "version": "1.0.0",
+  "description": "从数据库删除图片",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
+} 

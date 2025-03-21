@@ -2,7 +2,7 @@
   <view class="teacher-detail">
     <view class="teacher-header">
       <view class="avatar-container">
-        <image class="teacher-avatar" :src="teacher.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+        <image class="teacher-avatar" :src="getImageUrl(teacher.avatarId || teacher.avatar)" mode="aspectFill"></image>
       </view>
       
       <view class="teacher-info">
@@ -98,6 +98,7 @@ export default {
         name: '',
         title: '',
         avatar: '',
+        avatarId: '',
         introduction: '',
         experiences: [],
         awards: []
@@ -118,7 +119,9 @@ export default {
       loadMoreStatus: 'more',
       reviewLoadMoreStatus: 'more',
       hasMore: true,
-      hasMoreReviews: true
+      hasMoreReviews: true,
+      imageCache: {},
+      defaultAvatar: '/static/images/default-avatar.png'
     }
   },
   onLoad(options) {
@@ -135,8 +138,33 @@ export default {
       // 使用uniCloud调用云函数
       this.$api.teacher.getTeacherDetail(this.teacherId).then(res => {
         if (res && res.data) {
-          this.teacher = res.data;
+          console.log('教师原始数据:', JSON.stringify(res.data));
+          
+          // 确保数据中有avatarId字段，如果没有尝试其他可能的字段名
+          const teacherData = res.data;
+          if (!teacherData.avatarId && teacherData.avatarID) {
+            teacherData.avatarId = teacherData.avatarID;
+          }
+          if (!teacherData.avatarId && teacherData.avatar_id) {
+            teacherData.avatarId = teacherData.avatar_id;
+          }
+          
+          this.teacher = teacherData;
+          console.log('教师处理后数据:', this.teacher);
+          console.log('头像ID:', this.teacher.avatarId);
+          
           uni.setNavigationBarTitle({ title: this.teacher.name });
+          
+          // 预加载头像
+          if (this.teacher.avatarId) {
+            console.log('预加载头像ID:', this.teacher.avatarId);
+            this.preloadImage(this.teacher.avatarId);
+          } else if (this.teacher.avatar) {
+            console.log('预加载头像(avatar):', this.teacher.avatar);
+            this.preloadImage(this.teacher.avatar);
+          } else {
+            console.log('教师没有头像数据');
+          }
         } else {
           uni.showToast({
             title: '获取教师信息失败',
@@ -309,6 +337,78 @@ export default {
       
       const date = new Date(timestamp);
       return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    },
+    
+    // 获取图片URL
+    getImageUrl(imageId) {
+      console.log('获取图片URL:', imageId);
+      
+      // 如果是路径格式，直接返回
+      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+        console.log('使用路径格式图片:', imageId);
+        return imageId;
+      }
+      
+      // 尝试从缓存获取
+      if (imageId && this.imageCache[imageId]) {
+        console.log('从缓存获取图片:', imageId);
+        return this.imageCache[imageId];
+      }
+      
+      // 如果有ID但没缓存，尝试加载
+      if (imageId) {
+        console.log('尝试加载图片:', imageId);
+        this.preloadImage(imageId);
+      }
+      
+      // 返回默认头像
+      console.log('使用默认头像');
+      return this.defaultAvatar;
+    },
+    
+    // 预加载图片
+    preloadImage(imageId) {
+      console.log('预加载图片开始:', imageId);
+      
+      // 如果已经是URL格式，直接缓存
+      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+        this.imageCache[imageId] = imageId;
+        console.log('已缓存URL格式图片:', imageId);
+        return;
+      }
+      
+      // 调用API获取图片URL
+      this.$api.file.getImage(imageId)
+        .then(res => {
+          console.log('预加载图片完整结果:', JSON.stringify(res));
+          
+          // 处理不同格式的返回数据
+          if (res && res.data && res.data.url) {
+            // 处理包含data.url的情况
+            this.imageCache[imageId] = res.data.url;
+            console.log('已缓存图片URL:', res.data.url);
+            // 强制视图更新
+            this.$forceUpdate();
+          } else if (res && res.imageData && res.imageData.url) {
+            // 处理包含imageData.url的情况
+            this.imageCache[imageId] = res.imageData.url;
+            console.log('从imageData获取到图片URL:', res.imageData.url);
+            // 强制视图更新
+            this.$forceUpdate();
+          } else if (res && res.imageData && res.imageData.base64Data) {
+            // 处理base64数据的情况
+            const base64Url = 'data:image/jpeg;base64,' + res.imageData.base64Data;
+            this.imageCache[imageId] = base64Url;
+            console.log('从imageData.base64Data生成图片URL');
+            // 强制视图更新
+            this.$forceUpdate();
+          } else {
+            console.error('获取图片URL失败,返回数据结构不正确:', res);
+          }
+        })
+        .catch(err => {
+          console.error('获取图片失败:', err);
+        });
     }
   }
 }

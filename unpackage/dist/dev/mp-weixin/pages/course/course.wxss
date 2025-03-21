@@ -247,9 +247,16 @@
   display: flex;
   align-items: center;
 }
-.course-list .course-item .course-content .course-info .location-icon, .course-list .course-item .course-content .course-info .time-icon {
+.course-list .course-item .course-content .course-info .location-icon, .course-list .course-item .course-content .course-info .time-icon, .course-list .course-item .course-content .course-info .tag-icon {
   font-size: 24rpx;
   margin-right: 8rpx;
+}
+.course-list .course-item .course-content .course-info .subject-text {
+  color: #4CAF50;
+  margin-right: 6rpx;
+}
+.course-list .course-item .course-content .course-info .level-text {
+  color: #888;
 }
 .course-list .course-item .course-content .course-teacher {
   display: flex;

@@ -1,0 +1,276 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.booking-admin {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 30rpx;
+}
+.booking-admin .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+.booking-admin .header .title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+.booking-admin .header .actions {
+  display: flex;
+}
+.booking-admin .header .actions .btn-default {
+  font-size: 26rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  padding: 0 24rpx;
+  margin-left: 16rpx;
+  border-radius: 6rpx;
+  background-color: #f0f0f0;
+  color: #666;
+}
+.booking-admin .filter-bar {
+  display: flex;
+  background-color: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+.booking-admin .filter-bar .filter-item {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  padding: 20rpx 0;
+  position: relative;
+}
+.booking-admin .filter-bar .filter-item.active {
+  color: #EC7A49;
+  font-weight: bold;
+}
+.booking-admin .filter-bar .filter-item.active:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  right: 30%;
+  height: 4rpx;
+  background-color: #EC7A49;
+  border-radius: 2rpx;
+}
+.booking-admin .content {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+}
+.booking-admin .content .booking-item {
+  padding: 20rpx;
+  border-bottom: 1px solid #eee;
+}
+.booking-admin .content .booking-item:last-child {
+  border-bottom: none;
+}
+.booking-admin .content .booking-item .booking-info .info-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.booking-admin .content .booking-item .booking-info .info-section .booking-id {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.booking-admin .content .booking-item .booking-info .info-section .status-tag {
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+.booking-admin .content .booking-item .booking-info .info-section .status-tag.status-pending {
+  background-color: #E6A23C;
+  color: #fff;
+}
+.booking-admin .content .booking-item .booking-info .info-section .status-tag.status-confirmed {
+  background-color: #409EFF;
+  color: #fff;
+}
+.booking-admin .content .booking-item .booking-info .info-section .status-tag.status-completed {
+  background-color: #67C23A;
+  color: #fff;
+}
+.booking-admin .content .booking-item .booking-info .info-section .status-tag.status-cancelled {
+  background-color: #909399;
+  color: #fff;
+}
+.booking-admin .content .booking-item .booking-info .course-section {
+  margin-bottom: 16rpx;
+}
+.booking-admin .content .booking-item .booking-info .course-section .course-title {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+.booking-admin .content .booking-item .booking-info .course-section .time {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 4rpx;
+}
+.booking-admin .content .booking-item .booking-info .user-section, .booking-admin .content .booking-item .booking-info .remark-section {
+  margin-bottom: 16rpx;
+}
+.booking-admin .content .booking-item .booking-info .user-section .label, .booking-admin .content .booking-item .booking-info .remark-section .label {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+.booking-admin .content .booking-item .booking-info .user-section .user-name, .booking-admin .content .booking-item .booking-info .user-section .user-phone, .booking-admin .content .booking-item .booking-info .user-section .remark, .booking-admin .content .booking-item .booking-info .remark-section .user-name, .booking-admin .content .booking-item .booking-info .remark-section .user-phone, .booking-admin .content .booking-item .booking-info .remark-section .remark {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 4rpx;
+}
+.booking-admin .content .booking-item .actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20rpx;
+}
+.booking-admin .content .booking-item .actions .action {
+  font-size: 26rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 6rpx;
+  margin-left: 16rpx;
+}
+.booking-admin .content .booking-item .actions .action.confirm {
+  color: #409EFF;
+  background-color: rgba(64, 158, 255, 0.1);
+}
+.booking-admin .content .booking-item .actions .action.cancel {
+  color: #F56C6C;
+  background-color: rgba(245, 108, 108, 0.1);
+}
+.booking-admin .content .booking-item .actions .action.complete {
+  color: #67C23A;
+  background-color: rgba(103, 194, 58, 0.1);
+}
+.booking-admin .content .booking-item .actions .action.view {
+  color: #909399;
+  background-color: rgba(144, 147, 153, 0.1);
+}
+.booking-admin .empty {
+  padding: 100rpx 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12rpx;
+}
+.booking-admin .empty .empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+.booking-admin .loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.booking-admin .loading .spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #EC7A49;
+  border-radius: 50%;
+  -webkit-animation: spin 1s linear infinite;
+          animation: spin 1s linear infinite;
+}
+@-webkit-keyframes spin {
+0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+}
+100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+}
+}
+@keyframes spin {
+0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+}
+100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+}
+}
+

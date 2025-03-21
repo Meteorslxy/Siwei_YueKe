@@ -188,10 +188,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
-var _methods;
+//
+//
+//
+//
+//
 //
 //
 //
@@ -313,10 +316,10 @@ var _default = {
         value: 'all'
       }, {
         label: '小学',
-        value: 'primary'
+        value: '小学'
       }, {
         label: '初中',
-        value: 'junior'
+        value: '初中'
       }],
       // 校区筛选相关
       isSchoolFilterShow: false,
@@ -326,13 +329,13 @@ var _default = {
         value: 'all'
       }, {
         label: '雨花台校区',
-        value: 'yuhuatai'
+        value: '雨花台校区'
       }, {
         label: '大行宫校区',
-        value: 'daxinggong'
+        value: '大行宫校区'
       }, {
         label: '闵行校区',
-        value: 'minxing'
+        value: '闵行校区'
       }],
       // 学科筛选相关
       selectedSubject: 'all',
@@ -341,19 +344,19 @@ var _default = {
         value: 'all'
       }, {
         label: '语文',
-        value: 'chinese'
+        value: '语文'
       }, {
         label: '数学',
-        value: 'math'
+        value: '数学'
       }, {
         label: '英语',
-        value: 'english'
+        value: '英语'
       }, {
         label: '物理',
-        value: 'physics'
+        value: '物理'
       }, {
         label: '化学',
-        value: 'chemistry'
+        value: '化学'
       }],
       // 课程列表相关
       courseList: [],
@@ -396,7 +399,7 @@ var _default = {
       this.loadMore();
     }
   },
-  methods: (_methods = {
+  methods: {
     // 获取状态栏高度
     getStatusBarHeight: function getStatusBarHeight() {
       try {
@@ -444,21 +447,24 @@ var _default = {
       this.resetList();
       this.loadCourseList();
     },
-    // 重置列表数据
+    // 重置列表
     resetList: function resetList() {
       this.page = 1;
       this.courseList = [];
+      this.total = 0;
+      this.loadMoreStatus = 'more';
     },
     // 加载更多
     loadMore: function loadMore() {
+      if (this.isLoading) return;
       this.page++;
       this.loadCourseList();
     },
     // 获取课程列表
-    fetchCourses: function fetchCourses() {
+    loadCourseList: function loadCourseList() {
       var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var params, result, newList;
+        var params, result, filteredData;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -467,91 +473,94 @@ var _default = {
                   _context.next = 2;
                   break;
                 }
-                return _context.abrupt("return", Promise.resolve());
+                return _context.abrupt("return");
               case 2:
                 _this3.isLoading = true;
                 _this3.loadMoreStatus = 'loading';
                 _context.prev = 4;
-                // 使用API接口调用云函数
+                // 构建查询参数
                 params = {
-                  gradeLevel: _this3.selectedGradeGroup !== 'all' ? _this3.selectedGradeGroup : '',
-                  subject: _this3.selectedSubject !== 'all' ? _this3.selectedSubject : '',
-                  school: _this3.selectedSchool !== 'all' ? _this3.selectedSchool : '',
-                  limit: _this3.limit,
-                  skip: (_this3.page - 1) * _this3.limit
-                };
-                _context.next = 8;
+                  page: _this3.page,
+                  pageSize: _this3.limit
+                }; // 添加筛选条件
+                if (_this3.selectedGradeGroup !== 'all') {
+                  params.educationalStages = _this3.selectedGradeGroup;
+                }
+                if (_this3.selectedSchool !== 'all') {
+                  params.location = _this3.selectedSchool;
+                }
+                if (_this3.selectedSubject !== 'all') {
+                  params.subjects = _this3.selectedSubject;
+                }
+                console.log('发送课程查询参数:', params);
+
+                // 调用云函数获取课程列表
+                _context.next = 12;
                 return _this3.$api.course.getCourseList(params);
-              case 8:
+              case 12:
                 result = _context.sent;
-                if (result && result.success) {
-                  newList = result.data;
-                  _this3.total = result.total;
-                  if (_this3.page === 1) {
-                    _this3.courseList = newList;
-                  } else {
-                    _this3.courseList = [].concat((0, _toConsumableArray2.default)(_this3.courseList), (0, _toConsumableArray2.default)(newList));
+                console.log('云函数返回结果:', result);
+
+                // 处理返回结果
+                if (result && result.data) {
+                  filteredData = (0, _toConsumableArray2.default)(result.data); // 前端再次过滤数据，确保结果正确
+                  if (_this3.selectedGradeGroup !== 'all') {
+                    filteredData = filteredData.filter(function (item) {
+                      return item.educationalStages === _this3.selectedGradeGroup;
+                    });
                   }
+                  if (_this3.selectedSchool !== 'all') {
+                    filteredData = filteredData.filter(function (item) {
+                      return item.location === _this3.selectedSchool || item.schoolName === _this3.selectedSchool;
+                    });
+                  }
+                  if (_this3.selectedSubject !== 'all') {
+                    filteredData = filteredData.filter(function (item) {
+                      return item.subjects === _this3.selectedSubject;
+                    });
+                  }
+                  console.log('前端过滤后的数据:', filteredData);
+                  if (_this3.page === 1) {
+                    _this3.courseList = filteredData;
+                  } else {
+                    _this3.courseList = [].concat((0, _toConsumableArray2.default)(_this3.courseList), (0, _toConsumableArray2.default)(filteredData));
+                  }
+                  _this3.total = filteredData.length;
 
                   // 更新加载状态
-                  _this3.loadMoreStatus = _this3.courseList.length >= _this3.total ? 'noMore' : 'more';
+                  if (_this3.courseList.length >= _this3.total) {
+                    _this3.loadMoreStatus = 'noMore';
+                  } else {
+                    _this3.loadMoreStatus = 'more';
+                  }
                 } else {
-                  // 模拟数据
-                  _this3.useMockData();
+                  if (_this3.page === 1) {
+                    _this3.courseList = [];
+                  }
+                  _this3.loadMoreStatus = 'noMore';
                 }
-                _context.next = 16;
+                _context.next = 22;
                 break;
-              case 12:
-                _context.prev = 12;
+              case 17:
+                _context.prev = 17;
                 _context.t0 = _context["catch"](4);
                 console.error('获取课程列表失败:', _context.t0);
-                // 加载失败，使用模拟数据
-                _this3.useMockData();
-              case 16:
+                uni.showToast({
+                  title: '获取课程列表失败',
+                  icon: 'none'
+                });
+                _this3.loadMoreStatus = 'more';
+              case 22:
+                _context.prev = 22;
                 _this3.isLoading = false;
-                return _context.abrupt("return", Promise.resolve());
-              case 18:
+                return _context.finish(22);
+              case 25:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[4, 12]]);
+        }, _callee, null, [[4, 17, 22, 25]]);
       }))();
-    },
-    // 使用模拟数据
-    useMockData: function useMockData() {
-      var mockData = [{
-        _id: '1',
-        title: '三年级浪漫暑假班',
-        school: '雨花台',
-        schoolName: '雨花台校区',
-        teacherName: '刘星宇',
-        teacherTitle: '小学教师',
-        teacherAvatar: '/static/images/teacher/teacher1.jpg',
-        coverImage: '/static/images/course/course1.jpg',
-        price: 4000,
-        startTime: '2023-07-01 15:30',
-        endTime: '2023-07-17 15:30'
-      }, {
-        _id: '2',
-        title: '四年级提优暑假班',
-        school: '大行宫',
-        schoolName: '大行宫校区',
-        teacherName: '刘星宇',
-        teacherTitle: '小学教师',
-        teacherAvatar: '/static/images/teacher/teacher1.jpg',
-        coverImage: '/static/images/course/course2.jpg',
-        price: 4000,
-        startTime: '2023-07-08 08:30',
-        endTime: '2023-07-10 08:30'
-      }];
-      if (this.page === 1) {
-        this.courseList = mockData;
-      } else {
-        this.courseList = [].concat((0, _toConsumableArray2.default)(this.courseList), mockData);
-      }
-      this.total = 10;
-      this.loadMoreStatus = this.courseList.length >= this.total ? 'noMore' : 'more';
     },
     // 格式化课程时间
     formatCourseTime: function formatCourseTime(startTime, endTime) {
@@ -570,95 +579,8 @@ var _default = {
       uni.navigateTo({
         url: url
       });
-    },
-    // 加载课程列表
-    loadCourseList: function loadCourseList() {
-      var _this4 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var params, result;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                if (!_this4.isLoading) {
-                  _context2.next = 2;
-                  break;
-                }
-                return _context2.abrupt("return");
-              case 2:
-                _this4.isLoading = true;
-                _context2.prev = 3;
-                // 构建查询参数
-                params = {
-                  page: _this4.page,
-                  pageSize: _this4.limit
-                }; // 添加筛选条件
-                if (_this4.selectedGradeGroup !== 'all') {
-                  params.gradeGroup = _this4.selectedGradeGroup;
-                }
-                if (_this4.selectedSchool !== 'all') {
-                  params.schoolId = _this4.selectedSchool;
-                }
-
-                // 调用云函数获取课程列表
-                _context2.next = 9;
-                return _this4.$api.course.getCourseList(params);
-              case 9:
-                result = _context2.sent;
-                // 处理返回结果
-                if (result && result.data) {
-                  if (_this4.page === 1) {
-                    _this4.courseList = result.data;
-                  } else {
-                    _this4.courseList = [].concat((0, _toConsumableArray2.default)(_this4.courseList), (0, _toConsumableArray2.default)(result.data));
-                  }
-                  _this4.total = result.total || _this4.courseList.length;
-
-                  // 更新加载状态
-                  if (_this4.courseList.length >= _this4.total) {
-                    _this4.loadMoreStatus = 'noMore';
-                  } else {
-                    _this4.loadMoreStatus = 'more';
-                  }
-                } else {
-                  if (_this4.page === 1) {
-                    _this4.courseList = [];
-                  }
-                  _this4.loadMoreStatus = 'noMore';
-                }
-                _context2.next = 18;
-                break;
-              case 13:
-                _context2.prev = 13;
-                _context2.t0 = _context2["catch"](3);
-                console.error('获取课程列表失败:', _context2.t0);
-                uni.showToast({
-                  title: '获取课程列表失败',
-                  icon: 'none'
-                });
-                _this4.loadMoreStatus = 'more';
-              case 18:
-                _context2.prev = 18;
-                _this4.isLoading = false;
-                return _context2.finish(18);
-              case 21:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, null, [[3, 13, 18, 21]]);
-      }))();
     }
-  }, (0, _defineProperty2.default)(_methods, "resetList", function resetList() {
-    this.page = 1;
-    this.courseList = [];
-    this.total = 0;
-    this.loadMoreStatus = 'more';
-  }), (0, _defineProperty2.default)(_methods, "loadMore", function loadMore() {
-    if (this.isLoading) return;
-    this.page++;
-    this.loadCourseList();
-  }), _methods)
+  }
 };
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))

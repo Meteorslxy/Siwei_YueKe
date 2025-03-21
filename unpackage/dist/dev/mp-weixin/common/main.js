@@ -227,10 +227,13 @@ var _default = {
   globalData: {
     userInfo: null,
     systemInfo: null,
-    $spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29' // UniCloud阿里云空间ID
+    $spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29',
+    // UniCloud阿里云空间ID
+    currentPage: null // 当前页面对象引用
   },
 
   onLaunch: function onLaunch() {
+    var _this = this;
     console.log('App Launch');
 
     // 获取设备信息
@@ -241,6 +244,16 @@ var _default = {
 
     // 测试云函数连接
     this.testCloudConnection();
+
+    // 初始化全局页面引用
+    uni.$on('page-ready', function (pageVm) {
+      if (pageVm && pageVm.$page) {
+        console.log('页面准备就绪:', pageVm.$page.fullPath);
+        _this.globalData.currentPage = pageVm;
+      } else {
+        console.error('无效的页面实例:', pageVm);
+      }
+    });
   },
   onShow: function onShow() {
     console.log('App Show');
@@ -332,6 +345,19 @@ var _default = {
           }
         }, _callee, null, [[0, 20]]);
       }))();
+    },
+    onReady: function onReady() {
+      var _this2 = this;
+      // 页面就绪时通知App
+      setTimeout(function () {
+        if (_this2) {
+          // 确保this是有效的
+          uni.$emit('page-ready', _this2);
+          console.log('页面准备完成，已通知App');
+        } else {
+          console.error('当前页面实例无效');
+        }
+      }, 100);
     }
   }
 };
@@ -1210,6 +1236,15 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
+  var m0 = _vm.getImageUrl(_vm.teacher.avatarId || _vm.teacher.avatar)
+  _vm.$mp.data = Object.assign(
+    {},
+    {
+      $root: {
+        m0: m0,
+      },
+    }
+  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -1272,14 +1307,96 @@ var _default2 = {
   },
   data: function data() {
     return {
-      defaultAvatar: '/static/images/default-avatar.png'
+      defaultAvatar: '/static/images/default-avatar.png',
+      imageCache: {}
     };
+  },
+  created: function created() {
+    // 预加载教师头像
+    console.log('teacher-card组件创建，教师数据:', this.teacher);
+    console.log('头像ID:', this.teacher.avatarId);
+    if (this.teacher.avatarId) {
+      console.log('预加载头像ID:', this.teacher.avatarId);
+      this.preloadImage(this.teacher.avatarId);
+    } else if (this.teacher.avatar) {
+      console.log('预加载头像(avatar):', this.teacher.avatar);
+      this.preloadImage(this.teacher.avatar);
+    } else {
+      console.log('教师没有头像数据');
+    }
   },
   methods: {
     goToDetail: function goToDetail() {
       this.$emit('click', this.teacher);
       uni.navigateTo({
         url: "/pages/teacher/detail?id=".concat(this.teacher._id)
+      });
+    },
+    getImageUrl: function getImageUrl(imageId) {
+      console.log('获取图片URL, 图片ID:', imageId);
+
+      // 如果是路径格式，直接返回
+      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+        console.log('使用路径格式图片:', imageId);
+        return imageId;
+      }
+
+      // 尝试从缓存获取
+      if (imageId && this.imageCache[imageId]) {
+        console.log('从缓存获取图片:', imageId);
+        return this.imageCache[imageId];
+      }
+
+      // 如果有ID但没缓存，尝试加载
+      if (imageId) {
+        console.log('尝试加载图片:', imageId);
+        this.preloadImage(imageId);
+      }
+
+      // 返回默认头像
+      console.log('使用默认头像');
+      return this.defaultAvatar;
+    },
+    preloadImage: function preloadImage(imageId) {
+      var _this = this;
+      console.log('预加载图片开始:', imageId);
+
+      // 如果已经是URL格式，直接缓存
+      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+        this.imageCache[imageId] = imageId;
+        console.log('已缓存URL格式图片:', imageId);
+        return;
+      }
+
+      // 调用API获取图片URL
+      this.$api.file.getImage(imageId).then(function (res) {
+        console.log('预加载图片完整结果:', JSON.stringify(res));
+
+        // 处理不同格式的返回数据
+        if (res && res.data && res.data.url) {
+          // 处理包含data.url的情况
+          _this.imageCache[imageId] = res.data.url;
+          console.log('已缓存图片URL:', res.data.url);
+          // 强制视图更新
+          _this.$forceUpdate();
+        } else if (res && res.imageData && res.imageData.url) {
+          // 处理包含imageData.url的情况
+          _this.imageCache[imageId] = res.imageData.url;
+          console.log('从imageData获取到图片URL:', res.imageData.url);
+          // 强制视图更新
+          _this.$forceUpdate();
+        } else if (res && res.imageData && res.imageData.base64Data) {
+          // 处理base64数据的情况
+          var base64Url = 'data:image/jpeg;base64,' + res.imageData.base64Data;
+          _this.imageCache[imageId] = base64Url;
+          console.log('从imageData.base64Data生成图片URL');
+          // 强制视图更新
+          _this.$forceUpdate();
+        } else {
+          console.error('获取图片URL失败,返回数据结构不正确:', res);
+        }
+      }).catch(function (err) {
+        console.error('获取图片失败:', err);
       });
     }
   }

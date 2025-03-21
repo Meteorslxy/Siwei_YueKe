@@ -1,0 +1,8 @@
+{
+  "name": "getImageList",
+  "version": "1.0.0",
+  "description": "从数据库获取图片列表",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
+} 

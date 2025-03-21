@@ -12,7 +12,16 @@
     "pages/teacher/list",
     "pages/booking/create",
     "pages/school/detail",
-    "pages/course/lecture-detail"
+    "pages/course/lecture-detail",
+    "pages/user/upload-image",
+    "pages/admin/login",
+    "pages/admin/dashboard",
+    "pages/admin/teacher",
+    "pages/admin/course",
+    "pages/admin/lecture",
+    "pages/admin/news",
+    "pages/admin/booking",
+    "pages/admin/content-upload/index"
   ],
   "subPackages": [],
   "window": {

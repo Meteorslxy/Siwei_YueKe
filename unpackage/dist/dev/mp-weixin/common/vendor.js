@@ -18531,6 +18531,69 @@ var _default = {
       "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
+  }, {
+    "path": "pages/user/upload-image",
+    "style": {
+      "navigationBarTitleText": "图片上传",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/login",
+    "style": {
+      "navigationBarTitleText": "管理员登录",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/dashboard",
+    "style": {
+      "navigationBarTitleText": "管理控制台",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/teacher",
+    "style": {
+      "navigationBarTitleText": "教师管理",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/course",
+    "style": {
+      "navigationBarTitleText": "课程管理",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/lecture",
+    "style": {
+      "navigationBarTitleText": "讲座管理",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/news",
+    "style": {
+      "navigationBarTitleText": "新闻动态管理",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/booking",
+    "style": {
+      "navigationBarTitleText": "预约管理",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/admin/content-upload/index",
+    "style": {
+      "navigationBarTitleText": "内容上传",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
   }],
   "globalStyle": {
     "navigationBarTextStyle": "black",
@@ -18818,7 +18881,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _request = _interopRequireDefault(__webpack_require__(/*! ./request.js */ 82));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // 基础请求URL
 var baseURL = '';
 
@@ -18984,11 +19050,142 @@ var lectureApi = {
     });
   }
 };
+
+// 文件相关API
+var fileApi = {
+  // 上传图片
+  uploadImage: function uploadImage(base64Data, fileName, fileType) {
+    console.log('调用uploadImage, 文件名:', fileName, '类型:', fileType);
+
+    // 参数检查
+    if (!base64Data) {
+      console.error('uploadImage: 缺少图片数据');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少图片数据'
+      });
+    }
+    console.log('上传图片, base64长度:', base64Data.length);
+    return (0, _request.default)({
+      name: 'uploadImage',
+      data: {
+        base64Data: base64Data,
+        fileName: fileName,
+        fileType: fileType
+      },
+      showLoading: false // 组件内已有loading
+    }).then(function (res) {
+      console.log('uploadImage返回成功:', res);
+      return res;
+    }).catch(function (err) {
+      console.error('uploadImage返回错误:', err);
+      return {
+        code: -1,
+        success: false,
+        message: err.message || '上传图片失败'
+      };
+    });
+  },
+  // 获取单张图片
+  getImage: function getImage(imageId) {
+    console.log('调用getImage，ID:', imageId);
+    if (!imageId) {
+      console.error('getImage: 缺少图片ID');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少图片ID'
+      });
+    }
+    return (0, _request.default)({
+      name: 'getImage',
+      data: {
+        imageId: imageId
+      }
+    }).then(function (res) {
+      console.log('getImage返回:', res);
+
+      // 处理不同的返回数据结构
+      if (res && res.imageData && res.imageData.base64Data) {
+        // 如果有base64数据，创建data.url结构便于统一处理
+        return _objectSpread(_objectSpread({}, res), {}, {
+          data: {
+            url: 'data:image/jpeg;base64,' + res.imageData.base64Data
+          }
+        });
+      } else if (res && res.imageData && res.imageData.url) {
+        // 将imageData.url提升到data.url
+        return _objectSpread(_objectSpread({}, res), {}, {
+          data: {
+            url: res.imageData.url
+          }
+        });
+      }
+      return res;
+    });
+  },
+  // 获取多张图片
+  getImageList: function getImageList() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    return (0, _request.default)({
+      name: 'getImageList',
+      data: options
+    });
+  },
+  // 删除图片
+  deleteImage: function deleteImage(imageId) {
+    if (!imageId) {
+      console.error('deleteImage: 缺少图片ID');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少图片ID'
+      });
+    }
+    return (0, _request.default)({
+      name: 'deleteImage',
+      data: {
+        imageId: imageId
+      }
+    });
+  }
+};
+
+// 管理后台相关API
+var adminApi = {
+  // 上传各种内容（教师、讲座、课程、新闻等）
+  uploadContent: function uploadContent(data) {
+    if (!data.type) {
+      console.error('uploadContent: 缺少内容类型');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少内容类型'
+      });
+    }
+    if (!data.data) {
+      console.error('uploadContent: 缺少内容数据');
+      return Promise.reject({
+        code: -1,
+        success: false,
+        message: '缺少内容数据'
+      });
+    }
+    console.log("\u4E0A\u4F20".concat(data.type, "\u5185\u5BB9"));
+    return (0, _request.default)({
+      name: 'uploadContent',
+      data: data
+    });
+  }
+};
 var _default = {
   course: courseApi,
   user: userApi,
   teacher: teacherApi,
-  lecture: lectureApi
+  lecture: lectureApi,
+  file: fileApi,
+  admin: adminApi
 };
 exports.default = _default;
 
