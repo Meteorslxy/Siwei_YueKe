@@ -68,50 +68,105 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f7f7f7;
+  background-color: #EC7A49;
 }
-.teacher-list .filter-bar {
-  padding: 20rpx;
-  background-color: #fff;
+.teacher-list .grade-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80rpx;
+  padding: 0 30rpx;
 }
-.teacher-list .filter-bar .search-box {
+.teacher-list .grade-selector .grade-dropdown {
+  position: relative;
+  text-align: center;
+}
+.teacher-list .grade-selector .grade-dropdown .selected-grade {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+  padding: 0 20rpx;
   display: flex;
   align-items: center;
-  height: 70rpx;
-  background-color: #f5f5f5;
-  border-radius: 35rpx;
+}
+.teacher-list .grade-selector .grade-dropdown .selected-grade .triangle-down {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 8rpx;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-top: 10rpx solid #fff;
+  transition: -webkit-transform 0.3s ease;
+  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, -webkit-transform 0.3s ease;
+}
+.teacher-list .grade-selector .grade-dropdown .selected-grade .triangle-down.arrow-up {
+  -webkit-transform: rotate(180deg);
+          transform: rotate(180deg);
+}
+.teacher-list .grade-selector .grade-dropdown .grade-options {
+  position: absolute;
+  top: 60rpx;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  background-color: #fff;
+  border-radius: 8rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  width: 160rpx;
+  z-index: 10;
+  overflow: hidden;
+}
+.teacher-list .grade-selector .grade-dropdown .grade-options .grade-option {
+  font-size: 28rpx;
+  color: #333;
+  padding: 16rpx 0;
+  text-align: center;
+}
+.teacher-list .grade-selector .grade-dropdown .grade-options .grade-option.active {
+  color: #EC7A49;
+  background-color: rgba(236, 122, 73, 0.1);
+}
+.teacher-list .grade-selector .grade-dropdown .grade-options .grade-option:not(:last-child) {
+  border-bottom: 1rpx solid #f2f2f2;
+}
+.teacher-list .subject-tabs {
+  padding: 10rpx 0 120rpx;
+}
+.teacher-list .subject-tabs .scroll-view {
+  width: 100%;
+  white-space: nowrap;
+}
+.teacher-list .subject-tabs .tabs-container {
+  display: inline-flex;
   padding: 0 20rpx;
 }
-.teacher-list .filter-bar .search-box .iconfont {
+.teacher-list .subject-tabs .tab-item {
+  padding: 10rpx 30rpx;
   font-size: 28rpx;
-  color: #999;
-  margin-right: 10rpx;
+  color: rgba(255, 255, 255, 0.8);
+  display: inline-block;
 }
-.teacher-list .filter-bar .search-box input {
-  flex: 1;
-  height: 100%;
-  font-size: 26rpx;
-}
-.teacher-list .filter-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 16rpx 10rpx;
-  background-color: #fff;
-  border-top: 1rpx solid #eee;
-}
-.teacher-list .filter-tabs .tab-item {
-  padding: 10rpx 20rpx;
-  font-size: 26rpx;
-  color: #666;
-  border-radius: 26rpx;
-  margin: 6rpx;
-}
-.teacher-list .filter-tabs .tab-item.active {
+.teacher-list .subject-tabs .tab-item.active {
   color: #fff;
-  background-color: #FF6B00;
+  font-weight: bold;
+  position: relative;
 }
-.teacher-list .teachers-container {
+.teacher-list .subject-tabs .tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  width: 40%;
+  height: 4rpx;
+  background-color: #fff;
+  border-radius: 2rpx;
+}
+.teacher-list .content-area {
   flex: 1;
   padding: 20rpx;
+  padding-top: 90rpx;
+  background-color: var(--bg-color);
 }
 

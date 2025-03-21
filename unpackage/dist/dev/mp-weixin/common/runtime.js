@@ -105,11 +105,11 @@
 /******/
 /******/
 /******/ 		// mini-css-extract-plugin CSS loading
-/******/ 		var cssChunks = {"components/empty-tip/empty-tip":1,"components/load-more/load-more":1,"components/course-card/course-card":1,"components/booking-item/booking-item":1,"components/teacher-card/teacher-card":1,"components/image-upload/image-upload":1};
+/******/ 		var cssChunks = {"components/course-card/course-card":1,"components/empty-tip/empty-tip":1,"components/load-more/load-more":1,"components/booking-item/booking-item":1,"components/teacher-card/teacher-card":1,"components/image-upload/image-upload":1};
 /******/ 		if(installedCssChunks[chunkId]) promises.push(installedCssChunks[chunkId]);
 /******/ 		else if(installedCssChunks[chunkId] !== 0 && cssChunks[chunkId]) {
 /******/ 			promises.push(installedCssChunks[chunkId] = new Promise(function(resolve, reject) {
-/******/ 				var href = "" + ({"components/empty-tip/empty-tip":"components/empty-tip/empty-tip","components/load-more/load-more":"components/load-more/load-more","components/course-card/course-card":"components/course-card/course-card","components/booking-item/booking-item":"components/booking-item/booking-item","components/teacher-card/teacher-card":"components/teacher-card/teacher-card","components/image-upload/image-upload":"components/image-upload/image-upload"}[chunkId]||chunkId) + ".wxss";
+/******/ 				var href = "" + ({"components/course-card/course-card":"components/course-card/course-card","components/empty-tip/empty-tip":"components/empty-tip/empty-tip","components/load-more/load-more":"components/load-more/load-more","components/booking-item/booking-item":"components/booking-item/booking-item","components/teacher-card/teacher-card":"components/teacher-card/teacher-card","components/image-upload/image-upload":"components/image-upload/image-upload"}[chunkId]||chunkId) + ".wxss";
 /******/ 				var fullhref = __webpack_require__.p + href;
 /******/ 				var existingLinkTags = document.getElementsByTagName("link");
 /******/ 				for(var i = 0; i < existingLinkTags.length; i++) {

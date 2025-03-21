@@ -61,46 +61,14 @@
     
     <!-- 课程列表 -->
     <view class="course-list">
-      <view 
-        class="course-item" 
-        v-for="(item, index) in courseList" 
-        :key="index"
-        @click="navigateToCourseDetail(item)">
-        <view class="course-left">
-          <view class="course-brand-logo">
-            <text class="brand-text">思维</text>
-            <text class="brand-text sm">拓展</text>
-          </view>
-          <image class="course-logo" :src="item.coverImage || item.image" mode="aspectFill"></image>
-        </view>
-        <view class="course-content">
-          <view class="course-title">
-            <text v-if="item.school" class="school-tag">[{{item.school}}]</text>
-            <text>{{item.title}}</text>
-          </view>
-          <view class="course-info">
-            <text class="location-icon iconfont icon-location"></text>
-            <text class="location-text">{{item.schoolName || item.location}}</text>
-          </view>
-          <view class="course-info">
-            <text class="time-icon iconfont icon-time"></text>
-            <text class="time-text">{{formatCourseTime(item.startTime, item.endTime)}}</text>
-          </view>
-          <view class="course-info">
-            <text class="tag-icon iconfont icon-tag"></text>
-            <text class="subject-text">{{item.subjects || '未分类'}}</text>
-            <text class="level-text" v-if="item.educationalStages">| {{item.educationalStages}}</text>
-          </view>
-          <view class="course-teacher">
-            <image class="teacher-avatar" :src="item.teacherAvatar" mode="aspectFill"></image>
-            <text class="teacher-name">{{item.teacherName}}</text>
-            <text class="teacher-title">{{item.teacherTitle}}</text>
-          </view>
-          <view class="course-price">
-            <text class="price-value">{{item.price}}.00</text>
-          </view>
-        </view>
-      </view>
+      <block v-if="courseList.length > 0">
+        <course-card 
+          v-for="(item, index) in courseList" 
+          :key="index"
+          :course="item"
+          @click="navigateTo(`/pages/course/detail?id=${item._id}`)"
+        ></course-card>
+      </block>
       
       <!-- 加载更多 -->
       <load-more :status="loadMoreStatus" @click="loadMore"></load-more>
@@ -112,7 +80,16 @@
 </template>
 
 <script>
+import CourseCard from '@/components/course-card/course-card.vue'
+import LoadMore from '@/components/load-more/load-more.vue'
+import EmptyTip from '@/components/empty-tip/empty-tip.vue'
+
 export default {
+  components: {
+    CourseCard,
+    LoadMore,
+    EmptyTip
+  },
   data() {
     return {
       // 状态栏高度
@@ -122,9 +99,9 @@ export default {
       isGradeFilterShow: false,
       selectedGradeGroup: 'all',
       gradeGroups: [
-        { label: '全部', value: 'all' },
-        { label: '小学', value: '小学' },
-        { label: '初中', value: '初中' }
+        { label: '全部年级', value: 'all' },
+        { label: '小学', value: 'primary' },
+        { label: '初中', value: 'junior' }
       ],
       
       // 校区筛选相关
@@ -132,9 +109,15 @@ export default {
       selectedSchool: 'all',
       schoolOptions: [
         { label: '全部校区', value: 'all' },
-        { label: '雨花台校区', value: '雨花台校区' },
-        { label: '大行宫校区', value: '大行宫校区' },
-        { label: '闵行校区', value: '闵行校区' }
+        { label: '江宁万达', value: 'jnwd' },
+        { label: '江宁黄金海岸', value: 'jnhjha' },
+        { label: '大行宫', value: 'dxg' },
+        { label: '新街口', value: 'xjk' },
+        { label: '雨花', value: 'yh' },
+        { label: '桥北', value: 'qb' },
+        { label: '奥体', value: 'at' },
+        { label: '龙江', value: 'lj' },
+        { label: '六合', value: 'lh' }
       ],
       
       // 学科筛选相关
@@ -278,10 +261,8 @@ export default {
         }
         
         if (this.selectedSubject !== 'all') {
-          params.subjects = this.selectedSubject;
+          params.subject = this.selectedSubject;
         }
-        
-        console.log('发送课程查询参数:', params);
         
         // 调用云函数获取课程列表
         const result = await this.$api.course.getCourseList(params);
@@ -347,57 +328,23 @@ export default {
     
     // 格式化课程时间
     formatCourseTime(startTime, endTime) {
-      if (!startTime) return ''
+      if (!startTime) return '';
       
-      const start = new Date(startTime)
-      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`
+      const start = new Date(startTime);
+      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`;
       
       if (endTime) {
-        const end = new Date(endTime)
-        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`
-        return `${formattedStart}-${formattedEnd}`
+        const end = new Date(endTime);
+        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`;
+        return `${formattedStart}-${formattedEnd}`;
       }
       
-      return formattedStart
+      return formattedStart;
     },
     
-    // 页面导航到课程详情
-    navigateToCourseDetail(course) {
-      console.log('准备导航到课程详情，课程数据:', course);
-      // 优先使用_id，备选使用id
-      const courseId = course._id || course.id;
-      
-      if (!courseId) {
-        console.error('课程ID无效，无法导航到详情页');
-        uni.showToast({
-          title: '课程数据异常',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      console.log('导航到课程详情，ID:', courseId);
-      uni.navigateTo({
-        url: `/pages/course/detail?id=${courseId}`,
-        fail: (err) => {
-          console.error('导航到课程详情失败:', err);
-          uni.showToast({
-            title: '页面跳转失败',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    
-    // 原页面导航方法保留，但修改逻辑
+    // 页面导航
     navigateTo(url) {
-      console.log('通用导航:', url);
-      uni.navigateTo({ 
-        url,
-        fail: (err) => {
-          console.error('页面导航失败:', err);
-        }
-      });
+      uni.navigateTo({ url });
     }
   }
 }
@@ -531,7 +478,7 @@ export default {
 
 /* 课程列表 */
 .course-list {
-  padding: 20rpx 30rpx 30rpx;
+  padding: 30rpx 30rpx 30rpx;
   margin-top: -100rpx;
   position: relative;
   z-index: 10;
@@ -627,10 +574,10 @@ export default {
         margin-top: 16rpx;
         
         .teacher-avatar {
-          width: 40rpx;
-          height: 40rpx;
+          width: 60rpx;
+          height: 60rpx;
           border-radius: 50%;
-          margin-right: 10rpx;
+          margin-right: 20rpx;
         }
         
         .teacher-name {

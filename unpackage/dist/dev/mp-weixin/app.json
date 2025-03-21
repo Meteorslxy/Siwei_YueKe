@@ -58,16 +58,16 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "获取您的位置信息用于查找附近的课程"
+      "desc": "你的位置信息将用于查找附近的校区"
     }
   },
   "requiredPrivateInfos": [
     "getLocation"
   ],
-  "renderer": "webview",
-  "lazyCodeLoading": "requiredComponents",
-  "skylineRenderingEngine": false,
-  "uniCloud": true,
-  "cloud": false,
+  "plugins": {},
+  "uniCloud": {
+    "provider": "aliyun",
+    "spaceId": "mp-db123abc-4def-5678-9abc-123456789012"
+  },
   "usingComponents": {}
 }

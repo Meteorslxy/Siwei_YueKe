@@ -101,6 +101,9 @@ __webpack_require__.r(__webpack_exports__);
 var components
 try {
   components = {
+    courseCard: function () {
+      return __webpack_require__.e(/*! import() | components/course-card/course-card */ "components/course-card/course-card").then(__webpack_require__.bind(null, /*! @/components/course-card/course-card.vue */ 60))
+    },
     loadMore: function () {
       return __webpack_require__.e(/*! import() | components/load-more/load-more */ "components/load-more/load-more").then(__webpack_require__.bind(null, /*! @/components/load-more/load-more.vue */ 53))
     },
@@ -129,21 +132,14 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  var l0 = _vm.__map(_vm.courseList, function (item, index) {
-    var $orig = _vm.__get_orig(item)
-    var m0 = _vm.formatCourseTime(item.startTime, item.endTime)
-    return {
-      $orig: $orig,
-      m0: m0,
-    }
-  })
   var g0 = _vm.courseList.length
+  var g1 = _vm.courseList.length
   _vm.$mp.data = Object.assign(
     {},
     {
       $root: {
-        l0: l0,
         g0: g0,
+        g1: g1,
       },
     }
   )
@@ -190,6 +186,21 @@ exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var CourseCard = function CourseCard() {
+  __webpack_require__.e(/*! require.ensure | components/course-card/course-card */ "components/course-card/course-card").then((function () {
+    return resolve(__webpack_require__(/*! @/components/course-card/course-card.vue */ 60));
+  }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
+};
+var LoadMore = function LoadMore() {
+  __webpack_require__.e(/*! require.ensure | components/load-more/load-more */ "components/load-more/load-more").then((function () {
+    return resolve(__webpack_require__(/*! @/components/load-more/load-more.vue */ 53));
+  }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
+};
+var EmptyTip = function EmptyTip() {
+  __webpack_require__.e(/*! require.ensure | components/empty-tip/empty-tip */ "components/empty-tip/empty-tip").then((function () {
+    return resolve(__webpack_require__(/*! @/components/empty-tip/empty-tip.vue */ 46));
+  }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
+};
 //
 //
 //
@@ -304,6 +315,11 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 //
 //
 var _default = {
+  components: {
+    CourseCard: CourseCard,
+    LoadMore: LoadMore,
+    EmptyTip: EmptyTip
+  },
   data: function data() {
     return {
       // 状态栏高度
@@ -312,7 +328,7 @@ var _default = {
       isGradeFilterShow: false,
       selectedGradeGroup: 'all',
       gradeGroups: [{
-        label: '全部',
+        label: '全部年级',
         value: 'all'
       }, {
         label: '小学',
@@ -328,12 +344,36 @@ var _default = {
         label: '全部校区',
         value: 'all'
       }, {
+        label: '江宁万达',
+        value: 'jnwd'
+      }, {
+        label: '江宁黄金海岸',
+        value: 'jnhjha'
         label: '雨花台校区',
         value: '雨花台校区'
       }, {
+        label: '大行宫',
+        value: 'dxg'
         label: '大行宫校区',
         value: '大行宫校区'
       }, {
+        label: '新街口',
+        value: 'xjk'
+      }, {
+        label: '雨花',
+        value: 'yh'
+      }, {
+        label: '桥北',
+        value: 'qb'
+      }, {
+        label: '奥体',
+        value: 'at'
+      }, {
+        label: '龙江',
+        value: 'lj'
+      }, {
+        label: '六合',
+        value: 'lh'
         label: '闵行校区',
         value: '闵行校区'
       }],
@@ -400,6 +440,7 @@ var _default = {
     }
   },
   methods: {
+  methods: {
     // 获取状态栏高度
     getStatusBarHeight: function getStatusBarHeight() {
       try {
@@ -448,19 +489,24 @@ var _default = {
       this.loadCourseList();
     },
     // 重置列表
+    // 重置列表
     resetList: function resetList() {
       this.page = 1;
       this.courseList = [];
+      this.total = 0;
+      this.loadMoreStatus = 'more';
       this.total = 0;
       this.loadMoreStatus = 'more';
     },
     // 加载更多
     loadMore: function loadMore() {
       if (this.isLoading) return;
+      if (this.isLoading) return;
       this.page++;
       this.loadCourseList();
     },
     // 获取课程列表
+    loadCourseList: function loadCourseList() {
     loadCourseList: function loadCourseList() {
       var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
@@ -473,6 +519,7 @@ var _default = {
                   _context.next = 2;
                   break;
                 }
+                return _context.abrupt("return");
                 return _context.abrupt("return");
               case 2:
                 _this3.isLoading = true;
@@ -533,7 +580,16 @@ var _default = {
                   } else {
                     _this3.loadMoreStatus = 'more';
                   }
+                  if (_this3.courseList.length >= _this3.total) {
+                    _this3.loadMoreStatus = 'noMore';
+                  } else {
+                    _this3.loadMoreStatus = 'more';
+                  }
                 } else {
+                  if (_this3.page === 1) {
+                    _this3.courseList = [];
+                  }
+                  _this3.loadMoreStatus = 'noMore';
                   if (_this3.page === 1) {
                     _this3.courseList = [];
                   }
@@ -598,6 +654,8 @@ var _default = {
           });
         }
       });
+    }
+  }
     },
     // 原页面导航方法保留，但修改逻辑
     navigateTo: function navigateTo(url) {
