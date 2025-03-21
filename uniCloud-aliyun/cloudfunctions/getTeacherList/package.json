@@ -1,0 +1,16 @@
+{
+  "name": "getTeacherList",
+  "version": "1.0.0",
+  "description": "获取教师列表",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 10,
+    "runtime": "Nodejs10"
+  }
+} 

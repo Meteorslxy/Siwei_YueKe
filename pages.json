@@ -98,21 +98,11 @@
             }
         },
         {
-            "path": "pages/admin/import-data",
+            "path": "pages/course/lecture-detail",
             "style": {
-                "navigationBarTitleText": "数据导入工具",
+                "navigationBarTitleText": "讲座详情",
                 "navigationBarBackgroundColor": "#EC7A49",
-                "navigationBarTextStyle": "white",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/admin/testCloud",
-            "style": {
-                "navigationBarTitleText": "云函数测试",
-                "navigationBarBackgroundColor": "#EC7A49",
-                "navigationBarTextStyle": "white",
-                "enablePullDownRefresh": false
+                "navigationBarTextStyle": "white"
             }
         }
     ],

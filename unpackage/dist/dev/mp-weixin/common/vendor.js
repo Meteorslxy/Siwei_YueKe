@@ -1,6 +1,6 @@
-(global["webpackJsonp"] = global["webpackJsonp"] || []).push([["common/vendor"],{
-
-/***/ 1:
+(global["webpackJsonp"] = global["webpackJsonp"] || []).push([["common/vendor"],[
+/* 0 */,
+/* 1 */
 /*!*********************************************************!*\
   !*** ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js ***!
   \*********************************************************/
@@ -52,384 +52,7 @@ var _default = target[key];
 exports.default = _default;
 
 /***/ }),
-
-/***/ 10:
-/*!****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/nonIterableRest.js ***!
-  \****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-module.exports = _nonIterableRest, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 11:
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/defineProperty.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var toPropertyKey = __webpack_require__(/*! ./toPropertyKey.js */ 12);
-function _defineProperty(obj, key, value) {
-  key = toPropertyKey(key);
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-  return obj;
-}
-module.exports = _defineProperty, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 12:
-/*!**************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/toPropertyKey.js ***!
-  \**************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-var toPrimitive = __webpack_require__(/*! ./toPrimitive.js */ 14);
-function toPropertyKey(t) {
-  var i = toPrimitive(t, "string");
-  return "symbol" == _typeof(i) ? i : i + "";
-}
-module.exports = toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 13:
-/*!*******************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/typeof.js ***!
-  \*******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _typeof(o) {
-  "@babel/helpers - typeof";
-
-  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-    return typeof o;
-  } : function (o) {
-    return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(o);
-}
-module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 14:
-/*!************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/toPrimitive.js ***!
-  \************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-function toPrimitive(t, r) {
-  if ("object" != _typeof(t) || !t) return t;
-  var e = t[Symbol.toPrimitive];
-  if (void 0 !== e) {
-    var i = e.call(t, r || "default");
-    if ("object" != _typeof(i)) return i;
-    throw new TypeError("@@toPrimitive must return a primitive value.");
-  }
-  return ("string" === r ? String : Number)(t);
-}
-module.exports = toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 15:
-/*!**********************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/construct.js ***!
-  \**********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
-var isNativeReflectConstruct = __webpack_require__(/*! ./isNativeReflectConstruct.js */ 17);
-function _construct(t, e, r) {
-  if (isNativeReflectConstruct()) return Reflect.construct.apply(null, arguments);
-  var o = [null];
-  o.push.apply(o, e);
-  var p = new (t.bind.apply(t, o))();
-  return r && setPrototypeOf(p, r.prototype), p;
-}
-module.exports = _construct, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 16:
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/setPrototypeOf.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _setPrototypeOf(o, p) {
-  module.exports = _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _setPrototypeOf(o, p);
-}
-module.exports = _setPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 17:
-/*!*************************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/isNativeReflectConstruct.js ***!
-  \*************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _isNativeReflectConstruct() {
-  try {
-    var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
-  } catch (t) {}
-  return (module.exports = _isNativeReflectConstruct = function _isNativeReflectConstruct() {
-    return !!t;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports)();
-}
-module.exports = _isNativeReflectConstruct, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 18:
-/*!******************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/toConsumableArray.js ***!
-  \******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayWithoutHoles = __webpack_require__(/*! ./arrayWithoutHoles.js */ 19);
-var iterableToArray = __webpack_require__(/*! ./iterableToArray.js */ 20);
-var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ 8);
-var nonIterableSpread = __webpack_require__(/*! ./nonIterableSpread.js */ 21);
-function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
-}
-module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 185:
-/*!*********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/admin/mock-data.js ***!
-  \*********************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-// 模拟数据集合
-var mockData = {
-  // 课程数据
-  courses: [{
-    id: '1',
-    title: '高中数学进阶课程',
-    image: '/static/images/course/course1.jpg',
-    tags: ['热门', '推荐'],
-    price: 299,
-    originalPrice: 399,
-    bookingCount: 120,
-    gradeLevel: '高中',
-    subject: '数学',
-    teacherId: '1',
-    teacher: {
-      id: '1',
-      name: '张老师',
-      avatar: '/static/images/teacher/teacher1.jpg',
-      title: '高级讲师'
-    },
-    description: '本课程针对高中数学难点进行深入讲解，帮助学生快速提高数学成绩。',
-    content: '课程内容包括函数、导数、三角函数、立体几何等重要章节，通过系统讲解和大量练习，全面提升学生的数学能力。'
-  }, {
-    id: '2',
-    title: '初中英语提高班',
-    image: '/static/images/course/course2.jpg',
-    tags: ['新课'],
-    price: 199,
-    originalPrice: 299,
-    bookingCount: 85,
-    gradeLevel: '初中',
-    subject: '英语',
-    teacherId: '2',
-    teacher: {
-      id: '2',
-      name: '李老师',
-      avatar: '/static/images/teacher/teacher2.jpg',
-      title: '英语教研组长'
-    },
-    description: '本课程专为初中学生设计，提高英语听说读写能力。',
-    content: '课程涵盖初中英语重点语法、词汇和阅读理解，注重培养学生的语言应用能力和学习兴趣。'
-  }, {
-    id: '3',
-    title: '小学语文阅读写作班',
-    image: '/static/images/course/course3.jpg',
-    tags: ['热门'],
-    price: 159,
-    originalPrice: 259,
-    bookingCount: 130,
-    gradeLevel: '小学',
-    subject: '语文',
-    teacherId: '3',
-    teacher: {
-      id: '3',
-      name: '王老师',
-      avatar: '/static/images/teacher/teacher3.jpg',
-      title: '语文特级教师'
-    },
-    description: '培养小学生的阅读兴趣和写作能力。',
-    content: '通过经典文学作品阅读和多种写作训练，培养学生的文学素养和表达能力。'
-  }],
-  // 教师数据
-  teachers: [{
-    id: '1',
-    name: '张老师',
-    avatar: '/static/images/teacher/teacher1.jpg',
-    title: '高级讲师',
-    subject: '数学',
-    experience: '10年',
-    rating: 4.9,
-    studentCount: 2000,
-    description: '有多年教学经验，曾获得多项教学奖项。',
-    introduction: '张老师毕业于北京师范大学数学系，拥有10年高中数学教学经验。教学风格严谨而有趣，善于用生动的例子讲解抽象的数学概念，深受学生喜爱。',
-    achievements: ['全国优秀教师', '市级教学能手', '最受学生欢迎教师']
-  }, {
-    id: '2',
-    name: '李老师',
-    avatar: '/static/images/teacher/teacher2.jpg',
-    title: '英语教研组长',
-    subject: '英语',
-    experience: '15年',
-    rating: 4.8,
-    studentCount: 1800,
-    description: '英语教学专家，注重培养学生的学习兴趣和应用能力。',
-    introduction: '李老师毕业于上海外国语大学，拥有海外留学背景和丰富的英语教学经验。教学方法灵活多样，课堂氛围活跃，能有效激发学生的学习兴趣。',
-    achievements: ['省级骨干教师', '优秀英语教师', '教学创新奖']
-  }, {
-    id: '3',
-    name: '王老师',
-    avatar: '/static/images/teacher/teacher3.jpg',
-    title: '语文特级教师',
-    subject: '语文',
-    experience: '20年',
-    rating: 4.9,
-    studentCount: 2500,
-    description: '语文教育专家，致力于培养学生的人文素养。',
-    introduction: '王老师毕业于北京大学中文系，从教20年来，培养了大批优秀学生。教学注重培养学生的阅读理解能力和写作表达能力，深受学生和家长好评。',
-    achievements: ['特级教师', '全国语文教学大赛一等奖', '教育部优秀教师']
-  }],
-  // 新闻资讯
-  news: [{
-    id: '1',
-    title: '关于2023年暑期课程安排的通知',
-    image: '/static/images/news/news1.jpg',
-    date: '2023-05-15',
-    views: 256,
-    summary: '2023年暑期课程现已开放报名，本次课程涵盖多个学科领域...',
-    content: '2023年暑期课程现已开放报名，本次课程涵盖语文、数学、英语、物理、化学等多个学科领域，并设有科学实验、艺术创作、体育活动等特色课程。暑期课程将于7月1日正式开始，8月25日结束，分为上、下两个阶段。家长可根据学生的实际情况选择适合的课程。报名请联系各校区前台或通过小程序在线报名。'
-  }, {
-    id: '2',
-    title: '名师讲座：如何提高学习效率',
-    image: '/static/images/news/news2.jpg',
-    date: '2023-05-10',
-    views: 198,
-    summary: '著名教育专家王教授将于下周六在我校举办讲座，主题为"如何提高学习效率"...',
-    content: '著名教育专家王教授将于下周六(5月17日)下午2点在总校区报告厅举办讲座，主题为"如何提高学习效率"。王教授将分享科学的学习方法和时间管理技巧，帮助学生提高学习效率，减轻学习压力。讲座面向所有年级学生和家长开放，请提前报名预约座位。'
-  }],
-  // 用户数据
-  users: [{
-    id: '1',
-    openid: 'test_openid_1',
-    nickname: '张三',
-    avatar: '/static/images/avatar.png',
-    phone: '13800138001',
-    gender: 1,
-    city: '北京',
-    province: '北京',
-    country: '中国',
-    registerTime: new Date('2023-01-15').toISOString()
-  }, {
-    id: '2',
-    openid: 'test_openid_2',
-    nickname: '李四',
-    avatar: '/static/images/avatar.png',
-    phone: '13800138002',
-    gender: 2,
-    city: '上海',
-    province: '上海',
-    country: '中国',
-    registerTime: new Date('2023-02-20').toISOString()
-  }],
-  // 预订数据
-  bookings: [{
-    id: '1',
-    userId: '1',
-    courseId: '1',
-    courseTitle: '高中数学进阶课程',
-    courseImage: '/static/images/course/course1.jpg',
-    teacherName: '张老师',
-    price: 299,
-    status: 1,
-    // 1已预订，2已完成，3已取消
-    bookingTime: new Date('2023-05-01').toISOString(),
-    createTime: new Date('2023-04-28').toISOString()
-  }, {
-    id: '2',
-    userId: '1',
-    courseId: '2',
-    courseTitle: '初中英语提高班',
-    courseImage: '/static/images/course/course2.jpg',
-    teacherName: '李老师',
-    price: 199,
-    status: 2,
-    // 1已预订，2已完成，3已取消
-    bookingTime: new Date('2023-04-15').toISOString(),
-    createTime: new Date('2023-04-10').toISOString()
-  }]
-};
-var _default = mockData;
-exports.default = _default;
-
-/***/ }),
-
-/***/ 19:
-/*!******************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/arrayWithoutHoles.js ***!
-  \******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ 9);
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return arrayLikeToArray(arr);
-}
-module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 2:
+/* 2 */
 /*!************************************************************!*\
   !*** ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js ***!
   \************************************************************/
@@ -2875,8 +2498,336 @@ exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./../../../webpack/buildin/global.js */ 3)))
 
 /***/ }),
+/* 3 */
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
 
-/***/ 20:
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || new Function("return this")();
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 4 */
+/*!**********************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
+  \**********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 5 */
+/*!**************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/slicedToArray.js ***!
+  \**************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayWithHoles = __webpack_require__(/*! ./arrayWithHoles.js */ 6);
+var iterableToArrayLimit = __webpack_require__(/*! ./iterableToArrayLimit.js */ 7);
+var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ 8);
+var nonIterableRest = __webpack_require__(/*! ./nonIterableRest.js */ 10);
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+module.exports = _slicedToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 6 */
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 7 */
+/*!*********************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/iterableToArrayLimit.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _iterableToArrayLimit(r, l) {
+  var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+  if (null != t) {
+    var e,
+      n,
+      i,
+      u,
+      a = [],
+      f = !0,
+      o = !1;
+    try {
+      if (i = (t = t.call(r)).next, 0 === l) {
+        if (Object(t) !== t) return;
+        f = !1;
+      } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0) {
+        ;
+      }
+    } catch (r) {
+      o = !0, n = r;
+    } finally {
+      try {
+        if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return;
+      } finally {
+        if (o) throw n;
+      }
+    }
+    return a;
+  }
+}
+module.exports = _iterableToArrayLimit, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 8 */
+/*!***************************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js ***!
+  \***************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ 9);
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 9 */
+/*!*****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/arrayLikeToArray.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+  return arr2;
+}
+module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 10 */
+/*!****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/nonIterableRest.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+module.exports = _nonIterableRest, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 11 */
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/defineProperty.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var toPropertyKey = __webpack_require__(/*! ./toPropertyKey.js */ 12);
+function _defineProperty(obj, key, value) {
+  key = toPropertyKey(key);
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+module.exports = _defineProperty, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 12 */
+/*!**************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/toPropertyKey.js ***!
+  \**************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
+var toPrimitive = __webpack_require__(/*! ./toPrimitive.js */ 14);
+function toPropertyKey(t) {
+  var i = toPrimitive(t, "string");
+  return "symbol" == _typeof(i) ? i : i + "";
+}
+module.exports = toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 13 */
+/*!*******************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/typeof.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _typeof(o) {
+  "@babel/helpers - typeof";
+
+  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return typeof o;
+  } : function (o) {
+    return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(o);
+}
+module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 14 */
+/*!************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/toPrimitive.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
+function toPrimitive(t, r) {
+  if ("object" != _typeof(t) || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r || "default");
+    if ("object" != _typeof(i)) return i;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return ("string" === r ? String : Number)(t);
+}
+module.exports = toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 15 */
+/*!**********************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/construct.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
+var isNativeReflectConstruct = __webpack_require__(/*! ./isNativeReflectConstruct.js */ 17);
+function _construct(t, e, r) {
+  if (isNativeReflectConstruct()) return Reflect.construct.apply(null, arguments);
+  var o = [null];
+  o.push.apply(o, e);
+  var p = new (t.bind.apply(t, o))();
+  return r && setPrototypeOf(p, r.prototype), p;
+}
+module.exports = _construct, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 16 */
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/setPrototypeOf.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _setPrototypeOf(o, p) {
+  module.exports = _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _setPrototypeOf(o, p);
+}
+module.exports = _setPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 17 */
+/*!*************************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/isNativeReflectConstruct.js ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _isNativeReflectConstruct() {
+  try {
+    var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+  } catch (t) {}
+  return (module.exports = _isNativeReflectConstruct = function _isNativeReflectConstruct() {
+    return !!t;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports)();
+}
+module.exports = _isNativeReflectConstruct, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 18 */
+/*!******************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/toConsumableArray.js ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayWithoutHoles = __webpack_require__(/*! ./arrayWithoutHoles.js */ 19);
+var iterableToArray = __webpack_require__(/*! ./iterableToArray.js */ 20);
+var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ 8);
+var nonIterableSpread = __webpack_require__(/*! ./nonIterableSpread.js */ 21);
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 19 */
+/*!******************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/arrayWithoutHoles.js ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ 9);
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 20 */
 /*!****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/iterableToArray.js ***!
   \****************************************************************/
@@ -2889,8 +2840,7 @@ function _iterableToArray(iter) {
 module.exports = _iterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 21:
+/* 21 */
 /*!******************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/nonIterableSpread.js ***!
   \******************************************************************/
@@ -2903,8 +2853,7 @@ function _nonIterableSpread() {
 module.exports = _nonIterableSpread, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 22:
+/* 22 */
 /*!*************************************************************!*\
   !*** ./node_modules/@dcloudio/uni-i18n/dist/uni-i18n.es.js ***!
   \*************************************************************/
@@ -3440,8 +3389,7 @@ function resolveLocaleChain(locale) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./../../../webpack/buildin/global.js */ 3)))
 
 /***/ }),
-
-/***/ 23:
+/* 23 */
 /*!***************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/classCallCheck.js ***!
   \***************************************************************/
@@ -3456,8 +3404,7 @@ function _classCallCheck(instance, Constructor) {
 module.exports = _classCallCheck, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 24:
+/* 24 */
 /*!************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/createClass.js ***!
   \************************************************************/
@@ -3485,8 +3432,7 @@ function _createClass(Constructor, protoProps, staticProps) {
 module.exports = _createClass, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 25:
+/* 25 */
 /*!******************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/mp-vue/dist/mp.runtime.esm.js ***!
   \******************************************************************************************/
@@ -9567,8 +9513,7 @@ internalMixin(Vue);
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3)))
 
 /***/ }),
-
-/***/ 26:
+/* 26 */
 /*!************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js ***!
   \************************************************************************************/
@@ -10103,6 +10048,7 @@ var b = "development" === "development",
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
   A = T({"address":["127.0.0.1","192.168.1.3","172.27.96.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","C:/Users/Administrator/Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+  A = T({"address":["127.0.0.1","192.168.96.1","192.168.31.38"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
   O = T([{"provider":"aliyun","spaceName":"yueke-demo","spaceId":"mp-d0c06b27-ec33-40fe-b28b-337811bd2f29","clientSecret":"c3DWEyYRkArWA6mZ2b+gxQ==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
@@ -17968,8 +17914,7 @@ exports.default = Zs;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3), __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
-
-/***/ 27:
+/* 27 */
 /*!************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
   \************************************************************************************************/
@@ -17982,8 +17927,7 @@ var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime 
 module.exports = runtime;
 
 /***/ }),
-
-/***/ 28:
+/* 28 */
 /*!*******************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/regeneratorRuntime.js ***!
   \*******************************************************************/
@@ -18304,8 +18248,7 @@ function _regeneratorRuntime() {
 module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 29:
+/* 29 */
 /*!**********************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/assertThisInitialized.js ***!
   \**********************************************************************/
@@ -18321,39 +18264,7 @@ function _assertThisInitialized(self) {
 module.exports = _assertThisInitialized, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 3:
-/*!***********************************!*\
-  !*** (webpack)/buildin/global.js ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || new Function("return this")();
-} catch (e) {
-	// This works if the window reference is available
-	if (typeof window === "object") g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-
-/***/ 30:
+/* 30 */
 /*!*****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
   \*****************************************************************/
@@ -18393,8 +18304,7 @@ function _asyncToGenerator(fn) {
 module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 31:
+/* 31 */
 /*!*********************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/inherits.js ***!
   \*********************************************************/
@@ -18421,8 +18331,7 @@ function _inherits(subClass, superClass) {
 module.exports = _inherits, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 32:
+/* 32 */
 /*!**************************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js ***!
   \**************************************************************************/
@@ -18442,8 +18351,7 @@ function _possibleConstructorReturn(self, call) {
 module.exports = _possibleConstructorReturn, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 33:
+/* 33 */
 /*!***************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
   \***************************************************************/
@@ -18459,8 +18367,7 @@ function _getPrototypeOf(o) {
 module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 34:
+/* 34 */
 /*!****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
   \****************************************************************/
@@ -18500,8 +18407,7 @@ function _wrapNativeSuper(Class) {
 module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 35:
+/* 35 */
 /*!*****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
   \*****************************************************************/
@@ -18518,11 +18424,10 @@ function _isNativeFunction(fn) {
 module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-
-/***/ 36:
-/*!************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages.json?{"type":"origin-pages-json"} ***!
-  \************************************************************************************************/
+/* 36 */
+/*!**********************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"origin-pages-json"} ***!
+  \**********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18621,20 +18526,11 @@ var _default = {
       "navigationBarTextStyle": "white"
     }
   }, {
-    "path": "pages/admin/import-data",
+    "path": "pages/course/lecture-detail",
     "style": {
-      "navigationBarTitleText": "数据导入工具",
+      "navigationBarTitleText": "讲座详情",
       "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": false
-    }
-  }, {
-    "path": "pages/admin/testCloud",
-    "style": {
-      "navigationBarTitleText": "云函数测试",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": false
+      "navigationBarTextStyle": "white"
     }
   }],
   "globalStyle": {
@@ -18669,11 +18565,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-
-/***/ 37:
-/*!***********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages.json?{"type":"stat"} ***!
-  \***********************************************************************************/
+/* 37 */
+/*!*********************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"stat"} ***!
+  \*********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18690,35 +18585,22 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-
-/***/ 38:
-/*!*******************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages.json ***!
-  \*******************************************************************/
+/* 38 */
+/*!*****************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json ***!
+  \*****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
 
 
 /***/ }),
-
-/***/ 4:
-/*!**********************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
-  \**********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
-  };
-}
-module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 44:
+/* 39 */,
+/* 40 */,
+/* 41 */,
+/* 42 */,
+/* 43 */,
+/* 44 */
 /*!**********************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
   \**********************************************************************************************************/
@@ -18849,11 +18731,10 @@ function normalizeComponent (
 
 
 /***/ }),
-
-/***/ 45:
-/*!*****************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/components/global.js ***!
-  \*****************************************************************************/
+/* 45 */
+/*!***************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/global.js ***!
+  \***************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18888,103 +18769,45 @@ _vue.default.component('booking-item', _bookingItem.default);
 _vue.default.component('teacher-card', _teacherCard.default);
 
 /***/ }),
-
-/***/ 5:
-/*!**************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/slicedToArray.js ***!
-  \**************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayWithHoles = __webpack_require__(/*! ./arrayWithHoles.js */ 6);
-var iterableToArrayLimit = __webpack_require__(/*! ./iterableToArrayLimit.js */ 7);
-var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ 8);
-var nonIterableRest = __webpack_require__(/*! ./nonIterableRest.js */ 10);
-function _slicedToArray(arr, i) {
-  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
-}
-module.exports = _slicedToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 6:
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 7:
-/*!*********************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/iterableToArrayLimit.js ***!
-  \*********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _iterableToArrayLimit(r, l) {
-  var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-  if (null != t) {
-    var e,
-      n,
-      i,
-      u,
-      a = [],
-      f = !0,
-      o = !1;
-    try {
-      if (i = (t = t.call(r)).next, 0 === l) {
-        if (Object(t) !== t) return;
-        f = !1;
-      } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0) {
-        ;
-      }
-    } catch (r) {
-      o = !0, n = r;
-    } finally {
-      try {
-        if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return;
-      } finally {
-        if (o) throw n;
-      }
-    }
-    return a;
-  }
-}
-module.exports = _iterableToArrayLimit, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 8:
-/*!***************************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js ***!
-  \***************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayLikeToArray = __webpack_require__(/*! ./arrayLikeToArray.js */ 9);
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 81:
-/*!*********************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/api/index.js ***!
-  \*********************************************************************/
+/* 46 */,
+/* 47 */,
+/* 48 */,
+/* 49 */,
+/* 50 */,
+/* 51 */,
+/* 52 */,
+/* 53 */,
+/* 54 */,
+/* 55 */,
+/* 56 */,
+/* 57 */,
+/* 58 */,
+/* 59 */,
+/* 60 */,
+/* 61 */,
+/* 62 */,
+/* 63 */,
+/* 64 */,
+/* 65 */,
+/* 66 */,
+/* 67 */,
+/* 68 */,
+/* 69 */,
+/* 70 */,
+/* 71 */,
+/* 72 */,
+/* 73 */,
+/* 74 */,
+/* 75 */,
+/* 76 */,
+/* 77 */,
+/* 78 */,
+/* 79 */,
+/* 80 */,
+/* 81 */
+/*!*******************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/index.js ***!
+  \*******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19010,26 +18833,22 @@ var debugAPI = function debugAPI(name, result) {
 var courseApi = {
   // 获取课程列表
   getCourseList: function getCourseList(data) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     console.log('调用getCourseList，参数:', data);
     return (0, _request.default)({
       name: 'getCourseList',
-      data: data,
-      useMock: useMock
+      data: data
     }).then(function (res) {
       return debugAPI('getCourseList返回', res);
     });
   },
   // 获取课程详情
   getCourseDetail: function getCourseDetail(id) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     console.log('调用getCourseDetail，ID:', id);
     return (0, _request.default)({
       name: 'getCourseDetail',
       data: {
         id: id
-      },
-      useMock: useMock
+      }
     }).then(function (res) {
       return debugAPI('getCourseDetail返回', res);
     });
@@ -19037,12 +18856,10 @@ var courseApi = {
   // 获取新闻列表
   getNewsList: function getNewsList() {
     var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     console.log('调用getNewsList，参数:', data);
     return (0, _request.default)({
       name: 'getNewsList',
-      data: data,
-      useMock: useMock
+      data: data
     }).then(function (res) {
       return debugAPI('getNewsList返回', res);
     });
@@ -19050,23 +18867,19 @@ var courseApi = {
   // 获取推荐课程
   getRecommendCourses: function getRecommendCourses() {
     var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     console.log('调用getRecommendCourses，参数:', data);
     return (0, _request.default)({
       name: 'getRecommendCourses',
-      data: data,
-      useMock: useMock
+      data: data
     }).then(function (res) {
       return debugAPI('getRecommendCourses返回', res);
     });
   },
   // 预订课程
   bookCourse: function bookCourse(data) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     return (0, _request.default)({
       name: 'bookCourse',
-      data: data,
-      useMock: useMock
+      data: data
     });
   }
 };
@@ -19075,60 +18888,48 @@ var courseApi = {
 var userApi = {
   // 用户登录
   login: function login(data) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     return (0, _request.default)({
       name: 'login',
-      data: data,
-      useMock: useMock
+      data: data
     });
   },
   // 获取用户信息
   getUserInfo: function getUserInfo() {
-    var useMock = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     return (0, _request.default)({
       name: 'getUserInfo',
-      data: {},
-      useMock: useMock
+      data: {}
     });
   },
   // 获取预订列表
   getBookingList: function getBookingList(data) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     return (0, _request.default)({
       name: 'getBookingList',
-      data: data,
-      useMock: useMock
+      data: data
     });
   },
   // 获取预订详情
   getBookingDetail: function getBookingDetail(id) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     return (0, _request.default)({
       name: 'getBookingDetail',
       data: {
         id: id
-      },
-      useMock: useMock
+      }
     });
   },
   // 取消预订
   cancelBooking: function cancelBooking(id) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     return (0, _request.default)({
       name: 'cancelBooking',
       data: {
         id: id
-      },
-      useMock: useMock
+      }
     });
   },
   // 获取预订数量
   getBookingCount: function getBookingCount() {
-    var useMock = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     return (0, _request.default)({
       name: 'getBookingCount',
-      data: {},
-      useMock: useMock
+      data: {}
     });
   }
 };
@@ -19137,44 +18938,66 @@ var userApi = {
 var teacherApi = {
   // 获取教师列表
   getTeacherList: function getTeacherList(data) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     console.log('调用getTeacherList，参数:', data);
     return (0, _request.default)({
       name: 'getTeacherList',
-      data: data,
-      useMock: useMock
+      data: data
     }).then(function (res) {
       return debugAPI('getTeacherList返回', res);
     });
   },
   // 获取教师详情
   getTeacherDetail: function getTeacherDetail(id) {
-    var useMock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     console.log('调用getTeacherDetail，ID:', id);
     return (0, _request.default)({
       name: 'getTeacherDetail',
       data: {
         id: id
-      },
-      useMock: useMock
+      }
     }).then(function (res) {
       return debugAPI('getTeacherDetail返回', res);
+    });
+  }
+};
+
+// 讲座相关API
+var lectureApi = {
+  // 获取讲座列表
+  getLectureList: function getLectureList(data) {
+    console.log('调用getLectureList，参数:', data);
+    return (0, _request.default)({
+      name: 'getLectureList',
+      data: data
+    }).then(function (res) {
+      return debugAPI('getLectureList返回', res);
+    });
+  },
+  // 获取讲座详情
+  getLectureDetail: function getLectureDetail(id) {
+    console.log('调用getLectureDetail，ID:', id);
+    return (0, _request.default)({
+      name: 'getLectureDetail',
+      data: {
+        id: id
+      }
+    }).then(function (res) {
+      return debugAPI('getLectureDetail返回', res);
     });
   }
 };
 var _default = {
   course: courseApi,
   user: userApi,
-  teacher: teacherApi
+  teacher: teacherApi,
+  lecture: lectureApi
 };
 exports.default = _default;
 
 /***/ }),
-
-/***/ 82:
-/*!***********************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/api/request.js ***!
-  \***********************************************************************/
+/* 82 */
+/*!*********************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/request.js ***!
+  \*********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19191,7 +19014,6 @@ exports.default = void 0;
  * @param {String} options.name 云函数名称
  * @param {Object} options.data 请求参数
  * @param {Boolean} options.showLoading 是否显示加载提示
- * @param {Boolean} options.useMock 是否使用模拟数据
  */
 function request() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -19199,9 +19021,7 @@ function request() {
     _options$data = options.data,
     data = _options$data === void 0 ? {} : _options$data,
     _options$showLoading = options.showLoading,
-    showLoading = _options$showLoading === void 0 ? true : _options$showLoading,
-    _options$useMock = options.useMock,
-    useMock = _options$useMock === void 0 ? false : _options$useMock;
+    showLoading = _options$showLoading === void 0 ? true : _options$showLoading;
 
   // 检查云函数名称是否存在
   if (!name) {
@@ -19214,62 +19034,29 @@ function request() {
       mask: true
     });
   }
-
-  // 检查是否为游客模式
-  var systemInfo = uni.getSystemInfoSync();
-  var isGuestMode = systemInfo && systemInfo.result && systemInfo.result.isGuest || false;
-
-  // 判断是否使用模拟数据
-  // 1. 指定使用模拟数据
-  // 2. 在游客模式下
-  // 3. 在开发模式下
-  var shouldUseMockData = useMock || isGuestMode || getApp() && getApp().globalData && getApp().globalData.$isDevMode || false;
-  if (shouldUseMockData) {
-    console.log("[\u6A21\u62DF\u6570\u636E] \u4F7F\u7528\u6A21\u62DF\u6570\u636E\u8C03\u7528\u4E91\u51FD\u6570: ".concat(name));
-  }
   return new Promise(function (resolve, reject) {
-    // 使用模拟数据
-    if (shouldUseMockData) {
-      console.warn('使用模拟数据，原因:', useMock ? '手动指定' : isGuestMode ? '游客模式' : '开发模式');
-      // 延迟模拟网络请求
-      setTimeout(function () {
-        if (showLoading) {
-          uni.hideLoading();
-        }
-
-        // 根据不同的云函数名返回不同的模拟数据
-        var mockData = getMockData(name, data);
-        resolve(mockData);
-      }, 500);
-      return;
-    }
-
     // 正常调用云函数 - 使用uniCloud
-    // 先确保阿里云环境正确初始化
     var spaceId = getApp().globalData.$spaceId || 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29';
 
     // 微信小程序特殊处理 - 只使用阿里云UniCloud
 
-    console.log("\u5FAE\u4FE1\u5C0F\u7A0B\u5E8F\u73AF\u5883\u4E0B\u8C03\u7528\u4E91\u51FD\u6570[".concat(name, "]\uFF0C\u4F7F\u7528\u963F\u91CC\u4E91UniCloud\uFF0CspaceId: ").concat(spaceId));
     // 确保微信云函数被禁用
     if (typeof wx !== 'undefined' && wx.cloud) {
       wx.cloud = null;
-      console.log('在request.js中禁用微信云开发');
     }
     console.log("\u8C03\u7528\u963F\u91CC\u4E91\u4E91\u51FD\u6570[".concat(name, "]\uFF0C\u73AF\u5883ID: ").concat(spaceId));
 
     // 检查uniCloud是否存在
     if (typeof uniCloud === 'undefined') {
-      console.error('uniCloud对象不存在，可能是平台不支持，使用模拟数据');
-      // 使用模拟数据
-      var mockData = getMockData(name, data);
-      if (mockData) {
-        if (showLoading) {
-          uni.hideLoading();
-        }
-        resolve(mockData);
-        return;
+      console.error('uniCloud对象不存在，云函数调用失败');
+      uni.showToast({
+        title: '云服务不可用',
+        icon: 'none'
+      });
+      if (showLoading) {
+        uni.hideLoading();
       }
+      return reject(new Error('uniCloud对象不存在'));
     }
 
     // 使用uniCloud调用云函数
@@ -19282,37 +19069,26 @@ function request() {
         // 检查返回数据是否为空或有错误
         if (!res.result) {
           console.warn("\u4E91\u51FD\u6570 ".concat(name, " \u8FD4\u56DE\u6570\u636E\u4E3A\u7A7A"));
-          // 使用模拟数据
-          var _mockData = getMockData(name, data);
-          return resolve(_mockData);
+          uni.showToast({
+            title: '数据获取失败',
+            icon: 'none'
+          });
+          return reject(new Error('云函数返回数据为空'));
         }
 
-        // 检查是否有mongo数据库错误(mongo_cell_decision_not_found)
-        if (res.result.code === -1 && res.result.message && (res.result.message.includes('mongo_cell_decision_not_found') || res.result.message.includes('获取') && res.result.message.includes('失败'))) {
-          console.warn("\u4E91\u51FD\u6570 ".concat(name, " \u6570\u636E\u5E93\u8FDE\u63A5\u9519\u8BEF\uFF0C\u4F7F\u7528\u6A21\u62DF\u6570\u636E:"), res.result.message);
-          // 显示提示
+        // 检查是否有数据库错误
+        if (res.result.code === -1) {
+          console.error("\u4E91\u51FD\u6570 ".concat(name, " \u8FD4\u56DE\u9519\u8BEF:"), res.result.message);
           uni.showToast({
-            title: '正在使用演示数据',
-            icon: 'none',
-            duration: 2000
+            title: res.result.message || '数据获取失败',
+            icon: 'none'
           });
-          // 使用模拟数据
-          var _mockData2 = getMockData(name, data);
-          return resolve(_mockData2);
+          return reject(new Error(res.result.message || '数据获取失败'));
         }
         resolve(res.result);
       },
       fail: function fail(err) {
         console.error("\u4E91\u51FD\u6570 ".concat(name, " \u8C03\u7528\u5931\u8D25:"), err);
-
-        // 云函数不存在或失败时，自动切换到模拟数据模式
-        console.warn("\u4E91\u51FD\u6570 ".concat(name, " \u8C03\u7528\u5931\u8D25\uFF0C\u4F7F\u7528\u6A21\u62DF\u6570\u636E"));
-
-        // 使用对应的模拟数据
-        var mockData = getMockData(name, data);
-        if (mockData) {
-          return resolve(mockData);
-        }
         uni.showToast({
           title: '请求失败，请稍后重试',
           icon: 'none'
@@ -19327,216 +19103,10 @@ function request() {
     });
   });
 }
-
-// 获取模拟数据
-function getMockData(name) {
-  var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var mockData = {
-    code: 0,
-    success: true,
-    data: [],
-    message: '模拟数据'
-  };
-
-  // 根据不同的云函数名返回不同的模拟数据
-  if (name === 'getCourseList' || name === 'getCourses') {
-    mockData.data = [{
-      id: '1',
-      title: '高中数学进阶课程',
-      image: '/static/images/course/course1.jpg',
-      tags: ['热门', '推荐'],
-      price: 299,
-      originalPrice: 399,
-      teacher: {
-        name: '张老师',
-        avatar: '/static/images/teacher/teacher1.jpg'
-      }
-    }, {
-      id: '2',
-      title: '初中英语强化训练',
-      image: '/static/images/course/course2.jpg',
-      tags: ['新课'],
-      price: 199,
-      originalPrice: 299,
-      teacher: {
-        name: '李老师',
-        avatar: '/static/images/teacher/teacher2.jpg'
-      }
-    }, {
-      id: '3',
-      title: '物理实验与应用',
-      image: '/static/images/course/course3.jpg',
-      tags: ['畅销'],
-      price: 259,
-      originalPrice: 359,
-      teacher: {
-        name: '王老师',
-        avatar: '/static/images/teacher/teacher3.jpg'
-      }
-    }, {
-      id: '4',
-      title: '高考语文冲刺班',
-      image: '/static/images/course/course4.jpg',
-      tags: ['推荐'],
-      price: 329,
-      originalPrice: 429,
-      teacher: {
-        name: '刘老师',
-        avatar: '/static/images/teacher/teacher4.jpg'
-      }
-    }];
-  } else if (name === 'getNewsList' || name === 'getNews') {
-    mockData.data = [{
-      id: '1',
-      title: '关于2023年暑期课程安排的通知',
-      image: '/static/images/news/news1.jpg',
-      date: '2023-05-15',
-      views: 256,
-      summary: '2023年暑期课程现已开放报名，本次课程涵盖多个学科领域...'
-    }, {
-      id: '2',
-      title: '名师讲座：如何提高学习效率',
-      image: '/static/images/news/news2.jpg',
-      date: '2023-05-10',
-      views: 198,
-      summary: '著名教育专家王教授将于下周六在我校举办讲座，主题为"如何提高学习效率"...'
-    }, {
-      id: '3',
-      title: '2023年寒假班课程即将开始报名',
-      image: '/static/images/news/news3.jpg',
-      date: '2023-05-05',
-      views: 176,
-      summary: '寒假即将来临，为了帮助学生更好地利用假期时间，提高学习成绩...'
-    }, {
-      id: '4',
-      title: '教学成果展示：学生优秀作品赏析',
-      image: '/static/images/news/news4.jpg',
-      date: '2023-04-28',
-      views: 143,
-      summary: '本次展示汇集了我校学生在各个学科领域的优秀作品，展现了学生们的创造力和学习成果...'
-    }, {
-      id: '5',
-      title: '教师团队：专业能力提升培训',
-      image: '/static/images/news/news5.jpg',
-      date: '2023-04-20',
-      views: 128,
-      summary: '为提升教师团队的专业能力和教学水平，学校组织了一系列的培训活动...'
-    }];
-  } else if (name === 'getRecommendCourses') {
-    mockData.data = [{
-      id: '1',
-      title: '高中数学进阶课程',
-      image: '/static/images/course/course1.jpg',
-      tags: ['热门', '推荐'],
-      price: 299,
-      originalPrice: 399,
-      bookingCount: 120,
-      teacher: {
-        name: '张老师',
-        avatar: '/static/images/teacher/teacher1.jpg',
-        title: '高级讲师'
-      }
-    }, {
-      id: '2',
-      title: '初中英语强化训练',
-      image: '/static/images/course/course2.jpg',
-      tags: ['新课'],
-      price: 199,
-      originalPrice: 299,
-      bookingCount: 98,
-      teacher: {
-        name: '李老师',
-        avatar: '/static/images/teacher/teacher2.jpg',
-        title: '英语教研组长'
-      }
-    }, {
-      id: '3',
-      title: '初中英语提升班',
-      image: '/static/images/course/course3.jpg',
-      tags: ['畅销'],
-      price: 259,
-      originalPrice: 359,
-      bookingCount: 85,
-      teacher: {
-        name: '王老师',
-        avatar: '/static/images/teacher/teacher3.jpg',
-        title: '英语教研组长'
-      }
-    }, {
-      id: '4',
-      title: '高考语文冲刺班',
-      image: '/static/images/course/course4.jpg',
-      tags: ['推荐'],
-      price: 329,
-      originalPrice: 429,
-      bookingCount: 75,
-      teacher: {
-        name: '刘老师',
-        avatar: '/static/images/teacher/teacher4.jpg',
-        title: '语文特级教师'
-      }
-    }];
-  } else if (name === 'getCourseDetail') {
-    mockData.data = {
-      id: data.id || '1',
-      title: data.id === '2' ? '初中英语强化训练' : data.id === '3' ? '初中英语提升班' : '高中数学进阶课程',
-      image: "/static/images/course/course".concat(data.id || '1', ".jpg"),
-      description: '这是一个针对学生学习需求定制的专业课程，由经验丰富的教师团队精心设计。',
-      content: '课程内容包括多个章节，每个章节有不同的主题和内容。通过系统学习，学生将掌握核心知识点和解题技巧。',
-      price: data.id === '2' ? 199 : data.id === '3' ? 259 : 299,
-      originalPrice: data.id === '2' ? 299 : data.id === '3' ? 359 : 399,
-      bookingCount: data.id === '2' ? 98 : data.id === '3' ? 85 : 120,
-      chapter: [{
-        title: '第一章：基础知识',
-        lessons: ['1.1 基本概念', '1.2 基本方法', '1.3 典型例题']
-      }, {
-        title: '第二章：核心技巧',
-        lessons: ['2.1 解题思路', '2.2 常见错误', '2.3 练习题解析']
-      }, {
-        title: '第三章：提高应用',
-        lessons: ['3.1 综合运用', '3.2 实战演练', '3.3 能力提升']
-      }],
-      teacher: {
-        id: data.id === '2' ? '2' : data.id === '3' ? '3' : '1',
-        name: data.id === '2' ? '李老师' : data.id === '3' ? '王老师' : '张老师',
-        avatar: "/static/images/teacher/teacher".concat(data.id || '1', ".jpg"),
-        title: data.id === '2' ? '英语教研组长' : data.id === '3' ? '英语教研组长' : '高级讲师',
-        description: '有多年教学经验，曾获得多项教学奖项。擅长针对学生的不同特点制定个性化教学方案。'
-      }
-    };
-  } else if (name === 'yuekeCloudTest') {
-    mockData = {
-      code: 0,
-      success: true,
-      message: '云函数连接成功(模拟数据)',
-      timestamp: new Date().toISOString()
-    };
-  }
-  return mockData;
-}
 var _default = request;
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
 
-/***/ }),
-
-/***/ 9:
-/*!*****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/arrayLikeToArray.js ***!
-  \*****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-  return arr2;
-}
-module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
 /***/ })
-
-}]);
+]]);
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

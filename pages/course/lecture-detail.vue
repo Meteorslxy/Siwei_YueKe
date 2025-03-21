@@ -1,0 +1,500 @@
+<template>
+  <view class="lecture-detail">
+    <view class="lecture-header">
+      <image class="lecture-image" :src="lecture.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
+      <view class="lecture-overlay"></view>
+      <view class="lecture-title">{{lecture.title}}</view>
+    </view>
+    
+    <view class="lecture-info">
+      <view class="info-item">
+        <text class="iconfont icon-time info-icon"></text>
+        <text>{{formatDate(lecture.startTime)}} - {{formatTime(new Date(lecture.endTime))}}</text>
+      </view>
+      
+      <view class="info-item">
+        <text class="iconfont icon-location info-icon"></text>
+        <text>{{lecture.location || '待定'}}</text>
+      </view>
+      
+      <view class="info-item">
+        <text class="iconfont icon-teacher info-icon"></text>
+        <text>{{lecture.speaker || '待定'}}</text>
+      </view>
+      
+      <view class="info-price">
+        <text class="price-label">讲座价格:</text>
+        <text class="price-value" v-if="lecture.price > 0">¥{{lecture.price}}</text>
+        <text class="price-free" v-else>免费</text>
+      </view>
+      
+      <view class="info-status">
+        <text class="status-label">讲座状态:</text>
+        <text class="status-value" :class="{ 'status-ongoing': isOngoing(lecture), 'status-end': isEnded(lecture) }">
+          {{getLectureStatus(lecture)}}
+        </text>
+      </view>
+      
+      <view class="info-attendees">
+        <text class="attendees-label">已报名:</text>
+        <text class="attendees-value">{{lecture.currentAttendees || 0}}/{{lecture.maxAttendees || '不限'}}</text>
+      </view>
+    </view>
+    
+    <view class="lecture-tabs">
+      <view 
+        v-for="(tab, index) in tabs" 
+        :key="index" 
+        class="tab-item" 
+        :class="{ active: currentTab === index }"
+        @click="switchTab(index)"
+      >
+        {{tab.name}}
+      </view>
+    </view>
+    
+    <view class="lecture-content">
+      <!-- 讲座简介 -->
+      <view v-if="currentTab === 0" class="intro-container">
+        <view class="section-title">讲座简介</view>
+        <view class="intro-text">{{lecture.description || '暂无简介'}}</view>
+        
+        <view class="section-title">讲座内容</view>
+        <view class="content-text" v-if="lecture.content">
+          <text>{{lecture.content}}</text>
+        </view>
+        <empty-tip v-else tip="暂无详细内容" :show="true"></empty-tip>
+      </view>
+      
+      <!-- 讲师介绍 -->
+      <view v-if="currentTab === 1" class="speaker-container">
+        <view v-if="lecture.speakerInfo" class="speaker-info">
+          <image class="speaker-avatar" :src="lecture.speakerInfo.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+          <view class="speaker-detail">
+            <view class="speaker-name">{{lecture.speakerInfo.name}}</view>
+            <view class="speaker-title">{{lecture.speakerInfo.title}}</view>
+          </view>
+          <view class="speaker-intro">
+            <view class="section-title">讲师介绍</view>
+            <view class="intro-text">{{lecture.speakerInfo.introduction || '暂无介绍'}}</view>
+          </view>
+        </view>
+        <empty-tip v-else tip="暂无讲师信息" :show="true"></empty-tip>
+      </view>
+      
+      <!-- 相关讲座 -->
+      <view v-if="currentTab === 2" class="related-container">
+        <view v-if="lecture.recommendLectures && lecture.recommendLectures.length > 0" class="related-list">
+          <view class="related-item" v-for="(item, index) in lecture.recommendLectures" :key="item._id || index" @click="goToLecture(item)">
+            <image class="related-image" :src="item.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
+            <view class="related-info">
+              <view class="related-title">{{item.title}}</view>
+              <view class="related-time">{{formatDate(item.startTime)}}</view>
+            </view>
+          </view>
+        </view>
+        <empty-tip v-else tip="暂无相关讲座" :show="true"></empty-tip>
+      </view>
+    </view>
+    
+    <view class="action-bar">
+      <button class="action-button" :disabled="isEnded(lecture)" @click="registerLecture">
+        {{isEnded(lecture) ? '已结束' : '立即报名'}}
+      </button>
+    </view>
+  </view>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      lectureId: '',
+      lecture: {
+        title: '',
+        description: '',
+        content: '',
+        coverImage: '',
+        speaker: '',
+        location: '',
+        startTime: '',
+        endTime: '',
+        price: 0,
+        maxAttendees: 0,
+        currentAttendees: 0,
+        speakerInfo: null,
+        recommendLectures: []
+      },
+      tabs: [
+        { name: '讲座详情', id: 'intro' },
+        { name: '讲师介绍', id: 'speaker' },
+        { name: '相关讲座', id: 'related' }
+      ],
+      currentTab: 0,
+      loading: false
+    }
+  },
+  onLoad(options) {
+    if (options.id) {
+      this.lectureId = options.id;
+      this.getLectureDetail();
+    }
+  },
+  methods: {
+    // 获取讲座详情
+    getLectureDetail() {
+      this.loading = true;
+      uni.showLoading({ title: '加载中' });
+      
+      this.$api.lecture.getLectureDetail(this.lectureId)
+        .then(res => {
+          if (res && res.data) {
+            this.lecture = res.data;
+            uni.setNavigationBarTitle({ title: this.lecture.title });
+          } else {
+            uni.showToast({
+              title: '获取讲座信息失败',
+              icon: 'none'
+            });
+          }
+        })
+        .catch(err => {
+          console.error('获取讲座详情失败', err);
+          uni.showToast({
+            title: '获取讲座信息失败',
+            icon: 'none'
+          });
+        })
+        .finally(() => {
+          this.loading = false;
+          uni.hideLoading();
+        });
+    },
+    
+    // 切换标签
+    switchTab(index) {
+      if (this.currentTab === index) return;
+      this.currentTab = index;
+    },
+    
+    // 跳转到其他讲座
+    goToLecture(lecture) {
+      uni.navigateTo({
+        url: `/pages/course/lecture-detail?id=${lecture._id}`
+      });
+    },
+    
+    // 报名讲座
+    registerLecture() {
+      // 判断讲座是否已结束
+      if (this.isEnded(this.lecture)) {
+        uni.showToast({
+          title: '讲座已结束，无法报名',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 判断讲座是否已满员
+      if (this.lecture.currentAttendees >= this.lecture.maxAttendees) {
+        uni.showToast({
+          title: '讲座已满员，无法报名',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 这里实现报名逻辑
+      uni.showToast({
+        title: '报名功能尚未实现',
+        icon: 'none'
+      });
+    },
+    
+    // 格式化日期
+    formatDate(timestamp) {
+      if (!timestamp) return '待定';
+      
+      const date = new Date(timestamp);
+      return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${this.formatTime(date)}`;
+    },
+    
+    // 格式化时间
+    formatTime(date) {
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    },
+    
+    // 是否进行中
+    isOngoing(lecture) {
+      if (!lecture.startTime || !lecture.endTime) return false;
+      
+      const now = Date.now();
+      return now >= lecture.startTime && now <= lecture.endTime;
+    },
+    
+    // 是否已结束
+    isEnded(lecture) {
+      if (!lecture.endTime) return false;
+      
+      return Date.now() > lecture.endTime;
+    },
+    
+    // 获取讲座状态
+    getLectureStatus(lecture) {
+      if (this.isEnded(lecture)) {
+        return '已结束';
+      } else if (this.isOngoing(lecture)) {
+        return '进行中';
+      } else {
+        return '即将开始';
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.lecture-detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7f7f7;
+  
+  .lecture-header {
+    position: relative;
+    height: 360rpx;
+    
+    .lecture-image {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .lecture-overlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%);
+    }
+    
+    .lecture-title {
+      position: absolute;
+      left: 30rpx;
+      bottom: 30rpx;
+      right: 30rpx;
+      color: #fff;
+      font-size: 36rpx;
+      font-weight: bold;
+      line-height: 1.3;
+      text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
+    }
+  }
+  
+  .lecture-info {
+    background-color: #fff;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+    
+    .info-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20rpx;
+      font-size: 28rpx;
+      color: #333;
+      
+      .info-icon {
+        font-size: 32rpx;
+        color: #FF6B00;
+        margin-right: 15rpx;
+      }
+    }
+    
+    .info-price, .info-status, .info-attendees {
+      display: flex;
+      align-items: center;
+      margin-top: 30rpx;
+      font-size: 28rpx;
+      
+      .price-label, .status-label, .attendees-label {
+        color: #666;
+        margin-right: 15rpx;
+      }
+      
+      .price-value {
+        color: #FF6B00;
+        font-weight: bold;
+      }
+      
+      .price-free {
+        color: #4CAF50;
+      }
+      
+      .status-value {
+        color: #FF6B00;
+        
+        &.status-ongoing {
+          color: #007AFF;
+        }
+        
+        &.status-end {
+          color: #999;
+        }
+      }
+      
+      .attendees-value {
+        color: #333;
+      }
+    }
+  }
+  
+  .lecture-tabs {
+    display: flex;
+    background-color: #fff;
+    padding: 0 20rpx;
+    border-bottom: 1rpx solid #eee;
+    
+    .tab-item {
+      padding: 24rpx 30rpx;
+      font-size: 28rpx;
+      color: #666;
+      position: relative;
+      
+      &.active {
+        color: #FF6B00;
+        font-weight: bold;
+        
+        &:after {
+          content: '';
+          position: absolute;
+          left: 30rpx;
+          right: 30rpx;
+          bottom: 0;
+          height: 6rpx;
+          background-color: #FF6B00;
+          border-radius: 3rpx;
+        }
+      }
+    }
+  }
+  
+  .lecture-content {
+    flex: 1;
+    background-color: #fff;
+    padding: 30rpx;
+    
+    .section-title {
+      font-size: 30rpx;
+      font-weight: bold;
+      color: #333;
+      margin: 20rpx 0;
+      padding-left: 15rpx;
+      border-left: 6rpx solid #FF6B00;
+    }
+    
+    .intro-text, .content-text {
+      font-size: 28rpx;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 30rpx;
+      white-space: pre-wrap;
+    }
+    
+    .speaker-info {
+      display: flex;
+      flex-direction: column;
+      
+      .speaker-avatar {
+        width: 120rpx;
+        height: 120rpx;
+        border-radius: 50%;
+        margin-bottom: 20rpx;
+      }
+      
+      .speaker-detail {
+        margin-bottom: 20rpx;
+        
+        .speaker-name {
+          font-size: 32rpx;
+          font-weight: bold;
+          color: #333;
+        }
+        
+        .speaker-title {
+          font-size: 26rpx;
+          color: #666;
+          margin-top: 10rpx;
+        }
+      }
+      
+      .speaker-intro {
+        margin-top: 20rpx;
+      }
+    }
+    
+    .related-list {
+      .related-item {
+        display: flex;
+        margin-bottom: 30rpx;
+        padding-bottom: 30rpx;
+        border-bottom: 1rpx solid #eee;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        .related-image {
+          width: 200rpx;
+          height: 120rpx;
+          border-radius: 8rpx;
+        }
+        
+        .related-info {
+          flex: 1;
+          margin-left: 20rpx;
+          
+          .related-title {
+            font-size: 28rpx;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15rpx;
+          }
+          
+          .related-time {
+            font-size: 24rpx;
+            color: #999;
+          }
+        }
+      }
+    }
+  }
+  
+  .action-bar {
+    height: 100rpx;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 30rpx;
+    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+    
+    .action-button {
+      flex: 1;
+      height: 80rpx;
+      line-height: 80rpx;
+      background-color: #FF6B00;
+      color: #fff;
+      font-size: 28rpx;
+      font-weight: bold;
+      border-radius: 40rpx;
+      
+      &[disabled] {
+        background-color: #ccc;
+        color: #fff;
+      }
+    }
+  }
+}
+</style> 

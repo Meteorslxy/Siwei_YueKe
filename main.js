@@ -91,21 +91,8 @@ if (typeof uniCloud !== 'undefined') {
       endpoint: 'https://api.next.bspapp.com', // 阿里云服务空间地址
     });
     
-
-    // 测试云函数连接
-    uniCloud.callFunction({
-      name: 'yuekeCloudTest',
-      data: { 
-        message: '测试UniCloud阿里云',
-        testMode: 'basic'
-      }
-    }).then(res => {
-      console.log('云函数测试成功:', res.result);
-    }).catch(err => {
-      console.error('云函数测试失败:', err);
-      // 如果云函数调用失败，使用模拟数据
-      console.log('使用模拟数据代替云函数响应');
-    });
+    
+    console.log('UniCloud阿里云环境初始化完成');
   } catch (error) {
     console.error('UniCloud初始化失败:', error);
   }

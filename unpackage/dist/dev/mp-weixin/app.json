@@ -12,8 +12,7 @@
     "pages/teacher/list",
     "pages/booking/create",
     "pages/school/detail",
-    "pages/admin/import-data",
-    "pages/admin/testCloud"
+    "pages/course/lecture-detail"
   ],
   "subPackages": [],
   "window": {

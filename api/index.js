@@ -12,51 +12,46 @@ const debugAPI = (name, result) => {
 // 课程相关API
 const courseApi = {
   // 获取课程列表
-  getCourseList(data, useMock = false) {
+  getCourseList(data) {
     console.log('调用getCourseList，参数:', data);
     return request({
       name: 'getCourseList',
-      data,
-      useMock
+      data
     }).then(res => debugAPI('getCourseList返回', res));
   },
   
   // 获取课程详情
-  getCourseDetail(id, useMock = false) {
+  getCourseDetail(id) {
     console.log('调用getCourseDetail，ID:', id);
     return request({
       name: 'getCourseDetail',
-      data: { id },
-      useMock
+      data: { id }
     }).then(res => debugAPI('getCourseDetail返回', res));
   },
   
   // 获取新闻列表
-  getNewsList(data = {}, useMock = false) {
+  getNewsList(data = {}) {
     console.log('调用getNewsList，参数:', data);
     return request({
       name: 'getNewsList',
-      data,
-      useMock
+      data
     }).then(res => debugAPI('getNewsList返回', res));
   },
   
   // 获取推荐课程
-  getRecommendCourses(data = {}, useMock = false) {
+  getRecommendCourses(data = {}) {
     console.log('调用getRecommendCourses，参数:', data);
     return request({
       name: 'getRecommendCourses',
-      data,
-      useMock
+      data
     }).then(res => debugAPI('getRecommendCourses返回', res));
   },
   
   // 预订课程
-  bookCourse(data, useMock = false) {
+  bookCourse(data) {
     return request({
       name: 'bookCourse',
-      data,
-      useMock
+      data
     });
   }
 }
@@ -64,56 +59,50 @@ const courseApi = {
 // 用户相关API
 const userApi = {
   // 用户登录
-  login(data, useMock = false) {
+  login(data) {
     return request({
       name: 'login',
-      data,
-      useMock
+      data
     });
   },
   
   // 获取用户信息
-  getUserInfo(useMock = false) {
+  getUserInfo() {
     return request({
       name: 'getUserInfo',
-      data: {},
-      useMock
+      data: {}
     });
   },
   
   // 获取预订列表
-  getBookingList(data, useMock = false) {
+  getBookingList(data) {
     return request({
       name: 'getBookingList',
-      data,
-      useMock
+      data
     });
   },
   
   // 获取预订详情
-  getBookingDetail(id, useMock = false) {
+  getBookingDetail(id) {
     return request({
       name: 'getBookingDetail',
-      data: { id },
-      useMock
+      data: { id }
     });
   },
   
   // 取消预订
-  cancelBooking(id, useMock = false) {
+  cancelBooking(id) {
     return request({
       name: 'cancelBooking',
-      data: { id },
-      useMock
+      data: { id }
     });
   },
   
   // 获取预订数量
-  getBookingCount(useMock = false) {
+  getBookingCount() {
     return request({
       name: 'getBookingCount',
-      data: {},
-      useMock
+      data: {}
     });
   }
 }
@@ -121,28 +110,48 @@ const userApi = {
 // 教师相关API
 const teacherApi = {
   // 获取教师列表
-  getTeacherList(data, useMock = false) {
+  getTeacherList(data) {
     console.log('调用getTeacherList，参数:', data);
     return request({
       name: 'getTeacherList',
-      data,
-      useMock
+      data
     }).then(res => debugAPI('getTeacherList返回', res));
   },
   
   // 获取教师详情
-  getTeacherDetail(id, useMock = false) {
+  getTeacherDetail(id) {
     console.log('调用getTeacherDetail，ID:', id);
     return request({
       name: 'getTeacherDetail',
-      data: { id },
-      useMock
+      data: { id }
     }).then(res => debugAPI('getTeacherDetail返回', res));
+  }
+}
+
+// 讲座相关API
+const lectureApi = {
+  // 获取讲座列表
+  getLectureList(data) {
+    console.log('调用getLectureList，参数:', data);
+    return request({
+      name: 'getLectureList',
+      data
+    }).then(res => debugAPI('getLectureList返回', res));
+  },
+  
+  // 获取讲座详情
+  getLectureDetail(id) {
+    console.log('调用getLectureDetail，ID:', id);
+    return request({
+      name: 'getLectureDetail',
+      data: { id }
+    }).then(res => debugAPI('getLectureDetail返回', res));
   }
 }
 
 export default {
   course: courseApi,
   user: userApi,
-  teacher: teacherApi
+  teacher: teacherApi,
+  lecture: lectureApi
 } 
