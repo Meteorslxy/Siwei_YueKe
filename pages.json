@@ -96,14 +96,6 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white"
             }
-        },
-        {
-            "path": "pages/course/lecture-detail",
-            "style": {
-                "navigationBarTitleText": "讲座详情",
-                "navigationBarBackgroundColor": "#EC7A49",
-                "navigationBarTextStyle": "white"
-            }
         }
     ],
     "globalStyle": {

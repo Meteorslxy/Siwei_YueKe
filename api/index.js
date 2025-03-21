@@ -128,30 +128,8 @@ const teacherApi = {
   }
 }
 
-// 讲座相关API
-const lectureApi = {
-  // 获取讲座列表
-  getLectureList(data) {
-    console.log('调用getLectureList，参数:', data);
-    return request({
-      name: 'getLectureList',
-      data
-    }).then(res => debugAPI('getLectureList返回', res));
-  },
-  
-  // 获取讲座详情
-  getLectureDetail(id) {
-    console.log('调用getLectureDetail，ID:', id);
-    return request({
-      name: 'getLectureDetail',
-      data: { id }
-    }).then(res => debugAPI('getLectureDetail返回', res));
-  }
-}
-
 export default {
   course: courseApi,
   user: userApi,
-  teacher: teacherApi,
-  lecture: lectureApi
+  teacher: teacherApi
 } 
