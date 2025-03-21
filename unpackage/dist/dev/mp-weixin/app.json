@@ -11,7 +11,8 @@
     "pages/course/lectures",
     "pages/teacher/list",
     "pages/booking/create",
-    "pages/school/detail"
+    "pages/school/detail",
+    "pages/course/lecture-detail"
   ],
   "subPackages": [],
   "window": {

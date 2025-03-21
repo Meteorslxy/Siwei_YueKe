@@ -287,15 +287,14 @@ var _default = {
       var params = {
         page: this.page,
         pageSize: this.pageSize,
-        keyword: this.keyword,
-        type: 'lecture'
+        keyword: this.keyword
       };
       uni.showLoading({
         title: '加载中'
       });
 
       // 调用获取讲座列表接口
-      this.$api.course.getCourseList(params).then(function (res) {
+      this.$api.lecture.getLectureList(params).then(function (res) {
         var list = res.data || [];
         if (_this.page === 1) {
           _this.lectureList = list;
@@ -328,7 +327,7 @@ var _default = {
     // 跳转到详情页
     goToDetail: function goToDetail(lecture) {
       uni.navigateTo({
-        url: "/pages/course/detail?id=".concat(lecture._id, "&type=lecture")
+        url: "/pages/course/lecture-detail?id=".concat(lecture._id)
       });
     },
     // 格式化日期

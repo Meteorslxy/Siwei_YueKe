@@ -18524,6 +18524,13 @@ var _default = {
       "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
+  }, {
+    "path": "pages/course/lecture-detail",
+    "style": {
+      "navigationBarTitleText": "讲座详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
   }],
   "globalStyle": {
     "navigationBarTextStyle": "black",
@@ -18951,10 +18958,37 @@ var teacherApi = {
     });
   }
 };
+
+// 讲座相关API
+var lectureApi = {
+  // 获取讲座列表
+  getLectureList: function getLectureList(data) {
+    console.log('调用getLectureList，参数:', data);
+    return (0, _request.default)({
+      name: 'getLectureList',
+      data: data
+    }).then(function (res) {
+      return debugAPI('getLectureList返回', res);
+    });
+  },
+  // 获取讲座详情
+  getLectureDetail: function getLectureDetail(id) {
+    console.log('调用getLectureDetail，ID:', id);
+    return (0, _request.default)({
+      name: 'getLectureDetail',
+      data: {
+        id: id
+      }
+    }).then(function (res) {
+      return debugAPI('getLectureDetail返回', res);
+    });
+  }
+};
 var _default = {
   course: courseApi,
   user: userApi,
-  teacher: teacherApi
+  teacher: teacherApi,
+  lecture: lectureApi
 };
 exports.default = _default;
 
