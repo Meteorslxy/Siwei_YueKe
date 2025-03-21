@@ -176,6 +176,25 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white"
             }
+        },
+        {
+            "path": "pages/news/list",
+            "style": {
+                "navigationBarTitleText": "最新通知",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/news/detail",
+            "style": {
+                "navigationBarTitleText": "通知详情",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white",
+                "navigationStyle": "custom"
+            }
         }
     ],
     "globalStyle": {

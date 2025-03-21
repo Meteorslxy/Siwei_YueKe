@@ -52,7 +52,9 @@
     <view class="teacher-intro">
       <view class="detail-title">师资介绍</view>
       <view class="teacher-card">
-        <image class="teacher-avatar" :src="courseInfo.teacherAvatar" mode="aspectFill"></image>
+        <image class="teacher-avatar" 
+               :src="courseInfo.teacherAvatarUrl || courseInfo.teacherAvatar || '/static/images/teacher/default-avatar.png'" 
+               mode="aspectFill"></image>
         <view class="teacher-info">
           <view class="teacher-header">
             <text class="teacher-name">{{courseInfo.teacherName}}</text>
@@ -201,6 +203,18 @@ export default {
       this.courseInfo.enrolled = this.courseInfo.enrolled || 0;
       this.courseInfo.capacity = this.courseInfo.capacity || 20;
       
+      // 处理封面图片路径
+      if (this.courseInfo.coverImage && !this.courseInfo.coverImage.startsWith('/')) {
+        this.courseInfo.coverImage = `/static/images/course/${this.courseInfo.coverImage}`;
+      } else if (!this.courseInfo.coverImage && this.courseInfo.image) {
+        // 使用image字段作为备选
+        this.courseInfo.coverImage = this.courseInfo.image.startsWith('/') ? 
+          this.courseInfo.image : `/static/images/course/${this.courseInfo.image}`;
+      } else if (!this.courseInfo.coverImage) {
+        // 没有封面图时使用默认图片
+        this.courseInfo.coverImage = '/static/images/course/course1.jpg';
+      }
+      
       // 预加载教师头像
       if (this.courseInfo.teacherAvatar) {
         this.preloadTeacherAvatar();
@@ -214,12 +228,24 @@ export default {
       if (!this.courseInfo.teacherAvatar) return;
       
       try {
-        const avatarResult = await this.$api.file.getImage(this.courseInfo.teacherAvatar);
-        if (avatarResult && avatarResult.data && avatarResult.data.url) {
-          this.courseInfo.teacherAvatarUrl = avatarResult.data.url;
+        // 判断是否是本地图片路径（以/static开头或/开头）
+        if (this.courseInfo.teacherAvatar.startsWith('/static') || 
+            this.courseInfo.teacherAvatar.startsWith('/')) {
+          console.log('使用本地头像图片:', this.courseInfo.teacherAvatar);
+          // 如果是本地路径，直接使用
+          this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
+        } else {
+          // 否则从云端获取
+          console.log('从云端获取头像图片:', this.courseInfo.teacherAvatar);
+          const avatarResult = await this.$api.file.getImage(this.courseInfo.teacherAvatar);
+          if (avatarResult && avatarResult.data && avatarResult.data.url) {
+            this.courseInfo.teacherAvatarUrl = avatarResult.data.url;
+          }
         }
       } catch (error) {
         console.error('加载教师头像失败:', error);
+        // 加载失败时使用默认头像
+        this.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
       }
     },
     

@@ -61,17 +61,22 @@ export default {
       showGradeOptions: false,
       grades: [
         { id: 'all', name: '全部年级' },
-        { id: 'primary', name: '小学' },
-        { id: 'junior', name: '初中' }
+        { id: '小学', name: '小学' },
+        { id: '初中', name: '初中' },
+        { id: '高中', name: '高中' }
       ],
       currentSubject: '',
       subjects: [
         { id: '', name: '全部' },
-        { id: 'chinese', name: '语文' },
-        { id: 'math', name: '数学' },
-        { id: 'english', name: '英语' },
-        { id: 'physics', name: '物理' },
-        { id: 'chemistry', name: '化学' }
+        { id: '数学', name: '数学' },
+        { id: '语文', name: '语文' },
+        { id: '英语', name: '英语' },
+        { id: '物理', name: '物理' },
+        { id: '化学', name: '化学' },
+        { id: '生物', name: '生物' },
+        { id: '历史', name: '历史' },
+        { id: '地理', name: '地理' },
+        { id: '政治', name: '政治' }
       ],
       teacherList: [],
       page: 1,
@@ -150,13 +155,16 @@ export default {
         pageSize: this.pageSize,
         keyword: this.keyword,
         subject: this.currentSubject,
-        gradeGroup: this.currentGrade
+        grade: this.currentGrade !== 'all' ? this.currentGrade : ''
       };
+      
+      console.log('获取教师列表参数:', params);
       
       uni.showLoading({ title: '加载中' });
       
       // 使用API接口调用
       this.$api.teacher.getTeacherList(params).then(result => {
+        console.log('获取教师列表结果:', result);
         if (result && result.data) {
           const list = result.data || [];
           

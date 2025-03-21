@@ -116,7 +116,7 @@
   font-size: 24rpx;
   color: var(--text-color);
 }
-/* 资讯区域 */
+/* 资讯轮播区域 */
 .news-section {
   margin: 30rpx 30rpx 0;
   background-color: #fff;
@@ -141,21 +141,42 @@
   font-size: 32rpx;
   font-weight: bold;
   color: var(--text-color);
+  flex: 1;
+}
+.news-section .section-header .section-more {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+  display: flex;
+  align-items: center;
+}
+.news-section .section-header .section-more .more-arrow {
+  width: 12rpx;
+  height: 12rpx;
+  border-top: 2rpx solid var(--text-color-light);
+  border-right: 2rpx solid var(--text-color-light);
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  margin-left: 8rpx;
 }
 .news-section .news-scroll {
+  width: 100%;
   white-space: nowrap;
 }
 .news-section .news-scroll .news-item {
   display: inline-block;
   width: 600rpx;
-  margin-right: 20rpx;
-  background-color: #fff;
   border-radius: 12rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-}
-.news-section .news-scroll .news-item:first-child {
   margin-left: 30rpx;
+  position: relative;
+  /* 确保定位正确 */
+  z-index: 1;
+  /* 确保可点击 */
+}
+.news-section .news-scroll .news-item:active {
+  opacity: 0.8;
+  /* 点击反馈 */
 }
 .news-section .news-scroll .news-item .news-image {
   width: 600rpx;

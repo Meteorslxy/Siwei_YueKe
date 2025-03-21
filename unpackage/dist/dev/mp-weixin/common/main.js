@@ -16,7 +16,7 @@ __webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/ind
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _App = _interopRequireDefault(__webpack_require__(/*! ./App */ 39));
 __webpack_require__(/*! ./components/global.js */ 45);
-var _index2 = _interopRequireDefault(__webpack_require__(/*! ./api/index.js */ 81));
+var _index2 = _interopRequireDefault(__webpack_require__(/*! ./api/index.js */ 88));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // @ts-ignore
@@ -109,6 +109,13 @@ if (typeof uniCloud !== 'undefined') {
 } else {
   console.warn('uniCloud不可用');
 }
+
+// 添加页面跳转的错误处理
+uni.addInterceptor('navigateTo', {
+  fail: function fail(err) {
+    console.error('页面跳转错误:', err);
+  }
+});
 var app = new _vue.default(_objectSpread({}, _App.default));
 createApp(app).$mount();
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["createApp"]))
@@ -1245,11 +1252,15 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   var m0 = _vm.getImageUrl(_vm.teacher.avatarId || _vm.teacher.avatar)
+  var g0 = _vm.teacher.experience && _vm.teacher.experience.length > 0
+  var g1 = _vm.teacher.experience && _vm.teacher.experience.length > 0
   _vm.$mp.data = Object.assign(
     {},
     {
       $root: {
         m0: m0,
+        g0: g0,
+        g1: g1,
       },
     }
   )
@@ -1320,6 +1331,10 @@ exports.default = void 0;
 //
 //
 //
+//
+//
+//
+//
 var _default2 = {
   name: 'teacher-card',
   props: {
@@ -1350,6 +1365,18 @@ var _default2 = {
       console.log('教师没有头像数据');
     }
   },
+  computed: {
+    descList: function descList() {
+      if (!this.teacher.desc) return [];
+      if (Array.isArray(this.teacher.desc)) {
+        return this.teacher.desc;
+      }
+      // 假设描述是用换行符分隔的条目
+      return this.teacher.desc.split('\n').filter(function (item) {
+        return item.trim();
+      });
+    }
+  },
   methods: {
     goToDetail: function goToDetail() {
       this.$emit('click', this.teacher);
@@ -1360,26 +1387,29 @@ var _default2 = {
     getImageUrl: function getImageUrl(imageId) {
       console.log('获取图片URL, 图片ID:', imageId);
 
+      // 如果未提供ID，返回默认头像
+      if (!imageId) {
+        console.log('图片ID为空，使用默认头像');
+        return this.defaultAvatar;
+      }
+
       // 如果是路径格式，直接返回
-      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+      if (imageId.startsWith('/') || imageId.startsWith('http')) {
         console.log('使用路径格式图片:', imageId);
         return imageId;
       }
 
       // 尝试从缓存获取
-      if (imageId && this.imageCache[imageId]) {
+      if (this.imageCache[imageId]) {
         console.log('从缓存获取图片:', imageId);
         return this.imageCache[imageId];
       }
 
       // 如果有ID但没缓存，尝试加载
-      if (imageId) {
-        console.log('尝试加载图片:', imageId);
-        this.preloadImage(imageId);
-      }
+      this.preloadImage(imageId);
 
       // 返回默认头像
-      console.log('使用默认头像');
+      console.log('暂未加载到图片，使用默认头像');
       return this.defaultAvatar;
     },
     preloadImage: function preloadImage(imageId) {
@@ -1387,7 +1417,7 @@ var _default2 = {
       console.log('预加载图片开始:', imageId);
 
       // 如果已经是URL格式，直接缓存
-      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+      if (imageId.startsWith('/') || imageId.startsWith('http')) {
         this.imageCache[imageId] = imageId;
         console.log('已缓存URL格式图片:', imageId);
         return;
@@ -1402,27 +1432,41 @@ var _default2 = {
           // 处理包含data.url的情况
           _this.imageCache[imageId] = res.data.url;
           console.log('已缓存图片URL:', res.data.url);
-          // 强制视图更新
-          _this.$forceUpdate();
         } else if (res && res.imageData && res.imageData.url) {
           // 处理包含imageData.url的情况
           _this.imageCache[imageId] = res.imageData.url;
           console.log('从imageData获取到图片URL:', res.imageData.url);
-          // 强制视图更新
-          _this.$forceUpdate();
         } else if (res && res.imageData && res.imageData.base64Data) {
           // 处理base64数据的情况
           var base64Url = 'data:image/jpeg;base64,' + res.imageData.base64Data;
           _this.imageCache[imageId] = base64Url;
           console.log('从imageData.base64Data生成图片URL');
-          // 强制视图更新
-          _this.$forceUpdate();
+        } else if (res && typeof res === 'string' && res.startsWith('data:image')) {
+          // 直接返回的base64数据
+          _this.imageCache[imageId] = res;
+          console.log('接收到直接的base64图片数据');
         } else {
           console.error('获取图片URL失败,返回数据结构不正确:', res);
+          // 设置默认图片到缓存，避免重复请求
+          _this.imageCache[imageId] = _this.defaultAvatar;
         }
+
+        // 强制视图更新
+        _this.$forceUpdate();
       }).catch(function (err) {
         console.error('获取图片失败:', err);
+        // 设置默认图片到缓存，避免重复请求失败的图片
+        _this.imageCache[imageId] = _this.defaultAvatar;
+        _this.$forceUpdate();
       });
+    },
+    formatSubject: function formatSubject(subject) {
+      // 直接返回学科名（已是中文）
+      return subject;
+    },
+    formatGrade: function formatGrade(grade) {
+      // 直接返回年级名（已是中文）
+      return grade;
     }
   }
 };

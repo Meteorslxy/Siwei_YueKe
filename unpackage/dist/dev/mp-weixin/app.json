@@ -21,7 +21,9 @@
     "pages/admin/lecture",
     "pages/admin/news",
     "pages/admin/booking",
-    "pages/admin/content-upload/index"
+    "pages/admin/content-upload/index",
+    "pages/news/list",
+    "pages/news/detail"
   ],
   "subPackages": [],
   "window": {

@@ -7,9 +7,13 @@
       <view class="teacher-content">
         <view class="name-subject">
           <view class="teacher-name">{{teacher.name || '叶老师'}}</view>
-          <view class="subject-tag">{{teacher.subject || 'math'}}</view>
+          <view class="subject-tag" v-if="teacher.subject">{{teacher.subject}}</view>
         </view>
         <view class="intro-section">
+          <view class="intro-item" v-if="teacher.grade">
+            <text class="intro-label">教学年级：</text>
+            <text class="intro-content">{{teacher.grade}}</text>
+          </view>
           <view class="intro-item" v-if="teacher.education">
             <text class="intro-label">教育背景：</text>
             <text class="intro-content">{{teacher.education}}</text>
@@ -78,33 +82,36 @@ export default {
     getImageUrl(imageId) {
       console.log('获取图片URL, 图片ID:', imageId);
       
+      // 如果未提供ID，返回默认头像
+      if (!imageId) {
+        console.log('图片ID为空，使用默认头像');
+        return this.defaultAvatar;
+      }
+      
       // 如果是路径格式，直接返回
-      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+      if (imageId.startsWith('/') || imageId.startsWith('http')) {
         console.log('使用路径格式图片:', imageId);
         return imageId;
       }
       
       // 尝试从缓存获取
-      if (imageId && this.imageCache[imageId]) {
+      if (this.imageCache[imageId]) {
         console.log('从缓存获取图片:', imageId);
         return this.imageCache[imageId];
       }
       
       // 如果有ID但没缓存，尝试加载
-      if (imageId) {
-        console.log('尝试加载图片:', imageId);
-        this.preloadImage(imageId);
-      }
+      this.preloadImage(imageId);
       
       // 返回默认头像
-      console.log('使用默认头像');
+      console.log('暂未加载到图片，使用默认头像');
       return this.defaultAvatar;
     },
     preloadImage(imageId) {
       console.log('预加载图片开始:', imageId);
       
       // 如果已经是URL格式，直接缓存
-      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
+      if (imageId.startsWith('/') || imageId.startsWith('http')) {
         this.imageCache[imageId] = imageId;
         console.log('已缓存URL格式图片:', imageId);
         return;
@@ -120,28 +127,42 @@ export default {
             // 处理包含data.url的情况
             this.imageCache[imageId] = res.data.url;
             console.log('已缓存图片URL:', res.data.url);
-            // 强制视图更新
-            this.$forceUpdate();
           } else if (res && res.imageData && res.imageData.url) {
             // 处理包含imageData.url的情况
             this.imageCache[imageId] = res.imageData.url;
             console.log('从imageData获取到图片URL:', res.imageData.url);
-            // 强制视图更新
-            this.$forceUpdate();
           } else if (res && res.imageData && res.imageData.base64Data) {
             // 处理base64数据的情况
             const base64Url = 'data:image/jpeg;base64,' + res.imageData.base64Data;
             this.imageCache[imageId] = base64Url;
             console.log('从imageData.base64Data生成图片URL');
-            // 强制视图更新
-            this.$forceUpdate();
+          } else if (res && typeof res === 'string' && res.startsWith('data:image')) {
+            // 直接返回的base64数据
+            this.imageCache[imageId] = res;
+            console.log('接收到直接的base64图片数据');
           } else {
             console.error('获取图片URL失败,返回数据结构不正确:', res);
+            // 设置默认图片到缓存，避免重复请求
+            this.imageCache[imageId] = this.defaultAvatar;
           }
+          
+          // 强制视图更新
+          this.$forceUpdate();
         })
         .catch(err => {
           console.error('获取图片失败:', err);
+          // 设置默认图片到缓存，避免重复请求失败的图片
+          this.imageCache[imageId] = this.defaultAvatar;
+          this.$forceUpdate();
         });
+    },
+    formatSubject(subject) {
+      // 直接返回学科名（已是中文）
+      return subject;
+    },
+    formatGrade(grade) {
+      // 直接返回年级名（已是中文）
+      return grade;
     }
   }
 }

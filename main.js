@@ -100,6 +100,13 @@ if (typeof uniCloud !== 'undefined') {
   console.warn('uniCloud不可用');
 }
 
+// 添加页面跳转的错误处理
+uni.addInterceptor('navigateTo', {
+  fail(err) {
+    console.error('页面跳转错误:', err);
+  }
+});
+
 const app = new Vue({
     ...App
 })

@@ -1,0 +1,170 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.news-detail-container {
+  min-height: 100vh;
+  background-color: #fff;
+}
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--theme-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding-bottom: 10px;
+  z-index: 100;
+}
+.navbar .nav-back {
+  padding: 0 30rpx;
+  font-size: 40rpx;
+}
+.navbar .nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  padding-right: 60rpx;
+}
+.detail-content {
+  padding: 30rpx;
+  margin-top: calc(44px + 25px);
+}
+.detail-content .article-header {
+  margin-bottom: 30rpx;
+}
+.detail-content .article-header .article-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  line-height: 1.4;
+  margin-bottom: 20rpx;
+}
+.detail-content .article-header .article-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: var(--text-color-light);
+}
+.detail-content .article-cover {
+  margin-bottom: 30rpx;
+}
+.detail-content .article-cover .cover-image {
+  width: 100%;
+  border-radius: 8rpx;
+}
+.detail-content .article-content {
+  font-size: 30rpx;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+.detail-content .article-content :deep(._p) {
+  margin-bottom: 20rpx;
+}
+.detail-content .article-content :deep(._img) {
+  max-width: 100%;
+  margin: 20rpx 0;
+}
+.loading-container {
+  padding: 30rpx;
+  margin-top: calc(44px + 25px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+.loading-container .loading-text {
+  font-size: 28rpx;
+  color: var(--text-color-light);
+  text-align: center;
+}
+.loading-container .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.loading-container .error-container .error-text {
+  font-size: 32rpx;
+  color: var(--text-color);
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+.loading-container .error-container .error-tip {
+  font-size: 28rpx;
+  color: var(--text-color-light);
+  margin-bottom: 40rpx;
+}
+.loading-container .error-container .retry-btn {
+  background-color: var(--theme-color);
+  color: #fff;
+  font-size: 28rpx;
+  padding: 10rpx 60rpx;
+  border-radius: 40rpx;
+}
+

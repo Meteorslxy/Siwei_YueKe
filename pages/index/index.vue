@@ -32,13 +32,17 @@
       <view class="section-header">
         <view class="section-tag"></view>
         <text class="section-title">最新通知</text>
+        <view class="section-more" @click="navigateTo('/pages/news/list')">
+          <text>查看全部</text>
+          <view class="more-arrow"></view>
+        </view>
       </view>
       <scroll-view scroll-x class="news-scroll" show-scrollbar="false">
         <view 
           class="news-item" 
           v-for="(item, index) in newsList" 
           :key="index"
-          @click="navigateTo(`/pages/news/detail?id=${item._id}`)">
+          @click="navigateToNewsDetail(item)">
           <image class="news-image" :src="item.coverImage" mode="aspectFill"></image>
           <view class="news-content">
             <text class="news-title">{{item.title}}</text>
@@ -132,52 +136,29 @@ export default {
     // 获取资讯列表
     async getNews() {
       try {
+        console.log('首页获取资讯列表');
+        
         // 调用API获取资讯
         const result = await this.$api.course.getNewsList({
           page: 1,
           pageSize: 5
         });
         
-        if (result && result.data) {
+        console.log('获取资讯结果:', result);
+        
+        if (result && result.data && result.data.length > 0) {
           this.newsList = result.data;
         } else {
-          // 使用模拟数据
-          this.newsList = [
-            {
-              id: '1',
-              title: '四维工作室春季游学课程时间...',
-              digest: '尊敬的各位家长朋友，春季游学课程将于3月开始，敬请关注',
-              coverImage: '/static/images/news/news1.jpg',
-              publishTime: new Date('2023-02-15')
-            },
-            {
-              id: '2',
-              title: '四维工作室热烈祝贺学员杯赛季...',
-              digest: '尊敬的各位家长朋友，热烈祝贺我校学员在数学竞赛中获得一等奖',
-              coverImage: '/static/images/news/news2.jpg',
-              publishTime: new Date('2023-02-10')
-            }
-          ]
+          console.warn('未获取到资讯数据');
+          this.newsList = [];
         }
       } catch (e) {
-        console.error('获取资讯失败:', e)
-        // 使用模拟数据
-        this.newsList = [
-          {
-            id: '1',
-            title: '四维工作室春季游学课程时间...',
-            digest: '尊敬的各位家长朋友，春季游学课程将于3月开始，敬请关注',
-            coverImage: '/static/images/news/news1.jpg',
-            publishTime: new Date('2023-02-15')
-          },
-          {
-            id: '2',
-            title: '四维工作室热烈祝贺学员杯赛季...',
-            digest: '尊敬的各位家长朋友，热烈祝贺我校学员在数学竞赛中获得一等奖',
-            coverImage: '/static/images/news/news2.jpg',
-            publishTime: new Date('2023-02-10')
-          }
-        ]
+        console.error('获取资讯失败:', e);
+        this.newsList = [];
+        uni.showToast({
+          title: '获取通知列表失败',
+          icon: 'none'
+        });
       }
     },
     
@@ -284,6 +265,19 @@ export default {
       }
     },
     
+    // 获取图片URL - 处理本地和云端图片
+    getImageUrl(path) {
+      if (!path) return '/static/images/default.png';
+      
+      // 如果是完整路径或本地路径，直接返回
+      if (path.startsWith('http') || path.startsWith('/')) {
+        return path;
+      }
+      
+      // 否则作为云端图片处理
+      return `/static/images/${path}`;
+    },
+    
     // 格式化课程时间
     formatCourseTime(startTime, endTime) {
       if (!startTime) return ''
@@ -302,12 +296,88 @@ export default {
     
     // 页面导航
     navigateTo(url) {
-      uni.navigateTo({ url })
+      console.log('导航到:', url);
+      uni.navigateTo({ 
+        url,
+        success: function() {
+          console.log('导航成功:', url);
+        },
+        fail: function(err) {
+          console.error('导航失败:', url, err);
+          // 尝试使用另一种导航方式
+          uni.showToast({
+            title: '页面跳转失败',
+            icon: 'none'
+          });
+        }
+      });
     },
 
     // 切换到课程页面
     switchTab(url) {
       uni.switchTab({ url })
+    },
+
+    // 新闻详情页导航
+    navigateToNewsDetail(news) {
+      console.log('准备查看新闻:', news);
+      
+      if (!news) {
+        console.error('新闻对象为空');
+        uni.showToast({
+          title: '无法查看该通知',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 尝试所有可能的ID字段
+      const newsId = news._id || news.id || news.newsId;
+      console.log('使用的新闻ID:', newsId);
+      
+      if (!newsId) {
+        console.error('无法找到新闻ID');
+        // 显示模拟新闻详情
+        uni.navigateTo({
+          url: `/pages/news/detail?id=mock_news_${Date.now()}`,
+          success: (res) => {
+            console.log('新闻详情页导航成功(使用模拟ID)');
+          },
+          fail: (err) => {
+            console.error('新闻详情页导航失败:', err);
+            uni.showToast({
+              title: '无法查看该通知',
+              icon: 'none'
+            });
+          }
+        });
+        return;
+      }
+      
+      // 使用ID参数跳转到详情页
+      const url = `/pages/news/detail?id=${newsId}`;
+      console.log('导航到新闻详情页:', url);
+      
+      uni.navigateTo({
+        url,
+        success: (res) => {
+          console.log('新闻详情页导航成功:', res);
+        },
+        fail: (err) => {
+          console.error('新闻详情页导航失败:', err);
+          // 尝试使用另一种导航方式
+          uni.redirectTo({
+            url,
+            fail: (err2) => {
+              console.error('重定向到新闻详情页也失败了:', err2);
+              uni.showToast({
+                title: '无法跳转到详情页',
+                icon: 'none'
+              });
+            }
+          });
+        }
+      });
     }
   }
 }
@@ -372,7 +442,7 @@ export default {
   }
 }
 
-/* 资讯区域 */
+/* 资讯轮播区域 */
 .news-section {
   margin: 30rpx 30rpx 0;
   background-color: #fff;
@@ -398,23 +468,42 @@ export default {
       font-size: 32rpx;
       font-weight: bold;
       color: $text-color;
+      flex: 1;
+    }
+    
+    .section-more {
+      font-size: 24rpx;
+      color: $text-color-light;
+      display: flex;
+      align-items: center;
+      
+      .more-arrow {
+        width: 12rpx;
+        height: 12rpx;
+        border-top: 2rpx solid $text-color-light;
+        border-right: 2rpx solid $text-color-light;
+        transform: rotate(45deg);
+        margin-left: 8rpx;
+      }
     }
   }
   
   .news-scroll {
+    width: 100%;
     white-space: nowrap;
     
     .news-item {
       display: inline-block;
       width: 600rpx;
-      margin-right: 20rpx;
-      background-color: #fff;
       border-radius: 12rpx;
       overflow: hidden;
       box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+      margin-left: 30rpx;
+      position: relative; /* 确保定位正确 */
+      z-index: 1; /* 确保可点击 */
       
-      &:first-child {
-        margin-left: 30rpx;
+      &:active {
+        opacity: 0.8; /* 点击反馈 */
       }
       
       .news-image {

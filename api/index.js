@@ -62,6 +62,15 @@ const courseApi = {
     }).then(res => debugAPI('getNewsList返回', res));
   },
   
+  // 获取新闻详情
+  getNewsDetail(id) {
+    console.log('调用getNewsDetail，ID:', id);
+    return request({
+      name: 'getNewsDetail',
+      data: { _id: id, id: id } // 同时传递_id和id，增加匹配成功率
+    }).then(res => debugAPI('getNewsDetail返回', res));
+  },
+  
   // 获取推荐课程
   getRecommendCourses(data = {}) {
     console.log('调用getRecommendCourses，参数:', data);
