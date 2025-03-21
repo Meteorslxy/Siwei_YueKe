@@ -1,0 +1,39 @@
+
+.load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  margin: 20rpx 0;
+}
+.loading {
+  display: flex;
+  align-items: center;
+}
+.loading-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid #f2f2f2;
+  border-top: 4rpx solid #FF6B00;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  -webkit-animation: spin 1s linear infinite;
+          animation: spin 1s linear infinite;
+}
+@-webkit-keyframes spin {
+0% { -webkit-transform: rotate(0deg); transform: rotate(0deg);
+}
+100% { -webkit-transform: rotate(360deg); transform: rotate(360deg);
+}
+}
+@keyframes spin {
+0% { -webkit-transform: rotate(0deg); transform: rotate(0deg);
+}
+100% { -webkit-transform: rotate(360deg); transform: rotate(360deg);
+}
+}
+.loading-text, .text {
+  font-size: 28rpx;
+  color: #999;
+}
+

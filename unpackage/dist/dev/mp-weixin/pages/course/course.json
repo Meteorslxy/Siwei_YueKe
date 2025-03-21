@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "",
+  "navigationBarBackgroundColor": "#EC7A49",
+  "navigationBarTextStyle": "white",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "load-more": "/components/load-more/load-more",
+    "empty-tip": "/components/empty-tip/empty-tip"
+  }
+}

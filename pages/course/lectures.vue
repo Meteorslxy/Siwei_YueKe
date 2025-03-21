@@ -91,14 +91,13 @@ export default {
       const params = {
         page: this.page,
         pageSize: this.pageSize,
-        keyword: this.keyword,
-        type: 'lecture'
+        keyword: this.keyword
       };
       
       uni.showLoading({ title: '加载中' });
       
       // 调用获取讲座列表接口
-      this.$api.course.getCourseList(params)
+      this.$api.lecture.getLectureList(params)
         .then(res => {
           const list = res.data || [];
           
@@ -139,7 +138,7 @@ export default {
     // 跳转到详情页
     goToDetail(lecture) {
       uni.navigateTo({
-        url: `/pages/course/detail?id=${lecture._id}&type=lecture`
+        url: `/pages/course/lecture-detail?id=${lecture._id}`
       });
     },
     
