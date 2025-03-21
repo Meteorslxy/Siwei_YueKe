@@ -179,7 +179,7 @@
 }
 /* 课程列表 */
 .course-list {
-  padding: 20rpx 30rpx 30rpx;
+  padding: 30rpx 30rpx 30rpx;
   margin-top: -100rpx;
   position: relative;
   z-index: 10;
@@ -257,10 +257,10 @@
   margin-top: 16rpx;
 }
 .course-list .course-item .course-content .course-teacher .teacher-avatar {
-  width: 40rpx;
-  height: 40rpx;
+  width: 60rpx;
+  height: 60rpx;
   border-radius: 50%;
-  margin-right: 10rpx;
+  margin-right: 20rpx;
 }
 .course-list .course-item .course-content .course-teacher .teacher-name {
   font-size: 24rpx;

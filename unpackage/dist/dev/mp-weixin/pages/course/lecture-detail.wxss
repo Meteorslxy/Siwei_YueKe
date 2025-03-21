@@ -1,1 +1,269 @@
-/* pages/course/lecture-detail.wxss */
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.lecture-detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7f7f7;
+}
+.lecture-detail .lecture-header {
+  position: relative;
+  height: 360rpx;
+}
+.lecture-detail .lecture-header .lecture-image {
+  width: 100%;
+  height: 100%;
+}
+.lecture-detail .lecture-header .lecture-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.7) 100%);
+}
+.lecture-detail .lecture-header .lecture-title {
+  position: absolute;
+  left: 30rpx;
+  bottom: 30rpx;
+  right: 30rpx;
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+  line-height: 1.3;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+}
+.lecture-detail .lecture-info {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+.lecture-detail .lecture-info .info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.lecture-detail .lecture-info .info-item .info-icon {
+  font-size: 32rpx;
+  color: #FF6B00;
+  margin-right: 15rpx;
+}
+.lecture-detail .lecture-info .info-price, .lecture-detail .lecture-info .info-status, .lecture-detail .lecture-info .info-attendees {
+  display: flex;
+  align-items: center;
+  margin-top: 30rpx;
+  font-size: 28rpx;
+}
+.lecture-detail .lecture-info .info-price .price-label, .lecture-detail .lecture-info .info-price .status-label, .lecture-detail .lecture-info .info-price .attendees-label, .lecture-detail .lecture-info .info-status .price-label, .lecture-detail .lecture-info .info-status .status-label, .lecture-detail .lecture-info .info-status .attendees-label, .lecture-detail .lecture-info .info-attendees .price-label, .lecture-detail .lecture-info .info-attendees .status-label, .lecture-detail .lecture-info .info-attendees .attendees-label {
+  color: #666;
+  margin-right: 15rpx;
+}
+.lecture-detail .lecture-info .info-price .price-value, .lecture-detail .lecture-info .info-status .price-value, .lecture-detail .lecture-info .info-attendees .price-value {
+  color: #FF6B00;
+  font-weight: bold;
+}
+.lecture-detail .lecture-info .info-price .price-free, .lecture-detail .lecture-info .info-status .price-free, .lecture-detail .lecture-info .info-attendees .price-free {
+  color: #4CAF50;
+}
+.lecture-detail .lecture-info .info-price .status-value, .lecture-detail .lecture-info .info-status .status-value, .lecture-detail .lecture-info .info-attendees .status-value {
+  color: #FF6B00;
+}
+.lecture-detail .lecture-info .info-price .status-value.status-ongoing, .lecture-detail .lecture-info .info-status .status-value.status-ongoing, .lecture-detail .lecture-info .info-attendees .status-value.status-ongoing {
+  color: #007AFF;
+}
+.lecture-detail .lecture-info .info-price .status-value.status-end, .lecture-detail .lecture-info .info-status .status-value.status-end, .lecture-detail .lecture-info .info-attendees .status-value.status-end {
+  color: #999;
+}
+.lecture-detail .lecture-info .info-price .attendees-value, .lecture-detail .lecture-info .info-status .attendees-value, .lecture-detail .lecture-info .info-attendees .attendees-value {
+  color: #333;
+}
+.lecture-detail .lecture-tabs {
+  display: flex;
+  background-color: #fff;
+  padding: 0 20rpx;
+  border-bottom: 1rpx solid #eee;
+}
+.lecture-detail .lecture-tabs .tab-item {
+  padding: 24rpx 30rpx;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+.lecture-detail .lecture-tabs .tab-item.active {
+  color: #FF6B00;
+  font-weight: bold;
+}
+.lecture-detail .lecture-tabs .tab-item.active:after {
+  content: '';
+  position: absolute;
+  left: 30rpx;
+  right: 30rpx;
+  bottom: 0;
+  height: 6rpx;
+  background-color: #FF6B00;
+  border-radius: 3rpx;
+}
+.lecture-detail .lecture-content {
+  flex: 1;
+  background-color: #fff;
+  padding: 30rpx;
+}
+.lecture-detail .lecture-content .section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin: 20rpx 0;
+  padding-left: 15rpx;
+  border-left: 6rpx solid #FF6B00;
+}
+.lecture-detail .lecture-content .intro-text, .lecture-detail .lecture-content .content-text {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 30rpx;
+  white-space: pre-wrap;
+}
+.lecture-detail .lecture-content .speaker-info {
+  display: flex;
+  flex-direction: column;
+}
+.lecture-detail .lecture-content .speaker-info .speaker-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+}
+.lecture-detail .lecture-content .speaker-info .speaker-detail {
+  margin-bottom: 20rpx;
+}
+.lecture-detail .lecture-content .speaker-info .speaker-detail .speaker-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.lecture-detail .lecture-content .speaker-info .speaker-detail .speaker-title {
+  font-size: 26rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+.lecture-detail .lecture-content .speaker-info .speaker-intro {
+  margin-top: 20rpx;
+}
+.lecture-detail .lecture-content .related-list .related-item {
+  display: flex;
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx solid #eee;
+}
+.lecture-detail .lecture-content .related-list .related-item:last-child {
+  border-bottom: none;
+}
+.lecture-detail .lecture-content .related-list .related-item .related-image {
+  width: 200rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+}
+.lecture-detail .lecture-content .related-list .related-item .related-info {
+  flex: 1;
+  margin-left: 20rpx;
+}
+.lecture-detail .lecture-content .related-list .related-item .related-info .related-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15rpx;
+}
+.lecture-detail .lecture-content .related-list .related-item .related-info .related-time {
+  font-size: 24rpx;
+  color: #999;
+}
+.lecture-detail .action-bar {
+  height: 100rpx;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.lecture-detail .action-bar .action-button {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  background-color: #FF6B00;
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: bold;
+  border-radius: 40rpx;
+}
+.lecture-detail .action-bar .action-button[disabled] {
+  background-color: #ccc;
+  color: #fff;
+}
+

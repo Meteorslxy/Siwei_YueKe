@@ -385,65 +385,101 @@ text {
 
 
 .course-card {
-  display: flex;
   background-color: #fff;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   border-radius: 12rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
 }
+.card-upper {
+  display: flex;
+  padding: 20rpx;
+}
 .course-image {
-  width: 220rpx;
-  height: 220rpx;
+  width: 180rpx;
+  height: 140rpx;
   position: relative;
+  margin-right: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
 }
 .course-image image {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 .course-tag {
   position: absolute;
-  top: 16rpx;
+  top: 10rpx;
   left: 0;
   background-color: #FF6B00;
   color: #fff;
-  font-size: 22rpx;
-  padding: 6rpx 12rpx;
+  font-size: 20rpx;
+  padding: 4rpx 8rpx;
   border-radius: 0 6rpx 6rpx 0;
 }
 .course-info {
   flex: 1;
-  padding: 16rpx;
-  position: relative;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  padding: 6rpx 0;
 }
 .course-title {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: bold;
-  margin-bottom: 12rpx;
+  margin-bottom: 10rpx;
   line-height: 1.4;
   color: #333;
 }
-.course-school, .course-time {
-  font-size: 24rpx;
+.course-location, .course-time {
+  font-size: 22rpx;
   color: #666;
   margin-bottom: 8rpx;
   display: flex;
   align-items: center;
 }
-.school-icon, .time-icon {
-  font-size: 24rpx;
+.icon-image {
+  width: 24rpx;
+  height: 24rpx;
   margin-right: 8rpx;
-  color: #999;
 }
-.course-bottom {
+.location-text, .time-text {
+  color: #666;
+}
+.divider {
+  height: 1px;
+  background-color: #EEEEEE;
+  margin: 0 20rpx;
+}
+.card-lower {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;
+  padding: 16rpx 20rpx;
+  height: 60rpx;
 }
-.course-price {
+.teacher-info {
+  display: flex;
+  align-items: center;
+}
+.teacher-avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+.teacher-name {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+  margin-right: 10rpx;
+}
+.teacher-title {
+  font-size: 22rpx;
+  color: #999;
+}
+.price-info {
   display: flex;
   align-items: baseline;
 }
@@ -451,21 +487,6 @@ text {
   font-size: 32rpx;
   font-weight: bold;
   color: #FF3B30;
-}
-.price-original {
-  font-size: 24rpx;
-  color: #999;
-  text-decoration: line-through;
-  margin-left: 8rpx;
-}
-.book-btn {
-  height: 56rpx;
-  line-height: 56rpx;
-  background-color: #FF6B00;
-  color: #fff;
-  font-size: 24rpx;
-  padding: 0 20rpx;
-  border-radius: 28rpx;
 }
 
 @charset "UTF-8";
@@ -647,49 +668,83 @@ text {
 /* 选项卡 */
 .teacher-card {
   display: flex;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 180rpx;
   background-color: #fff;
-  border-radius: 8rpx;
+  margin-top: -140rpx;
+  border-radius: 12rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 .teacher-card .teacher-avatar {
-  width: 120rpx;
-  height: 120rpx;
-  margin-right: 20rpx;
+  width: 230rpx;
+  height: 350rpx;
+  margin-right: 24rpx;
 }
 .teacher-card .teacher-avatar .avatar {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 8rpx;
+  object-fit: cover;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 }
 .teacher-card .teacher-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.teacher-card .teacher-info .teacher-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.teacher-card .teacher-info .name-subject {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
 }
 .teacher-card .teacher-info .teacher-name {
-  font-size: 32rpx;
-  font-weight: 500;
+  font-size: 30rpx;
+  font-weight: 600;
   color: #333;
+}
+.teacher-card .teacher-info .subject-tag {
+  display: inline-block;
+  font-size: 24rpx;
+  color: #EC7A49;
+  background-color: rgba(236, 122, 73, 0.1);
+  padding: 4rpx 14rpx;
+  border-radius: 4rpx;
+}
+.teacher-card .teacher-info .intro-section {
+  padding-top: 10rpx;
+  border-top: 1px dashed #eee;
+}
+.teacher-card .teacher-info .intro-item {
   margin-bottom: 10rpx;
 }
-.teacher-card .teacher-info .teacher-name .teacher-title {
-  font-size: 24rpx;
-  color: #999;
-  margin-left: 20rpx;
-  font-weight: normal;
+.teacher-card .teacher-info .intro-label {
+  font-size: 23rpx;
+  color: #333;
+  font-weight: 500;
 }
-.teacher-card .teacher-info .teacher-school {
-  font-size: 26rpx;
+.teacher-card .teacher-info .intro-content {
+  font-size: 22rpx;
   color: #666;
-  margin-bottom: 10rpx;
 }
-.teacher-card .teacher-info .teacher-desc {
-  font-size: 24rpx;
-  color: #999;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.teacher-card .teacher-info .teacher-desc-list {
+  padding-left: 10rpx;
+}
+.teacher-card .teacher-info .teacher-desc-list .desc-item {
+  font-size: 22rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+  display: flex;
+  line-height: 32rpx;
+}
+.teacher-card .teacher-info .teacher-desc-list .desc-item .bullet {
+  color: #EC7A49;
+  margin-right: 8rpx;
+  flex-shrink: 0;
 }
 

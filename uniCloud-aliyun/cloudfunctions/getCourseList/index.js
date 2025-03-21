@@ -2,7 +2,15 @@
 const db = uniCloud.database();
 
 exports.main = async (event, context) => {
-  const { page = 1, pageSize = 10, category = '', keyword = '' } = event;
+  const { 
+    page = 1, 
+    pageSize = 10, 
+    category = '', 
+    keyword = '',
+    gradeGroup = '',
+    subject = '',
+    schoolId = ''
+  } = event;
   
   try {
     const collection = db.collection('courses');
@@ -17,6 +25,18 @@ exports.main = async (event, context) => {
     
     if (keyword) {
       condition.title = new RegExp(keyword, 'i');
+    }
+    
+    if (gradeGroup) {
+      condition.gradeGroup = gradeGroup;
+    }
+    
+    if (subject) {
+      condition.subject = subject;
+    }
+    
+    if (schoolId) {
+      condition.schoolId = schoolId;
     }
     
     if (Object.keys(condition).length > 0) {

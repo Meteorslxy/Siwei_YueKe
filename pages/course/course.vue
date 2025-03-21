@@ -61,41 +61,14 @@
     
     <!-- 课程列表 -->
     <view class="course-list">
-      <view 
-        class="course-item" 
-        v-for="(item, index) in courseList" 
-        :key="index"
-        @click="navigateTo(`/pages/course/detail?id=${item._id}`)">
-        <view class="course-left">
-          <view class="course-brand-logo">
-            <text class="brand-text">思维</text>
-            <text class="brand-text sm">拓展</text>
-          </view>
-          <image class="course-logo" :src="item.coverImage" mode="aspectFill"></image>
-        </view>
-        <view class="course-content">
-          <view class="course-title">
-            <text v-if="item.school" class="school-tag">[{{item.school}}]</text>
-            <text>{{item.title}}</text>
-          </view>
-          <view class="course-info">
-            <text class="location-icon iconfont icon-location"></text>
-            <text class="location-text">{{item.schoolName}}</text>
-          </view>
-          <view class="course-info">
-            <text class="time-icon iconfont icon-time"></text>
-            <text class="time-text">{{formatCourseTime(item.startTime, item.endTime)}}</text>
-          </view>
-          <view class="course-teacher">
-            <image class="teacher-avatar" :src="item.teacherAvatar" mode="aspectFill"></image>
-            <text class="teacher-name">{{item.teacherName}}</text>
-            <text class="teacher-title">{{item.teacherTitle}}</text>
-          </view>
-          <view class="course-price">
-            <text class="price-value">{{item.price}}.00</text>
-          </view>
-        </view>
-      </view>
+      <block v-if="courseList.length > 0">
+        <course-card 
+          v-for="(item, index) in courseList" 
+          :key="index"
+          :course="item"
+          @click="navigateTo(`/pages/course/detail?id=${item._id}`)"
+        ></course-card>
+      </block>
       
       <!-- 加载更多 -->
       <load-more :status="loadMoreStatus" @click="loadMore"></load-more>
@@ -107,7 +80,16 @@
 </template>
 
 <script>
+import CourseCard from '@/components/course-card/course-card.vue'
+import LoadMore from '@/components/load-more/load-more.vue'
+import EmptyTip from '@/components/empty-tip/empty-tip.vue'
+
 export default {
+  components: {
+    CourseCard,
+    LoadMore,
+    EmptyTip
+  },
   data() {
     return {
       // 状态栏高度
@@ -117,7 +99,7 @@ export default {
       isGradeFilterShow: false,
       selectedGradeGroup: 'all',
       gradeGroups: [
-        { label: '全部', value: 'all' },
+        { label: '全部年级', value: 'all' },
         { label: '小学', value: 'primary' },
         { label: '初中', value: 'junior' }
       ],
@@ -127,9 +109,15 @@ export default {
       selectedSchool: 'all',
       schoolOptions: [
         { label: '全部校区', value: 'all' },
-        { label: '雨花台校区', value: 'yuhuatai' },
-        { label: '大行宫校区', value: 'daxinggong' },
-        { label: '闵行校区', value: 'minxing' }
+        { label: '江宁万达', value: 'jnwd' },
+        { label: '江宁黄金海岸', value: 'jnhjha' },
+        { label: '大行宫', value: 'dxg' },
+        { label: '新街口', value: 'xjk' },
+        { label: '雨花', value: 'yh' },
+        { label: '桥北', value: 'qb' },
+        { label: '奥体', value: 'at' },
+        { label: '龙江', value: 'lj' },
+        { label: '六合', value: 'lh' }
       ],
       
       // 学科筛选相关
@@ -234,126 +222,22 @@ export default {
       this.loadCourseList()
     },
     
-    // 重置列表数据
+    // 重置列表
     resetList() {
-      this.page = 1
-      this.courseList = []
+      this.page = 1;
+      this.courseList = [];
+      this.total = 0;
+      this.loadMoreStatus = 'more';
     },
     
     // 加载更多
     loadMore() {
-      this.page++
-      this.loadCourseList()
+      if (this.isLoading) return;
+      this.page++;
+      this.loadCourseList();
     },
     
     // 获取课程列表
-    async fetchCourses() {
-      if (this.isLoading) return Promise.resolve()
-      
-      this.isLoading = true
-      this.loadMoreStatus = 'loading'
-      
-      try {
-        // 使用API接口调用云函数
-        const params = {
-          gradeLevel: this.selectedGradeGroup !== 'all' ? this.selectedGradeGroup : '',
-          subject: this.selectedSubject !== 'all' ? this.selectedSubject : '',
-          school: this.selectedSchool !== 'all' ? this.selectedSchool : '',
-          limit: this.limit,
-          skip: (this.page - 1) * this.limit
-        };
-        
-        const result = await this.$api.course.getCourseList(params);
-        
-        if (result && result.success) {
-          const newList = result.data
-          this.total = result.total
-          
-          if (this.page === 1) {
-            this.courseList = newList
-          } else {
-            this.courseList = [...this.courseList, ...newList]
-          }
-          
-          // 更新加载状态
-          this.loadMoreStatus = this.courseList.length >= this.total ? 'noMore' : 'more'
-        } else {
-          // 模拟数据
-          this.useMockData()
-        }
-      } catch (e) {
-        console.error('获取课程列表失败:', e)
-        // 加载失败，使用模拟数据
-        this.useMockData()
-      }
-      
-      this.isLoading = false
-      return Promise.resolve()
-    },
-    
-    // 使用模拟数据
-    useMockData() {
-      const mockData = [
-        {
-          _id: '1',
-          title: '三年级浪漫暑假班',
-          school: '雨花台',
-          schoolName: '雨花台校区',
-          teacherName: '刘星宇',
-          teacherTitle: '小学教师',
-          teacherAvatar: '/static/images/teacher/teacher1.jpg',
-          coverImage: '/static/images/course/course1.jpg',
-          price: 4000,
-          startTime: '2023-07-01 15:30',
-          endTime: '2023-07-17 15:30'
-        },
-        {
-          _id: '2',
-          title: '四年级提优暑假班',
-          school: '大行宫',
-          schoolName: '大行宫校区',
-          teacherName: '刘星宇',
-          teacherTitle: '小学教师',
-          teacherAvatar: '/static/images/teacher/teacher1.jpg',
-          coverImage: '/static/images/course/course2.jpg',
-          price: 4000,
-          startTime: '2023-07-08 08:30',
-          endTime: '2023-07-10 08:30'
-        }
-      ]
-      
-      if (this.page === 1) {
-        this.courseList = mockData
-      } else {
-        this.courseList = [...this.courseList, ...mockData]
-      }
-      
-      this.total = 10
-      this.loadMoreStatus = this.courseList.length >= this.total ? 'noMore' : 'more'
-    },
-    
-    // 格式化课程时间
-    formatCourseTime(startTime, endTime) {
-      if (!startTime) return ''
-      
-      const start = new Date(startTime)
-      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`
-      
-      if (endTime) {
-        const end = new Date(endTime)
-        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`
-        return `${formattedStart}-${formattedEnd}`
-      }
-      
-      return formattedStart
-    },
-    
-    // 页面导航
-    navigateTo(url) {
-      uni.navigateTo({ url })
-    },
-    
-    // 加载课程列表
     async loadCourseList() {
       if (this.isLoading) return;
       
@@ -372,6 +256,10 @@ export default {
         
         if (this.selectedSchool !== 'all') {
           params.schoolId = this.selectedSchool;
+        }
+        
+        if (this.selectedSubject !== 'all') {
+          params.subject = this.selectedSubject;
         }
         
         // 调用云函数获取课程列表
@@ -411,19 +299,25 @@ export default {
       }
     },
     
-    // 重置列表
-    resetList() {
-      this.page = 1;
-      this.courseList = [];
-      this.total = 0;
-      this.loadMoreStatus = 'more';
+    // 格式化课程时间
+    formatCourseTime(startTime, endTime) {
+      if (!startTime) return '';
+      
+      const start = new Date(startTime);
+      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`;
+      
+      if (endTime) {
+        const end = new Date(endTime);
+        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`;
+        return `${formattedStart}-${formattedEnd}`;
+      }
+      
+      return formattedStart;
     },
     
-    // 加载更多
-    loadMore() {
-      if (this.isLoading) return;
-      this.page++;
-      this.loadCourseList();
+    // 页面导航
+    navigateTo(url) {
+      uni.navigateTo({ url });
     }
   }
 }
@@ -557,7 +451,7 @@ export default {
 
 /* 课程列表 */
 .course-list {
-  padding: 20rpx 30rpx 30rpx;
+  padding: 30rpx 30rpx 30rpx;
   margin-top: -100rpx;
   position: relative;
   z-index: 10;
@@ -644,10 +538,10 @@ export default {
         margin-top: 16rpx;
         
         .teacher-avatar {
-          width: 40rpx;
-          height: 40rpx;
+          width: 60rpx;
+          height: 60rpx;
           border-radius: 50%;
-          margin-right: 10rpx;
+          margin-right: 20rpx;
         }
         
         .teacher-name {

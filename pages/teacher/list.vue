@@ -1,25 +1,43 @@
 <template>
   <view class="teacher-list">
-    <view class="filter-bar">
-      <view class="search-box">
-        <text class="iconfont icon-search"></text>
-        <input type="text" v-model="keyword" placeholder="搜索教师" confirm-type="search" @confirm="search" />
+    <!-- 年级选择 -->
+    <view class="grade-selector">
+      <view class="grade-dropdown">
+        <view class="selected-grade" @click="toggleGradeOptions">
+          {{selectedGradeName}} <text class="triangle-down" :class="{ 'arrow-up': showGradeOptions }"></text>
+        </view>
+        <view class="grade-options" v-if="showGradeOptions">
+          <view 
+            v-for="(grade, index) in grades" 
+            :key="index" 
+            class="grade-option"
+            :class="{ active: currentGrade === grade.id }"
+            @click="selectGrade(grade.id)"
+          >
+            {{grade.name}}
+          </view>
+        </view>
       </view>
     </view>
     
-    <view class="filter-tabs">
-      <view 
-        v-for="(tab, index) in subjects" 
-        :key="index" 
-        class="tab-item" 
-        :class="{ active: currentSubject === tab.id }"
-        @click="filterBySubject(tab.id)"
-      >
-        {{tab.name}}
-      </view>
+    <!-- 学科选择 -->
+    <view class="subject-tabs">
+      <scroll-view scroll-x class="scroll-view">
+        <view class="tabs-container">
+          <view 
+            v-for="(tab, index) in subjects" 
+            :key="index" 
+            class="tab-item" 
+            :class="{ active: currentSubject === tab.id }"
+            @click="filterBySubject(tab.id)"
+          >
+            {{tab.name}}
+          </view>
+        </view>
+      </scroll-view>
     </view>
     
-    <view class="teachers-container">
+    <view class="content-area">
       <block v-if="teacherList.length > 0">
         <teacher-card 
           v-for="(teacher, index) in teacherList" 
@@ -39,14 +57,21 @@ export default {
   data() {
     return {
       keyword: '',
+      currentGrade: 'all',
+      showGradeOptions: false,
+      grades: [
+        { id: 'all', name: '全部年级' },
+        { id: 'primary', name: '小学' },
+        { id: 'junior', name: '初中' }
+      ],
       currentSubject: '',
       subjects: [
         { id: '', name: '全部' },
-        { id: '1', name: '钢琴' },
-        { id: '2', name: '小提琴' },
-        { id: '3', name: '古筝' },
-        { id: '4', name: '吉他' },
-        { id: '5', name: '声乐' }
+        { id: 'chinese', name: '语文' },
+        { id: 'math', name: '数学' },
+        { id: 'english', name: '英语' },
+        { id: 'physics', name: '物理' },
+        { id: 'chemistry', name: '化学' }
       ],
       teacherList: [],
       page: 1,
@@ -56,10 +81,21 @@ export default {
       hasMore: true
     }
   },
+  computed: {
+    selectedGradeName() {
+      const grade = this.grades.find(item => item.id === this.currentGrade);
+      return grade ? grade.name : '全部';
+    }
+  },
   onLoad(options) {
     // 如果有科目参数，设置当前科目
     if (options.subject) {
       this.currentSubject = options.subject;
+    }
+    
+    // 如果有年级参数，设置当前年级
+    if (options.grade) {
+      this.currentGrade = options.grade;
     }
     
     this.getTeacherList();
@@ -70,6 +106,18 @@ export default {
   methods: {
     // 搜索
     search() {
+      this.refreshList();
+    },
+    
+    // 切换年级选项显示
+    toggleGradeOptions() {
+      this.showGradeOptions = !this.showGradeOptions;
+    },
+    
+    // 选择年级
+    selectGrade(gradeId) {
+      this.currentGrade = gradeId;
+      this.showGradeOptions = false;
       this.refreshList();
     },
     
@@ -101,7 +149,8 @@ export default {
         page: this.page,
         pageSize: this.pageSize,
         keyword: this.keyword,
-        subject: this.currentSubject
+        subject: this.currentSubject,
+        gradeGroup: this.currentGrade
       };
       
       uni.showLoading({ title: '加载中' });
@@ -158,58 +207,117 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f7f7f7;
+  background-color: #EC7A49;
   
-  .filter-bar {
-    padding: 20rpx;
-    background-color: #fff;
+  .grade-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80rpx;
+    padding: 0 30rpx;
     
-    .search-box {
-      display: flex;
-      align-items: center;
-      height: 70rpx;
-      background-color: #f5f5f5;
-      border-radius: 35rpx;
-      padding: 0 20rpx;
+    .grade-dropdown {
+      position: relative;
+      text-align: center;
       
-      .iconfont {
+      .selected-grade {
         font-size: 28rpx;
-        color: #999;
-        margin-right: 10rpx;
+        color: #fff;
+        font-weight: bold;
+        padding: 0 20rpx;
+        display: flex;
+        align-items: center;
+        
+        .triangle-down {
+          display: inline-block;
+          width: 0;
+          height: 0;
+          margin-left: 8rpx;
+          border-left: 8rpx solid transparent;
+          border-right: 8rpx solid transparent;
+          border-top: 10rpx solid #fff;
+          transition: transform 0.3s ease;
+          
+          &.arrow-up {
+            transform: rotate(180deg);
+          }
+        }
       }
       
-      input {
-        flex: 1;
-        height: 100%;
-        font-size: 26rpx;
+      .grade-options {
+        position: absolute;
+        top: 60rpx;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #fff;
+        border-radius: 8rpx;
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+        width: 160rpx;
+        z-index: 10;
+        overflow: hidden;
+        
+        .grade-option {
+          font-size: 28rpx;
+          color: #333;
+          padding: 16rpx 0;
+          text-align: center;
+          
+          &.active {
+            color: #EC7A49;
+            background-color: rgba(236, 122, 73, 0.1);
+          }
+          
+          &:not(:last-child) {
+            border-bottom: 1rpx solid #f2f2f2;
+          }
+        }
       }
     }
   }
   
-  .filter-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 16rpx 10rpx;
-    background-color: #fff;
-    border-top: 1rpx solid #eee;
+  .subject-tabs {
+    padding: 10rpx 0 120rpx;
+    
+    .scroll-view {
+      width: 100%;
+      white-space: nowrap;
+    }
+    
+    .tabs-container {
+      display: inline-flex;
+      padding: 0 20rpx;
+    }
     
     .tab-item {
-      padding: 10rpx 20rpx;
-      font-size: 26rpx;
-      color: #666;
-      border-radius: 26rpx;
-      margin: 6rpx;
+      padding: 10rpx 30rpx;
+      font-size: 28rpx;
+      color: rgba(255, 255, 255, 0.8);
+      display: inline-block;
       
       &.active {
         color: #fff;
-        background-color: #FF6B00;
+        font-weight: bold;
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 30%;
+          width: 40%;
+          height: 4rpx;
+          background-color: #fff;
+          border-radius: 2rpx;
+        }
       }
     }
   }
   
-  .teachers-container {
+  .content-area {
     flex: 1;
     padding: 20rpx;
+    padding-top: 90rpx;
+    background-color: $bg-color;
   }
 }
 </style> 
