@@ -3,9 +3,12 @@
     <!-- 顶部导航栏 -->
     <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px' }">
       <view class="nav-back" @click="navigateBack">
-        <text class="iconfont icon-back"></text>
+        <view class="back-arrow"></view>
       </view>
       <view class="nav-title">最新通知</view>
+      <view class="nav-right">
+        <text class="iconfont icon-search"></text>
+      </view>
     </view>
     
     <!-- 新闻列表 -->
@@ -201,7 +204,31 @@ export default {
     
     // 返回上一页
     navigateBack() {
-      uni.navigateBack()
+      console.log('点击返回按钮');
+      
+      // 判断是否可以返回上一页
+      const pages = getCurrentPages();
+      if (pages.length > 1) {
+        uni.navigateBack({
+          delta: 1,
+          success: () => {
+            console.log('返回上一页成功');
+          },
+          fail: (err) => {
+            console.error('返回上一页失败:', err);
+            // 如果返回失败，尝试跳转到首页
+            uni.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        });
+      } else {
+        // 如果没有上一页，返回首页
+        console.log('没有上一页，返回首页');
+        uni.switchTab({
+          url: '/pages/index/index'
+        });
+      }
     },
     
     // 添加刷新方法
@@ -233,40 +260,75 @@ export default {
   align-items: center;
   padding-bottom: 10px;
   z-index: 100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   
   .nav-back {
-    padding: 0 30rpx;
-    font-size: 40rpx;
+    width: 88rpx;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .back-arrow {
+      width: 24rpx;
+      height: 24rpx;
+      border-top: 4rpx solid #fff;
+      border-left: 4rpx solid #fff;
+      transform: rotate(-45deg);
+      margin-left: 10rpx;
+    }
+    
+    &:active {
+      opacity: 0.8;
+    }
   }
   
   .nav-title {
     flex: 1;
     text-align: center;
-    font-size: 36rpx;
-    font-weight: bold;
-    padding-right: 60rpx;
+    font-size: 34rpx;
+    font-weight: 500;
+  }
+  
+  .nav-right {
+    width: 88rpx;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .iconfont {
+      font-size: 36rpx;
+    }
   }
 }
 
 .news-list {
   padding: 20rpx 30rpx;
-  margin-top: calc(44px + var(--status-bar-height));
+  margin-top: calc(44px + var(--status-bar-height) + 10px);
   
   .news-item {
     display: flex;
     background-color: #fff;
-    border-radius: 12rpx;
+    border-radius: 16rpx;
     overflow: hidden;
     margin-bottom: 30rpx;
     box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-    padding: 20rpx;
+    padding: 24rpx;
+    position: relative;
+    
+    &:active {
+      transform: scale(0.98);
+      transition: transform 0.2s;
+    }
     
     .news-image {
-      width: 200rpx;
-      height: 150rpx;
-      border-radius: 8rpx;
-      margin-right: 20rpx;
+      width: 180rpx;
+      height: 160rpx;
+      border-radius: 12rpx;
+      margin-right: 24rpx;
       flex-shrink: 0;
+      background-color: #f5f5f5;
     }
     
     .news-content {
@@ -275,11 +337,11 @@ export default {
       flex-direction: column;
       
       .news-title {
-        font-size: 30rpx;
-        font-weight: bold;
+        font-size: 32rpx;
+        font-weight: 600;
         color: $text-color;
-        line-height: 1.3;
-        margin-bottom: 10rpx;
+        line-height: 1.4;
+        margin-bottom: 12rpx;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
@@ -290,8 +352,8 @@ export default {
       .news-desc {
         font-size: 26rpx;
         color: $text-color-light;
-        line-height: 1.3;
-        margin-bottom: 10rpx;
+        line-height: 1.4;
+        margin-bottom: 16rpx;
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -305,19 +367,29 @@ export default {
         justify-content: space-between;
         font-size: 24rpx;
         color: $text-color-light;
+        
+        .news-time, .news-source {
+          position: relative;
+          z-index: 1;
+        }
+        
+        .news-source {
+          color: $theme-color;
+        }
       }
     }
   }
   
   .load-more, .no-more {
     text-align: center;
-    padding: 20rpx 0;
-    font-size: 24rpx;
+    padding: 30rpx 0;
+    font-size: 26rpx;
     color: $text-color-light;
   }
   
   .load-more {
     color: $theme-color;
+    font-weight: 500;
   }
 }
 
@@ -326,27 +398,33 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 0;
+  padding: 120rpx 0;
   
   .loading-text, .empty-text {
     font-size: 28rpx;
     color: $text-color-light;
-    margin: 20rpx 0;
+    margin: 24rpx 0;
   }
   
   .empty-icon {
-    width: 200rpx;
-    height: 200rpx;
-    margin-bottom: 20rpx;
+    width: 240rpx;
+    height: 240rpx;
+    margin-bottom: 30rpx;
   }
   
   .refresh-btn {
-    margin-top: 30rpx;
+    margin-top: 40rpx;
     font-size: 28rpx;
     background-color: $theme-color;
     color: #fff;
-    padding: 10rpx 50rpx;
+    padding: 16rpx 60rpx;
     border-radius: 40rpx;
+    box-shadow: 0 4rpx 12rpx rgba(236, 122, 73, 0.2);
+    
+    &:active {
+      opacity: 0.9;
+      transform: translateY(2rpx);
+    }
   }
 }
 </style> 

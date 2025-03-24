@@ -100,8 +100,8 @@ export default {
       selectedGradeGroup: 'all',
       gradeGroups: [
         { label: '全部年级', value: 'all' },
-        { label: '小学', value: 'primary' },
-        { label: '初中', value: 'junior' }
+        { label: '小学', value: '小学' },
+        { label: '初中', value: '初中' }
       ],
       
       // 校区筛选相关
@@ -109,15 +109,15 @@ export default {
       selectedSchool: 'all',
       schoolOptions: [
         { label: '全部校区', value: 'all' },
-        { label: '江宁万达', value: 'jnwd' },
-        { label: '江宁黄金海岸', value: 'jnhjha' },
-        { label: '大行宫', value: 'dxg' },
-        { label: '新街口', value: 'xjk' },
-        { label: '雨花', value: 'yh' },
-        { label: '桥北', value: 'qb' },
-        { label: '奥体', value: 'at' },
-        { label: '龙江', value: 'lj' },
-        { label: '六合', value: 'lh' }
+        { label: '江宁万达', value: '江宁万达' },
+        { label: '江宁黄金海岸', value: '江宁黄金海岸' },
+        { label: '大行宫', value: '大行宫' },
+        { label: '新街口', value: '新街口' },
+        { label: '雨花', value: '雨花' },
+        { label: '桥北', value: '桥北' },
+        { label: '奥体', value: '奥体' },
+        { label: '龙江', value: '龙江' },
+        { label: '六合', value: '六合' }
       ],
       
       // 学科筛选相关
@@ -292,6 +292,48 @@ export default {
             );
           }
           
+          // 处理每个课程的时间字段，避免NaN问题
+          filteredData = filteredData.map(course => {
+            // 处理日期和时间
+            if (!course.startDate && course.startTime) {
+              if (course.startTime.includes(' ')) {
+                const parts = course.startTime.split(' ');
+                course.startDate = parts[0];
+                course.startTime = parts[1];
+              } else if (course.startTime.includes('T')) {
+                try {
+                  const date = new Date(course.startTime);
+                  if (!isNaN(date.getTime())) {
+                    course.startDate = date.toISOString().split('T')[0];
+                    course.startTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                  }
+                } catch (e) {
+                  console.error('解析startTime失败:', e, course.startTime);
+                }
+              }
+            }
+            
+            if (!course.endDate && course.endTime) {
+              if (course.endTime.includes(' ')) {
+                const parts = course.endTime.split(' ');
+                course.endDate = parts[0];
+                course.endTime = parts[1];
+              } else if (course.endTime.includes('T')) {
+                try {
+                  const date = new Date(course.endTime);
+                  if (!isNaN(date.getTime())) {
+                    course.endDate = date.toISOString().split('T')[0];
+                    course.endTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                  }
+                } catch (e) {
+                  console.error('解析endTime失败:', e, course.endTime);
+                }
+              }
+            }
+            
+            return course;
+          });
+          
           console.log('前端过滤后的数据:', filteredData);
           
           if (this.page === 1) {
@@ -328,18 +370,51 @@ export default {
     
     // 格式化课程时间
     formatCourseTime(startTime, endTime) {
-      if (!startTime) return '';
+      if (!startTime) return '时间待定';
       
-      const start = new Date(startTime);
-      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`;
-      
-      if (endTime) {
-        const end = new Date(endTime);
-        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`;
-        return `${formattedStart}-${formattedEnd}`;
+      try {
+        // 尝试解析日期
+        const start = new Date(startTime);
+        
+        // 检查日期是否有效
+        if (isNaN(start.getTime())) {
+          console.warn('无效的开始时间格式:', startTime);
+          
+          // 如果是YYYY-MM-DD格式，直接返回
+          if (typeof startTime === 'string' && 
+              (startTime.includes('-') || startTime.includes('/'))) {
+            return startTime;
+          }
+          
+          return '时间待定';
+        }
+        
+        const formattedStart = `${start.getFullYear()}-${(start.getMonth() + 1).toString().padStart(2, '0')}-${start.getDate().toString().padStart(2, '0')}`;
+        
+        if (endTime) {
+          const end = new Date(endTime);
+          
+          // 检查结束日期是否有效
+          if (isNaN(end.getTime())) {
+            console.warn('无效的结束时间格式:', endTime);
+            return formattedStart;
+          }
+          
+          const formattedEnd = `${end.getFullYear()}-${(end.getMonth() + 1).toString().padStart(2, '0')}-${end.getDate().toString().padStart(2, '0')}`;
+          return `${formattedStart} 至 ${formattedEnd}`;
+        }
+        
+        return formattedStart;
+      } catch (e) {
+        console.error('时间格式化错误:', e, startTime, endTime);
+        
+        // 如果是字符串格式，尝试直接返回
+        if (typeof startTime === 'string') {
+          return startTime;
+        }
+        
+        return '时间待定';
       }
-      
-      return formattedStart;
     },
     
     // 页面导航

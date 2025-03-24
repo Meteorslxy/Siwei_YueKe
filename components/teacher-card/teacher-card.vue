@@ -7,13 +7,9 @@
       <view class="teacher-content">
         <view class="name-subject">
           <view class="teacher-name">{{teacher.name || '叶老师'}}</view>
-          <view class="subject-tag" v-if="teacher.subject">{{teacher.subject}}</view>
+          <view class="subject-tag" v-if="teacher.grade && teacher.subject">{{teacher.grade + teacher.subject}}</view>
         </view>
         <view class="intro-section">
-          <view class="intro-item" v-if="teacher.grade">
-            <text class="intro-label">教学年级：</text>
-            <text class="intro-content">{{teacher.grade}}</text>
-          </view>
           <view class="intro-item" v-if="teacher.education">
             <text class="intro-label">教育背景：</text>
             <text class="intro-content">{{teacher.education}}</text>

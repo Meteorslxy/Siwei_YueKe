@@ -185,14 +185,43 @@ var _default2 = {
     },
     formatTime: function formatTime(startTime, endTime) {
       if (!startTime) return '';
-      var start = new Date(startTime);
-      var formattedStart = "".concat(start.getMonth() + 1, ".").concat(start.getDate());
-      if (endTime) {
-        var end = new Date(endTime);
-        var formattedEnd = "".concat(end.getMonth() + 1, ".").concat(end.getDate());
-        return "".concat(formattedStart, "-").concat(formattedEnd);
+      try {
+        // 处理日期时间分离的情况
+        var startDate = startTime;
+        var startTimeOnly = '';
+        var endDate = endTime;
+        var endTimeOnly = '';
+
+        // 处理日期时间组合格式
+        if (startTime.includes(' ') || startTime.includes('T')) {
+          var date = new Date(startTime);
+          if (!isNaN(date.getTime())) {
+            startDate = "".concat(date.getFullYear(), "-").concat((date.getMonth() + 1).toString().padStart(2, '0'), "-").concat(date.getDate().toString().padStart(2, '0'));
+            startTimeOnly = "".concat(date.getHours().toString().padStart(2, '0'), ":").concat(date.getMinutes().toString().padStart(2, '0'));
+          } else {
+            return startTime; // 无法解析时返回原值
+          }
+        }
+
+        if (endTime && (endTime.includes(' ') || endTime.includes('T'))) {
+          var _date = new Date(endTime);
+          if (!isNaN(_date.getTime())) {
+            endDate = "".concat(_date.getFullYear(), "-").concat((_date.getMonth() + 1).toString().padStart(2, '0'), "-").concat(_date.getDate().toString().padStart(2, '0'));
+            endTimeOnly = "".concat(_date.getHours().toString().padStart(2, '0'), ":").concat(_date.getMinutes().toString().padStart(2, '0'));
+          }
+        }
+
+        // 格式化日期部分
+        if (startDate && endDate) {
+          return "".concat(startDate, " \u81F3 ").concat(endDate);
+        } else if (startDate) {
+          return startDate;
+        }
+        return startTime; // 如果无法处理，返回原始时间
+      } catch (e) {
+        console.error('时间格式化错误:', e, startTime, endTime);
+        return startTime || '时间待定'; // 发生错误时返回原值或默认值
       }
-      return formattedStart;
     }
   }
 };

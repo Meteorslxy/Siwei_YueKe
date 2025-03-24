@@ -320,8 +320,18 @@
 .course-section .course-list .course-item .course-content .course-bottom .course-status {
   font-size: 24rpx;
   color: var(--text-color-light);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 .course-section .course-list .course-item .course-content .course-bottom .course-status .max-students {
-  margin-right: 20rpx;
+  margin-bottom: 8rpx;
+  color: var(--theme-color);
+}
+.course-section .course-list .course-item .course-content .course-bottom .course-status .lesson-count {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320rpx;
 }
 

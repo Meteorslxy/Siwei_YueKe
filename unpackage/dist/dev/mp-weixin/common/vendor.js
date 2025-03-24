@@ -10047,7 +10047,7 @@ var b = "development" === "development",
   k = "true" === undefined || !0 === undefined,
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
-  A = T({"address":["127.0.0.1","192.168.96.1","192.168.31.38"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
   O = T([{"provider":"aliyun","spaceName":"yueke-demo","spaceId":"mp-d0c06b27-ec33-40fe-b28b-337811bd2f29","clientSecret":"c3DWEyYRkArWA6mZ2b+gxQ==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
@@ -18883,14 +18883,7 @@ _vue.default.component('teacher-card', _teacherCard.default);
 /* 78 */,
 /* 79 */,
 /* 80 */,
-/* 81 */,
-/* 82 */,
-/* 83 */,
-/* 84 */,
-/* 85 */,
-/* 86 */,
-/* 87 */,
-/* 88 */
+/* 81 */
 /*!*******************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/index.js ***!
   \*******************************************************************************/
@@ -18906,7 +18899,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _request = _interopRequireDefault(__webpack_require__(/*! ./request.js */ 89));
+var _request = _interopRequireDefault(__webpack_require__(/*! ./request.js */ 82));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // 基础请求URL
@@ -19247,7 +19240,7 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 89 */
+/* 82 */
 /*!*********************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/request.js ***!
   \*********************************************************************************/
@@ -19359,6 +19352,234 @@ function request() {
 var _default = request;
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+
+/***/ }),
+/* 83 */,
+/* 84 */,
+/* 85 */,
+/* 86 */,
+/* 87 */,
+/* 88 */,
+/* 89 */,
+/* 90 */,
+/* 91 */,
+/* 92 */,
+/* 93 */,
+/* 94 */,
+/* 95 */,
+/* 96 */,
+/* 97 */,
+/* 98 */,
+/* 99 */,
+/* 100 */,
+/* 101 */,
+/* 102 */,
+/* 103 */,
+/* 104 */,
+/* 105 */,
+/* 106 */,
+/* 107 */,
+/* 108 */,
+/* 109 */,
+/* 110 */,
+/* 111 */,
+/* 112 */,
+/* 113 */,
+/* 114 */,
+/* 115 */,
+/* 116 */,
+/* 117 */,
+/* 118 */,
+/* 119 */,
+/* 120 */,
+/* 121 */,
+/* 122 */,
+/* 123 */,
+/* 124 */,
+/* 125 */,
+/* 126 */,
+/* 127 */,
+/* 128 */,
+/* 129 */,
+/* 130 */,
+/* 131 */,
+/* 132 */,
+/* 133 */,
+/* 134 */,
+/* 135 */,
+/* 136 */,
+/* 137 */,
+/* 138 */,
+/* 139 */,
+/* 140 */,
+/* 141 */,
+/* 142 */,
+/* 143 */,
+/* 144 */,
+/* 145 */,
+/* 146 */,
+/* 147 */,
+/* 148 */,
+/* 149 */,
+/* 150 */,
+/* 151 */,
+/* 152 */,
+/* 153 */,
+/* 154 */,
+/* 155 */,
+/* 156 */,
+/* 157 */,
+/* 158 */,
+/* 159 */,
+/* 160 */,
+/* 161 */
+/*!**************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/static/data/filter-options.json ***!
+  \**************************************************************************************************/
+/*! exports provided: gradeOptions, subjectOptions, schoolOptions, educationalStages, courseTypes, teacherTitles, statusOptions, bookingStatus, databaseFields, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"高中\",\"value\":\"高中\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"},{\"label\":\"生物\",\"value\":\"生物\"},{\"label\":\"历史\",\"value\":\"历史\"},{\"label\":\"地理\",\"value\":\"地理\"},{\"label\":\"政治\",\"value\":\"政治\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"primary\"},{\"label\":\"初中\",\"value\":\"junior\"},{\"label\":\"高中\",\"value\":\"senior\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
+
+/***/ }),
+/* 162 */
+/*!***************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/utils/filters.js ***!
+  \***************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+exports.getAllFilterOptions = getAllFilterOptions;
+exports.getBookingStatusLabelByValue = getBookingStatusLabelByValue;
+exports.getBookingStatusOptions = getBookingStatusOptions;
+exports.getGradeLabelByValue = getGradeLabelByValue;
+exports.getGradeOptions = getGradeOptions;
+exports.getLabelByValue = getLabelByValue;
+exports.getSchoolLabelByValue = getSchoolLabelByValue;
+exports.getSchoolOptions = getSchoolOptions;
+exports.getSubjectLabelByValue = getSubjectLabelByValue;
+exports.getSubjectOptions = getSubjectOptions;
+exports.isValidFilterValue = isValidFilterValue;
+var _filterOptions = _interopRequireDefault(__webpack_require__(/*! @/static/data/filter-options.json */ 161));
+/**
+ * 筛选选项工具类
+ * 用于统一管理和获取筛选选项数据
+ */
+
+/**
+ * 获取所有筛选选项
+ */
+function getAllFilterOptions() {
+  return _filterOptions.default;
+}
+
+/**
+ * 获取年级筛选选项
+ */
+function getGradeOptions() {
+  return _filterOptions.default.gradeOptions.options;
+}
+
+/**
+ * 获取学科筛选选项
+ */
+function getSubjectOptions() {
+  return _filterOptions.default.subjectOptions.options;
+}
+
+/**
+ * 获取校区筛选选项
+ */
+function getSchoolOptions() {
+  return _filterOptions.default.schoolOptions.options;
+}
+
+/**
+ * 获取预约状态筛选选项
+ */
+function getBookingStatusOptions() {
+  return _filterOptions.default.bookingStatus.options;
+}
+
+/**
+ * 通过值获取选项标签
+ * @param {Array} options - 选项数组
+ * @param {String} value - 选项值
+ * @returns {String} 选项标签
+ */
+function getLabelByValue(options, value) {
+  var option = options.find(function (opt) {
+    return opt.value === value;
+  });
+  return option ? option.label : '';
+}
+
+/**
+ * 通过年级值获取年级标签
+ * @param {String} value - 年级值
+ * @returns {String} 年级标签
+ */
+function getGradeLabelByValue(value) {
+  return getLabelByValue(getGradeOptions(), value);
+}
+
+/**
+ * 通过学科值获取学科标签
+ * @param {String} value - 学科值
+ * @returns {String} 学科标签
+ */
+function getSubjectLabelByValue(value) {
+  return getLabelByValue(getSubjectOptions(), value);
+}
+
+/**
+ * 通过校区值获取校区标签
+ * @param {String} value - 校区值
+ * @returns {String} 校区标签
+ */
+function getSchoolLabelByValue(value) {
+  return getLabelByValue(getSchoolOptions(), value);
+}
+
+/**
+ * 通过预约状态值获取预约状态标签
+ * @param {String} value - 预约状态值
+ * @returns {String} 预约状态标签
+ */
+function getBookingStatusLabelByValue(value) {
+  return getLabelByValue(getBookingStatusOptions(), value);
+}
+
+/**
+ * 判断筛选值是否有效（不是'all'且不为空）
+ * @param {String} value - 筛选值
+ * @returns {Boolean} 是否为有效的筛选值
+ */
+function isValidFilterValue(value) {
+  return value && value !== 'all';
+}
+var _default = {
+  getAllFilterOptions: getAllFilterOptions,
+  getGradeOptions: getGradeOptions,
+  getSubjectOptions: getSubjectOptions,
+  getSchoolOptions: getSchoolOptions,
+  getBookingStatusOptions: getBookingStatusOptions,
+  getLabelByValue: getLabelByValue,
+  getGradeLabelByValue: getGradeLabelByValue,
+  getSubjectLabelByValue: getSubjectLabelByValue,
+  getSchoolLabelByValue: getSchoolLabelByValue,
+  getBookingStatusLabelByValue: getBookingStatusLabelByValue,
+  isValidFilterValue: isValidFilterValue
+};
+exports.default = _default;
 
 /***/ })
 ]]);

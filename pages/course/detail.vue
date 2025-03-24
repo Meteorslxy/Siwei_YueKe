@@ -24,19 +24,19 @@
       <view class="info-item">
         <text class="item-icon iconfont icon-location"></text>
         <text class="item-label">授课地点：</text>
-        <text class="item-value">{{courseInfo.schoolName}}</text>
+        <text class="item-value">{{courseInfo.location || courseInfo.schoolName || '未指定'}}</text>
       </view>
       
       <view class="info-item">
         <text class="item-icon iconfont icon-time"></text>
         <text class="item-label">课程时间：</text>
-        <text class="item-value">{{formatCourseTime(courseInfo.startTime, courseInfo.endTime)}}</text>
+        <text class="item-value">{{formatCourseDateAndTime(courseInfo.startDate, courseInfo.endDate, courseInfo.startTime, courseInfo.endTime)}}</text>
       </view>
       
       <view class="info-item">
         <text class="item-icon iconfont icon-student"></text>
         <text class="item-label">招生人数：</text>
-        <text class="item-value">{{courseInfo.capacity || 20}}人 (已报名{{courseInfo.enrolled || 0}}人)</text>
+        <text class="item-value">{{courseInfo.courseCount || courseInfo.capacity || 20}}人 (已报名{{courseInfo.bookingCount || courseInfo.enrolled || 0}}人)</text>
       </view>
     </view>
     
@@ -197,11 +197,27 @@ export default {
       this.courseInfo.price = this.courseInfo.price || 0;
       this.courseInfo.teacherName = this.courseInfo.teacherName || '未指定';
       this.courseInfo.location = this.courseInfo.location || '未指定';
-      this.courseInfo.startTime = this.courseInfo.startTime || '';
-      this.courseInfo.endTime = this.courseInfo.endTime || '';
+      
+      // 处理课程容量和报名人数
+      this.courseInfo.capacity = this.courseInfo.capacity || this.courseInfo.courseCount || 20;
+      this.courseInfo.enrolled = this.courseInfo.enrolled || this.courseInfo.bookingCount || 0;
+      
+      // 处理日期和时间
+      if (!this.courseInfo.startDate && this.courseInfo.startTime && this.courseInfo.startTime.includes(' ')) {
+        // 从旧格式提取日期和时间
+        const parts = this.courseInfo.startTime.split(' ');
+        this.courseInfo.startDate = parts[0];
+        this.courseInfo.startTime = parts[1];
+      }
+      
+      if (!this.courseInfo.endDate && this.courseInfo.endTime && this.courseInfo.endTime.includes(' ')) {
+        // 从旧格式提取日期和时间
+        const parts = this.courseInfo.endTime.split(' ');
+        this.courseInfo.endDate = parts[0];
+        this.courseInfo.endTime = parts[1];
+      }
+      
       this.courseInfo.description = this.courseInfo.description || '暂无课程详情';
-      this.courseInfo.enrolled = this.courseInfo.enrolled || 0;
-      this.courseInfo.capacity = this.courseInfo.capacity || 20;
       
       // 处理封面图片路径
       if (this.courseInfo.coverImage && !this.courseInfo.coverImage.startsWith('/')) {
@@ -261,10 +277,12 @@ export default {
         teacherAvatar: '/static/images/teacher/teacher1.jpg',
         coverImage: '/static/images/course/course1.jpg',
         price: 4000,
-        startTime: '2023-07-01 15:30',
-        endTime: '2023-07-17 15:30',
-        capacity: 30,
-        enrolled: 15,
+        startDate: '2023-07-01',
+        endDate: '2023-07-17',
+        startTime: '15:30',
+        endTime: '17:00',
+        courseCount: 30,
+        bookingCount: 15,
         description: `<p style="text-indent:2em;">暑假班的主要内容包括：</p>
 <p style="text-indent:2em;">1. 语文与数学的基础知识巩固</p>
 <p style="text-indent:2em;">2. 英语口语和听力训练</p>
@@ -385,6 +403,100 @@ export default {
           icon: 'none'
         });
       }
+    },
+    
+    // 格式化课程日期和时间
+    formatCourseDateAndTime(startDate, endDate, startTime, endTime) {
+      // 检查必要参数，如果没有新格式的字段，则使用原来的时间格式
+      if (!startDate && !endDate) {
+        if (this.courseInfo.startTime && this.courseInfo.endTime) {
+          return this.formatCourseTime(this.courseInfo.startTime, this.courseInfo.endTime);
+        }
+        return '时间待定';
+      }
+      
+      // 格式化日期部分
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        let date;
+        try {
+          date = new Date(dateStr);
+          // 检查日期是否有效
+          if (isNaN(date.getTime())) {
+            return '';
+          }
+        } catch (e) {
+          console.error('日期格式化错误:', e);
+          return '';
+        }
+        return `${date.getFullYear()}年${(date.getMonth() + 1)}月${date.getDate()}日`;
+      };
+      
+      // 格式化时间部分
+      const formatTime = (timeStr) => {
+        if (!timeStr) return '';
+        
+        // 如果timeStr是标准时间格式，则直接使用Date对象解析
+        if (timeStr.includes(':')) {
+          try {
+            // 处理"HH:MM"格式
+            const parts = timeStr.split(':');
+            const hours = parseInt(parts[0]);
+            const minutes = parts.length > 1 ? parseInt(parts[1]) : 0;
+            
+            if (!isNaN(hours) && !isNaN(minutes)) {
+              return `${hours}:${minutes.toString().padStart(2, '0')}`;
+            }
+          } catch (e) {
+            console.error('时间格式化错误:', e);
+          }
+        }
+        
+        // 如果不是标准格式，尝试作为完整日期解析
+        try {
+          const time = new Date(timeStr);
+          if (!isNaN(time.getTime())) {
+            return `${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`;
+          }
+        } catch (e) {
+          console.error('时间格式化错误:', e);
+        }
+        
+        return timeStr; // 兜底返回原始值
+      };
+      
+      let result = '';
+      
+      // 添加日期范围
+      const startDateFormatted = formatDate(startDate);
+      const endDateFormatted = formatDate(endDate);
+      
+      if (startDateFormatted && endDateFormatted) {
+        if (startDateFormatted === endDateFormatted) {
+          // 如果开始和结束日期相同
+          result = startDateFormatted;
+        } else {
+          result = `${startDateFormatted} 至 ${endDateFormatted}`;
+        }
+      } else if (startDateFormatted) {
+        result = startDateFormatted;
+      } else if (endDateFormatted) {
+        result = endDateFormatted;
+      }
+      
+      // 添加时间范围
+      const startTimeFormatted = formatTime(startTime);
+      const endTimeFormatted = formatTime(endTime);
+      
+      if (startTimeFormatted && endTimeFormatted) {
+        if (result) {
+          result += ` ${startTimeFormatted}-${endTimeFormatted}`;
+        } else {
+          result = `${startTimeFormatted}-${endTimeFormatted}`;
+        }
+      }
+      
+      return result || '时间待定';
     }
   }
 }

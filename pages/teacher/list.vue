@@ -1,20 +1,39 @@
 <template>
   <view class="teacher-list">
-    <!-- 年级选择 -->
-    <view class="grade-selector">
-      <view class="grade-dropdown">
-        <view class="selected-grade" @click="toggleGradeOptions">
+    <!-- 筛选栏 -->
+    <view class="filter-bar">
+      <!-- 年级选择 -->
+      <view class="filter-dropdown">
+        <view class="selected-filter" @click="toggleGradeOptions">
           {{selectedGradeName}} <text class="triangle-down" :class="{ 'arrow-up': showGradeOptions }"></text>
         </view>
-        <view class="grade-options" v-if="showGradeOptions">
+        <view class="filter-options" v-if="showGradeOptions">
           <view 
-            v-for="(grade, index) in grades" 
+            v-for="(grade, index) in filterOptions.gradeOptions.options" 
             :key="index" 
-            class="grade-option"
-            :class="{ active: currentGrade === grade.id }"
-            @click="selectGrade(grade.id)"
+            class="filter-option"
+            :class="{ active: currentGrade === grade.value }"
+            @click="selectGrade(grade.value)"
           >
-            {{grade.name}}
+            {{grade.label}}
+          </view>
+        </view>
+      </view>
+      
+      <!-- 校区选择 -->
+      <view class="filter-dropdown">
+        <view class="selected-filter" @click="toggleSchoolOptions">
+          {{selectedSchoolName}} <text class="triangle-down" :class="{ 'arrow-up': showSchoolFilter }"></text>
+        </view>
+        <view class="filter-options" v-if="showSchoolFilter">
+          <view 
+            v-for="(school, index) in filterOptions.schoolOptions.options" 
+            :key="index" 
+            class="filter-option"
+            :class="{ active: schoolFilter === school.value }"
+            @click="selectSchool(school.value)"
+          >
+            {{school.label}}
           </view>
         </view>
       </view>
@@ -25,13 +44,13 @@
       <scroll-view scroll-x class="scroll-view">
         <view class="tabs-container">
           <view 
-            v-for="(tab, index) in subjects" 
+            v-for="(tab, index) in filterOptions.subjectOptions.options" 
             :key="index" 
             class="tab-item" 
-            :class="{ active: currentSubject === tab.id }"
-            @click="filterBySubject(tab.id)"
+            :class="{ active: currentSubject === tab.value }"
+            @click="filterBySubject(tab.value)"
           >
-            {{tab.name}}
+            {{tab.label}}
           </view>
         </view>
       </scroll-view>
@@ -53,31 +72,20 @@
 </template>
 
 <script>
+// 导入筛选选项JSON和工具类
+import filterOptions from '@/static/data/filter-options.json';
+import filterUtils from '@/api/utils/filters';
+
 export default {
   data() {
     return {
       keyword: '',
       currentGrade: 'all',
       showGradeOptions: false,
-      grades: [
-        { id: 'all', name: '全部年级' },
-        { id: '小学', name: '小学' },
-        { id: '初中', name: '初中' },
-        { id: '高中', name: '高中' }
-      ],
+      filterOptions: filterOptions, // 从JSON文件导入的筛选选项
       currentSubject: '',
-      subjects: [
-        { id: '', name: '全部' },
-        { id: '数学', name: '数学' },
-        { id: '语文', name: '语文' },
-        { id: '英语', name: '英语' },
-        { id: '物理', name: '物理' },
-        { id: '化学', name: '化学' },
-        { id: '生物', name: '生物' },
-        { id: '历史', name: '历史' },
-        { id: '地理', name: '地理' },
-        { id: '政治', name: '政治' }
-      ],
+      schoolFilter: '',
+      showSchoolFilter: false,
       teacherList: [],
       page: 1,
       pageSize: 10,
@@ -88,19 +96,36 @@ export default {
   },
   computed: {
     selectedGradeName() {
-      const grade = this.grades.find(item => item.id === this.currentGrade);
-      return grade ? grade.name : '全部';
+      const grade = this.filterOptions.gradeOptions.options.find(item => item.value === this.currentGrade);
+      return grade ? grade.label : '全部';
+    },
+    
+    selectedSchoolName() {
+      if (!this.schoolFilter || this.schoolFilter === 'all') {
+        return '全部校区';
+      }
+      return filterUtils.getSchoolLabelByValue(this.schoolFilter) || '全部校区';
     }
   },
   onLoad(options) {
+    console.log('教师列表页面加载，参数:', options);
+    
     // 如果有科目参数，设置当前科目
     if (options.subject) {
       this.currentSubject = options.subject;
+      console.log('设置初始学科:', this.currentSubject);
     }
     
     // 如果有年级参数，设置当前年级
     if (options.grade) {
       this.currentGrade = options.grade;
+      console.log('设置初始年级:', this.currentGrade);
+    }
+    
+    // 如果有校区参数，设置当前校区
+    if (options.school) {
+      this.schoolFilter = options.school;
+      console.log('设置初始校区:', this.schoolFilter);
     }
     
     this.getTeacherList();
@@ -117,19 +142,39 @@ export default {
     // 切换年级选项显示
     toggleGradeOptions() {
       this.showGradeOptions = !this.showGradeOptions;
+      // 如果打开年级选项，关闭校区选项
+      if (this.showGradeOptions && this.showSchoolFilter) {
+        this.showSchoolFilter = false;
+      }
+    },
+    
+    // 切换校区选项显示
+    toggleSchoolOptions() {
+      this.showSchoolFilter = !this.showSchoolFilter;
+      // 如果打开校区选项，关闭年级选项
+      if (this.showSchoolFilter && this.showGradeOptions) {
+        this.showGradeOptions = false;
+      }
     },
     
     // 选择年级
-    selectGrade(gradeId) {
-      this.currentGrade = gradeId;
+    selectGrade(gradeValue) {
+      this.currentGrade = gradeValue;
       this.showGradeOptions = false;
       this.refreshList();
     },
     
+    // 选择校区
+    selectSchool(schoolValue) {
+      this.schoolFilter = schoolValue;
+      this.showSchoolFilter = false;
+      this.refreshList();
+    },
+    
     // 按科目筛选
-    filterBySubject(subjectId) {
-      if (this.currentSubject === subjectId) return;
-      this.currentSubject = subjectId;
+    filterBySubject(subjectValue) {
+      if (this.currentSubject === subjectValue) return;
+      this.currentSubject = subjectValue;
       this.refreshList();
     },
     
@@ -152,11 +197,25 @@ export default {
       // 构建请求参数
       const params = {
         page: this.page,
-        pageSize: this.pageSize,
-        keyword: this.keyword,
-        subject: this.currentSubject,
-        grade: this.currentGrade !== 'all' ? this.currentGrade : ''
+        pageSize: this.pageSize
       };
+      
+      // 只有在有值且不为'all'时才添加筛选参数
+      if (this.keyword) {
+        params.keyword = this.keyword;
+      }
+      
+      if (filterUtils.isValidFilterValue(this.currentSubject)) {
+        params.subject = this.currentSubject;
+      }
+      
+      if (filterUtils.isValidFilterValue(this.currentGrade)) {
+        params.grade = this.currentGrade;
+      }
+      
+      if (filterUtils.isValidFilterValue(this.schoolFilter)) {
+        params.school = this.schoolFilter;
+      }
       
       console.log('获取教师列表参数:', params);
       
@@ -217,18 +276,19 @@ export default {
   min-height: 100vh;
   background-color: #EC7A49;
   
-  .grade-selector {
+  .filter-bar {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
     height: 80rpx;
     padding: 0 30rpx;
     
-    .grade-dropdown {
+    .filter-dropdown {
       position: relative;
       text-align: center;
+      margin: 0 20rpx;
       
-      .selected-grade {
+      .selected-filter {
         font-size: 28rpx;
         color: #fff;
         font-weight: bold;
@@ -252,7 +312,7 @@ export default {
         }
       }
       
-      .grade-options {
+      .filter-options {
         position: absolute;
         top: 60rpx;
         left: 50%;
@@ -262,9 +322,10 @@ export default {
         box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
         width: 160rpx;
         z-index: 10;
-        overflow: hidden;
+        max-height: 400rpx;
+        overflow-y: auto;
         
-        .grade-option {
+        .filter-option {
           font-size: 28rpx;
           color: #333;
           padding: 16rpx 0;

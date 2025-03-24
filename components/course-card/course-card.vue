@@ -50,18 +50,46 @@ export default {
       this.$emit('book', this.course)
     },
     formatTime(startTime, endTime) {
-      if (!startTime) return ''
+      if (!startTime) return '';
       
-      const start = new Date(startTime)
-      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`
-      
-      if (endTime) {
-        const end = new Date(endTime)
-        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`
-        return `${formattedStart}-${formattedEnd}`
+      try {
+        // 处理日期时间分离的情况
+        let startDate = startTime;
+        let startTimeOnly = '';
+        let endDate = endTime;
+        let endTimeOnly = '';
+        
+        // 处理日期时间组合格式
+        if (startTime.includes(' ') || startTime.includes('T')) {
+          const date = new Date(startTime);
+          if (!isNaN(date.getTime())) {
+            startDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            startTimeOnly = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+          } else {
+            return startTime; // 无法解析时返回原值
+          }
+        }
+        
+        if (endTime && (endTime.includes(' ') || endTime.includes('T'))) {
+          const date = new Date(endTime);
+          if (!isNaN(date.getTime())) {
+            endDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            endTimeOnly = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+          }
+        }
+        
+        // 格式化日期部分
+        if (startDate && endDate) {
+          return `${startDate} 至 ${endDate}`;
+        } else if (startDate) {
+          return startDate;
+        }
+        
+        return startTime; // 如果无法处理，返回原始时间
+      } catch (e) {
+        console.error('时间格式化错误:', e, startTime, endTime);
+        return startTime || '时间待定'; // 发生错误时返回原值或默认值
       }
-      
-      return formattedStart
     }
   }
 }

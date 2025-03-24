@@ -76,8 +76,8 @@
               <text>{{item.title}}</text>
             </view>
             <view class="course-info">
-              <text class="course-location">{{item.schoolName}}</text>
-              <text class="course-time">{{formatCourseTime(item.startTime, item.endTime)}}</text>
+              <text class="course-location">{{item.location || item.schoolName}}</text>
+              <text class="course-time">{{item.startTime && item.endTime ? `${item.startTime}-${item.endTime}` : ''}}</text>
             </view>
             <view class="course-teacher">
               <image class="teacher-avatar" :src="item.teacherAvatar" mode="aspectFill"></image>
@@ -87,8 +87,8 @@
             <view class="course-bottom">
               <text class="course-price">¥{{item.price}}</text>
               <view class="course-status">
-                <text class="max-students">名额 {{item.enrollCount}}/{{item.maxEnroll}}</text>
-                <text class="lesson-count">课时 {{item.lessonCount}}</text>
+                <text class="max-students">名额 {{item.courseCount ? (item.courseCount - item.bookingCount) + '/' + item.courseCount : item.enrollCount + '/' + item.maxEnroll}}</text>
+                <text class="lesson-count">{{item.startDate && item.endDate ? `${item.startDate}-${item.endDate}` : '日期待定'}}</text>
               </view>
             </view>
           </view>
@@ -165,13 +165,71 @@ export default {
     // 获取推荐课程
     async getRecommendCourses() {
       try {
+        console.log('获取推荐课程');
+        
         // 调用API获取推荐课程
         const result = await this.$api.course.getRecommendCourses({
           limit: 4
         });
         
+        console.log('获取推荐课程结果:', result);
+        
         if (result && result.data) {
-          this.recommendCourses = result.data;
+          // 处理每个课程项，确保有正确的数据格式
+          this.recommendCourses = result.data.map(course => {
+            // 确保有正确的名额数据
+            if (!course.courseCount && course.maxEnroll) {
+              course.courseCount = course.maxEnroll;
+            }
+            
+            if (!course.bookingCount && course.enrollCount) {
+              course.bookingCount = course.enrollCount;
+            }
+            
+            // 确保有正确的日期和时间数据
+            if (!course.startDate && course.startTime) {
+              if (course.startTime.includes(' ')) {
+                const parts = course.startTime.split(' ');
+                course.startDate = parts[0];
+                course.startTime = parts[1];
+              } else if (course.startTime.includes('T')) {
+                try {
+                  const date = new Date(course.startTime);
+                  if (!isNaN(date.getTime())) {
+                    course.startDate = date.toISOString().split('T')[0];
+                    course.startTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                  }
+                } catch (e) {
+                  console.error('解析startTime失败:', e, course.startTime);
+                }
+              }
+            }
+            
+            if (!course.endDate && course.endTime) {
+              if (course.endTime.includes(' ')) {
+                const parts = course.endTime.split(' ');
+                course.endDate = parts[0];
+                course.endTime = parts[1];
+              } else if (course.endTime.includes('T')) {
+                try {
+                  const date = new Date(course.endTime);
+                  if (!isNaN(date.getTime())) {
+                    course.endDate = date.toISOString().split('T')[0];
+                    course.endTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                  }
+                } catch (e) {
+                  console.error('解析endTime失败:', e, course.endTime);
+                }
+              }
+            }
+            
+            // 确保有地点信息
+            if (!course.location && course.schoolName) {
+              course.location = course.schoolName;
+            }
+            
+            return course;
+          });
         } else {
           // 使用模拟数据
           this.recommendCourses = [
@@ -185,11 +243,12 @@ export default {
               teacherAvatar: '/static/images/teacher/teacher1.jpg',
               coverImage: '/static/images/course/course1.jpg',
               price: 4000,
-              enrollCount: 5,
-              maxEnroll: 10,
-              lessonCount: 10,
-              startTime: '2023-07-01 15:30',
-              endTime: '2023-07-17 15:30'
+              courseCount: 10,
+              bookingCount: 5,
+              startDate: '2023-07-01',
+              endDate: '2023-07-17',
+              startTime: '15:30',
+              endTime: '17:00'
             },
             {
               _id: '2',
@@ -201,32 +260,17 @@ export default {
               teacherAvatar: '/static/images/teacher/teacher1.jpg',
               coverImage: '/static/images/course/course2.jpg',
               price: 4000,
-              enrollCount: 3,
-              maxEnroll: 10,
-              lessonCount: 10,
-              startTime: '2023-07-08 08:30',
-              endTime: '2023-07-10 08:30'
-            },
-            {
-              _id: '3',
-              title: '四年级提优暑假班',
-              school: '大行宫',
-              schoolName: '大行宫校区',
-              teacherName: '刘星宇',
-              teacherTitle: '小学教师',
-              teacherAvatar: '/static/images/teacher/teacher1.jpg',
-              coverImage: '/static/images/course/course3.jpg',
-              price: 4000,
-              enrollCount: 2,
-              maxEnroll: 10,
-              lessonCount: 10,
-              startTime: '2023-07-08 08:30',
-              endTime: '2023-07-10 08:30'
+              courseCount: 10,
+              bookingCount: 3,
+              startDate: '2023-07-08',
+              endDate: '2023-07-10',
+              startTime: '08:30',
+              endTime: '10:00'
             }
-          ]
+          ];
         }
       } catch (e) {
-        console.error('获取推荐课程失败:', e)
+        console.error('获取推荐课程失败:', e);
         // 使用模拟数据
         this.recommendCourses = [
           {
@@ -239,29 +283,14 @@ export default {
             teacherAvatar: '/static/images/teacher/teacher1.jpg',
             coverImage: '/static/images/course/course1.jpg',
             price: 4000,
-            enrollCount: 5,
-            maxEnroll: 10,
-            lessonCount: 10,
-            startTime: '2023-07-01 15:30',
-            endTime: '2023-07-17 15:30'
-          },
-          {
-            _id: '2',
-            title: '四年级提优暑假班',
-            school: '大行宫',
-            schoolName: '大行宫校区',
-            teacherName: '刘星宇',
-            teacherTitle: '小学教师',
-            teacherAvatar: '/static/images/teacher/teacher1.jpg',
-            coverImage: '/static/images/course/course2.jpg',
-            price: 4000,
-            enrollCount: 3,
-            maxEnroll: 10,
-            lessonCount: 10,
-            startTime: '2023-07-08 08:30',
-            endTime: '2023-07-10 08:30'
+            courseCount: 10,
+            bookingCount: 5,
+            startDate: '2023-07-01',
+            endDate: '2023-07-17',
+            startTime: '15:30',
+            endTime: '17:00'
           }
-        ]
+        ];
       }
     },
     
@@ -280,18 +309,138 @@ export default {
     
     // 格式化课程时间
     formatCourseTime(startTime, endTime) {
-      if (!startTime) return ''
+      if (!startTime) return '时间待定'
       
-      const start = new Date(startTime)
-      const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`
-      
-      if (endTime) {
-        const end = new Date(endTime)
-        const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`
-        return `${formattedStart}-${formattedEnd}`
+      try {
+        const start = new Date(startTime)
+        // 检查日期是否有效
+        if (isNaN(start.getTime())) {
+          console.warn('无效的开始时间格式:', startTime);
+          return '时间待定';
+        }
+        
+        const formattedStart = `${start.getMonth() + 1}.${start.getDate()}`
+        
+        if (endTime) {
+          const end = new Date(endTime)
+          // 检查日期是否有效
+          if (isNaN(end.getTime())) {
+            console.warn('无效的结束时间格式:', endTime);
+            return formattedStart;
+          }
+          
+          const formattedEnd = `${end.getMonth() + 1}.${end.getDate()}`
+          return `${formattedStart}-${formattedEnd}`
+        }
+        
+        return formattedStart
+      } catch (e) {
+        console.error('时间格式化错误:', e, startTime, endTime);
+        return '时间待定';
+      }
+    },
+    
+    // 格式化课程日期和时间
+    formatCourseDateAndTime(startDate, endDate, startTime, endTime) {
+      // 检查必要参数
+      if (!startDate && !endDate) {
+        // 尝试使用原有的时间格式
+        if (startTime && startTime.includes(' ')) {
+          const parts = startTime.split(' ');
+          startDate = parts[0];
+          startTime = parts[1];
+          
+          if (endTime && endTime.includes(' ')) {
+            const endParts = endTime.split(' ');
+            endDate = endParts[0];
+            endTime = endParts[1];
+          }
+        } else if (!startTime) {
+          return '时间待定';
+        }
       }
       
-      return formattedStart
+      // 格式化日期部分
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        try {
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) return '';
+          
+          const year = date.getFullYear();
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const day = date.getDate().toString().padStart(2, '0');
+          
+          return `${year}-${month}-${day}`;
+        } catch (e) {
+          console.error('日期格式化错误:', e, dateStr);
+          return '';
+        }
+      };
+      
+      // 格式化时间部分
+      const formatTime = (timeStr) => {
+        if (!timeStr) return '';
+        try {
+          // 如果是标准时间格式 (HH:MM)
+          if (timeStr.includes(':')) {
+            return timeStr.substring(0, 5); // 只取小时和分钟 HH:MM
+          }
+          
+          // 如果是完整日期时间，尝试提取时间部分
+          if (timeStr.includes('T') || timeStr.includes(' ')) {
+            const date = new Date(timeStr);
+            if (!isNaN(date.getTime())) {
+              return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+            }
+          }
+          
+          return timeStr; // 如果无法解析，返回原值
+        } catch (e) {
+          console.error('时间格式化错误:', e, timeStr);
+          return timeStr;
+        }
+      };
+      
+      // 尝试格式化日期和时间
+      const startDateFormatted = formatDate(startDate);
+      const endDateFormatted = formatDate(endDate);
+      const startTimeFormatted = formatTime(startTime);
+      const endTimeFormatted = formatTime(endTime);
+      
+      // 组合日期和时间
+      let result = '';
+      
+      // 添加日期范围
+      if (startDateFormatted && endDateFormatted) {
+        if (startDateFormatted === endDateFormatted) {
+          // 如果开始和结束日期相同
+          result = startDateFormatted;
+        } else {
+          result = `${startDateFormatted} 至 ${endDateFormatted}`;
+        }
+      } else if (startDateFormatted) {
+        result = startDateFormatted;
+      } else if (endDateFormatted) {
+        result = endDateFormatted;
+      }
+      
+      // 添加时间范围
+      if (startTimeFormatted && endTimeFormatted) {
+        if (result) {
+          result += ` ${startTimeFormatted}-${endTimeFormatted}`;
+        } else {
+          result = `${startTimeFormatted}-${endTimeFormatted}`;
+        }
+      } else if (startTimeFormatted) {
+        if (result) {
+          result += ` ${startTimeFormatted}`;
+        } else {
+          result = startTimeFormatted;
+        }
+      }
+      
+      return result || '时间待定';
     },
     
     // 页面导航
@@ -669,9 +818,20 @@ export default {
           .course-status {
             font-size: 24rpx;
             color: $text-color-light;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
             
             .max-students {
-              margin-right: 20rpx;
+              margin-bottom: 8rpx;
+              color: $theme-color;
+            }
+            
+            .lesson-count {
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 320rpx;
             }
           }
         }
