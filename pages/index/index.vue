@@ -108,6 +108,9 @@ export default {
     }
   },
   onLoad() {
+    // 初始化应用
+    this.initApp();
+    
     this.getNews()
     this.getRecommendCourses()
     // 获取状态栏高度
@@ -122,6 +125,23 @@ export default {
     })
   },
   methods: {
+    // 初始化应用
+    async initApp() {
+      try {
+        // 检查数据库状态
+        const res = await uniCloud.callFunction({
+          name: 'initUserTable'
+        });
+        
+        if (res.result && res.result.code === 0) {
+          console.log('用户表初始化完成:', res.result);
+        } else {
+          console.warn('用户表初始化警告:', res.result);
+        }
+      } catch (err) {
+        console.error('应用初始化失败:', err);
+      }
+    },
     // 获取状态栏高度
     getStatusBarHeight() {
       try {
@@ -231,66 +251,20 @@ export default {
             return course;
           });
         } else {
-          // 使用模拟数据
-          this.recommendCourses = [
-            {
-              _id: '1',
-              title: '三年级浪漫暑假班',
-              school: '雨花台',
-              schoolName: '雨花台校区',
-              teacherName: '刘星宇',
-              teacherTitle: '小学教师',
-              teacherAvatar: '/static/images/teacher/teacher1.jpg',
-              coverImage: '/static/images/course/course1.jpg',
-              price: 4000,
-              courseCount: 10,
-              bookingCount: 5,
-              startDate: '2023-07-01',
-              endDate: '2023-07-17',
-              startTime: '15:30',
-              endTime: '17:00'
-            },
-            {
-              _id: '2',
-              title: '四年级提优暑假班',
-              school: '大行宫',
-              schoolName: '大行宫校区',
-              teacherName: '刘星宇',
-              teacherTitle: '小学教师',
-              teacherAvatar: '/static/images/teacher/teacher1.jpg',
-              coverImage: '/static/images/course/course2.jpg',
-              price: 4000,
-              courseCount: 10,
-              bookingCount: 3,
-              startDate: '2023-07-08',
-              endDate: '2023-07-10',
-              startTime: '08:30',
-              endTime: '10:00'
-            }
-          ];
+          console.warn('未获取到推荐课程数据');
+          this.recommendCourses = [];
+          uni.showToast({
+            title: '暂无推荐课程',
+            icon: 'none'
+          });
         }
       } catch (e) {
         console.error('获取推荐课程失败:', e);
-        // 使用模拟数据
-        this.recommendCourses = [
-          {
-            _id: '1',
-            title: '三年级浪漫暑假班',
-            school: '雨花台',
-            schoolName: '雨花台校区',
-            teacherName: '刘星宇',
-            teacherTitle: '小学教师',
-            teacherAvatar: '/static/images/teacher/teacher1.jpg',
-            coverImage: '/static/images/course/course1.jpg',
-            price: 4000,
-            courseCount: 10,
-            bookingCount: 5,
-            startDate: '2023-07-01',
-            endDate: '2023-07-17',
-            startTime: '15:30',
-            endTime: '17:00'
-          }
-        ];
+        this.recommendCourses = [];
+        uni.showToast({
+          title: '获取推荐课程失败',
+          icon: 'none'
+        });
       }
     },
     

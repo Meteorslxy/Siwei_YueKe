@@ -3,96 +3,111 @@
 const db = uniCloud.database();
 const dbCmd = db.command;
 
+// 预约状态处理工具
+const statusUtils = {
+  // 确保预约记录有正确的状态字段
+  normalizeStatus(booking) {
+    if (!booking) return booking;
+    
+    // 复制一份以便修改
+    const newBooking = {...booking};
+    
+    // 状态处理
+    if (!newBooking.status) {
+      newBooking.status = 'pending';
+    }
+    
+    // 支付状态处理
+    if (!newBooking.paymentStatus) {
+      // 如果已确认且没有支付状态，默认为未支付
+      if (newBooking.status === 'confirmed') {
+        newBooking.paymentStatus = 'unpaid';
+        // 重新调整状态为confirmed_unpaid
+        newBooking.status = 'confirmed_unpaid';
+      } else {
+        newBooking.paymentStatus = 'unpaid';
+      }
+    }
+    
+    return newBooking;
+  }
+};
+
 // 云函数入口函数
 exports.main = async (event, context) => {
+  console.log('getBookings函数收到请求:', event);
+  
   const { 
     userId, 
+    courseId,
     status, 
     limit = 10, 
-    skip = 0 
+    skip = 0,
+    isUsable = false // 新增isUsable参数，用于过滤可用的预约
   } = event;
   
-  if (!userId) {
+  if (!userId && !courseId) {
+    console.log('缺少查询参数，需要userId或courseId');
     return {
       code: -1,
       success: false,
-      message: '用户ID不能为空'
+      message: '参数错误，请提供用户ID或课程ID'
     };
   }
   
   try {
     // 构建查询条件
-    const query = { userId };
+    const whereCondition = {};
     
-    // 如果指定了状态，添加到查询条件中
-    if (status) {
-      query.status = status;
+    // 按用户ID查询
+    if (userId) {
+      whereCondition.userId = userId;
     }
     
-    // 查询符合条件的总数
+    // 按课程ID查询
+    if (courseId) {
+      whereCondition.courseId = courseId;
+    }
+    
+    // 按状态查询
+    if (status) {
+      whereCondition.status = status;
+    }
+    
+    // 处理"可使用"状态 - 包括待确认和已确认状态，排除已取消状态
+    if (isUsable) {
+      whereCondition.status = dbCmd.in(['pending', 'confirmed', 'confirmed_unpaid']);
+    }
+    
+    console.log('查询条件:', whereCondition);
+    
+    // 先获取总数
     const countResult = await db.collection('bookings')
-      .where(query)
+      .where(whereCondition)
       .count();
     
     const total = countResult.total;
+    console.log('总记录数:', total);
     
-    // 查询预约记录
-    const bookingResult = await db.collection('bookings')
-      .where(query)
+    // 查询数据
+    const result = await db.collection('bookings')
+      .where(whereCondition)
       .skip(skip)
       .limit(limit)
       .orderBy('createTime', 'desc')
       .get();
     
-    // 获取所有关联的课程ID
-    const courseIds = bookingResult.data
-      .map(booking => booking.courseId)
-      .filter((id, index, self) => self.indexOf(id) === index); // 去重
+    // 处理数据，确保所有记录都有正确的状态字段
+    let bookings = result.data || [];
+    bookings = bookings.map(statusUtils.normalizeStatus);
     
-    // 查询课程信息
-    const courseMap = {};
-    
-    if (courseIds.length > 0) {
-      const courseResult = await db.collection('courses')
-        .where({
-          _id: dbCmd.in(courseIds)
-        })
-        .get();
-      
-      courseResult.data.forEach(course => {
-        courseMap[course._id] = course;
-      });
-    }
-    
-    // 将课程信息添加到预约记录中
-    const bookings = bookingResult.data.map(booking => {
-      const course = courseMap[booking.courseId] || {};
-      
-      // 格式化预约编号
-      const bookingId = booking._id.slice(-10).toUpperCase();
-      
-      return {
-        _id: booking._id,
-        bookingId: `B${bookingId}`,
-        userId: booking.userId,
-        courseId: booking.courseId,
-        courseTitle: course.title || booking.courseName || '未知课程',
-        courseStartTime: course.startTime || booking.startTime,
-        courseEndTime: course.endTime || booking.endTime,
-        schoolName: course.schoolName || booking.schoolName || '未知校区',
-        studentName: booking.studentName,
-        contactPhone: booking.contactPhone,
-        remark: booking.remark,
-        status: booking.status,
-        createTime: booking.createTime
-      };
-    });
+    console.log(`查询到${bookings.length}条记录`);
     
     return {
       code: 0,
       success: true,
-      total,
       data: bookings,
+      total: total,
       message: '获取预约记录成功'
     };
   } catch (err) {
@@ -100,7 +115,6 @@ exports.main = async (event, context) => {
     return {
       code: -1,
       success: false,
-      data: [],
       message: err.message || '获取预约记录失败'
     };
   }

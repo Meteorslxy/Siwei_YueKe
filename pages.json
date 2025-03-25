@@ -195,6 +195,23 @@
                 "navigationBarTextStyle": "white",
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/user/booking",
+            "style": {
+                "navigationBarTitleText": "预约记录",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/user/booking-detail",
+            "style": {
+                "navigationBarTitleText": "预约详情",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
         }
     ],
     "globalStyle": {

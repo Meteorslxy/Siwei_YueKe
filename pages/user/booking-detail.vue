@@ -3,11 +3,11 @@
     <!-- 状态栏 -->
     <view class="status-bar" :class="'status-' + bookingDetail.status">
       <view class="status-icon">
-        <text class="iconfont" :class="getStatusIcon(bookingDetail.status)"></text>
+        <text class="iconfont" :class="statusIcon"></text>
       </view>
       <view class="status-info">
-        <view class="status-text">{{getStatusText(bookingDetail.status)}}</view>
-        <view class="status-desc">{{getStatusDesc(bookingDetail.status)}}</view>
+        <view class="status-text">{{statusText}}</view>
+        <view class="status-desc">{{statusDesc}}</view>
       </view>
     </view>
     
@@ -54,7 +54,7 @@
     <view class="action-bar">
       <view class="action-btn outline" @click="goBack">返回列表</view>
       
-      <block v-if="bookingDetail.status === 'pending'">
+      <block v-if="bookingDetail.status === 'pending' || bookingDetail.status === 'confirmed_unpaid'">
         <view class="action-btn primary" @click="cancelBooking">取消预约</view>
       </block>
       
@@ -112,87 +112,63 @@ export default {
       }, 1500)
     }
   },
+  computed: {
+    statusIcon() {
+      return this.getStatusIcon(this.bookingDetail.status);
+    },
+    statusText() {
+      return this.getStatusText(this.bookingDetail.status);
+    },
+    statusDesc() {
+      return this.getStatusDesc(this.bookingDetail.status);
+    }
+  },
   methods: {
     // 获取预约详情
     async fetchBookingDetail() {
+      if (!this.bookingId) {
+        console.error('预约ID为空，无法获取详情')
+        uni.showToast({
+          title: '参数错误',
+          icon: 'none'
+        })
+        return
+      }
+      
       uni.showLoading({
         title: '加载中...'
       })
       
       try {
         // 调用云函数获取预约详情
-        const res = await wx.cloud.callFunction({
+        const res = await uniCloud.callFunction({
           name: 'getBookingDetail',
           data: {
             bookingId: this.bookingId
           }
         })
         
-        if (res.result && res.result.success) {
+        console.log('预约详情云函数返回结果:', res.result)
+        
+        if (res.result && res.result.success && res.result.data) {
           this.bookingDetail = res.result.data
+          console.log('获取到预约详情:', this.bookingDetail)
         } else {
-          // 使用模拟数据
-          this.useMockData()
+          console.error('获取预约详情失败:', res.result)
+          uni.showToast({
+            title: '获取预约详情失败',
+            icon: 'none'
+          })
         }
       } catch (e) {
-        console.error('获取预约详情失败:', e)
-        // 加载失败，使用模拟数据
-        this.useMockData()
+        console.error('获取预约详情出错:', e)
+        uni.showToast({
+          title: '获取预约详情失败',
+          icon: 'none'
+        })
       } finally {
         uni.hideLoading()
       }
-    },
-    
-    // 使用模拟数据
-    useMockData() {
-      this.bookingDetail = {
-        _id: this.bookingId,
-        bookingId: 'B20230701001',
-        userId: 'temp_user_id',
-        courseId: '1',
-        courseTitle: '三年级浪漫暑假班',
-        courseStartTime: '2023-07-01 15:30',
-        courseEndTime: '2023-07-17 15:30',
-        schoolName: '雨花台校区',
-        studentName: '王小明',
-        contactPhone: '13812345678',
-        remark: '学生性格内向，希望老师多关注',
-        status: 'confirmed',
-        createTime: '2023-06-25 14:30:00'
-      }
-    },
-    
-    // 获取状态图标
-    getStatusIcon(status) {
-      const iconMap = {
-        'pending': 'icon-pending',
-        'confirmed': 'icon-confirmed',
-        'finished': 'icon-finished',
-        'cancelled': 'icon-cancelled'
-      }
-      return iconMap[status] || 'icon-unknown'
-    },
-    
-    // 获取状态文本
-    getStatusText(status) {
-      const statusMap = {
-        'pending': '待确认',
-        'confirmed': '已确认',
-        'finished': '已完成',
-        'cancelled': '已取消'
-      }
-      return statusMap[status] || '未知状态'
-    },
-    
-    // 获取状态描述
-    getStatusDesc(status) {
-      const descMap = {
-        'pending': '您的预约正在等待确认',
-        'confirmed': '您的预约已确认，请按时上课',
-        'finished': '课程已结束，感谢您的参与',
-        'cancelled': '预约已取消'
-      }
-      return descMap[status] || ''
     },
     
     // 格式化课程时间
@@ -241,13 +217,27 @@ export default {
       })
       
       try {
-        // 调用云函数取消预约
-        const res = await wx.cloud.callFunction({
+        // 确定使用哪个ID
+        const bookingDocId = this.bookingDetail._id;
+        const displayBookingId = this.bookingDetail.bookingId;
+        
+        console.log('取消预约详情:', {
+          _id: bookingDocId,
+          bookingId: displayBookingId,
+          courseId: this.bookingDetail.courseId,
+          status: this.bookingDetail.status
+        });
+        
+        // 调用云函数取消预约，跳过用户ID验证
+        const res = await uniCloud.callFunction({
           name: 'cancelBooking',
           data: {
-            bookingId: this.bookingDetail._id
+            bookingId: bookingDocId, // 使用文档_id
+            skipUserCheck: true // 跳过用户ID验证
           }
         })
+        
+        console.log('取消预约结果:', res.result);
         
         if (res.result && res.result.success) {
           uni.showToast({
@@ -257,6 +247,12 @@ export default {
           
           // 更新状态
           this.bookingDetail.status = 'cancelled'
+          
+          // 通知课程详情页面更新预约状态
+          uni.$emit('booking:cancel', {
+            courseId: this.bookingDetail.courseId,
+            userId: userId
+          });
           
           // 返回上一页并刷新列表
           setTimeout(() => {
@@ -288,15 +284,26 @@ export default {
     
     // 联系老师
     contactTeacher() {
+      // 检查是否有联系电话
+      const phoneNumber = this.bookingDetail.contactPhone || this.bookingDetail.teacherPhone || '';
+      
+      if (!phoneNumber) {
+        uni.showToast({
+          title: '暂无联系方式',
+          icon: 'none'
+        });
+        return;
+      }
+      
       uni.makePhoneCall({
-        phoneNumber: '13812345678',
+        phoneNumber: phoneNumber,
         fail: () => {
           uni.showToast({
             title: '拨打电话失败',
             icon: 'none'
-          })
+          });
         }
-      })
+      });
     },
     
     // 查看课程详情
@@ -304,7 +311,59 @@ export default {
       uni.navigateTo({
         url: `/pages/course/detail?id=${this.bookingDetail.courseId}`
       })
-    }
+    },
+    
+    // 获取状态图标
+    getStatusIcon(status) {
+      switch(status) {
+        case 'pending':
+          return 'icon-time';
+        case 'confirmed':
+          return 'icon-check-circle';
+        case 'finished':
+          return 'icon-success';
+        case 'cancelled':
+          return 'icon-close-circle';
+        default:
+          return 'icon-help';
+      }
+    },
+    
+    // 获取状态文本
+    getStatusText(status) {
+      switch(status) {
+        case 'pending':
+          return '待确认（未缴费）';
+        case 'confirmed_unpaid':
+          return '已确认（未缴费）';
+        case 'confirmed':
+          return '已确认（已缴费）';
+        case 'finished':
+          return '已完成';
+        case 'cancelled':
+          return '已取消';
+        default:
+          return '未知状态';
+      }
+    },
+    
+    // 获取状态描述
+    getStatusDesc(status) {
+      switch(status) {
+        case 'pending':
+          return '您的预约正在等待教师确认，未缴费状态可随时取消';
+        case 'confirmed_unpaid':
+          return '教师已确认您的预约，但您尚未缴费，请及时缴费或取消';
+        case 'confirmed':
+          return '教师已确认您的预约，您已完成缴费，请按时参加课程';
+        case 'finished':
+          return '课程已顺利完成，感谢您的参与';
+        case 'cancelled':
+          return '预约已取消';
+        default:
+          return '';
+      }
+    },
   }
 }
 </script>
@@ -314,6 +373,20 @@ export default {
   min-height: 100vh;
   background-color: $bg-color;
   padding-bottom: 120rpx;
+}
+
+/* 图标样式 */
+.iconfont {
+  font-family: "iconfont";
+  font-size: 48rpx;
+  font-style: normal;
+  display: inline-block;
+  
+  &.icon-time:before { content: "\e657"; }
+  &.icon-check-circle:before { content: "\e645"; }
+  &.icon-success:before { content: "\e6b3"; }
+  &.icon-close-circle:before { content: "\e646"; }
+  &.icon-help:before { content: "\e6a8"; }
 }
 
 /* 状态栏 */

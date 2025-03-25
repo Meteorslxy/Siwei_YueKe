@@ -7,6 +7,14 @@
       <view class="course-title">{{courseInfo.title}}</view>
     </view>
     
+    <!-- 课程ID调试信息，仅在调试模式下显示 -->
+    <view class="debug-info" v-if="false" style="padding: 10px; background-color: #f0f0f0; margin: 10px;">
+      <text style="display: block;">课程ID: {{courseId}}</text>
+      <text style="display: block;">用户ID: {{userInfo ? userInfo.userId : '未登录'}}</text>
+      <text style="display: block;">预约状态: {{hasBooked ? '已预约' : '未预约'}}</text>
+      <button @click="toggleBookStatus" style="margin-top: 5px; font-size: 12px; padding: 2px 5px;">切换预约状态</button>
+    </view>
+    
     <!-- 课程信息卡片 -->
     <view class="info-card">
       <view class="info-price">
@@ -36,7 +44,7 @@
       <view class="info-item">
         <text class="item-icon iconfont icon-student"></text>
         <text class="item-label">招生人数：</text>
-        <text class="item-value">{{courseInfo.courseCount || courseInfo.capacity || 20}}人 (已报名{{courseInfo.bookingCount || courseInfo.enrolled || 0}}人)</text>
+        <text class="item-value">{{courseInfo.courseCount || courseInfo.capacity || 20}}人 (已报名{{courseInfo.bookingCount || 0}}人，剩余{{calculateRemainingSeats()}}人)</text>
       </view>
     </view>
     
@@ -66,19 +74,14 @@
     </view>
     
     <!-- 预约信息 -->
-    <view class="booking-info" v-if="showBookingForm">
-      <view class="detail-title">预约信息</view>
-      <view class="form-item">
-        <text class="form-label">学生姓名</text>
-        <input class="form-input" v-model="bookingForm.studentName" placeholder="请输入学生姓名" />
+    <view class="booking-info" v-if="hasBooked">
+      <view class="detail-title">预约状态</view>
+      <view class="booking-status">
+        <text class="status-icon iconfont icon-success"></text>
+        <text class="status-text">您已成功预约该课程</text>
       </view>
-      <view class="form-item">
-        <text class="form-label">联系电话</text>
-        <input class="form-input" v-model="bookingForm.contactPhone" placeholder="请输入联系电话" />
-      </view>
-      <view class="form-item">
-        <text class="form-label">备注信息</text>
-        <textarea class="form-textarea" v-model="bookingForm.remark" placeholder="请输入备注信息（选填）"></textarea>
+      <view class="booking-tips">
+        可在<text class="tips-link" @click="navigateToBookingList">我的预约</text>中查看详情
       </view>
     </view>
     
@@ -88,10 +91,8 @@
         <text class="btn-icon iconfont icon-contact"></text>
         <text>联系老师</text>
       </view>
-      <view class="book-btn" @click="toggleBookingForm">
-        {{showBookingForm ? '取消预约' : '预约课程'}}
-      </view>
-      <view class="submit-btn" v-if="showBookingForm" @click="submitBooking">立即预约</view>
+      <button class="book-btn" v-if="!hasBooked" @click="bookCourse">立即预约</button>
+      <button class="book-btn booked" v-else @click="navigateToBookingList">查看预约</button>
     </view>
   </view>
 </template>
@@ -102,30 +103,63 @@ export default {
     return {
       courseId: '',
       courseInfo: {},
-      showBookingForm: false,
-      bookingForm: {
-        studentName: '',
-        contactPhone: '',
-        remark: ''
-      }
+      hasBooked: false,
+      userInfo: null
     }
   },
+  mounted() {
+    console.log('课程详情页已挂载，当前状态:', {
+      courseId: this.courseId,
+      userInfo: this.userInfo ? '已登录' : '未登录',
+      hasBooked: this.hasBooked
+    });
+    
+    // 每3秒输出状态信息，但不使用document.querySelector
+    this.debugInterval = setInterval(() => {
+      console.log('课程详情页状态:', {
+        courseId: this.courseId,
+        hasBooked: this.hasBooked
+      });
+    }, 3000);
+    
+    // 监听预约取消事件
+    uni.$on('booking:cancel', this.handleBookingCancelled);
+  },
+  beforeDestroy() {
+    // 清除定时器
+    if (this.debugInterval) {
+      clearInterval(this.debugInterval);
+    }
+    
+    // 移除事件监听
+    uni.$off('booking:cancel', this.handleBookingCancelled);
+  },
   onLoad(options) {
-    console.log('课程详情页接收参数:', options);
-    if (options && options.id) {
+    console.log('加载课程详情页面, 参数:', options);
+    
+    // 监听预约取消事件，更新本页面的预约状态
+    uni.$on('booking:cancel', this.handleBookingCancelled);
+    
+    if (options.id) {
       this.courseId = options.id;
-      console.log('课程ID:', this.courseId);
-      // 直接使用MongoDB ObjectId格式获取课程详情
-      this.fetchCourseDetail();
+      // 获取课程详情
+      this.getCourseDetail();
+      // 如果登录了，检查预约状态
+      this.checkBookingStatus();
     } else {
-      console.error('未接收到有效的课程ID');
       uni.showToast({
-        title: '参数错误',
+        title: '未找到课程ID',
         icon: 'none'
       });
-      // 使用模拟数据
-      this.useMockData();
+      setTimeout(() => {
+        uni.navigateBack();
+      }, 1500);
     }
+  },
+  
+  onUnload() {
+    // 页面卸载时移除事件监听，防止内存泄漏
+    uni.$off('booking:cancel', this.handleBookingCancelled);
   },
   methods: {
     // 获取课程详情
@@ -133,7 +167,6 @@ export default {
       // 验证课程ID是否有效
       if (!this.courseId) {
         console.error('课程ID为空，无法获取详情');
-        this.useMockData();
         return;
       }
       
@@ -166,17 +199,18 @@ export default {
           // 预处理数据，确保所有字段都有值
           this.processCourseData();
         } else {
-          // 获取失败时使用模拟数据
+          // 获取失败时显示错误提示
           console.error('获取课程详情失败: 未找到数据');
-          this.useMockData();
+          uni.showToast({
+            title: '获取课程详情失败',
+            icon: 'none'
+          });
         }
       } catch (error) {
         // 隐藏加载提示
         uni.hideLoading();
         
         console.error('获取课程详情失败:', error);
-        // 加载失败，使用模拟数据
-        this.useMockData();
         
         // 显示错误提示
         uni.showToast({
@@ -184,6 +218,12 @@ export default {
           icon: 'none'
         });
       }
+    },
+    
+    // 新函数，与onLoad中使用的方法名匹配
+    getCourseDetail() {
+      // 调用原有的获取课程详情函数
+      this.fetchCourseDetail();
     },
     
     // 预处理课程数据，确保所有需要的字段都存在
@@ -199,8 +239,9 @@ export default {
       this.courseInfo.location = this.courseInfo.location || '未指定';
       
       // 处理课程容量和报名人数
+      this.courseInfo.courseCount = this.courseInfo.courseCount || 20; // 优先使用courseCount
       this.courseInfo.capacity = this.courseInfo.capacity || this.courseInfo.courseCount || 20;
-      this.courseInfo.enrolled = this.courseInfo.enrolled || this.courseInfo.bookingCount || 0;
+      this.courseInfo.bookingCount = this.courseInfo.bookingCount || 0;
       
       // 处理日期和时间
       if (!this.courseInfo.startDate && this.courseInfo.startTime && this.courseInfo.startTime.includes(' ')) {
@@ -265,33 +306,6 @@ export default {
       }
     },
     
-    // 使用模拟数据
-    useMockData() {
-      this.courseInfo = {
-        _id: '1',
-        title: '三年级浪漫暑假班',
-        school: '雨花台',
-        schoolName: '雨花台校区',
-        teacherName: '刘星宇',
-        teacherTitle: '小学教师',
-        teacherAvatar: '/static/images/teacher/teacher1.jpg',
-        coverImage: '/static/images/course/course1.jpg',
-        price: 4000,
-        startDate: '2023-07-01',
-        endDate: '2023-07-17',
-        startTime: '15:30',
-        endTime: '17:00',
-        courseCount: 30,
-        bookingCount: 15,
-        description: `<p style="text-indent:2em;">暑假班的主要内容包括：</p>
-<p style="text-indent:2em;">1. 语文与数学的基础知识巩固</p>
-<p style="text-indent:2em;">2. 英语口语和听力训练</p>
-<p style="text-indent:2em;">3. 趣味科学实验</p>
-<p style="text-indent:2em;">4. 艺术创作和音乐欣赏</p>`,
-        teacherDesc: '毕业于南京师范大学教育系，从教十年，教学经验丰富，善于启发学生思考，深受学生和家长喜爱。'
-      }
-    },
-    
     // 格式化课程时间
     formatCourseTime(startTime, endTime) {
       if (!startTime) return ''
@@ -308,101 +322,263 @@ export default {
       return formatDateTime(startTime)
     },
     
-    // 切换预约表单显示状态
-    toggleBookingForm() {
-      this.showBookingForm = !this.showBookingForm
+    // 加载用户信息
+    loadUserInfo() {
+      console.log('加载用户信息');
+      
+      // 调试全局用户信息
+      const globalUserInfo = getApp().globalData.userInfo;
+      console.log('全局用户信息:', globalUserInfo);
+      
+      const userInfoStr = uni.getStorageSync('userInfo');
+      console.log('本地存储用户信息字符串:', userInfoStr ? '存在(长度:' + userInfoStr.length + ')' : '不存在');
+      
+      if (userInfoStr) {
+        try {
+          this.userInfo = JSON.parse(userInfoStr);
+          console.log('当前用户信息解析成功:', this.userInfo);
+          
+          // 确保userInfo包含userId
+          if (!this.userInfo.userId && this.userInfo._id) {
+            console.log('用户信息中没有userId，使用_id代替:', this.userInfo._id);
+            this.userInfo.userId = this.userInfo._id;
+          }
+          
+          console.log('用户ID:', this.userInfo.userId);
+        } catch (e) {
+          console.error('解析用户信息失败:', e);
+          this.userInfo = null;
+          
+          // 尝试从全局状态恢复
+          if (globalUserInfo) {
+            console.log('从全局状态恢复用户信息');
+            this.userInfo = globalUserInfo;
+          }
+        }
+      } else {
+        console.log('本地存储中没有用户信息');
+        this.userInfo = globalUserInfo || null;
+      }
+      
+      // 最终检查
+      if (this.userInfo) {
+        console.log('最终用户信息:', this.userInfo);
+      } else {
+        console.log('用户未登录');
+      }
     },
     
-    // 联系老师
-    contactTeacher() {
-      uni.makePhoneCall({
-        phoneNumber: '13812345678',
-        fail: () => {
-          uni.showToast({
-            title: '拨打电话失败',
-            icon: 'none'
-          })
+    // 检查是否已预约
+    async checkBookingStatus() {
+      console.log('开始检查预约状态，当前用户信息:', this.userInfo);
+      
+      // 先设置为未预约状态，确保按钮可见
+      this.hasBooked = false;
+      
+      if (!this.userInfo || !this.userInfo.userId || !this.courseId) {
+        console.log('用户未登录或缺少必要参数，设置为未预约状态');
+        return;
+      }
+      
+      try {
+        console.log('检查预约状态，用户ID:', this.userInfo.userId, '课程ID:', this.courseId);
+        
+        const res = await uniCloud.callFunction({
+          name: 'getBookings',
+          data: {
+            userId: this.userInfo.userId,
+            courseId: this.courseId,
+            status: ['pending', 'confirmed']
+          }
+        });
+        
+        console.log('查询预约状态结果详情:', JSON.stringify(res.result));
+        
+        if (res.result && res.result.success && res.result.data && res.result.data.length > 0) {
+          this.hasBooked = true;
+          console.log('用户已预约该课程，预约记录:', res.result.data[0]);
+        } else {
+          console.log('用户未预约该课程，API返回:', res.result);
         }
-      })
+      } catch (e) {
+        console.error('检查预约状态失败，详细错误:', e);
+      }
+      
+      console.log('预约状态检查完成，hasBooked=', this.hasBooked);
+    },
+    
+    // 预约课程
+    bookCourse() {
+      console.log('点击预约课程按钮');
+      
+      // 再次检查用户是否登录
+      if (!this.userInfo || !this.userInfo.userId) {
+        console.log('用户未登录，跳转到登录页面');
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        
+        setTimeout(() => {
+          // 跳转到登录页面，并设置重定向回当前页面
+          const currentUrl = `/pages/course/detail?id=${this.courseId}`;
+          console.log('设置登录后重定向地址:', currentUrl);
+          uni.navigateTo({
+            url: `/pages/login/login?redirect=${encodeURIComponent(currentUrl)}`
+          });
+        }, 1500);
+        return;
+      }
+      
+      // 显示确认弹窗
+      uni.showModal({
+        title: '确认预约',
+        content: `您确定要预约"${this.courseInfo.title}"课程吗？`,
+        success: async (res) => {
+          if (res.confirm) {
+            console.log('用户确认预约');
+            // 用户点击确定
+            await this.submitBooking();
+          } else {
+            console.log('用户取消预约');
+          }
+        }
+      });
     },
     
     // 提交预约
     async submitBooking() {
-      // 表单验证
-      if (!this.bookingForm.studentName) {
-        uni.showToast({
-          title: '请输入学生姓名',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      if (!this.bookingForm.contactPhone) {
-        uni.showToast({
-          title: '请输入联系电话',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      const phoneReg = /^1[3-9]\d{9}$/;
-      if (!phoneReg.test(this.bookingForm.contactPhone)) {
-        uni.showToast({
-          title: '手机号格式不正确',
-          icon: 'none'
-        });
-        return;
-      }
+      console.log('开始提交预约请求');
       
       uni.showLoading({
-        title: '提交中...'
+        title: '预约中...'
       });
       
       try {
-        // 获取用户ID（实际应从登录状态获取）
-        const userInfo = getApp().globalData.userInfo || {};
-        const userId = userInfo.userId || 'temp_user_id';
+        console.log('提交预约数据：用户ID:', this.userInfo.userId, '课程ID:', this.courseId);
         
-        // 使用API接口调用预约课程
-        const result = await this.$api.course.bookCourse({
-          courseId: this.courseId,
-          userId: userId,
-          studentName: this.bookingForm.studentName,
-          contactPhone: this.bookingForm.contactPhone,
-          remark: this.bookingForm.remark
+        // 调用云函数预约课程
+        const res = await uniCloud.callFunction({
+          name: 'bookCourse',
+          data: {
+            userId: this.userInfo.userId,
+            courseId: this.courseId,
+            userName: this.userInfo.nickName || this.userInfo.username || '未知用户',
+            phoneNumber: this.userInfo.phoneNumber || '',
+            remark: ''
+          }
         });
+        
+        console.log('预约结果详情:', JSON.stringify(res.result));
         
         uni.hideLoading();
         
-        if (result && result.success) {
+        if (res.result && res.result.success) {
+          console.log('预约成功:', res.result);
           uni.showToast({
             title: '预约成功',
             icon: 'success'
           });
           
-          // 重置表单
-          this.bookingForm = {
-            studentName: '',
-            contactPhone: '',
-            remark: ''
-          };
-          this.showBookingForm = false;
+          // 设置已预约状态
+          this.hasBooked = true;
           
-          // 刷新课程信息
-          this.fetchCourseDetail();
+          // 更新预约人数，确保UI显示正确
+          if (this.courseInfo) {
+            this.courseInfo.bookingCount = (this.courseInfo.bookingCount || 0) + 1;
+            console.log('更新预约人数，bookingCount:', this.courseInfo.bookingCount);
+          }
+          
+          // 发送预约成功事件，用于其他页面更新
+          uni.$emit('booking:success', {
+            courseId: this.courseId,
+            userId: this.userInfo.userId
+          });
+          
+          // 延迟1.5秒后刷新数据，确保云端数据已更新
+          setTimeout(() => {
+            // 重新获取课程详情
+            this.fetchCourseDetail().then(() => {
+              // 再次检查预约状态
+              this.checkBookingStatus();
+            });
+          }, 1500);
         } else {
+          console.error('预约失败:', res.result);
           uni.showToast({
-            title: result.message || '预约失败',
+            title: res.result && res.result.message ? res.result.message : '预约失败',
             icon: 'none'
           });
         }
       } catch (e) {
-        console.error('预约课程失败:', e);
+        uni.hideLoading();
+        console.error('预约课程过程中发生异常:', e);
         uni.showToast({
           title: '预约失败，请稍后重试',
           icon: 'none'
         });
       }
+    },
+    
+    // 跳转到预约列表
+    navigateToBookingList() {
+      uni.navigateTo({
+        url: '/pages/user/booking?status=all'
+      });
+    },
+    
+    // 联系老师
+    contactTeacher() {
+      // 获取教师电话号码
+      const teacherPhone = this.courseInfo.teacherPhone || '';
+      
+      console.log('尝试联系老师，电话:', teacherPhone);
+      
+      if (!teacherPhone || teacherPhone.trim() === '') {
+        uni.showToast({
+          title: '暂无联系方式',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 检查电话号码格式
+      const isValidPhone = /^1[3-9]\d{9}$/.test(teacherPhone) || /^0\d{2,3}-?\d{7,8}$/.test(teacherPhone);
+      
+      if (!isValidPhone) {
+        console.warn('教师电话格式可能不正确:', teacherPhone);
+        // 尽管格式可能不正确，仍然尝试拨打，但显示警告
+        uni.showModal({
+          title: '提示',
+          content: '电话号码格式可能不正确，是否继续拨打？',
+          success: (res) => {
+            if (res.confirm) {
+              this.makePhoneCall(teacherPhone);
+            }
+          }
+        });
+        return;
+      }
+      
+      // 格式正确，直接拨打
+      this.makePhoneCall(teacherPhone);
+    },
+    
+    // 拨打电话
+    makePhoneCall(phoneNumber) {
+      uni.makePhoneCall({
+        phoneNumber: phoneNumber,
+        success: () => {
+          console.log('拨打电话成功');
+        },
+        fail: (err) => {
+          console.error('拨打电话失败:', err);
+          uni.showToast({
+            title: '拨打电话失败',
+            icon: 'none'
+          });
+        }
+      });
     },
     
     // 格式化课程日期和时间
@@ -497,6 +673,41 @@ export default {
       }
       
       return result || '时间待定';
+    },
+    
+    // 计算剩余名额
+    calculateRemainingSeats() {
+      const total = this.courseInfo.courseCount || this.courseInfo.capacity || 20;
+      const enrolled = this.courseInfo.bookingCount || 0;
+      const remaining = Math.max(0, total - enrolled);
+      return remaining;
+    },
+    
+    // 新增：调试方法，简单切换预约状态
+    toggleBookStatus() {
+      this.hasBooked = !this.hasBooked;
+      console.log('手动切换预约状态，当前值:', this.hasBooked);
+    },
+    
+    // 处理预约取消事件
+    handleBookingCancelled(data) {
+      console.log('收到预约取消事件:', data);
+      
+      // 判断是否是当前课程的预约取消
+      if (data && data.courseId === this.courseId) {
+        // 更新预约状态
+        this.hasBooked = false;
+        this.bookingId = '';
+        this.bookingStatus = '';
+        
+        uni.showToast({
+          title: '预约已取消',
+          icon: 'none'
+        });
+        
+        // 刷新课程详情，获取最新的报名人数
+        this.getCourseDetail();
+      }
     }
   }
 }
@@ -686,32 +897,33 @@ export default {
   border-radius: 12rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
   
-  .form-item {
-    margin-bottom: 30rpx;
+  .booking-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30rpx 0;
     
-    &:last-child {
-      margin-bottom: 0;
+    .status-icon {
+      font-size: 48rpx;
+      color: #4CD964;
+      margin-right: 20rpx;
     }
     
-    .form-label {
-      display: block;
-      font-size: 28rpx;
+    .status-text {
+      font-size: 32rpx;
       color: $text-color;
-      margin-bottom: 16rpx;
+      font-weight: bold;
     }
+  }
+  
+  .booking-tips {
+    text-align: center;
+    font-size: 28rpx;
+    color: $text-color-grey;
+    padding-bottom: 30rpx;
     
-    .form-input, .form-textarea {
-      width: 100%;
-      background-color: #f9f9f9;
-      border-radius: 8rpx;
-      border: 1rpx solid #eee;
-      padding: 20rpx;
-      font-size: 28rpx;
-      box-sizing: border-box;
-    }
-    
-    .form-textarea {
-      height: 200rpx;
+    .tips-link {
+      color: $theme-color;
     }
   }
 }
@@ -726,6 +938,7 @@ export default {
   background-color: #fff;
   display: flex;
   border-top: 1rpx solid $border-color-light;
+  z-index: 100;
   
   .contact-btn {
     display: flex;
@@ -752,15 +965,33 @@ export default {
     align-items: center;
     justify-content: center;
     font-size: 32rpx;
+    font-weight: bold;
     color: #fff;
+    background-color: #FF6B00; /* 主题色 */
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+    line-height: 100rpx;
+    height: 100%;
+    box-sizing: border-box;
+    outline: none;
+    
+    &::after {
+      border: none;
+    }
   }
   
   .book-btn {
-    background-color: #FF9500;
-  }
-  
-  .submit-btn {
-    background-color: #FF3B30;
+    &.booked {
+      background-color: #4CD964;
+    }
+    
+    &.disabled {
+      background-color: #999;
+      color: #fff;
+      cursor: not-allowed;
+    }
   }
 }
 </style> 

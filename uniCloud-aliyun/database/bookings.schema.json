@@ -1,0 +1,69 @@
+{
+  "bsonType": "object",
+  "required": ["userId", "courseId", "status"],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": true
+  },
+  "properties": {
+    "_id": {
+      "description": "ID，系统自动生成"
+    },
+    "bookingId": {
+      "bsonType": "string",
+      "description": "预约编号"
+    },
+    "userId": {
+      "bsonType": "string",
+      "description": "用户ID"
+    },
+    "courseId": {
+      "bsonType": "string",
+      "description": "课程ID"
+    },
+    "courseTitle": {
+      "bsonType": "string",
+      "description": "课程标题"
+    },
+    "courseStartTime": {
+      "bsonType": "string",
+      "description": "课程开始时间"
+    },
+    "courseEndTime": {
+      "bsonType": "string",
+      "description": "课程结束时间"
+    },
+    "schoolName": {
+      "bsonType": "string",
+      "description": "校区名称"
+    },
+    "studentName": {
+      "bsonType": "string",
+      "description": "学生姓名"
+    },
+    "contactPhone": {
+      "bsonType": "string",
+      "description": "联系电话"
+    },
+    "remark": {
+      "bsonType": "string",
+      "description": "备注信息"
+    },
+    "status": {
+      "bsonType": "string",
+      "description": "预约状态：pending-待确认，confirmed-已确认，finished-已完成，cancelled-已取消",
+      "enum": ["pending", "confirmed", "finished", "cancelled"],
+      "defaultValue": "pending"
+    },
+    "createTime": {
+      "bsonType": "timestamp",
+      "description": "创建时间"
+    },
+    "updateTime": {
+      "bsonType": "timestamp",
+      "description": "更新时间"
+    }
+  }
+} 

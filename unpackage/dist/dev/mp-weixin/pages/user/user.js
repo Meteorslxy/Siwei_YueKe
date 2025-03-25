@@ -114,7 +114,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni, wx) {
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud, wx) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -123,6 +123,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 //
 //
 //
@@ -240,6 +244,7 @@ var _default = {
     };
   },
   onLoad: function onLoad() {
+    var _this = this;
     // 获取全局变量
     this.isDev = getApp().globalData.$isDevMode;
 
@@ -247,48 +252,136 @@ var _default = {
     this.isAdmin = true;
 
     // 获取当前用户信息
-    var userInfo = uni.getStorageSync('userInfo');
-    if (userInfo) {
-      this.userInfo = JSON.parse(userInfo);
-      this.hasUserInfo = true;
-    }
+    this.loadUserInfo();
 
     // 获取我的预约数
     this.getBookingCount();
+
+    // 监听登录事件
+    uni.$on('user:login', function (userData) {
+      console.log('接收到登录事件，刷新用户信息:', userData);
+      _this.loadUserInfo();
+    });
+  },
+  onUnload: function onUnload() {
+    // 取消监听登录事件
+    uni.$off('user:login');
   },
   onShow: function onShow() {
+    // 每次页面显示时重新获取用户信息，解决登录后跳转但不显示用户信息的问题
+    this.loadUserInfo();
     if (this.hasUserInfo) {
       this.fetchBookingCounts();
     }
   },
   methods: {
+    // 加载用户信息
+    loadUserInfo: function loadUserInfo() {
+      console.log('加载用户信息');
+      var userInfoStr = uni.getStorageSync('userInfo');
+      if (userInfoStr) {
+        try {
+          var userInfo = JSON.parse(userInfoStr);
+          console.log('读取到的用户信息:', JSON.stringify(userInfo));
+
+          // 检查是否为数组格式(登录函数可能返回数组格式)
+          if (Array.isArray(userInfo) && userInfo.length > 0) {
+            userInfo = userInfo[0];
+          }
+
+          // 处理一层嵌套数据的情况（有些时候data是嵌套的）
+          if (userInfo.data && (0, _typeof2.default)(userInfo.data) === 'object') {
+            userInfo = userInfo.data;
+          }
+          this.userInfo = this.formatUserInfo(userInfo);
+          this.hasUserInfo = !!this.userInfo.nickName || !!this.userInfo.nickname;
+          console.log('处理后的用户信息:', JSON.stringify(this.userInfo));
+          console.log('是否有用户信息：', this.hasUserInfo);
+          console.log('头像地址：', this.userInfo.avatarUrl);
+          console.log('昵称：', this.userInfo.nickName || this.userInfo.nickname);
+        } catch (e) {
+          console.error('解析用户信息失败:', e);
+          this.userInfo = {};
+          this.hasUserInfo = false;
+        }
+      } else {
+        console.log('未找到用户信息');
+        this.userInfo = {};
+        this.hasUserInfo = false;
+      }
+    },
+    // 格式化用户信息
+    formatUserInfo: function formatUserInfo(userInfo) {
+      if (!userInfo) return {};
+
+      // 创建新对象，避免直接修改原对象
+      var formattedInfo = _objectSpread({}, userInfo);
+
+      // 确保有默认值
+      if (!formattedInfo.nickName && !formattedInfo.nickname) {
+        // 如果有手机号，使用手机号生成昵称
+        if (formattedInfo.phoneNumber) {
+          formattedInfo.nickName = '用户' + formattedInfo.phoneNumber.substr(formattedInfo.phoneNumber.length - 4);
+        } else {
+          formattedInfo.nickName = '微信用户';
+        }
+      }
+
+      // 兼容nickName和nickname两种属性名
+      if (!formattedInfo.nickName && formattedInfo.nickname) {
+        formattedInfo.nickName = formattedInfo.nickname;
+      }
+
+      // 确保有默认头像
+      if (!formattedInfo.avatarUrl) {
+        formattedInfo.avatarUrl = '/static/images/default-avatar.png';
+      }
+
+      // 确保userId字段
+      if (!formattedInfo.userId && formattedInfo._id) {
+        formattedInfo.userId = formattedInfo._id;
+      }
+      return formattedInfo;
+    },
     // 获取预约数量
     getBookingCount: function getBookingCount() {
-      var _this = this;
+      var _this2 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var result;
+        var userInfo, userId, res, counts;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (_this.hasUserInfo) {
+                if (_this2.hasUserInfo) {
                   _context.next = 2;
                   break;
                 }
                 return _context.abrupt("return");
               case 2:
                 _context.prev = 2;
-                _context.next = 5;
-                return _this.$api.user.getBookingCount({
-                  userId: _this.userInfo.id || ''
+                userInfo = _this2.userInfo;
+                userId = userInfo.userId || userInfo._id || ''; // 直接调用云函数获取预约统计
+                _context.next = 7;
+                return uniCloud.callFunction({
+                  name: 'getBookingCounts',
+                  data: {
+                    userId: userId
+                  }
                 });
-              case 5:
-                result = _context.sent;
-                if (result && result.data) {
-                  _this.bookingStats = result.data;
+              case 7:
+                res = _context.sent;
+                if (res.result && res.result.code === 0) {
+                  counts = res.result.data.counts || {};
+                  _this2.bookingStats = {
+                    total: counts.all || 0,
+                    pending: counts.pending || 0,
+                    confirmed: counts.confirmed || 0,
+                    finished: counts.finished || 0,
+                    cancelled: counts.cancelled || 0
+                  };
                 } else {
                   // 使用模拟数据
-                  _this.bookingStats = {
+                  _this2.bookingStats = {
                     total: 0,
                     pending: 0,
                     confirmed: 0,
@@ -296,176 +389,128 @@ var _default = {
                     cancelled: 0
                   };
                 }
-                _context.next = 13;
+                _context.next = 15;
                 break;
-              case 9:
-                _context.prev = 9;
+              case 11:
+                _context.prev = 11;
                 _context.t0 = _context["catch"](2);
                 console.error('获取预约统计失败:', _context.t0);
                 // 使用模拟数据
-                _this.bookingStats = {
+                _this2.bookingStats = {
                   total: 0,
                   pending: 0,
                   confirmed: 0,
                   finished: 0,
                   cancelled: 0
                 };
-              case 13:
+              case 15:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[2, 9]]);
+        }, _callee, null, [[2, 11]]);
       }))();
-    },
-    // 检查登录状态
-    checkLoginStatus: function checkLoginStatus() {
-      var userInfo = uni.getStorageSync('userInfo');
-      if (userInfo) {
-        this.userInfo = JSON.parse(userInfo);
-        this.hasUserInfo = true;
-        this.fetchBookingCounts();
-      }
-    },
-    // 获取用户信息
-    getUserProfile: function getUserProfile() {
-      var _this2 = this;
-      // 在 uniapp 中获取用户信息
-      uni.getUserProfile({
-        desc: '用于完善用户资料',
-        success: function success(res) {
-          _this2.userInfo = res.userInfo;
-          _this2.hasUserInfo = true;
-
-          // 存储用户信息
-          uni.setStorageSync('userInfo', JSON.stringify(res.userInfo));
-
-          // 登录微信小程序
-          _this2.wxLogin();
-        },
-        fail: function fail(err) {
-          console.error('获取用户信息失败', err);
-          uni.showToast({
-            title: '获取用户信息失败',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    // 微信登录
-    wxLogin: function wxLogin() {
-      var _this3 = this;
-      uni.login({
-        success: function () {
-          var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(res) {
-            var loginRes, userId;
-            return _regenerator.default.wrap(function _callee2$(_context2) {
-              while (1) {
-                switch (_context2.prev = _context2.next) {
-                  case 0:
-                    _context2.prev = 0;
-                    _context2.next = 3;
-                    return uni.cloud.callFunction({
-                      name: 'login',
-                      data: {
-                        code: res.code,
-                        userInfo: _this3.userInfo
-                      }
-                    });
-                  case 3:
-                    loginRes = _context2.sent;
-                    if (loginRes.result && loginRes.result.success) {
-                      userId = loginRes.result.userId; // 保存用户ID
-                      _this3.userInfo.userId = userId;
-                      uni.setStorageSync('userInfo', JSON.stringify(_this3.userInfo));
-
-                      // 获取预约数量
-                      _this3.fetchBookingCounts();
-                    } else {
-                      console.error('登录云函数调用失败', loginRes);
-                    }
-                    _context2.next = 10;
-                    break;
-                  case 7:
-                    _context2.prev = 7;
-                    _context2.t0 = _context2["catch"](0);
-                    console.error('登录失败', _context2.t0);
-                  case 10:
-                  case "end":
-                    return _context2.stop();
-                }
-              }
-            }, _callee2, null, [[0, 7]]);
-          }));
-          function success(_x) {
-            return _success.apply(this, arguments);
-          }
-          return success;
-        }(),
-        fail: function fail(err) {
-          console.error('微信登录失败', err);
-        }
-      });
     },
     // 获取预约数量
     fetchBookingCounts: function fetchBookingCounts() {
-      var _this4 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-        var res;
-        return _regenerator.default.wrap(function _callee3$(_context3) {
+      var _this3 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var res, counts;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
-                if (!(!_this4.hasUserInfo || !_this4.userInfo.userId)) {
-                  _context3.next = 2;
+                if (!(!_this3.hasUserInfo || !_this3.userInfo.userId)) {
+                  _context2.next = 2;
                   break;
                 }
-                return _context3.abrupt("return");
+                return _context2.abrupt("return");
               case 2:
-                _context3.prev = 2;
-                _context3.next = 5;
-                return uni.cloud.callFunction({
+                _context2.prev = 2;
+                _context2.next = 5;
+                return uniCloud.callFunction({
                   name: 'getBookingCounts',
                   data: {
-                    userId: _this4.userInfo.userId
+                    userId: _this3.userInfo.userId || _this3.userInfo._id
                   }
                 });
               case 5:
-                res = _context3.sent;
-                if (res.result && res.result.success) {
-                  _this4.bookingCounts = res.result.counts;
+                res = _context2.sent;
+                if (res.result && res.result.code === 0) {
+                  // 获取counts下的数据
+                  counts = res.result.data.counts || {};
+                  _this3.bookingCounts = {
+                    usable: counts.pending + counts.confirmed || 0,
+                    expired: counts.finished || 0,
+                    canceled: counts.cancelled || 0
+                  };
+
+                  // 如果用户有未完成的预约，在tabBar上添加红点提示
+                  if (_this3.bookingCounts.usable > 0) {
+                    uni.showTabBarRedDot({
+                      index: 2 // 假设"我的"页面是第三个tabBar页面（索引从0开始）
+                    });
+                  } else {
+                    uni.hideTabBarRedDot({
+                      index: 2
+                    });
+                  }
                 } else {
                   // 模拟数据
-                  _this4.bookingCounts = {
-                    usable: 1,
-                    expired: 2,
+                  _this3.bookingCounts = {
+                    usable: 0,
+                    expired: 0,
                     canceled: 0
                   };
                 }
-                _context3.next = 13;
+                _context2.next = 13;
                 break;
               case 9:
-                _context3.prev = 9;
-                _context3.t0 = _context3["catch"](2);
-                console.error('获取预约数量失败', _context3.t0);
+                _context2.prev = 9;
+                _context2.t0 = _context2["catch"](2);
+                console.error('获取预约数量失败', _context2.t0);
                 // 模拟数据
-                _this4.bookingCounts = {
-                  usable: 1,
-                  expired: 2,
+                _this3.bookingCounts = {
+                  usable: 0,
+                  expired: 0,
                   canceled: 0
                 };
               case 13:
               case "end":
-                return _context3.stop();
+                return _context2.stop();
             }
           }
-        }, _callee3, null, [[2, 9]]);
+        }, _callee2, null, [[2, 9]]);
       }))();
     },
     // 页面跳转
     navigateTo: function navigateTo(url) {
+      // 替换status=usable为status=confirmed,pending的组合查询
+      if (url.includes('status=usable')) {
+        url = url.replace('status=usable', 'status=usable');
+        console.log('修改后的URL:', url);
+      }
+
+      // 替换status=expired为status=finished
+      if (url.includes('status=expired')) {
+        url = url.replace('status=expired', 'status=finished');
+        console.log('修改后的URL:', url);
+      }
+
+      // 确保cancelled拼写与服务器一致
+      if (url.includes('status=canceled')) {
+        url = url.replace('status=canceled', 'status=cancelled');
+        console.log('修改后的URL:', url);
+      }
       uni.navigateTo({
-        url: url
+        url: url,
+        fail: function fail(err) {
+          console.error('页面跳转错误:', err);
+          uni.showToast({
+            title: '页面跳转失败',
+            icon: 'none'
+          });
+        }
       });
     },
     // 管理员登录入口
@@ -494,7 +539,7 @@ var _default = {
     },
     // 退出登录
     logout: function logout() {
-      var _this5 = this;
+      var _this4 = this;
       uni.showModal({
         title: '提示',
         content: '确定要退出登录吗？',
@@ -504,9 +549,9 @@ var _default = {
             uni.removeStorageSync('userInfo');
 
             // 重置状态
-            _this5.userInfo = {};
-            _this5.hasUserInfo = false;
-            _this5.bookingCounts = {
+            _this4.userInfo = {};
+            _this4.hasUserInfo = false;
+            _this4.bookingCounts = {
               usable: 0,
               expired: 0,
               canceled: 0
@@ -518,11 +563,18 @@ var _default = {
           }
         }
       });
+    },
+    // 获取用户信息
+    getUserProfile: function getUserProfile() {
+      // 重定向到登录页面
+      uni.navigateTo({
+        url: '/pages/login/login?redirect=' + encodeURIComponent('/pages/user/user')
+      });
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
 

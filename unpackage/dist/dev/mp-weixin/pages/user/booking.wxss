@@ -1,0 +1,199 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.booking-container {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+/* 状态筛选选项卡 */
+.tab-bar {
+  display: flex;
+  background-color: #fff;
+  border-bottom: 1rpx solid var(--border-color-light);
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tab-bar .tab-item {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--text-color);
+  position: relative;
+}
+.tab-bar .tab-item.active {
+  color: var(--theme-color);
+  font-weight: bold;
+}
+.tab-bar .tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background-color: var(--theme-color);
+  border-radius: 2rpx;
+}
+/* 预约记录列表 */
+.booking-list {
+  padding: 20rpx;
+}
+.booking-list .booking-item {
+  margin-bottom: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+.booking-list .booking-item .booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid var(--border-color-light);
+}
+.booking-list .booking-item .booking-header .course-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  flex: 1;
+}
+.booking-list .booking-item .booking-header .booking-status {
+  font-size: 24rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 6rpx;
+}
+.booking-list .booking-item .booking-header .booking-status.status-pending {
+  color: #FF9500;
+  background-color: rgba(255, 149, 0, 0.1);
+}
+.booking-list .booking-item .booking-header .booking-status.status-confirmed {
+  color: #4CD964;
+  background-color: rgba(76, 217, 100, 0.1);
+}
+.booking-list .booking-item .booking-header .booking-status.status-finished {
+  color: #007AFF;
+  background-color: rgba(0, 122, 255, 0.1);
+}
+.booking-list .booking-item .booking-header .booking-status.status-cancelled {
+  color: #8E8E93;
+  background-color: rgba(142, 142, 147, 0.1);
+}
+.booking-list .booking-item .booking-info {
+  padding: 20rpx;
+}
+.booking-list .booking-item .booking-info .info-row {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+.booking-list .booking-item .booking-info .info-row:last-child {
+  margin-bottom: 0;
+}
+.booking-list .booking-item .booking-info .info-row .info-label {
+  width: 160rpx;
+  font-size: 26rpx;
+  color: var(--text-color-grey);
+}
+.booking-list .booking-item .booking-info .info-row .info-value {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--text-color);
+}
+.booking-list .booking-item .booking-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border-top: 1rpx solid var(--border-color-light);
+}
+.booking-list .booking-item .booking-footer .booking-time {
+  font-size: 24rpx;
+  color: var(--text-color-grey);
+}
+.booking-list .booking-item .booking-footer .booking-actions {
+  display: flex;
+}
+.booking-list .booking-item .booking-footer .booking-actions .action-btn {
+  margin-left: 20rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: var(--text-color);
+  background-color: #f5f5f5;
+  border-radius: 28rpx;
+}
+.booking-list .booking-item .booking-footer .booking-actions .action-btn.primary {
+  color: #fff;
+  background-color: var(--theme-color);
+}
+

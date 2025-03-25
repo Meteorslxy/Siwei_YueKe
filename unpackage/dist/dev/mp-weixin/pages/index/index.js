@@ -136,7 +136,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -254,6 +254,8 @@ var _default = {
     };
   },
   onLoad: function onLoad() {
+    // 初始化应用
+    this.initApp();
     this.getNews();
     this.getRecommendCourses();
     // 获取状态栏高度
@@ -265,6 +267,40 @@ var _default = {
     });
   },
   methods: {
+    // 初始化应用
+    initApp: function initApp() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+        var res;
+        return _regenerator.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return uniCloud.callFunction({
+                  name: 'initUserTable'
+                });
+              case 3:
+                res = _context.sent;
+                if (res.result && res.result.code === 0) {
+                  console.log('用户表初始化完成:', res.result);
+                } else {
+                  console.warn('用户表初始化警告:', res.result);
+                }
+                _context.next = 10;
+                break;
+              case 7:
+                _context.prev = 7;
+                _context.t0 = _context["catch"](0);
+                console.error('应用初始化失败:', _context.t0);
+              case 10:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[0, 7]]);
+      }))();
+    },
     // 获取状态栏高度
     getStatusBarHeight: function getStatusBarHeight() {
       try {
@@ -278,52 +314,6 @@ var _default = {
     // 获取资讯列表
     getNews: function getNews() {
       var _this = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var result;
-        return _regenerator.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.prev = 0;
-                console.log('首页获取资讯列表');
-
-                // 调用API获取资讯
-                _context.next = 4;
-                return _this.$api.course.getNewsList({
-                  page: 1,
-                  pageSize: 5
-                });
-              case 4:
-                result = _context.sent;
-                console.log('获取资讯结果:', result);
-                if (result && result.data && result.data.length > 0) {
-                  _this.newsList = result.data;
-                } else {
-                  console.warn('未获取到资讯数据');
-                  _this.newsList = [];
-                }
-                _context.next = 14;
-                break;
-              case 9:
-                _context.prev = 9;
-                _context.t0 = _context["catch"](0);
-                console.error('获取资讯失败:', _context.t0);
-                _this.newsList = [];
-                uni.showToast({
-                  title: '获取通知列表失败',
-                  icon: 'none'
-                });
-              case 14:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, null, [[0, 9]]);
-      }))();
-    },
-    // 获取推荐课程
-    getRecommendCourses: function getRecommendCourses() {
-      var _this2 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
         var result;
         return _regenerator.default.wrap(function _callee2$(_context2) {
@@ -331,15 +321,61 @@ var _default = {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.prev = 0;
+                console.log('首页获取资讯列表');
+
+                // 调用API获取资讯
+                _context2.next = 4;
+                return _this.$api.course.getNewsList({
+                  page: 1,
+                  pageSize: 5
+                });
+              case 4:
+                result = _context2.sent;
+                console.log('获取资讯结果:', result);
+                if (result && result.data && result.data.length > 0) {
+                  _this.newsList = result.data;
+                } else {
+                  console.warn('未获取到资讯数据');
+                  _this.newsList = [];
+                }
+                _context2.next = 14;
+                break;
+              case 9:
+                _context2.prev = 9;
+                _context2.t0 = _context2["catch"](0);
+                console.error('获取资讯失败:', _context2.t0);
+                _this.newsList = [];
+                uni.showToast({
+                  title: '获取通知列表失败',
+                  icon: 'none'
+                });
+              case 14:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 9]]);
+      }))();
+    },
+    // 获取推荐课程
+    getRecommendCourses: function getRecommendCourses() {
+      var _this2 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+        var result;
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.prev = 0;
                 console.log('获取推荐课程');
 
                 // 调用API获取推荐课程
-                _context2.next = 4;
+                _context3.next = 4;
                 return _this2.$api.course.getRecommendCourses({
                   limit: 4
                 });
               case 4:
-                result = _context2.sent;
+                result = _context3.sent;
                 console.log('获取推荐课程结果:', result);
                 if (result && result.data) {
                   // 处理每个课程项，确保有正确的数据格式
@@ -395,71 +431,30 @@ var _default = {
                     return course;
                   });
                 } else {
-                  // 使用模拟数据
-                  _this2.recommendCourses = [{
-                    _id: '1',
-                    title: '三年级浪漫暑假班',
-                    school: '雨花台',
-                    schoolName: '雨花台校区',
-                    teacherName: '刘星宇',
-                    teacherTitle: '小学教师',
-                    teacherAvatar: '/static/images/teacher/teacher1.jpg',
-                    coverImage: '/static/images/course/course1.jpg',
-                    price: 4000,
-                    courseCount: 10,
-                    bookingCount: 5,
-                    startDate: '2023-07-01',
-                    endDate: '2023-07-17',
-                    startTime: '15:30',
-                    endTime: '17:00'
-                  }, {
-                    _id: '2',
-                    title: '四年级提优暑假班',
-                    school: '大行宫',
-                    schoolName: '大行宫校区',
-                    teacherName: '刘星宇',
-                    teacherTitle: '小学教师',
-                    teacherAvatar: '/static/images/teacher/teacher1.jpg',
-                    coverImage: '/static/images/course/course2.jpg',
-                    price: 4000,
-                    courseCount: 10,
-                    bookingCount: 3,
-                    startDate: '2023-07-08',
-                    endDate: '2023-07-10',
-                    startTime: '08:30',
-                    endTime: '10:00'
-                  }];
+                  console.warn('未获取到推荐课程数据');
+                  _this2.recommendCourses = [];
+                  uni.showToast({
+                    title: '暂无推荐课程',
+                    icon: 'none'
+                  });
                 }
-                _context2.next = 13;
+                _context3.next = 14;
                 break;
               case 9:
-                _context2.prev = 9;
-                _context2.t0 = _context2["catch"](0);
-                console.error('获取推荐课程失败:', _context2.t0);
-                // 使用模拟数据
-                _this2.recommendCourses = [{
-                  _id: '1',
-                  title: '三年级浪漫暑假班',
-                  school: '雨花台',
-                  schoolName: '雨花台校区',
-                  teacherName: '刘星宇',
-                  teacherTitle: '小学教师',
-                  teacherAvatar: '/static/images/teacher/teacher1.jpg',
-                  coverImage: '/static/images/course/course1.jpg',
-                  price: 4000,
-                  courseCount: 10,
-                  bookingCount: 5,
-                  startDate: '2023-07-01',
-                  endDate: '2023-07-17',
-                  startTime: '15:30',
-                  endTime: '17:00'
-                }];
-              case 13:
+                _context3.prev = 9;
+                _context3.t0 = _context3["catch"](0);
+                console.error('获取推荐课程失败:', _context3.t0);
+                _this2.recommendCourses = [];
+                uni.showToast({
+                  title: '获取推荐课程失败',
+                  icon: 'none'
+                });
+              case 14:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, null, [[0, 9]]);
+        }, _callee3, null, [[0, 9]]);
       }))();
     },
     // 获取图片URL - 处理本地和云端图片
@@ -683,7 +678,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
 
 /***/ }),
 

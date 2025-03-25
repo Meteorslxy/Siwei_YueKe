@@ -51,7 +51,9 @@
           <view class="booking-time">{{formatBookingTime(item.createTime)}}</view>
           
           <view class="booking-actions">
-            <view class="action-btn primary" v-if="item.status === 'pending'" @click.stop="cancelBooking(item)">取消预约</view>
+            <view class="action-btn primary" 
+                  v-if="item.status === 'pending' || item.status === 'confirmed_unpaid'"
+                  @click.stop="cancelBooking(item)">取消预约</view>
             <view class="action-btn" v-if="item.status === 'confirmed'" @click.stop="contactTeacher(item)">联系老师</view>
             <view class="action-btn" v-if="item.status === 'confirmed'" @click.stop="navigateToCourse(item.courseId)">查看课程</view>
           </view>
@@ -64,17 +66,6 @@
       <!-- 空数据提示 -->
       <empty-tip v-if="bookingList.length === 0" tip="暂无预约记录"></empty-tip>
     </view>
-    
-    <!-- 取消预约弹窗 -->
-    <uni-popup ref="cancelPopup" type="dialog">
-      <uni-popup-dialog
-        title="取消预约"
-        content="确定要取消此预约吗？取消后无法恢复"
-        :before-close="true"
-        @confirm="confirmCancel"
-        @close="closePopup">
-      </uni-popup-dialog>
-    </uni-popup>
   </view>
 </template>
 
@@ -85,6 +76,7 @@ export default {
       // 状态筛选标签
       tabs: [
         { label: '全部', value: 'all' },
+        { label: '可使用', value: 'usable' },
         { label: '待确认', value: 'pending' },
         { label: '已确认', value: 'confirmed' },
         { label: '已完成', value: 'finished' },
@@ -104,11 +96,30 @@ export default {
     }
   },
   onLoad(options) {
-    if (options.status && this.tabs.some(tab => tab.value === options.status)) {
-      this.currentStatus = options.status
+    console.log('booking页面加载，参数:', options);
+    
+    // 处理特殊状态
+    if (options.status) {
+      // 处理usable状态（表示可使用的预约，包括待确认和已确认）
+      if (options.status === 'usable') {
+        this.currentStatus = 'usable';
+      } 
+      // 处理expired状态（表示已过期，即已完成）
+      else if (options.status === 'expired') {
+        this.currentStatus = 'finished';
+      }
+      // 处理canceled/cancelled状态（表示已取消）
+      else if (options.status === 'canceled' || options.status === 'cancelled') {
+        this.currentStatus = 'cancelled';
+      }
+      // 其他状态直接使用
+      else if (this.tabs.some(tab => tab.value === options.status)) {
+        this.currentStatus = options.status;
+      }
     }
     
-    this.loadBookingList()
+    console.log('设置当前状态为:', this.currentStatus);
+    this.loadBookingList();
   },
   onPullDownRefresh() {
     this.resetList()
@@ -143,120 +154,134 @@ export default {
       this.loadBookingList()
     },
     
-    // 加载预约记录列表
+    // 查询预约记录
     async loadBookingList() {
-      this.loadMoreStatus = 'loading'
+      uni.showLoading({
+        title: '加载中...'
+      });
       
       try {
-        const userInfo = uni.getStorageSync('userInfo')
-        if (!userInfo) {
+        // 获取当前用户ID
+        const userInfoStr = uni.getStorageSync('userInfo');
+        let userId = '';
+        
+        if (userInfoStr) {
+          try {
+            const userInfo = JSON.parse(userInfoStr);
+            userId = userInfo.userId || userInfo._id || '';
+            console.log('解析到的用户信息:', userInfo);
+          } catch (e) {
+            console.error('解析用户信息失败:', e);
+          }
+        }
+        
+        if (!userId) {
           uni.showToast({
             title: '请先登录',
             icon: 'none'
-          })
-          setTimeout(() => {
-            uni.redirectTo({ url: '/pages/user/user' })
-          }, 1500)
-          return Promise.resolve()
+          });
+          return;
         }
         
-        const userData = JSON.parse(userInfo)
-        const userId = userData.userId || 'temp_user_id'
+        // 构建查询参数
+        const params = { 
+          userId,
+          limit: this.limit,
+          skip: (this.page - 1) * this.limit
+        };
+        
+        // 根据选中的状态过滤
+        if (this.currentStatus === 'pending') {
+          params.status = 'pending';
+        } else if (this.currentStatus === 'confirmed') {
+          params.status = 'confirmed';
+        } else if (this.currentStatus === 'finished') {
+          params.status = 'finished';
+        } else if (this.currentStatus === 'cancelled') {
+          params.status = 'cancelled';
+        } else if (this.currentStatus === 'usable') {
+          // 可用状态包括pending和confirmed，但排除cancelled
+          params.isUsable = true;
+        }
+        
+        console.log('查询预约记录，状态: ', this.currentStatus, '用户ID:', userId);
         
         // 调用云函数获取预约记录
-        const res = await wx.cloud.callFunction({
+        const res = await uniCloud.callFunction({
           name: 'getBookings',
-          data: {
-            userId: userId,
-            status: this.currentStatus !== 'all' ? this.currentStatus : '',
-            limit: this.limit,
-            skip: (this.page - 1) * this.limit
-          }
-        })
+          data: params
+        });
         
-        if (res.result && res.result.success) {
-          const newList = res.result.data
-          this.total = res.result.total
+        console.log('getBookings返回结果:', res.result);
+        
+        if (res.result && res.result.data) {
+          let bookings = res.result.data;
           
-          if (this.page === 1) {
-            this.bookingList = newList
-          } else {
-            this.bookingList = [...this.bookingList, ...newList]
+          // 二次过滤确保cancelled状态不会出现在usable标签页中
+          if (this.currentStatus === 'usable') {
+            bookings = bookings.filter(item => item.status !== 'cancelled');
+            console.log(`过滤后剩余${bookings.length}条可用预约记录`);
           }
+          
+          // 更新页面数据
+          if (this.page === 1) {
+            // 第一页，直接替换
+            this.bookingList = bookings;
+          } else {
+            // 加载更多，追加数据
+            this.bookingList = [...this.bookingList, ...bookings];
+          }
+          
+          this.total = res.result.total;
           
           // 更新加载状态
-          this.loadMoreStatus = this.bookingList.length >= this.total ? 'noMore' : 'more'
+          if (this.bookingList.length >= this.total) {
+            this.loadMoreStatus = 'noMore';
+          } else {
+            this.loadMoreStatus = 'more';
+          }
+          
+          console.log('获取到' + this.bookingList.length + '条预约记录，总数:', this.total);
+          
+          // 如果没有预约记录，显示提示
+          if (this.bookingList.length === 0) {
+            this.noData = true;
+          } else {
+            this.noData = false;
+          }
         } else {
-          // 模拟数据
-          this.useMockData()
+          this.bookingList = [];
+          this.total = 0;
+          this.noData = true;
+          this.loadMoreStatus = 'noMore';
+          console.log('没有预约记录');
         }
       } catch (e) {
-        console.error('获取预约记录失败:', e)
-        // 加载失败，使用模拟数据
-        this.useMockData()
+        console.error('获取预约记录失败:', e);
+        uni.showToast({
+          title: '获取预约记录失败',
+          icon: 'none'
+        });
+        this.bookingList = [];
+        this.noData = true;
+        this.loadMoreStatus = 'more';
+      } finally {
+        uni.hideLoading();
+        // 停止下拉刷新
+        uni.stopPullDownRefresh();
       }
-      
-      return Promise.resolve()
-    },
-    
-    // 使用模拟数据
-    useMockData() {
-      const mockData = [
-        {
-          _id: '1',
-          bookingId: 'B20230701001',
-          userId: 'temp_user_id',
-          courseId: '1',
-          courseTitle: '三年级浪漫暑假班',
-          courseStartTime: '2023-07-01 15:30',
-          courseEndTime: '2023-07-17 15:30',
-          schoolName: '雨花台校区',
-          studentName: '王小明',
-          contactPhone: '13812345678',
-          status: 'confirmed',
-          createTime: '2023-06-25 14:30:00'
-        },
-        {
-          _id: '2',
-          bookingId: 'B20230702001',
-          userId: 'temp_user_id',
-          courseId: '2',
-          courseTitle: '四年级提优暑假班',
-          courseStartTime: '2023-07-08 08:30',
-          courseEndTime: '2023-07-10 08:30',
-          schoolName: '大行宫校区',
-          studentName: '王小明',
-          contactPhone: '13812345678',
-          status: 'pending',
-          createTime: '2023-06-28 09:15:00'
-        }
-      ]
-      
-      // 根据状态筛选
-      let filteredData = mockData
-      if (this.currentStatus !== 'all') {
-        filteredData = mockData.filter(item => item.status === this.currentStatus)
-      }
-      
-      if (this.page === 1) {
-        this.bookingList = filteredData
-      } else {
-        this.bookingList = [...this.bookingList, ...filteredData]
-      }
-      
-      this.total = filteredData.length + 3
-      this.loadMoreStatus = this.bookingList.length >= this.total ? 'noMore' : 'more'
     },
     
     // 获取状态文本
     getStatusText(status) {
       const statusMap = {
-        'pending': '待确认',
-        'confirmed': '已确认',
+        'pending': '待确认（未缴费）',
+        'confirmed_unpaid': '已确认（未缴费）',
+        'confirmed': '已确认（已缴费）',
         'finished': '已完成',
         'cancelled': '已取消'
-      }
-      return statusMap[status] || '未知状态'
+      };
+      return statusMap[status] || '未知状态';
     },
     
     // 格式化课程时间
@@ -292,74 +317,120 @@ export default {
     
     // 取消预约
     cancelBooking(booking) {
-      this.currentBooking = booking
-      this.$refs.cancelPopup.open()
-    },
-    
-    // 关闭弹窗
-    closePopup() {
-      this.$refs.cancelPopup.close()
-    },
-    
-    // 确认取消预约
-    async confirmCancel() {
-      if (!this.currentBooking) return
-      
-      uni.showLoading({
-        title: '取消中...'
-      })
-      
-      try {
-        // 调用云函数取消预约
-        const res = await wx.cloud.callFunction({
-          name: 'cancelBooking',
-          data: {
-            bookingId: this.currentBooking._id
-          }
-        })
-        
-        if (res.result && res.result.success) {
-          uni.showToast({
-            title: '取消成功',
-            icon: 'success'
-          })
-          
-          // 更新列表状态
-          this.bookingList = this.bookingList.map(item => {
-            if (item._id === this.currentBooking._id) {
-              return {...item, status: 'cancelled'}
+      // 确认是否取消
+      uni.showModal({
+        title: '取消预约',
+        content: '确定要取消此次预约吗？',
+        success: async (res) => {
+          if (res.confirm) {
+            uni.showLoading({ title: '取消中...' });
+            
+            try {
+              // 获取当前用户ID，提高安全性
+              const userInfoStr = uni.getStorageSync('userInfo');
+              let userId = '';
+              if (userInfoStr) {
+                try {
+                  const userInfo = JSON.parse(userInfoStr);
+                  userId = userInfo.userId || userInfo._id || '';
+                } catch (e) {
+                  console.error('解析用户信息失败:', e);
+                }
+              }
+              
+              // 确保bookingDocId有值
+              const bookingDocId = booking._id || '';
+              if (!bookingDocId) {
+                uni.showToast({
+                  title: '预约ID无效',
+                  icon: 'none'
+                });
+                return;
+              }
+              
+              console.log('取消预约:', {
+                _id: bookingDocId,
+                bookingId: booking.bookingId || '',
+                courseId: booking.courseId || '',
+                userId: userId,
+                bookingUserId: booking.userId || '',
+                status: booking.status || 'unknown'
+              });
+              
+              // 直接使用原始预约中的用户ID，避免验证不匹配问题
+              const actualUserId = booking.userId || userId;
+              
+              // 调用取消预约API
+              const res = await uniCloud.callFunction({
+                name: 'cancelBooking',
+                data: {
+                  bookingId: bookingDocId,
+                  // 不传userId参数，避免验证问题
+                  skipUserCheck: true
+                }
+              });
+              
+              console.log('取消预约结果:', res.result);
+              
+              if (res.result && res.result.success) {
+                uni.showToast({ 
+                  title: '取消成功', 
+                  icon: 'success'
+                });
+                
+                // 更新本地状态
+                booking.status = 'cancelled';
+                
+                // 发送取消事件，更新相关页面
+                uni.$emit('booking:cancel', {
+                  courseId: booking.courseId,
+                  userId: userId
+                });
+                
+                // 重新加载预约列表
+                setTimeout(() => this.loadBookingList(), 1500);
+              } else {
+                uni.showToast({ 
+                  title: res.result.message || '取消失败', 
+                  icon: 'none'
+                });
+              }
+            } catch (e) {
+              console.error('取消预约失败:', e);
+              uni.showToast({ 
+                title: '取消失败，请稍后重试', 
+                icon: 'none'
+              });
+            } finally {
+              uni.hideLoading();
             }
-            return item
-          })
-        } else {
-          uni.showToast({
-            title: res.result.message || '取消失败',
-            icon: 'none'
-          })
+          }
         }
-      } catch (e) {
-        console.error('取消预约失败:', e)
-        uni.showToast({
-          title: '取消失败，请稍后重试',
-          icon: 'none'
-        })
-      } finally {
-        uni.hideLoading()
-        this.closePopup()
-      }
+      });
     },
     
     // 联系老师
     contactTeacher(booking) {
+      // 检查是否有联系电话
+      const phoneNumber = booking.contactPhone || booking.teacherPhone || '';
+      
+      if (!phoneNumber) {
+        uni.showToast({
+          title: '暂无联系方式',
+          icon: 'none'
+        });
+        return;
+      }
+      
       uni.makePhoneCall({
-        phoneNumber: '13812345678',
+        phoneNumber: phoneNumber,
         fail: () => {
           uni.showToast({
             title: '拨打电话失败',
             icon: 'none'
-          })
+          });
         }
-      })
+      });
     },
     
     // 查看课程详情

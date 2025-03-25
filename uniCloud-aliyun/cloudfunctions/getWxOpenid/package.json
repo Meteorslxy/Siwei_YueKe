@@ -1,0 +1,12 @@
+{
+  "name": "getWxOpenid",
+  "version": "1.0.0",
+  "description": "获取微信小程序openid",
+  "main": "index.js",
+  "dependencies": {},
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 5,
+    "triggers": []
+  }
+} 

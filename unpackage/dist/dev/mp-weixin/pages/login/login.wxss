@@ -105,7 +105,6 @@
   height: 90rpx;
   line-height: 90rpx;
   text-align: center;
-  background-color: #07c160;
   color: #fff;
   font-size: 32rpx;
   border-radius: 45rpx;
@@ -116,6 +115,15 @@
 }
 .login-container .content .auth-btn .iconfont {
   margin-right: 10rpx;
+}
+.login-container .content .wechat-btn {
+  background-color: #07c160;
+}
+.login-container .content .phone-btn {
+  background-color: #1989fa;
+}
+.login-container .content .debug-btn {
+  background-color: #ff6347;
 }
 .login-container .content .tips {
   font-size: 26rpx;

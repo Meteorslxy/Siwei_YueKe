@@ -1,0 +1,6 @@
+{
+  "mp-weixin": {
+    "appid": "wxdummyappid",
+    "secret": "dummy-secret-for-testing"
+  }
+} 

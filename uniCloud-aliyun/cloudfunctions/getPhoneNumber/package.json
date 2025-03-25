@@ -1,0 +1,12 @@
+{
+  "name": "getPhoneNumber",
+  "version": "1.0.0",
+  "description": "通过一键登录access_token获取手机号",
+  "main": "index.js",
+  "dependencies": {},
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 5,
+    "triggers": []
+  }
+} 

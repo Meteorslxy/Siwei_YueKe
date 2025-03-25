@@ -127,7 +127,7 @@ const userApi = {
   cancelBooking(id) {
     return request({
       name: 'cancelBooking',
-      data: { id }
+      data: { bookingId: id }
     });
   },
   

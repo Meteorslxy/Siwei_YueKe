@@ -12,7 +12,7 @@
           ></image>
         </view>
         <view class="user-detail">
-          <text v-if="hasUserInfo" class="user-name">{{userInfo.nickName}}</text>
+          <text v-if="hasUserInfo" class="user-name">{{userInfo.nickName || userInfo.nickname || '微信用户'}}</text>
           <button v-else class="login-btn" @click="getUserProfile">点击登录</button>
         </view>
       </view>
@@ -122,32 +122,126 @@ export default {
     this.isAdmin = true
     
     // 获取当前用户信息
-    const userInfo = uni.getStorageSync('userInfo')
-    if (userInfo) {
-      this.userInfo = JSON.parse(userInfo)
-      this.hasUserInfo = true
-    }
+    this.loadUserInfo()
     
     // 获取我的预约数
     this.getBookingCount()
+    
+    // 监听登录事件
+    uni.$on('user:login', (userData) => {
+      console.log('接收到登录事件，刷新用户信息:', userData)
+      this.loadUserInfo()
+    })
+  },
+  onUnload() {
+    // 取消监听登录事件
+    uni.$off('user:login')
   },
   onShow() {
+    // 每次页面显示时重新获取用户信息，解决登录后跳转但不显示用户信息的问题
+    this.loadUserInfo()
+    
     if (this.hasUserInfo) {
       this.fetchBookingCounts()
     }
   },
   methods: {
+    // 加载用户信息
+    loadUserInfo() {
+      console.log('加载用户信息')
+      const userInfoStr = uni.getStorageSync('userInfo')
+      if (userInfoStr) {
+        try {
+          let userInfo = JSON.parse(userInfoStr)
+          console.log('读取到的用户信息:', JSON.stringify(userInfo))
+          
+          // 检查是否为数组格式(登录函数可能返回数组格式)
+          if (Array.isArray(userInfo) && userInfo.length > 0) {
+            userInfo = userInfo[0]
+          }
+          
+          // 处理一层嵌套数据的情况（有些时候data是嵌套的）
+          if (userInfo.data && typeof userInfo.data === 'object') {
+            userInfo = userInfo.data
+          }
+          
+          this.userInfo = this.formatUserInfo(userInfo)
+          this.hasUserInfo = !!this.userInfo.nickName || !!this.userInfo.nickname
+          console.log('处理后的用户信息:', JSON.stringify(this.userInfo))
+          console.log('是否有用户信息：', this.hasUserInfo)
+          console.log('头像地址：', this.userInfo.avatarUrl)
+          console.log('昵称：', this.userInfo.nickName || this.userInfo.nickname)
+        } catch (e) {
+          console.error('解析用户信息失败:', e)
+          this.userInfo = {}
+          this.hasUserInfo = false
+        }
+      } else {
+        console.log('未找到用户信息')
+        this.userInfo = {}
+        this.hasUserInfo = false
+      }
+    },
+    
+    // 格式化用户信息
+    formatUserInfo(userInfo) {
+      if (!userInfo) return {};
+      
+      // 创建新对象，避免直接修改原对象
+      const formattedInfo = {...userInfo};
+      
+      // 确保有默认值
+      if (!formattedInfo.nickName && !formattedInfo.nickname) {
+        // 如果有手机号，使用手机号生成昵称
+        if (formattedInfo.phoneNumber) {
+          formattedInfo.nickName = '用户' + formattedInfo.phoneNumber.substr(formattedInfo.phoneNumber.length - 4);
+        } else {
+          formattedInfo.nickName = '微信用户';
+        }
+      }
+      
+      // 兼容nickName和nickname两种属性名
+      if (!formattedInfo.nickName && formattedInfo.nickname) {
+        formattedInfo.nickName = formattedInfo.nickname;
+      }
+      
+      // 确保有默认头像
+      if (!formattedInfo.avatarUrl) {
+        formattedInfo.avatarUrl = '/static/images/default-avatar.png';
+      }
+      
+      // 确保userId字段
+      if (!formattedInfo.userId && formattedInfo._id) {
+        formattedInfo.userId = formattedInfo._id;
+      }
+      
+      return formattedInfo;
+    },
     // 获取预约数量
     async getBookingCount() {
       if (!this.hasUserInfo) return;
       
       try {
-        const result = await this.$api.user.getBookingCount({
-          userId: this.userInfo.id || ''
+        const userInfo = this.userInfo;
+        const userId = userInfo.userId || userInfo._id || '';
+        
+        // 直接调用云函数获取预约统计
+        const res = await uniCloud.callFunction({
+          name: 'getBookingCounts', 
+          data: {
+            userId
+          }
         });
         
-        if (result && result.data) {
-          this.bookingStats = result.data;
+        if (res.result && res.result.code === 0) {
+          const counts = res.result.data.counts || {};
+          this.bookingStats = {
+            total: counts.all || 0,
+            pending: counts.pending || 0,
+            confirmed: counts.confirmed || 0,
+            finished: counts.finished || 0,
+            cancelled: counts.cancelled || 0
+          };
         } else {
           // 使用模拟数据
           this.bookingStats = {
@@ -171,118 +265,89 @@ export default {
       }
     },
     
-    // 检查登录状态
-    checkLoginStatus() {
-      const userInfo = uni.getStorageSync('userInfo')
-      if (userInfo) {
-        this.userInfo = JSON.parse(userInfo)
-        this.hasUserInfo = true
-        this.fetchBookingCounts()
-      }
-    },
-    
-    // 获取用户信息
-    getUserProfile() {
-      // 在 uniapp 中获取用户信息
-      uni.getUserProfile({
-        desc: '用于完善用户资料',
-        success: (res) => {
-          this.userInfo = res.userInfo
-          this.hasUserInfo = true
-          
-          // 存储用户信息
-          uni.setStorageSync('userInfo', JSON.stringify(res.userInfo))
-          
-          // 登录微信小程序
-          this.wxLogin()
-        },
-        fail: (err) => {
-          console.error('获取用户信息失败', err)
-          uni.showToast({
-            title: '获取用户信息失败',
-            icon: 'none'
-          })
-        }
-      })
-    },
-    
-    // 微信登录
-    wxLogin() {
-      uni.login({
-        success: async (res) => {
-          try {
-            // 调用云函数登录
-            const loginRes = await uni.cloud.callFunction({
-              name: 'login',
-              data: {
-                code: res.code,
-                userInfo: this.userInfo
-              }
-            })
-            
-            if (loginRes.result && loginRes.result.success) {
-              const { userId } = loginRes.result
-              
-              // 保存用户ID
-              this.userInfo.userId = userId
-              uni.setStorageSync('userInfo', JSON.stringify(this.userInfo))
-              
-              // 获取预约数量
-              this.fetchBookingCounts()
-            } else {
-              console.error('登录云函数调用失败', loginRes)
-            }
-          } catch (e) {
-            console.error('登录失败', e)
-          }
-        },
-        fail: (err) => {
-          console.error('微信登录失败', err)
-        }
-      })
-    },
-    
     // 获取预约数量
     async fetchBookingCounts() {
       if (!this.hasUserInfo || !this.userInfo.userId) {
-        return
+        return;
       }
       
       try {
-        // 调用云函数获取预约数量
-        const res = await uni.cloud.callFunction({
+        // 使用API接口获取预约数量
+        const res = await uniCloud.callFunction({
           name: 'getBookingCounts',
           data: {
-            userId: this.userInfo.userId
+            userId: this.userInfo.userId || this.userInfo._id
           }
-        })
+        });
         
-        if (res.result && res.result.success) {
-          this.bookingCounts = res.result.counts
+        if (res.result && res.result.code === 0) {
+          // 获取counts下的数据
+          const counts = res.result.data.counts || {};
+          this.bookingCounts = {
+            usable: counts.pending + counts.confirmed || 0,
+            expired: counts.finished || 0,
+            canceled: counts.cancelled || 0
+          };
+          
+          // 如果用户有未完成的预约，在tabBar上添加红点提示
+          if (this.bookingCounts.usable > 0) {
+            uni.showTabBarRedDot({
+              index: 2 // 假设"我的"页面是第三个tabBar页面（索引从0开始）
+            });
+          } else {
+            uni.hideTabBarRedDot({
+              index: 2
+            });
+          }
         } else {
           // 模拟数据
           this.bookingCounts = {
-            usable: 1,
-            expired: 2,
+            usable: 0,
+            expired: 0,
             canceled: 0
-          }
+          };
         }
       } catch (e) {
-        console.error('获取预约数量失败', e)
+        console.error('获取预约数量失败', e);
         // 模拟数据
         this.bookingCounts = {
-          usable: 1,
-          expired: 2,
+          usable: 0,
+          expired: 0,
           canceled: 0
-        }
+        };
       }
     },
     
     // 页面跳转
     navigateTo(url) {
+      // 替换status=usable为status=confirmed,pending的组合查询
+      if (url.includes('status=usable')) {
+        url = url.replace('status=usable', 'status=usable');
+        console.log('修改后的URL:', url);
+      }
+      
+      // 替换status=expired为status=finished
+      if (url.includes('status=expired')) {
+        url = url.replace('status=expired', 'status=finished');
+        console.log('修改后的URL:', url);
+      }
+      
+      // 确保cancelled拼写与服务器一致
+      if (url.includes('status=canceled')) {
+        url = url.replace('status=canceled', 'status=cancelled');
+        console.log('修改后的URL:', url);
+      }
+      
       uni.navigateTo({
-        url: url
-      })
+        url: url,
+        fail: (err) => {
+          console.error('页面跳转错误:', err);
+          uni.showToast({
+            title: '页面跳转失败',
+            icon: 'none'
+          });
+        }
+      });
     },
     
     // 管理员登录入口
@@ -337,6 +402,14 @@ export default {
           }
         }
       })
+    },
+    
+    // 获取用户信息
+    getUserProfile() {
+      // 重定向到登录页面
+      uni.navigateTo({
+        url: '/pages/login/login?redirect=' + encodeURIComponent('/pages/user/user')
+      });
     }
   }
 }
