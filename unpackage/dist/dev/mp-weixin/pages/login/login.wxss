@@ -65,78 +65,103 @@
 /* 导航栏 */
 /* 选项卡 */
 .login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   min-height: 100vh;
-  padding: 40rpx;
-  background-color: #fff;
-}
-.login-container .header {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-top: 80rpx;
-  margin-bottom: 100rpx;
 }
-.login-container .header .logo {
-  width: 160rpx;
-  height: 160rpx;
-  margin-bottom: 30rpx;
-}
-.login-container .header .title {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20rpx;
-}
-.login-container .header .subtitle {
-  font-size: 30rpx;
-  color: #666;
-}
-.login-container .content {
+.login-container .bg-image {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  height: 100%;
+  z-index: 0;
 }
-.login-container .content .auth-btn {
-  width: 100%;
-  height: 90rpx;
-  line-height: 90rpx;
-  text-align: center;
-  color: #fff;
-  font-size: 32rpx;
-  border-radius: 45rpx;
+.login-container .custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: transparent;
+}
+.login-container .custom-nav .nav-content {
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.login-container .custom-nav .nav-content .nav-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+.login-container .content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 60rpx;
+  padding-top: calc(44px + 25px);
+}
+.login-container .content .header {
+  margin-top: 25vh;
+  text-align: center;
+}
+.login-container .content .header .logo {
+  width: 120rpx;
+  height: 120rpx;
+}
+.login-container .content .auth-buttons {
+  margin-top: 460rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.login-container .content .auth-buttons .auth-btn {
+  width: 80%;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 44rpx;
+  font-size: 32rpx;
   margin-bottom: 30rpx;
+  border: none;
 }
-.login-container .content .auth-btn .iconfont {
-  margin-right: 10rpx;
+.login-container .content .auth-buttons .auth-btn::after {
+  border: none;
 }
-.login-container .content .wechat-btn {
-  background-color: #07c160;
+.login-container .content .auth-buttons .wechat-btn {
+  background-color: #47c76d;
+  color: #fff;
 }
-.login-container .content .phone-btn {
-  background-color: #1989fa;
-}
-.login-container .content .debug-btn {
-  background-color: #ff6347;
-}
-.login-container .content .tips {
-  font-size: 26rpx;
-  color: #999;
+.login-container .content .auth-buttons .phone-btn {
+  background-color: #fff;
+  color: #333;
+  border: 2rpx solid rgba(0, 0, 0, 0.1);
 }
 .login-container .footer {
-  margin-top: auto;
-  padding-bottom: 40rpx;
+  position: fixed;
+  bottom: 40rpx;
+  left: 0;
+  width: 100%;
+  z-index: 1;
 }
 .login-container .footer .agreement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 24rpx;
-  color: #999;
-  text-align: center;
+  color: #666;
+}
+.login-container .footer .agreement .dot {
+  width: 8rpx;
+  height: 8rpx;
+  background-color: #666;
+  border-radius: 50%;
+  margin-right: 8rpx;
 }
 .login-container .footer .agreement .link {
   color: #FF6B00;

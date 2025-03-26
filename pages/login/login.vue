@@ -1,38 +1,40 @@
 <template>
   <view class="login-container">
-    <view class="header">
-      <image class="logo" src="../../static/images/logo.png" mode="aspectFit"></image>
-      <view class="title">悦课</view>
-      <view class="subtitle">艺术教育预约平台</view>
+    <!-- 背景图 -->
+    <image class="bg-image" src="/static/images/login.png" mode="aspectFill"></image>
+    
+    <!-- 自定义导航栏 -->
+    <view class="custom-nav" :style="{ paddingTop: statusBarHeight + 'px' }">
+      <view class="nav-content">
+        <text class="nav-title">登录</text>
+      </view>
     </view>
     
     <view class="content">
-      <!-- 微信登录按钮 -->
-      <button class="auth-btn wechat-btn" open-type="getUserInfo" @getuserinfo="handleUserInfo">
-        <text class="iconfont icon-wechat"></text>
-        <text>微信一键登录</text>
-      </button>
+      <!-- Logo -->
+      <view class="header">
+        <image class="logo" src="../../static/images/logo.png" mode="aspectFit"></image>
+      </view>
       
-      <!-- 手机号一键登录 -->
-      <button class="auth-btn phone-btn" @click="handlePhoneLogin">
-        <text class="iconfont icon-phone"></text>
-        <text>手机号一键登录</text>
-      </button>
+      <!-- 登录按钮 -->
+      <view class="auth-buttons">
+        <button class="auth-btn wechat-btn" open-type="getUserInfo" @getuserinfo="handleUserInfo">
+          微信登陆
+        </button>
+        <button class="auth-btn phone-btn" @click="handlePhoneLogin">
+          手机号登陆
+        </button>
+      </view>
       
-      <!-- 添加调试按钮 -->
-      <button class="auth-btn debug-btn" @click="debugNavigate" v-if="false">
-        <text>调试跳转</text>
-      </button>
-      
-      <view class="tips">登录后可使用完整功能</view>
-    </view>
-    
-    <view class="footer">
-      <view class="agreement">
-        <text>登录即代表您已同意</text>
-        <text class="link" @click="showPrivacyPolicy">《隐私政策》</text>
-        <text>和</text>
-        <text class="link" @click="showUserAgreement">《用户协议》</text>
+      <!-- 用户协议 -->
+      <view class="footer">
+        <view class="agreement">
+          <text class="dot"></text>
+          <text>登录即代表同意</text>
+          <text class="link" @click="showUserAgreement">《用户协议》</text>
+          <text>和</text>
+          <text class="link" @click="showPrivacyPolicy">《隐私政策》</text>
+        </view>
       </view>
     </view>
   </view>
@@ -44,6 +46,7 @@ export default {
     return {
       redirectUrl: '',
       isSupport: false, // 是否支持一键登录
+      statusBarHeight: 0,
       loginState: {
         code: '', // 微信登录code
         openid: '', // 用户openid
@@ -52,6 +55,10 @@ export default {
     }
   },
   onLoad(options) {
+    // 获取状态栏高度
+    const systemInfo = uni.getSystemInfoSync();
+    this.statusBarHeight = systemInfo.statusBarHeight;
+    
     // 获取重定向页面
     if (options.redirect) {
       this.redirectUrl = decodeURIComponent(options.redirect);
@@ -745,89 +752,116 @@ export default {
 
 <style lang="scss">
 .login-container {
+  min-height: 100vh;
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  padding: 40rpx;
-  background-color: #fff;
   
-  .header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 80rpx;
-    margin-bottom: 100rpx;
+  .bg-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  
+  .custom-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background-color: transparent;
     
-    .logo {
-      width: 160rpx;
-      height: 160rpx;
-      margin-bottom: 30rpx;
-    }
-    
-    .title {
-      font-size: 48rpx;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 20rpx;
-    }
-    
-    .subtitle {
-      font-size: 30rpx;
-      color: #666;
+    .nav-content {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .nav-title {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+      }
     }
   }
   
   .content {
-    width: 100%;
+    position: relative;
+    z-index: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    padding: 0 60rpx;
+    padding-top: calc(44px + var(--status-bar-height));
     
-    .auth-btn {
-      width: 100%;
-      height: 90rpx;
-      line-height: 90rpx;
+    .header {
+      margin-top: 25vh;
       text-align: center;
-      color: #fff;
-      font-size: 32rpx;
-      border-radius: 45rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 30rpx;
       
-      .iconfont {
-        margin-right: 10rpx;
+      .logo {
+        width: 120rpx;
+        height: 120rpx;
       }
     }
     
-    .wechat-btn {
-      background-color: #07c160;
-    }
-    
-    .phone-btn {
-      background-color: #1989fa;
-    }
-    
-    .debug-btn {
-      background-color: #ff6347;
-    }
-    
-    .tips {
-      font-size: 26rpx;
-      color: #999;
+    .auth-buttons {
+      margin-top: 460rpx;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      
+      .auth-btn {
+        width: 80%;
+        height: 88rpx;
+        line-height: 88rpx;
+        text-align: center;
+        border-radius: 44rpx;
+        font-size: 32rpx;
+        margin-bottom: 30rpx;
+        border: none;
+        
+        &::after {
+          border: none;
+        }
+      }
+      
+      .wechat-btn {
+        background-color: #47c76d;
+        color: #fff;
+      }
+      
+      .phone-btn {
+        background-color: #fff;
+        color: #333;
+        border: 2rpx solid rgba(0, 0, 0, 0.1);
+      }
     }
   }
   
   .footer {
-    margin-top: auto;
-    padding-bottom: 40rpx;
+    position: fixed;
+    bottom: 40rpx;
+    left: 0;
+    width: 100%;
+    z-index: 1;
     
     .agreement {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 24rpx;
-      color: #999;
-      text-align: center;
+      color: #666;
+      
+      .dot {
+        width: 8rpx;
+        height: 8rpx;
+        background-color: #666;
+        border-radius: 50%;
+        margin-right: 8rpx;
+      }
       
       .link {
         color: #FF6B00;

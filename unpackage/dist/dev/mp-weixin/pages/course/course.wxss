@@ -81,39 +81,41 @@
   display: flex;
   gap: 20rpx;
 }
-.filter-dropdown {
+.filter-section .filter-dropdown {
   position: relative;
   flex: 1;
 }
-.filter-dropdown .filter-item {
+.filter-section .filter-dropdown .filter-item {
   height: 70rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
   padding: 0 20rpx;
 }
-.filter-dropdown .filter-item .filter-text {
+.filter-section .filter-dropdown .filter-item .filter-text {
   font-size: 28rpx;
   font-weight: bold;
   margin-right: 6rpx;
+  color: #fff !important;
+  /* 强制使用白色 */
 }
-.filter-dropdown .filter-item .arrow-icon {
+.filter-section .filter-dropdown .filter-item .arrow-icon {
   width: 0;
   height: 0;
   border-left: 10rpx solid transparent;
   border-right: 10rpx solid transparent;
   border-top: 10rpx solid #fff;
+  /* 箭头颜色设为白色 */
   margin-left: 0;
   transition: -webkit-transform 0.3s;
   transition: transform 0.3s;
   transition: transform 0.3s, -webkit-transform 0.3s;
 }
-.filter-dropdown .filter-item .arrow-icon.arrow-up {
+.filter-section .filter-dropdown .filter-item .arrow-icon.arrow-up {
   -webkit-transform: rotate(180deg);
           transform: rotate(180deg);
 }
-.filter-dropdown .filter-dropdown-content {
+.filter-section .filter-dropdown .filter-dropdown-content {
   position: absolute;
   top: 80rpx;
   left: 0;
@@ -123,27 +125,30 @@
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
   z-index: 100;
 }
-.filter-dropdown .filter-dropdown-content .dropdown-title {
+.filter-section .filter-dropdown .filter-dropdown-content .dropdown-title {
   height: 70rpx;
   line-height: 70rpx;
   text-align: center;
   font-size: 28rpx;
-  color: var(--text-color-light);
-  border-bottom: 1rpx solid var(--border-color-light);
+  color: #333;
+  /* 下拉菜单标题保持黑色 */
+  border-bottom: 1rpx solid #eee;
 }
-.filter-dropdown .filter-dropdown-content .dropdown-options {
+.filter-section .filter-dropdown .filter-dropdown-content .dropdown-options {
   max-height: 350rpx;
   overflow-y: auto;
 }
-.filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option {
+.filter-section .filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option {
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
   font-size: 28rpx;
-  color: var(--text-color);
+  color: #333;
+  /* 下拉选项保持黑色 */
 }
-.filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option.active {
-  color: var(--theme-color);
+.filter-section .filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option.active {
+  color: #EC7A49;
+  /* 选中项使用主题色 */
   font-weight: bold;
 }
 /* 学科选项卡 */

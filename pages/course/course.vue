@@ -443,74 +443,74 @@ export default {
   padding: 40rpx 30rpx 30rpx;
   display: flex;
   gap: 20rpx;
-}
-
-.filter-dropdown {
-  position: relative;
-  flex: 1;
   
-  .filter-item {
-    height: 70rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    padding: 0 20rpx;
+  .filter-dropdown {
+    position: relative;
+    flex: 1;
     
-    .filter-text {
-      font-size: 28rpx;
-      font-weight: bold;
-      margin-right: 6rpx;
-    }
-    
-    .arrow-icon {
-      width: 0;
-      height: 0;
-      border-left: 10rpx solid transparent;
-      border-right: 10rpx solid transparent;
-      border-top: 10rpx solid #fff;
-      margin-left: 0;
-      transition: transform 0.3s;
+    .filter-item {
+      height: 70rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20rpx;
       
-      &.arrow-up {
-        transform: rotate(180deg);
+      .filter-text {
+        font-size: 28rpx;
+        font-weight: bold;
+        margin-right: 6rpx;
+        color: #fff !important; /* 强制使用白色 */
+      }
+      
+      .arrow-icon {
+        width: 0;
+        height: 0;
+        border-left: 10rpx solid transparent;
+        border-right: 10rpx solid transparent;
+        border-top: 10rpx solid #fff; /* 箭头颜色设为白色 */
+        margin-left: 0;
+        transition: transform 0.3s;
+        
+        &.arrow-up {
+          transform: rotate(180deg);
+        }
       }
     }
-  }
-  
-  .filter-dropdown-content {
-    position: absolute;
-    top: 80rpx;
-    left: 0;
-    width: 100%;
-    background-color: #fff;
-    border-radius: 12rpx;
-    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
-    z-index: 100;
     
-    .dropdown-title {
-      height: 70rpx;
-      line-height: 70rpx;
-      text-align: center;
-      font-size: 28rpx;
-      color: $text-color-light;
-      border-bottom: 1rpx solid $border-color-light;
-    }
-    
-    .dropdown-options {
-      max-height: 350rpx;
-      overflow-y: auto;
+    .filter-dropdown-content {
+      position: absolute;
+      top: 80rpx;
+      left: 0;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 12rpx;
+      box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
+      z-index: 100;
       
-      .dropdown-option {
-        height: 80rpx;
-        line-height: 80rpx;
+      .dropdown-title {
+        height: 70rpx;
+        line-height: 70rpx;
         text-align: center;
         font-size: 28rpx;
-        color: $text-color;
+        color: #333; /* 下拉菜单标题保持黑色 */
+        border-bottom: 1rpx solid #eee;
+      }
+      
+      .dropdown-options {
+        max-height: 350rpx;
+        overflow-y: auto;
         
-        &.active {
-          color: $theme-color;
-          font-weight: bold;
+        .dropdown-option {
+          height: 80rpx;
+          line-height: 80rpx;
+          text-align: center;
+          font-size: 28rpx;
+          color: #333; /* 下拉选项保持黑色 */
+          
+          &.active {
+            color: #EC7A49; /* 选中项使用主题色 */
+            font-weight: bold;
+          }
         }
       }
     }
