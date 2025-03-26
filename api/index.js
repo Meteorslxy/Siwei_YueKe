@@ -34,12 +34,60 @@ const courseApi = {
       });
     }
     
+    // 尝试先从缓存中获取数据
+    try {
+      const cachedKey = `course_${id}`;
+      const cachedData = uni.getStorageSync(cachedKey);
+      
+      if (cachedData) {
+        console.log(`[缓存] 从缓存获取课程详情数据: ${cachedKey}`);
+        const parsedData = JSON.parse(cachedData);
+        
+        // 判断缓存时间是否过期（24小时）
+        const cacheTime = uni.getStorageSync(`${cachedKey}_time`);
+        const now = Date.now();
+        const isExpired = !cacheTime || (now - cacheTime > 24 * 60 * 60 * 1000);
+        
+        if (!isExpired) {
+          console.log('使用缓存的课程详情数据');
+          
+          // 后台刷新缓存
+          setTimeout(() => {
+            this.refreshCourseCache(id);
+          }, 100);
+          
+          return Promise.resolve({
+            code: 0,
+            success: true,
+            message: '从缓存获取成功',
+            data: parsedData,
+            fromCache: true
+          });
+        } else {
+          console.log('缓存已过期，重新获取数据');
+        }
+      }
+    } catch (e) {
+      console.error('读取缓存失败:', e);
+    }
+    
     // 使用courseId作为参数名，与云函数期望一致
     return request({
       name: 'getCourseDetail',
-      data: { courseId: id }
+      data: { courseId: id },
+      timeout: 15000 // 设置15秒超时
     }).then(res => {
       console.log('getCourseDetail原始返回:', res);
+      
+      // 如果获取成功，更新缓存时间
+      if (res && res.data) {
+        try {
+          const cachedKey = `course_${id}`;
+          uni.setStorageSync(`${cachedKey}_time`, Date.now());
+        } catch (e) {
+          console.error('更新缓存时间失败:', e);
+        }
+      }
       
       // 如果返回的data为空但有_id字段，将其规范化
       if (res && !res.data && res._id) {
@@ -50,6 +98,33 @@ const courseApi = {
       }
       
       return debugAPI('getCourseDetail返回', res);
+    });
+  },
+  
+  // 刷新课程缓存（后台操作）
+  refreshCourseCache(id) {
+    console.log('后台刷新课程缓存:', id);
+    
+    return request({
+      name: 'getCourseDetail',
+      data: { courseId: id },
+      timeout: 30000,
+      showLoading: false // 不显示加载提示
+    }).then(res => {
+      if (res && res.data) {
+        try {
+          const cachedKey = `course_${id}`;
+          uni.setStorageSync(cachedKey, JSON.stringify(res.data));
+          uni.setStorageSync(`${cachedKey}_time`, Date.now());
+          console.log('后台更新课程缓存成功');
+        } catch (e) {
+          console.error('后台更新课程缓存失败:', e);
+        }
+      }
+      return res;
+    }).catch(err => {
+      console.error('后台刷新课程缓存失败:', err);
+      return err;
     });
   },
   

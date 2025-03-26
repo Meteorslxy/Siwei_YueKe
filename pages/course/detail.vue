@@ -12,7 +12,10 @@
       <text style="display: block;">课程ID: {{courseId}}</text>
       <text style="display: block;">用户ID: {{userInfo ? userInfo.userId : '未登录'}}</text>
       <text style="display: block;">预约状态: {{hasBooked ? '已预约' : '未预约'}}</text>
-      <button @click="toggleBookStatus" style="margin-top: 5px; font-size: 12px; padding: 2px 5px;">切换预约状态</button>
+      <view style="display: flex; margin-top: 5px;">
+        <button @click="toggleBookStatus" style="flex: 1; font-size: 12px; padding: 2px 5px; margin-right: 5px;">切换预约状态</button>
+        <button @click="forceRefreshStatus" style="flex: 1; font-size: 12px; padding: 2px 5px;">重新检查状态</button>
+      </view>
     </view>
     
     <!-- 课程信息卡片 -->
@@ -114,25 +117,13 @@ export default {
       hasBooked: this.hasBooked
     });
     
-    // 每3秒输出状态信息，但不使用document.querySelector
-    this.debugInterval = setInterval(() => {
-      console.log('课程详情页状态:', {
-        courseId: this.courseId,
-        hasBooked: this.hasBooked
-      });
-    }, 3000);
-    
     // 监听预约取消事件
     uni.$on('booking:cancel', this.handleBookingCancelled);
   },
   beforeDestroy() {
-    // 清除定时器
-    if (this.debugInterval) {
-      clearInterval(this.debugInterval);
-    }
-    
     // 移除事件监听
     uni.$off('booking:cancel', this.handleBookingCancelled);
+    uni.$off('login:success', this.handleLoginSuccess);
   },
   onLoad(options) {
     console.log('加载课程详情页面, 参数:', options);
@@ -140,12 +131,82 @@ export default {
     // 监听预约取消事件，更新本页面的预约状态
     uni.$on('booking:cancel', this.handleBookingCancelled);
     
+    // 加载用户信息
+    this.loadUserInfo();
+    
     if (options.id) {
       this.courseId = options.id;
+      
+      // 检查是否有状态变更标记
+      const hasBookingChanged = uni.getStorageSync('booking_changed') === 'true';
+      if (hasBookingChanged) {
+        console.log('检测到预约状态变更标记，将优先从云端获取最新状态');
+        // 清除本地缓存中可能过时的预约状态
+        try {
+          if (this.userInfo && this.userInfo.userId) {
+            const userKey = `booking_${this.userInfo.userId}_${this.courseId}`;
+            uni.removeStorageSync(userKey);
+          }
+          const courseKey = `booking_course_${this.courseId}`;
+          uni.removeStorageSync(courseKey);
+          console.log('已清除可能过时的预约状态缓存');
+        } catch(e) {
+          console.error('清除缓存失败:', e);
+        }
+      }
+      
+      // 检查URL中是否已直接包含预约状态参数
+      if (options.hasBooked === 'true') {
+        console.log('从URL参数获取预约状态: 已预约');
+        this.hasBooked = true;
+      } else if (options.hasBooked === 'false') {
+        console.log('从URL参数获取预约状态: 未预约');
+        this.hasBooked = false;
+      } else {
+        // 尝试从本地缓存加载预约状态（立即执行以避免闪烁）
+        if (this.loadBookingStatusFromCache()) {
+          console.log('从缓存获取到预约状态，设置hasBooked =', this.hasBooked);
+        }
+      }
+      
       // 获取课程详情
       this.getCourseDetail();
-      // 如果登录了，检查预约状态
-      this.checkBookingStatus();
+      
+      // 立即检查云端预约状态（优先级高于本地缓存）
+      this.checkBookingStatus().then(booked => {
+        console.log('初始检查预约状态完成，结果:', booked);
+        
+        // 如果云端状态与本地状态不一致，以云端为准
+        if (booked !== this.hasBooked) {
+          console.log('检测到状态不一致，更新本地状态:', {云端状态: booked, 本地状态: this.hasBooked});
+          this.hasBooked = booked;
+          this.saveBookingStatusToCache(booked);
+          this.$forceUpdate();
+        }
+        
+        // 清除状态变更标记
+        if (hasBookingChanged) {
+          uni.setStorageSync('booking_changed', 'false');
+          console.log('已清除预约状态变更标记');
+        }
+      }).catch(err => {
+        console.error('初始检查预约状态失败:', err);
+      });
+      
+      // 延迟再次检查，确保页面显示正确的状态
+      setTimeout(() => {
+        // 再次检查本地缓存
+        this.checkBookingStatus().then(booked => {
+          console.log('延迟检查预约状态结果:', booked);
+          if (booked !== this.hasBooked) {
+            console.log('延迟检查发现状态不一致，更新状态');
+            this.hasBooked = booked;
+            this.$forceUpdate();
+          }
+        }).catch(err => {
+          console.warn('延迟检查预约状态失败，忽略错误:', err);
+        });
+      }, 1000);
     } else {
       uni.showToast({
         title: '未找到课程ID',
@@ -160,10 +221,11 @@ export default {
   onUnload() {
     // 页面卸载时移除事件监听，防止内存泄漏
     uni.$off('booking:cancel', this.handleBookingCancelled);
+    uni.$off('login:success', this.handleLoginSuccess);
   },
   methods: {
     // 获取课程详情
-    async fetchCourseDetail() {
+    async fetchCourseDetail(retryCount = 0) {
       // 验证课程ID是否有效
       if (!this.courseId) {
         console.error('课程ID为空，无法获取详情');
@@ -198,13 +260,20 @@ export default {
           
           // 预处理数据，确保所有字段都有值
           this.processCourseData();
+        } else if (result && result.code === -1 && retryCount < 3) {
+          // 如果是超时错误且重试次数小于3次，尝试重试
+          console.log(`获取课程详情失败，准备第${retryCount + 1}次重试...`);
+          uni.hideLoading();
+          
+          // 延迟1秒后重试
+          setTimeout(() => {
+            this.fetchCourseDetail(retryCount + 1);
+          }, 1000);
         } else {
           // 获取失败时显示错误提示
           console.error('获取课程详情失败: 未找到数据');
-          uni.showToast({
-            title: '获取课程详情失败',
-            icon: 'none'
-          });
+          // 尝试使用静态数据
+          this.handleDetailFetchError();
         }
       } catch (error) {
         // 隐藏加载提示
@@ -212,12 +281,48 @@ export default {
         
         console.error('获取课程详情失败:', error);
         
-        // 显示错误提示
-        uni.showToast({
-          title: '获取课程详情失败',
-          icon: 'none'
-        });
+        // 如果是网络错误或超时错误，且重试次数小于3次，尝试重试
+        if (retryCount < 3) {
+          console.log(`获取课程详情出错，准备第${retryCount + 1}次重试...`);
+          
+          // 延迟1秒后重试
+          setTimeout(() => {
+            this.fetchCourseDetail(retryCount + 1);
+          }, 1000);
+        } else {
+          // 尝试使用静态数据
+          this.handleDetailFetchError();
+        }
       }
+    },
+    
+    // 处理获取课程详情失败的情况
+    handleDetailFetchError() {
+      // 显示错误提示
+      uni.showToast({
+        title: '获取课程详情失败',
+        icon: 'none'
+      });
+      
+      // 使用预设的默认数据
+      console.log('使用默认课程数据作为备选');
+      this.courseInfo = {
+        title: '课程详情加载失败',
+        price: 0,
+        teacherName: '未知',
+        location: '未知',
+        startDate: '',
+        endDate: '',
+        startTime: '',
+        endTime: '',
+        description: '抱歉，无法加载课程详情，请返回后重试或联系客服。',
+        coverImage: '/static/images/course/default.jpg',
+        courseCount: 20,
+        bookingCount: 0
+      };
+      
+      // 预处理数据
+      this.processCourseData();
     },
     
     // 新函数，与onLoad中使用的方法名匹配
@@ -366,45 +471,265 @@ export default {
       } else {
         console.log('用户未登录');
       }
+      
+      // 添加登录成功事件监听
+      uni.$on('login:success', this.handleLoginSuccess);
+    },
+    
+    // 处理登录成功事件
+    handleLoginSuccess(userData) {
+      console.log('收到登录成功事件，更新用户数据:', userData);
+      this.userInfo = userData;
+      
+      // 登录成功后重新检查预约状态
+      setTimeout(() => {
+        this.checkBookingStatus();
+      }, 500);
+    },
+    
+    // 从本地缓存加载预约状态
+    loadBookingStatusFromCache() {
+      try {
+        if (this.courseId) {
+          // 检查是否有状态变更标记
+          const hasBookingChanged = uni.getStorageSync('booking_changed') === 'true';
+          if (hasBookingChanged) {
+            console.log('检测到预约状态变更标记，避免使用可能过时的缓存状态');
+            return false;
+          }
+          
+          // 先尝试使用用户特定的缓存
+          if (this.userInfo && this.userInfo.userId) {
+            const userKey = `booking_${this.userInfo.userId}_${this.courseId}`;
+            const userCachedStatus = uni.getStorageSync(userKey);
+            
+            if (userCachedStatus) {
+              console.log('从用户特定缓存加载预约状态:', userCachedStatus);
+              this.hasBooked = userCachedStatus === 'true';
+              console.log('用户特定缓存预约状态:', this.hasBooked);
+              return true;
+            }
+          }
+          
+          // 尝试使用课程通用缓存
+          const courseKey = `booking_course_${this.courseId}`;
+          const courseCachedStatus = uni.getStorageSync(courseKey);
+          
+          if (courseCachedStatus) {
+            console.log('从课程通用缓存加载预约状态:', courseCachedStatus);
+            this.hasBooked = courseCachedStatus === 'true';
+            console.log('课程通用缓存预约状态:', this.hasBooked);
+            return true;
+          }
+        }
+      } catch (e) {
+        console.error('加载本地预约状态失败:', e);
+      }
+      return false;
+    },
+    
+    // 保存预约状态到本地缓存
+    saveBookingStatusToCache(status) {
+      try {
+        if (this.courseId) {
+          console.log('保存预约状态到缓存:', status);
+          
+          // 清除所有相关的缓存键，确保状态一致性
+          const clearRelatedCaches = () => {
+            // 清除可能存在的过期状态
+            if (this.userInfo && this.userInfo.userId) {
+              const userKey = `booking_${this.userInfo.userId}_${this.courseId}`;
+              uni.removeStorageSync(userKey);
+              console.log('已清除用户特定缓存');
+            }
+            
+            // 清除课程通用缓存
+            const courseKey = `booking_course_${this.courseId}`;
+            uni.removeStorageSync(courseKey);
+            console.log('已清除课程通用缓存');
+          };
+          
+          // 在设置新值前先清除相关缓存
+          if (!status) {
+            clearRelatedCaches();
+          }
+          
+          // 同时保存用户特定缓存和课程通用缓存
+          if (this.userInfo && this.userInfo.userId) {
+            const userKey = `booking_${this.userInfo.userId}_${this.courseId}`;
+            uni.setStorageSync(userKey, status ? 'true' : 'false');
+            console.log('预约状态已保存到用户特定缓存:', status);
+          }
+          
+          // 保存课程通用缓存
+          const courseKey = `booking_course_${this.courseId}`;
+          uni.setStorageSync(courseKey, status ? 'true' : 'false');
+          console.log('预约状态已保存到课程通用缓存:', status);
+          
+          // 设置全局标记，通知其他页面可能需要刷新状态
+          uni.setStorageSync('booking_changed', 'true');
+          console.log('已设置booking_changed标记通知其他页面');
+          
+          // 立即刷新页面显示
+          this.hasBooked = status;
+          console.log('hasBooked状态已更新为:', status);
+          
+          // 强制DOM更新
+          this.$forceUpdate();
+          
+          // 确保下一帧渲染生效
+          this.$nextTick(() => {
+            // 再次确认状态已更新
+            if(this.hasBooked !== status) {
+              console.warn('状态更新失败，强制再次更新');
+              this.hasBooked = status;
+              this.$forceUpdate();
+            }
+          });
+        }
+      } catch (e) {
+        console.error('保存预约状态到本地缓存失败:', e);
+      }
     },
     
     // 检查是否已预约
     async checkBookingStatus() {
       console.log('开始检查预约状态，当前用户信息:', this.userInfo);
       
-      // 先设置为未预约状态，确保按钮可见
-      this.hasBooked = false;
+      // 检查本地缓存中是否有预约状态记录
+      if (this.userInfo && this.userInfo.userId && this.courseId) {
+        const key = `booking_${this.userInfo.userId}_${this.courseId}`;
+        const cachedStatus = uni.getStorageSync(key);
+        
+        if (cachedStatus === 'true') {
+          console.log('从本地缓存确认预约状态: 已预约');
+          this.hasBooked = true;
+          // 仍然继续查询云端状态来确认
+        }
+      }
       
       if (!this.userInfo || !this.userInfo.userId || !this.courseId) {
         console.log('用户未登录或缺少必要参数，设置为未预约状态');
-        return;
+        this.hasBooked = false;
+        return Promise.resolve(false);
       }
       
       try {
         console.log('检查预约状态，用户ID:', this.userInfo.userId, '课程ID:', this.courseId);
         
+        // 首先尝试调用getBookings云函数
         const res = await uniCloud.callFunction({
           name: 'getBookings',
           data: {
             userId: this.userInfo.userId,
             courseId: this.courseId,
-            status: ['pending', 'confirmed']
+            // 包括所有未取消的状态
+            status: ['pending', 'confirmed', 'confirmed_unpaid'] 
           }
         });
         
         console.log('查询预约状态结果详情:', JSON.stringify(res.result));
         
+        // 判断是否预约过
+        let booked = false;
+        
         if (res.result && res.result.success && res.result.data && res.result.data.length > 0) {
-          this.hasBooked = true;
+          booked = true;
           console.log('用户已预约该课程，预约记录:', res.result.data[0]);
         } else {
-          console.log('用户未预约该课程，API返回:', res.result);
+          console.log('第一次查询未找到记录，尝试不带状态参数再次查询');
+          
+          // 如果没有找到记录，尝试不带状态参数再次查询
+          try {
+            const allRes = await uniCloud.callFunction({
+              name: 'getBookings',
+              data: {
+                userId: this.userInfo.userId,
+                courseId: this.courseId
+                // 不指定状态，查询所有状态的预约
+              }
+            });
+            
+            console.log('第二次查询结果:', JSON.stringify(allRes.result));
+            
+            if (allRes.result && allRes.result.success && allRes.result.data) {
+              // 只有在找到未取消的预约记录时才设置为已预约
+              const activeBookings = allRes.result.data.filter(b => 
+                b.status !== 'cancelled' && 
+                b.status !== 'cancel'
+              );
+              
+              // 检查是否所有记录都是已取消状态
+              const allCancelled = allRes.result.data.length > 0 && 
+                                   allRes.result.data.every(b => 
+                                     b.status === 'cancelled' || 
+                                     b.status === 'cancel'
+                                   );
+              
+              if (allCancelled) {
+                console.log('所有预约记录均为已取消状态，设置为未预约');
+                booked = false;
+              } else if (activeBookings.length > 0) {
+                booked = true;
+                console.log('找到未取消的预约:', activeBookings[0]);
+              } else {
+                console.log('云端没有找到有效预约记录');
+                
+                // 如果仍然没有找到记录，再尝试使用常规数据库API查询
+                const db = uniCloud.database();
+                try {
+                  const dbRes = await db.collection('bookings')
+                    .where({
+                      courseId: this.courseId,
+                      userId: this.userInfo.userId,
+                      status: db.command.neq('cancelled')
+                    })
+                    .limit(1)
+                    .get();
+                    
+                  console.log('数据库直接查询结果:', dbRes);
+                  
+                  if (dbRes && dbRes.data && dbRes.data.length > 0) {
+                    booked = true;
+                    console.log('通过数据库API找到有效预约:', dbRes.data[0]);
+                  }
+                } catch (dbErr) {
+                  console.error('数据库查询失败:', dbErr);
+                }
+              }
+            }
+          } catch (err) {
+            console.error('第二次查询失败:', err);
+          }
         }
+        
+        // 如果查询到所有预约都已取消，则设置为未预约状态，无论本地缓存状态如何
+        if (booked === false) {
+          console.log('云端确认用户没有有效预约，覆盖本地缓存状态');
+          this.hasBooked = false;
+        }
+        // 如果查询失败但本地缓存认为已预约，仅在没有确认所有预约都已取消的情况下保留已预约状态
+        else if (!booked && this.hasBooked) {
+          console.log('云端查询失败但本地缓存显示已预约，保留已预约状态');
+          booked = true;
+        }
+        
+        // 更新预约状态
+        console.log('最终预约状态:', booked);
+        this.hasBooked = booked;
+        
+        // 更新本地缓存
+        this.saveBookingStatusToCache(booked);
+        
+        // 强制刷新视图
+        this.$forceUpdate();
+        
+        return Promise.resolve(booked);
       } catch (e) {
         console.error('检查预约状态失败，详细错误:', e);
+        // 出错时保持当前状态不变
+        return Promise.reject(e);
       }
-      
-      console.log('预约状态检查完成，hasBooked=', this.hasBooked);
     },
     
     // 预约课程
@@ -412,6 +737,31 @@ export default {
       console.log('点击预约课程按钮');
       
       // 再次检查用户是否登录
+      if (!this.userInfo || !this.userInfo.userId) {
+        this.userInfo = null;
+        
+        // 尝试从本地和全局重新加载用户信息
+        const userInfoStr = uni.getStorageSync('userInfo');
+        if (userInfoStr) {
+          try {
+            this.userInfo = JSON.parse(userInfoStr);
+            console.log('从本地存储重新获取用户信息:', this.userInfo);
+          } catch (e) {
+            console.error('从本地存储重新解析用户信息失败:', e);
+          }
+        }
+        
+        // 如果本地存储没有，尝试从全局获取
+        if (!this.userInfo) {
+          const globalUserInfo = getApp().globalData.userInfo;
+          if (globalUserInfo) {
+            this.userInfo = globalUserInfo;
+            console.log('从全局状态获取用户信息:', this.userInfo);
+          }
+        }
+      }
+      
+      // 如果仍然未登录
       if (!this.userInfo || !this.userInfo.userId) {
         console.log('用户未登录，跳转到登录页面');
         uni.showToast({
@@ -475,13 +825,18 @@ export default {
         
         if (res.result && res.result.success) {
           console.log('预约成功:', res.result);
+          
+          // 强制立即设置预约状态
+          this.hasBooked = true;
+          console.log('预约成功，强制设置hasBooked =', this.hasBooked);
+          
+          // 立即保存到本地缓存
+          this.saveBookingStatusToCache(true);
+          
           uni.showToast({
             title: '预约成功',
             icon: 'success'
           });
-          
-          // 设置已预约状态
-          this.hasBooked = true;
           
           // 更新预约人数，确保UI显示正确
           if (this.courseInfo) {
@@ -495,14 +850,22 @@ export default {
             userId: this.userInfo.userId
           });
           
-          // 延迟1.5秒后刷新数据，确保云端数据已更新
+          // 确保UI立即更新
+          this.$forceUpdate();
+          
+          // 确保下一帧渲染时状态正确
+          this.$nextTick(() => {
+            // 再次确认hasBooked状态
+            this.hasBooked = true;
+            // 检查DOM是否正确反映了状态
+            console.log('DOM更新后再次检查状态：hasBooked =', this.hasBooked);
+          });
+          
+          // 强制刷新页面以显示预约成功状态
           setTimeout(() => {
-            // 重新获取课程详情
-            this.fetchCourseDetail().then(() => {
-              // 再次检查预约状态
-              this.checkBookingStatus();
-            });
-          }, 1500);
+            // 重新加载页面（彻底解决显示问题）
+            this.reloadPage();
+          }, 1000);
         } else {
           console.error('预约失败:', res.result);
           uni.showToast({
@@ -518,6 +881,48 @@ export default {
           icon: 'none'
         });
       }
+    },
+    
+    // 重新加载页面
+    reloadPage() {
+      console.log('重新加载页面以确保显示预约状态');
+      
+      // 先缓存必要数据
+      const courseId = this.courseId;
+      const hasBooked = this.hasBooked;
+      
+      // 也确保本地缓存已更新
+      this.saveBookingStatusToCache(hasBooked);
+      
+      // 显示加载提示
+      uni.showLoading({
+        title: '刷新页面...'
+      });
+      
+      // 重新导航到当前页面（完全重新加载）
+      uni.redirectTo({
+        url: `/pages/course/detail?id=${courseId}&hasBooked=${hasBooked}&_t=${Date.now()}`,
+        success: () => {
+          console.log('页面重新加载成功，预约状态:', hasBooked);
+          uni.hideLoading();
+        },
+        fail: (err) => {
+          console.error('页面重新加载失败:', err);
+          uni.hideLoading();
+          
+          // 失败时，再次尝试强制更新状态
+          this.hasBooked = hasBooked;
+          
+          // 立即更新按钮显示
+          this.$forceUpdate();
+          
+          // 确保下一帧更新
+          this.$nextTick(() => {
+            this.hasBooked = hasBooked;
+            console.log('强制更新状态完成, hasBooked =', this.hasBooked);
+          });
+        }
+      });
     },
     
     // 跳转到预约列表
@@ -689,16 +1094,101 @@ export default {
       console.log('手动切换预约状态，当前值:', this.hasBooked);
     },
     
+    // 添加强制刷新预约状态的方法
+    forceRefreshStatus() {
+      console.log('手动强制刷新预约状态');
+      
+      // 从缓存中删除状态，强制重新检查
+      try {
+        if (this.courseId) {
+          // 清除用户特定缓存
+          if (this.userInfo && this.userInfo.userId) {
+            const userKey = `booking_${this.userInfo.userId}_${this.courseId}`;
+            uni.removeStorageSync(userKey);
+          }
+          
+          // 清除课程通用缓存
+          const courseKey = `booking_course_${this.courseId}`;
+          uni.removeStorageSync(courseKey);
+          
+          console.log('已清除本地预约状态缓存');
+        }
+      } catch (e) {
+        console.error('清除预约缓存失败:', e);
+      }
+      
+      // 显示加载状态
+      uni.showLoading({
+        title: '刷新中...'
+      });
+      
+      // 立即检查最新预约状态
+      this.checkBookingStatus().then(() => {
+        uni.hideLoading();
+        uni.showToast({
+          title: this.hasBooked ? '您已预约此课程' : '您未预约此课程',
+          icon: 'none'
+        });
+        
+        // 强制刷新页面
+        this.$forceUpdate();
+      }).catch(() => {
+        uni.hideLoading();
+        uni.showToast({
+          title: '刷新失败',
+          icon: 'none'
+        });
+      });
+    },
+    
     // 处理预约取消事件
     handleBookingCancelled(data) {
       console.log('收到预约取消事件:', data);
       
       // 判断是否是当前课程的预约取消
       if (data && data.courseId === this.courseId) {
+        console.log('当前课程的预约已被取消，立即更新状态');
+        
+        // 强制清除缓存中的预约状态
+        try {
+          if (this.userInfo && this.userInfo.userId) {
+            const userKey = `booking_${this.userInfo.userId}_${this.courseId}`;
+            uni.removeStorageSync(userKey);
+            console.log('已强制清除用户特定预约状态缓存');
+          }
+          
+          const courseKey = `booking_course_${this.courseId}`;
+          uni.removeStorageSync(courseKey);
+          console.log('已强制清除课程通用预约状态缓存');
+        } catch (e) {
+          console.error('清除预约缓存失败:', e);
+        }
+        
         // 更新预约状态
         this.hasBooked = false;
         this.bookingId = '';
         this.bookingStatus = '';
+        
+        // 更新本地缓存（设置为false）
+        this.saveBookingStatusToCache(false);
+        
+        // 立即更新课程的报名人数
+        if (this.courseInfo && this.courseInfo.bookingCount && this.courseInfo.bookingCount > 0) {
+          this.courseInfo.bookingCount -= 1;
+          console.log('已减少当前页面课程报名人数，更新后:', this.courseInfo.bookingCount);
+        }
+        
+        // 强制更新UI
+        this.$forceUpdate();
+        
+        // 确保下一帧状态一致
+        this.$nextTick(() => {
+          if (this.hasBooked !== false) {
+            console.warn('状态未正确更新，强制再次设置为未预约');
+            this.hasBooked = false;
+            this.$forceUpdate();
+          }
+        });
         
         uni.showToast({
           title: '预约已取消',
@@ -706,7 +1196,9 @@ export default {
         });
         
         // 刷新课程详情，获取最新的报名人数
-        this.getCourseDetail();
+        setTimeout(() => {
+          this.getCourseDetail();
+        }, 1000);
       }
     }
   }
@@ -985,6 +1477,15 @@ export default {
   .book-btn {
     &.booked {
       background-color: #4CD964;
+      position: relative;
+      overflow: hidden;
+      
+      &::before {
+        content: '✓';
+        display: inline-block;
+        margin-right: 10rpx;
+        font-weight: bold;
+      }
     }
     
     &.disabled {

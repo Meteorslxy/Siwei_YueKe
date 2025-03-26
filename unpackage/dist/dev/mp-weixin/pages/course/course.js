@@ -385,7 +385,7 @@ var _default = {
     loadCourseList: function loadCourseList() {
       var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var params, result, filteredData;
+        var _result$data, params, result, filteredData;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -398,12 +398,19 @@ var _default = {
               case 2:
                 _this3.isLoading = true;
                 _this3.loadMoreStatus = 'loading';
-                _context.prev = 4;
+                console.log('开始加载课程列表，当前筛选条件：', {
+                  年级: _this3.selectedGradeGroup,
+                  校区: _this3.selectedSchool,
+                  学科: _this3.selectedSubject,
+                  页码: _this3.page,
+                  数量限制: _this3.limit
+                });
+                _context.prev = 5;
                 // 构建查询参数
                 params = {
                   page: _this3.page,
                   pageSize: _this3.limit
-                }; // 添加筛选条件
+                }; // 添加筛选条件 - 确保参数名称与后端一致
                 if (_this3.selectedGradeGroup !== 'all') {
                   params.educationalStages = _this3.selectedGradeGroup;
                 }
@@ -413,34 +420,18 @@ var _default = {
                 if (_this3.selectedSubject !== 'all') {
                   params.subject = _this3.selectedSubject;
                 }
+                console.log('发送到后端的查询参数:', params);
 
                 // 调用云函数获取课程列表
-                _context.next = 11;
+                _context.next = 13;
                 return _this3.$api.course.getCourseList(params);
-              case 11:
+              case 13:
                 result = _context.sent;
-                console.log('云函数返回结果:', result);
+                console.log('云函数返回结果:', result, '数据条数:', (result === null || result === void 0 ? void 0 : (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.length) || 0);
 
                 // 处理返回结果
                 if (result && result.data) {
-                  filteredData = (0, _toConsumableArray2.default)(result.data); // 前端再次过滤数据，确保结果正确
-                  if (_this3.selectedGradeGroup !== 'all') {
-                    filteredData = filteredData.filter(function (item) {
-                      return item.educationalStages === _this3.selectedGradeGroup;
-                    });
-                  }
-                  if (_this3.selectedSchool !== 'all') {
-                    filteredData = filteredData.filter(function (item) {
-                      return item.location === _this3.selectedSchool || item.schoolName === _this3.selectedSchool;
-                    });
-                  }
-                  if (_this3.selectedSubject !== 'all') {
-                    filteredData = filteredData.filter(function (item) {
-                      return item.subjects === _this3.selectedSubject;
-                    });
-                  }
-
-                  // 处理每个课程的时间字段，避免NaN问题
+                  filteredData = (0, _toConsumableArray2.default)(result.data); // 处理每个课程的时间字段，避免NaN问题
                   filteredData = filteredData.map(function (course) {
                     // 处理日期和时间
                     if (!course.startDate && course.startTime) {
@@ -499,27 +490,27 @@ var _default = {
                   }
                   _this3.loadMoreStatus = 'noMore';
                 }
-                _context.next = 21;
+                _context.next = 23;
                 break;
-              case 16:
-                _context.prev = 16;
-                _context.t0 = _context["catch"](4);
+              case 18:
+                _context.prev = 18;
+                _context.t0 = _context["catch"](5);
                 console.error('获取课程列表失败:', _context.t0);
                 uni.showToast({
                   title: '获取课程列表失败',
                   icon: 'none'
                 });
                 _this3.loadMoreStatus = 'more';
-              case 21:
-                _context.prev = 21;
+              case 23:
+                _context.prev = 23;
                 _this3.isLoading = false;
-                return _context.finish(21);
-              case 24:
+                return _context.finish(23);
+              case 26:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[4, 16, 21, 24]]);
+        }, _callee, null, [[5, 18, 23, 26]]);
       }))();
     },
     // 格式化课程时间

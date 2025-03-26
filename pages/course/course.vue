@@ -244,6 +244,14 @@ export default {
       this.isLoading = true;
       this.loadMoreStatus = 'loading';
       
+      console.log('开始加载课程列表，当前筛选条件：', {
+        年级: this.selectedGradeGroup,
+        校区: this.selectedSchool,
+        学科: this.selectedSubject,
+        页码: this.page,
+        数量限制: this.limit
+      });
+      
       try {
         // 构建查询参数
         const params = {
@@ -251,7 +259,7 @@ export default {
           pageSize: this.limit
         };
         
-        // 添加筛选条件
+        // 添加筛选条件 - 确保参数名称与后端一致
         if (this.selectedGradeGroup !== 'all') {
           params.educationalStages = this.selectedGradeGroup;
         }
@@ -264,33 +272,15 @@ export default {
           params.subject = this.selectedSubject;
         }
         
+        console.log('发送到后端的查询参数:', params);
+        
         // 调用云函数获取课程列表
         const result = await this.$api.course.getCourseList(params);
-        console.log('云函数返回结果:', result);
+        console.log('云函数返回结果:', result, '数据条数:', result?.data?.length || 0);
         
         // 处理返回结果
         if (result && result.data) {
           let filteredData = [...result.data];
-          
-          // 前端再次过滤数据，确保结果正确
-          if (this.selectedGradeGroup !== 'all') {
-            filteredData = filteredData.filter(item => 
-              item.educationalStages === this.selectedGradeGroup
-            );
-          }
-          
-          if (this.selectedSchool !== 'all') {
-            filteredData = filteredData.filter(item => 
-              item.location === this.selectedSchool || 
-              item.schoolName === this.selectedSchool
-            );
-          }
-          
-          if (this.selectedSubject !== 'all') {
-            filteredData = filteredData.filter(item => 
-              item.subjects === this.selectedSubject
-            );
-          }
           
           // 处理每个课程的时间字段，避免NaN问题
           filteredData = filteredData.map(course => {

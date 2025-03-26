@@ -1,0 +1,8 @@
+{
+  "name": "forceUpdateBooking",
+  "version": "1.0.0",
+  "description": "强制更新预约状态，绕过schema验证",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
+} 

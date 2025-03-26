@@ -298,6 +298,14 @@
 }
 .footer .book-btn.booked {
   background-color: #4CD964;
+  position: relative;
+  overflow: hidden;
+}
+.footer .book-btn.booked::before {
+  content: '✓';
+  display: inline-block;
+  margin-right: 10rpx;
+  font-weight: bold;
 }
 .footer .book-btn.disabled {
   background-color: #999;

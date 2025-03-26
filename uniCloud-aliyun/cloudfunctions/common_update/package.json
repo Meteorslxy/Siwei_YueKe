@@ -1,0 +1,5 @@
+{
+  "name": "common_update",
+  "version": "1.0.0",
+  "description": "通用数据库更新函数，可绕过schema验证"
+} 

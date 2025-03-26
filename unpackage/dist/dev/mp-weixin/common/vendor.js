@@ -18906,7 +18906,7 @@ _vue.default.component('teacher-card', _teacherCard.default);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -18940,6 +18940,7 @@ var courseApi = {
   },
   // 获取课程详情
   getCourseDetail: function getCourseDetail(id) {
+    var _this = this;
     console.log('调用getCourseDetail，ID:', id);
 
     // 确保ID参数有效
@@ -18952,14 +18953,59 @@ var courseApi = {
       });
     }
 
+    // 尝试先从缓存中获取数据
+    try {
+      var cachedKey = "course_".concat(id);
+      var cachedData = uni.getStorageSync(cachedKey);
+      if (cachedData) {
+        console.log("[\u7F13\u5B58] \u4ECE\u7F13\u5B58\u83B7\u53D6\u8BFE\u7A0B\u8BE6\u60C5\u6570\u636E: ".concat(cachedKey));
+        var parsedData = JSON.parse(cachedData);
+
+        // 判断缓存时间是否过期（24小时）
+        var cacheTime = uni.getStorageSync("".concat(cachedKey, "_time"));
+        var now = Date.now();
+        var isExpired = !cacheTime || now - cacheTime > 24 * 60 * 60 * 1000;
+        if (!isExpired) {
+          console.log('使用缓存的课程详情数据');
+
+          // 后台刷新缓存
+          setTimeout(function () {
+            _this.refreshCourseCache(id);
+          }, 100);
+          return Promise.resolve({
+            code: 0,
+            success: true,
+            message: '从缓存获取成功',
+            data: parsedData,
+            fromCache: true
+          });
+        } else {
+          console.log('缓存已过期，重新获取数据');
+        }
+      }
+    } catch (e) {
+      console.error('读取缓存失败:', e);
+    }
+
     // 使用courseId作为参数名，与云函数期望一致
     return (0, _request.default)({
       name: 'getCourseDetail',
       data: {
         courseId: id
-      }
+      },
+      timeout: 15000 // 设置15秒超时
     }).then(function (res) {
       console.log('getCourseDetail原始返回:', res);
+
+      // 如果获取成功，更新缓存时间
+      if (res && res.data) {
+        try {
+          var _cachedKey = "course_".concat(id);
+          uni.setStorageSync("".concat(_cachedKey, "_time"), Date.now());
+        } catch (e) {
+          console.error('更新缓存时间失败:', e);
+        }
+      }
 
       // 如果返回的data为空但有_id字段，将其规范化
       if (res && !res.data && res._id) {
@@ -18968,6 +19014,33 @@ var courseApi = {
         });
       }
       return debugAPI('getCourseDetail返回', res);
+    });
+  },
+  // 刷新课程缓存（后台操作）
+  refreshCourseCache: function refreshCourseCache(id) {
+    console.log('后台刷新课程缓存:', id);
+    return (0, _request.default)({
+      name: 'getCourseDetail',
+      data: {
+        courseId: id
+      },
+      timeout: 30000,
+      showLoading: false // 不显示加载提示
+    }).then(function (res) {
+      if (res && res.data) {
+        try {
+          var cachedKey = "course_".concat(id);
+          uni.setStorageSync(cachedKey, JSON.stringify(res.data));
+          uni.setStorageSync("".concat(cachedKey, "_time"), Date.now());
+          console.log('后台更新课程缓存成功');
+        } catch (e) {
+          console.error('后台更新课程缓存失败:', e);
+        }
+      }
+      return res;
+    }).catch(function (err) {
+      console.error('后台刷新课程缓存失败:', err);
+      return err;
     });
   },
   // 获取新闻列表
@@ -19253,6 +19326,7 @@ var _default = {
   admin: adminApi
 };
 exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 /* 82 */
@@ -19275,6 +19349,7 @@ exports.default = void 0;
  * @param {String} options.name 云函数名称
  * @param {Object} options.data 请求参数
  * @param {Boolean} options.showLoading 是否显示加载提示
+ * @param {Number} options.timeout 请求超时时间（毫秒），默认30000ms
  */
 function request() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -19282,7 +19357,9 @@ function request() {
     _options$data = options.data,
     data = _options$data === void 0 ? {} : _options$data,
     _options$showLoading = options.showLoading,
-    showLoading = _options$showLoading === void 0 ? true : _options$showLoading;
+    showLoading = _options$showLoading === void 0 ? true : _options$showLoading,
+    _options$timeout = options.timeout,
+    timeout = _options$timeout === void 0 ? 30000 : _options$timeout;
 
   // 检查云函数名称是否存在
   if (!name) {
@@ -19330,11 +19407,52 @@ function request() {
       return resolve(mockResult);
     }
 
+    // 处理超时的定时器
+    var timeoutTimer = null;
+    if (timeout > 0) {
+      timeoutTimer = setTimeout(function () {
+        console.warn("\u4E91\u51FD\u6570 ".concat(name, " \u8C03\u7528\u8D85\u65F6\uFF08").concat(timeout, "ms\uFF09"));
+        if (showLoading) {
+          uni.hideLoading();
+        }
+
+        // 如果是课程详情请求且是从内存或缓存中获取
+        if (name === 'getCourseDetail' && data && data.courseId) {
+          // 尝试从本地获取缓存数据
+          try {
+            var cachedKey = "course_".concat(data.courseId);
+            var cachedData = uni.getStorageSync(cachedKey);
+            if (cachedData) {
+              console.log("\u4ECE\u7F13\u5B58\u4E2D\u83B7\u53D6\u8BFE\u7A0B\u8BE6\u60C5\u6570\u636E: ".concat(cachedKey));
+              return resolve({
+                code: 0,
+                message: '从缓存获取成功',
+                data: JSON.parse(cachedData),
+                fromCache: true
+              });
+            }
+          } catch (e) {
+            console.error('读取缓存失败:', e);
+          }
+        }
+        resolve({
+          code: -1,
+          message: "\u8BF7\u6C42\u8D85\u65F6\uFF08".concat(timeout / 1000, "\u79D2\uFF09"),
+          error: new Error("[".concat(name, "]: \u8BF7\u6C42\u4E91\u51FD\u6570\u8D85\u65F6"))
+        });
+      }, timeout);
+    }
+
     // 使用uniCloud调用云函数
     uniCloud.callFunction({
       name: name,
       data: data,
       success: function success(res) {
+        // 清除超时定时器
+        if (timeoutTimer) {
+          clearTimeout(timeoutTimer);
+          timeoutTimer = null;
+        }
         console.log("\u4E91\u51FD\u6570 ".concat(name, " \u8C03\u7528\u6210\u529F:"), res.result);
 
         // 检查返回数据是否为空或有错误
@@ -19349,6 +19467,17 @@ function request() {
           return;
         }
 
+        // 如果是课程详情请求且成功获取数据，则缓存结果
+        if (name === 'getCourseDetail' && res.result.data && data && data.courseId) {
+          try {
+            var cachedKey = "course_".concat(data.courseId);
+            uni.setStorageSync(cachedKey, JSON.stringify(res.result.data));
+            console.log("\u8BFE\u7A0B\u8BE6\u60C5\u6570\u636E\u5DF2\u7F13\u5B58: ".concat(cachedKey));
+          } catch (e) {
+            console.error('缓存课程详情数据失败:', e);
+          }
+        }
+
         // 检查是否有数据库错误，但仍然返回数据而不是reject
         if (res.result.code === -1) {
           console.error("\u4E91\u51FD\u6570 ".concat(name, " \u8FD4\u56DE\u9519\u8BEF:"), res.result.message);
@@ -19359,6 +19488,11 @@ function request() {
         resolve(res.result);
       },
       fail: function fail(err) {
+        // 清除超时定时器
+        if (timeoutTimer) {
+          clearTimeout(timeoutTimer);
+          timeoutTimer = null;
+        }
         console.error("\u4E91\u51FD\u6570 ".concat(name, " \u8C03\u7528\u5931\u8D25:"), err);
 
         // 返回错误数据而不是reject，让业务层处理
@@ -19466,7 +19600,7 @@ exports.default = _default;
 /*! exports provided: gradeOptions, subjectOptions, schoolOptions, educationalStages, courseTypes, teacherTitles, statusOptions, bookingStatus, databaseFields, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"高中\",\"value\":\"高中\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"},{\"label\":\"生物\",\"value\":\"生物\"},{\"label\":\"历史\",\"value\":\"历史\"},{\"label\":\"地理\",\"value\":\"地理\"},{\"label\":\"政治\",\"value\":\"政治\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"primary\"},{\"label\":\"初中\",\"value\":\"junior\"},{\"label\":\"高中\",\"value\":\"senior\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
+module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"高中\",\"value\":\"高中\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"},{\"label\":\"生物\",\"value\":\"生物\"},{\"label\":\"历史\",\"value\":\"历史\"},{\"label\":\"地理\",\"value\":\"地理\"},{\"label\":\"政治\",\"value\":\"政治\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
 
 /***/ }),
 /* 162 */

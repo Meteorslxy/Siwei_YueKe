@@ -74,7 +74,7 @@ exports.main = async (event, context) => {
       whereCondition.status = status;
     }
     
-    // 处理"可使用"状态 - 包括待确认和已确认状态，排除已取消状态
+    // 处理"可使用"状态 - 包括待确认和已确认状态
     if (isUsable) {
       whereCondition.status = dbCmd.in(['pending', 'confirmed', 'confirmed_unpaid']);
     }

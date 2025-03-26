@@ -1,6 +1,6 @@
 {
   "bsonType": "object",
-  "required": ["userId", "courseId", "status"],
+  "required": ["userId", "courseId"],
   "permission": {
     "read": true,
     "create": true,
@@ -53,17 +53,27 @@
     },
     "status": {
       "bsonType": "string",
-      "description": "预约状态：pending-待确认，confirmed-已确认，finished-已完成，cancelled-已取消",
-      "enum": ["pending", "confirmed", "finished", "cancelled"],
+      "description": "预约状态：pending-待确认，confirmed_unpaid-已确认未支付，confirmed-已确认已支付，finished-已完成，cancelled-已取消",
+      "enum": ["pending", "confirmed_unpaid", "confirmed", "finished", "cancelled"],
       "defaultValue": "pending"
     },
+    "paymentStatus": {
+      "bsonType": "string",
+      "description": "支付状态：unpaid-未支付，paid-已支付",
+      "enum": ["unpaid", "paid"],
+      "defaultValue": "unpaid"
+    },
     "createTime": {
-      "bsonType": "timestamp",
+      "bsonType": "string",
       "description": "创建时间"
     },
     "updateTime": {
-      "bsonType": "timestamp",
+      "bsonType": "string",
       "description": "更新时间"
+    },
+    "cancelTime": {
+      "bsonType": "string",
+      "description": "取消时间"
     }
   }
 } 

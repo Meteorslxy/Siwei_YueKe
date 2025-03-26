@@ -532,6 +532,7 @@ export default {
           // 发送登录成功事件通知
           try {
             uni.$emit('user:login', userData);
+            uni.$emit('login:success', userData);
             console.log('已发送登录成功事件');
           } catch (err) {
             console.error('发送登录事件失败:', err);

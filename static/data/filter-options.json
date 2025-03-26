@@ -45,9 +45,8 @@
     "description": "教育阶段筛选选项",
     "options": [
       { "label": "全部", "value": "all" },
-      { "label": "小学", "value": "primary" },
-      { "label": "初中", "value": "junior" },
-      { "label": "高中", "value": "senior" }
+      { "label": "小学", "value": "小学" },
+      { "label": "初中", "value": "初中" }
     ]
   },
 
