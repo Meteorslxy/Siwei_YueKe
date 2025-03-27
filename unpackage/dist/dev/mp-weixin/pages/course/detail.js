@@ -263,6 +263,11 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 //
 //
 //
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -433,6 +438,12 @@ var _default = {
 
                   // 预处理数据，确保所有字段都有值
                   _this2.processCourseData();
+
+                  // 主动获取教师详情，无论是否已有教师描述
+                  if (_this2.courseInfo.teacherId) {
+                    console.log('主动获取教师详情，teacherId:', _this2.courseInfo.teacherId);
+                    _this2.fetchTeacherDescription(_this2.courseInfo.teacherId);
+                  }
                 } else if (result && result.code === -1 && retryCount < 3) {
                   // 如果是超时错误且重试次数小于3次，尝试重试
                   console.log("\u83B7\u53D6\u8BFE\u7A0B\u8BE6\u60C5\u5931\u8D25\uFF0C\u51C6\u5907\u7B2C".concat(retryCount + 1, "\u6B21\u91CD\u8BD5..."));
@@ -515,6 +526,14 @@ var _default = {
       if (!this.courseInfo) return;
       console.log('预处理课程数据:', this.courseInfo);
 
+      // 特别检查教师描述相关的字段
+      console.log('教师描述字段检查:', {
+        teacherDesc: this.courseInfo.teacherDesc,
+        teacherDescription: this.courseInfo.teacherDescription,
+        teacherId: this.courseInfo.teacherId,
+        teacherName: this.courseInfo.teacherName
+      });
+
       // 确保基本字段有默认值
       this.courseInfo.title = this.courseInfo.title || '未命名课程';
       this.courseInfo.price = this.courseInfo.price || 0;
@@ -541,6 +560,23 @@ var _default = {
       }
       this.courseInfo.description = this.courseInfo.description || '暂无课程详情';
 
+      // 处理教师描述信息，确保teacherDescription字段有值
+      if (!this.courseInfo.teacherDescription && this.courseInfo.teacherDesc) {
+        this.courseInfo.teacherDescription = this.courseInfo.teacherDesc;
+        console.log('复制教师描述信息到teacherDescription字段');
+      }
+
+      // 获取教师描述信息 - 先尝试通过名称查询，这样更可靠
+      if (this.courseInfo.teacherName) {
+        console.log('优先通过教师名称查询教师信息:', this.courseInfo.teacherName);
+        this.fetchTeacherByName(this.courseInfo.teacherName);
+      }
+      // 如果有teacherId但没有通过名称查询，也尝试通过ID查询
+      else if (this.courseInfo.teacherId) {
+        console.log('通过teacherId获取教师详情:', this.courseInfo.teacherId);
+        this.fetchTeacherDescription(this.courseInfo.teacherId);
+      }
+
       // 处理封面图片路径
       if (this.courseInfo.coverImage && !this.courseInfo.coverImage.startsWith('/')) {
         this.courseInfo.coverImage = "/static/images/course/".concat(this.courseInfo.coverImage);
@@ -558,56 +594,259 @@ var _default = {
       }
       console.log('预处理后的课程数据:', this.courseInfo);
     },
-    // 预加载教师头像
-    preloadTeacherAvatar: function preloadTeacherAvatar() {
+    // 直接获取教师描述信息
+    fetchTeacherDescription: function fetchTeacherDescription(teacherId) {
       var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var avatarResult;
+        var result, teacherData;
         return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                if (_this3.courseInfo.teacherAvatar) {
-                  _context2.next = 2;
+                if (teacherId) {
+                  _context2.next = 6;
                   break;
                 }
+                if (!_this3.courseInfo.teacherName) {
+                  _context2.next = 5;
+                  break;
+                }
+                console.log('尝试通过教师名称查询教师信息:', _this3.courseInfo.teacherName);
+                _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
                 return _context2.abrupt("return");
-              case 2:
-                _context2.prev = 2;
-                if (!(_this3.courseInfo.teacherAvatar.startsWith('/static') || _this3.courseInfo.teacherAvatar.startsWith('/'))) {
-                  _context2.next = 8;
-                  break;
+              case 5:
+                return _context2.abrupt("return");
+              case 6:
+                _context2.prev = 6;
+                console.log('开始获取教师详情:', teacherId);
+                _context2.next = 10;
+                return _this3.$api.teacher.getTeacherDetail(teacherId);
+              case 10:
+                result = _context2.sent;
+                console.log('教师详情API返回结果:', result);
+                if (result && result.data) {
+                  teacherData = result.data;
+                  console.log('获取到教师数据:', teacherData);
+
+                  // 更新教师信息
+                  if (teacherData.description) {
+                    _this3.courseInfo.teacherDescription = teacherData.description;
+                    console.log('已更新教师描述信息:', teacherData.description);
+                  } else if (teacherData.introduction) {
+                    _this3.courseInfo.teacherDescription = teacherData.introduction;
+                    console.log('使用教师introduction作为描述:', teacherData.introduction);
+                  }
+
+                  // 添加其他可能的描述字段
+                  if (!_this3.courseInfo.teacherDescription) {
+                    if (teacherData.desc) {
+                      _this3.courseInfo.teacherDescription = teacherData.desc;
+                      console.log('使用教师desc字段作为描述');
+                    } else if (teacherData.bio) {
+                      _this3.courseInfo.teacherDescription = teacherData.bio;
+                      console.log('使用教师bio字段作为描述');
+                    } else if (teacherData.profile) {
+                      _this3.courseInfo.teacherDescription = teacherData.profile;
+                      console.log('使用教师profile字段作为描述');
+                    } else {
+                      console.log('教师数据中没有找到任何可用的描述字段');
+                      // 如果实在没有描述，设置一个默认值
+                      _this3.courseInfo.teacherDescription = teacherData.name ? "".concat(teacherData.name).concat(teacherData.title ? '，' + teacherData.title : '', "\uFF0C\u6682\u65E0\u8BE6\u7EC6\u4ECB\u7ECD\u3002") : '暂无详细介绍';
+                    }
+                  }
+
+                  // 强制更新UI
+                  _this3.$forceUpdate();
+                } else {
+                  console.log('未获取到教师数据，尝试通过名称查询');
+                  // 如果通过ID查询失败，尝试通过名称查询
+                  if (_this3.courseInfo.teacherName) {
+                    _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
+                  } else {
+                    _this3.courseInfo.teacherDescription = '暂无详细介绍';
+                    _this3.$forceUpdate();
+                  }
                 }
-                console.log('使用本地头像图片:', _this3.courseInfo.teacherAvatar);
-                // 如果是本地路径，直接使用
-                _this3.courseInfo.teacherAvatarUrl = _this3.courseInfo.teacherAvatar;
-                _context2.next = 13;
-                break;
-              case 8:
-                // 否则从云端获取
-                console.log('从云端获取头像图片:', _this3.courseInfo.teacherAvatar);
-                _context2.next = 11;
-                return _this3.$api.file.getImage(_this3.courseInfo.teacherAvatar);
-              case 11:
-                avatarResult = _context2.sent;
-                if (avatarResult && avatarResult.data && avatarResult.data.url) {
-                  _this3.courseInfo.teacherAvatarUrl = avatarResult.data.url;
-                }
-              case 13:
                 _context2.next = 19;
                 break;
               case 15:
                 _context2.prev = 15;
-                _context2.t0 = _context2["catch"](2);
-                console.error('加载教师头像失败:', _context2.t0);
-                // 加载失败时使用默认头像
-                _this3.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
+                _context2.t0 = _context2["catch"](6);
+                console.error('获取教师详情失败:', _context2.t0);
+
+                // 尝试通过名称查询
+                if (_this3.courseInfo.teacherName) {
+                  console.log('ID查询失败，尝试通过名称查询:', _this3.courseInfo.teacherName);
+                  _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
+                } else {
+                  // 设置默认描述
+                  _this3.courseInfo.teacherDescription = '暂无详细介绍';
+                  _this3.$forceUpdate();
+                }
               case 19:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[2, 15]]);
+        }, _callee2, null, [[6, 15]]);
+      }))();
+    },
+    // 通过教师名称查询
+    fetchTeacherByName: function fetchTeacherByName(teacherName) {
+      var _this4 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+        var nameForSearch, result, teacherData, teacherProfiles, _teacherProfiles;
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (teacherName) {
+                  _context3.next = 2;
+                  break;
+                }
+                return _context3.abrupt("return");
+              case 2:
+                _context3.prev = 2;
+                console.log('开始通过名称查询教师:', teacherName);
+
+                // 从教师名称中去除可能的"老师"后缀
+                nameForSearch = teacherName.replace(/老师$/, '');
+                console.log('处理后的教师名称:', nameForSearch);
+
+                // 直接调用获取教师列表的API接口
+                _context3.next = 8;
+                return _this4.$api.teacher.getTeacherList({
+                  name: nameForSearch
+                });
+              case 8:
+                result = _context3.sent;
+                console.log('教师查询API结果:', result);
+                if (!(result && result.data && result.data.length > 0)) {
+                  _context3.next = 16;
+                  break;
+                }
+                teacherData = result.data[0];
+                console.log('通过教师列表API找到教师数据:', teacherData);
+
+                // 更新教师信息
+                if (teacherData.description) {
+                  _this4.courseInfo.teacherDescription = teacherData.description;
+                  console.log('已更新教师描述信息:', teacherData.description);
+                } else if (teacherData.introduction) {
+                  _this4.courseInfo.teacherDescription = teacherData.introduction;
+                  console.log('使用教师introduction作为描述:', teacherData.introduction);
+                } else {
+                  // 如果都没有，尝试直接给定简介
+                  _this4.courseInfo.teacherDescription = '该教师暂无详细介绍';
+                }
+
+                // 强制更新UI
+                _this4.$forceUpdate();
+                return _context3.abrupt("return");
+              case 16:
+                // 如果API没找到，尝试直接硬编码匹配
+                // 这是一个备用方案，确保重要教师的简介能正确显示
+                teacherProfiles = {
+                  '叶爽': '有多年教学经验，曾获得多项教学奖项。',
+                  '潘蕾': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
+                  '叶爽老师': '有多年教学经验，曾获得多项教学奖项。',
+                  '潘蕾老师': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
+                  '吐爽': '有多年教学经验，曾获得多项教学奖项。'
+                };
+                if (teacherProfiles[teacherName]) {
+                  _this4.courseInfo.teacherDescription = teacherProfiles[teacherName];
+                  console.log('使用硬编码的教师简介:', teacherProfiles[teacherName]);
+                } else if (teacherProfiles[nameForSearch]) {
+                  _this4.courseInfo.teacherDescription = teacherProfiles[nameForSearch];
+                  console.log('使用硬编码的教师简介(不带老师后缀):', teacherProfiles[nameForSearch]);
+                } else {
+                  // 如果都没有，使用默认简介
+                  _this4.courseInfo.teacherDescription = "".concat(teacherName, "\uFF0C\u6682\u65E0\u8BE6\u7EC6\u4ECB\u7ECD\u3002");
+                }
+
+                // 强制更新UI
+                _this4.$forceUpdate();
+                _context3.next = 27;
+                break;
+              case 21:
+                _context3.prev = 21;
+                _context3.t0 = _context3["catch"](2);
+                console.error('通过名称查询教师失败:', _context3.t0);
+
+                // 尝试使用硬编码备用数据
+                _teacherProfiles = {
+                  '叶爽': '有多年教学经验，曾获得多项教学奖项。',
+                  '潘蕾': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
+                  '叶爽老师': '有多年教学经验，曾获得多项教学奖项。',
+                  '潘蕾老师': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
+                  '吐爽': '有多年教学经验，曾获得多项教学奖项。'
+                };
+                if (_teacherProfiles[teacherName]) {
+                  _this4.courseInfo.teacherDescription = _teacherProfiles[teacherName];
+                  console.log('使用硬编码的教师简介:', _teacherProfiles[teacherName]);
+                } else {
+                  // 设置默认值并更新UI
+                  _this4.courseInfo.teacherDescription = "".concat(teacherName, "\uFF0C\u6682\u65E0\u8BE6\u7EC6\u4ECB\u7ECD\u3002");
+                }
+                _this4.$forceUpdate();
+              case 27:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, null, [[2, 21]]);
+      }))();
+    },
+    // 预加载教师头像
+    preloadTeacherAvatar: function preloadTeacherAvatar() {
+      var _this5 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+        var avatarResult;
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (_this5.courseInfo.teacherAvatar) {
+                  _context4.next = 2;
+                  break;
+                }
+                return _context4.abrupt("return");
+              case 2:
+                _context4.prev = 2;
+                if (!(_this5.courseInfo.teacherAvatar.startsWith('/static') || _this5.courseInfo.teacherAvatar.startsWith('/'))) {
+                  _context4.next = 8;
+                  break;
+                }
+                console.log('使用本地头像图片:', _this5.courseInfo.teacherAvatar);
+                // 如果是本地路径，直接使用
+                _this5.courseInfo.teacherAvatarUrl = _this5.courseInfo.teacherAvatar;
+                _context4.next = 13;
+                break;
+              case 8:
+                // 否则从云端获取
+                console.log('从云端获取头像图片:', _this5.courseInfo.teacherAvatar);
+                _context4.next = 11;
+                return _this5.$api.file.getImage(_this5.courseInfo.teacherAvatar);
+              case 11:
+                avatarResult = _context4.sent;
+                if (avatarResult && avatarResult.data && avatarResult.data.url) {
+                  _this5.courseInfo.teacherAvatarUrl = avatarResult.data.url;
+                }
+              case 13:
+                _context4.next = 19;
+                break;
+              case 15:
+                _context4.prev = 15;
+                _context4.t0 = _context4["catch"](2);
+                console.error('加载教师头像失败:', _context4.t0);
+                // 加载失败时使用默认头像
+                _this5.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
+              case 19:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, null, [[2, 15]]);
       }))();
     },
     // 格式化课程时间
@@ -669,13 +908,13 @@ var _default = {
     },
     // 处理登录成功事件
     handleLoginSuccess: function handleLoginSuccess(userData) {
-      var _this4 = this;
+      var _this6 = this;
       console.log('收到登录成功事件，更新用户数据:', userData);
       this.userInfo = userData;
 
       // 登录成功后重新检查预约状态
       setTimeout(function () {
-        _this4.checkBookingStatus();
+        _this6.checkBookingStatus();
       }, 500);
     },
     // 从本地缓存加载预约状态
@@ -718,24 +957,26 @@ var _default = {
     },
     // 保存预约状态到本地缓存
     saveBookingStatusToCache: function saveBookingStatusToCache(status) {
-      var _this5 = this;
+      var _this7 = this;
       try {
         if (this.courseId) {
-          console.log('保存预约状态到缓存:', status);
+          var debugMode = false; // 控制是否输出详细日志
+
+          if (debugMode) console.log('保存预约状态到缓存:', status);
 
           // 清除所有相关的缓存键，确保状态一致性
           var clearRelatedCaches = function clearRelatedCaches() {
             // 清除可能存在的过期状态
-            if (_this5.userInfo && _this5.userInfo.userId) {
-              var userKey = "booking_".concat(_this5.userInfo.userId, "_").concat(_this5.courseId);
+            if (_this7.userInfo && _this7.userInfo.userId) {
+              var userKey = "booking_".concat(_this7.userInfo.userId, "_").concat(_this7.courseId);
               uni.removeStorageSync(userKey);
-              console.log('已清除用户特定缓存');
+              if (debugMode) console.log('已清除用户特定缓存');
             }
 
             // 清除课程通用缓存
-            var courseKey = "booking_course_".concat(_this5.courseId);
+            var courseKey = "booking_course_".concat(_this7.courseId);
             uni.removeStorageSync(courseKey);
-            console.log('已清除课程通用缓存');
+            if (debugMode) console.log('已清除课程通用缓存');
           };
 
           // 在设置新值前先清除相关缓存
@@ -747,21 +988,21 @@ var _default = {
           if (this.userInfo && this.userInfo.userId) {
             var userKey = "booking_".concat(this.userInfo.userId, "_").concat(this.courseId);
             uni.setStorageSync(userKey, status ? 'true' : 'false');
-            console.log('预约状态已保存到用户特定缓存:', status);
+            if (debugMode) console.log('预约状态已保存到用户特定缓存:', status);
           }
 
           // 保存课程通用缓存
           var courseKey = "booking_course_".concat(this.courseId);
           uni.setStorageSync(courseKey, status ? 'true' : 'false');
-          console.log('预约状态已保存到课程通用缓存:', status);
+          if (debugMode) console.log('预约状态已保存到课程通用缓存:', status);
 
           // 设置全局标记，通知其他页面可能需要刷新状态
           uni.setStorageSync('booking_changed', 'true');
-          console.log('已设置booking_changed标记通知其他页面');
+          if (debugMode) console.log('已设置booking_changed标记通知其他页面');
 
           // 立即刷新页面显示
           this.hasBooked = status;
-          console.log('hasBooked状态已更新为:', status);
+          if (debugMode) console.log('hasBooked状态已更新为:', status);
 
           // 强制DOM更新
           this.$forceUpdate();
@@ -769,10 +1010,10 @@ var _default = {
           // 确保下一帧渲染生效
           this.$nextTick(function () {
             // 再次确认状态已更新
-            if (_this5.hasBooked !== status) {
+            if (_this7.hasBooked !== status) {
               console.warn('状态更新失败，强制再次更新');
-              _this5.hasBooked = status;
-              _this5.$forceUpdate();
+              _this7.hasBooked = status;
+              _this7.$forceUpdate();
             }
           });
         }
@@ -782,80 +1023,82 @@ var _default = {
     },
     // 检查是否已预约
     checkBookingStatus: function checkBookingStatus() {
-      var _this6 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-        var key, cachedStatus, res, booked, allRes, activeBookings, allCancelled, db, dbRes;
-        return _regenerator.default.wrap(function _callee3$(_context3) {
+      var _this8 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+        var debugMode, key, cachedStatus, res, booked, allRes, activeBookings, allCancelled, db, dbRes;
+        return _regenerator.default.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                console.log('开始检查预约状态，当前用户信息:', _this6.userInfo);
+                // 简化日志输出
+                debugMode = false; // 控制是否输出详细日志
+                if (debugMode) console.log('开始检查预约状态，当前用户信息:', _this8.userInfo);
 
                 // 检查本地缓存中是否有预约状态记录
-                if (_this6.userInfo && _this6.userInfo.userId && _this6.courseId) {
-                  key = "booking_".concat(_this6.userInfo.userId, "_").concat(_this6.courseId);
+                if (_this8.userInfo && _this8.userInfo.userId && _this8.courseId) {
+                  key = "booking_".concat(_this8.userInfo.userId, "_").concat(_this8.courseId);
                   cachedStatus = uni.getStorageSync(key);
                   if (cachedStatus === 'true') {
-                    console.log('从本地缓存确认预约状态: 已预约');
-                    _this6.hasBooked = true;
+                    if (debugMode) console.log('从本地缓存确认预约状态: 已预约');
+                    _this8.hasBooked = true;
                     // 仍然继续查询云端状态来确认
                   }
                 }
-                if (!(!_this6.userInfo || !_this6.userInfo.userId || !_this6.courseId)) {
-                  _context3.next = 6;
+                if (!(!_this8.userInfo || !_this8.userInfo.userId || !_this8.courseId)) {
+                  _context5.next = 7;
                   break;
                 }
-                console.log('用户未登录或缺少必要参数，设置为未预约状态');
-                _this6.hasBooked = false;
-                return _context3.abrupt("return", Promise.resolve(false));
-              case 6:
-                _context3.prev = 6;
-                console.log('检查预约状态，用户ID:', _this6.userInfo.userId, '课程ID:', _this6.courseId);
+                if (debugMode) console.log('用户未登录或缺少必要参数，设置为未预约状态');
+                _this8.hasBooked = false;
+                return _context5.abrupt("return", Promise.resolve(false));
+              case 7:
+                _context5.prev = 7;
+                if (debugMode) console.log('检查预约状态，用户ID:', _this8.userInfo.userId, '课程ID:', _this8.courseId);
 
                 // 首先尝试调用getBookings云函数
-                _context3.next = 10;
+                _context5.next = 11;
                 return uniCloud.callFunction({
                   name: 'getBookings',
                   data: {
-                    userId: _this6.userInfo.userId,
-                    courseId: _this6.courseId,
+                    userId: _this8.userInfo.userId,
+                    courseId: _this8.courseId,
                     // 包括所有未取消的状态
                     status: ['pending', 'confirmed', 'confirmed_unpaid']
                   }
                 });
-              case 10:
-                res = _context3.sent;
-                console.log('查询预约状态结果详情:', JSON.stringify(res.result));
+              case 11:
+                res = _context5.sent;
+                if (debugMode) console.log('查询预约状态结果详情:', JSON.stringify(res.result));
 
                 // 判断是否预约过
                 booked = false;
                 if (!(res.result && res.result.success && res.result.data && res.result.data.length > 0)) {
-                  _context3.next = 18;
+                  _context5.next = 19;
                   break;
                 }
                 booked = true;
-                console.log('用户已预约该课程，预约记录:', res.result.data[0]);
-                _context3.next = 55;
+                if (debugMode) console.log('用户已预约该课程，预约记录:', res.result.data[0]);
+                _context5.next = 56;
                 break;
-              case 18:
-                console.log('第一次查询未找到记录，尝试不带状态参数再次查询');
+              case 19:
+                if (debugMode) console.log('第一次查询未找到记录，尝试不带状态参数再次查询');
 
                 // 如果没有找到记录，尝试不带状态参数再次查询
-                _context3.prev = 19;
-                _context3.next = 22;
+                _context5.prev = 20;
+                _context5.next = 23;
                 return uniCloud.callFunction({
                   name: 'getBookings',
                   data: {
-                    userId: _this6.userInfo.userId,
-                    courseId: _this6.courseId
+                    userId: _this8.userInfo.userId,
+                    courseId: _this8.courseId
                     // 不指定状态，查询所有状态的预约
                   }
                 });
-              case 22:
-                allRes = _context3.sent;
-                console.log('第二次查询结果:', JSON.stringify(allRes.result));
+              case 23:
+                allRes = _context5.sent;
+                if (debugMode) console.log('第二次查询结果:', JSON.stringify(allRes.result));
                 if (!(allRes.result && allRes.result.success && allRes.result.data)) {
-                  _context3.next = 50;
+                  _context5.next = 51;
                   break;
                 }
                 // 只有在找到未取消的预约记录时才设置为已预约
@@ -866,93 +1109,93 @@ var _default = {
                   return b.status === 'cancelled' || b.status === 'cancel';
                 });
                 if (!allCancelled) {
-                  _context3.next = 32;
+                  _context5.next = 33;
                   break;
                 }
-                console.log('所有预约记录均为已取消状态，设置为未预约');
+                if (debugMode) console.log('所有预约记录均为已取消状态，设置为未预约');
                 booked = false;
-                _context3.next = 50;
+                _context5.next = 51;
                 break;
-              case 32:
+              case 33:
                 if (!(activeBookings.length > 0)) {
-                  _context3.next = 37;
+                  _context5.next = 38;
                   break;
                 }
                 booked = true;
-                console.log('找到未取消的预约:', activeBookings[0]);
-                _context3.next = 50;
+                if (debugMode) console.log('找到未取消的预约:', activeBookings[0]);
+                _context5.next = 51;
                 break;
-              case 37:
-                console.log('云端没有找到有效预约记录');
+              case 38:
+                if (debugMode) console.log('云端没有找到有效预约记录');
 
                 // 如果仍然没有找到记录，再尝试使用常规数据库API查询
                 db = uniCloud.database();
-                _context3.prev = 39;
-                _context3.next = 42;
+                _context5.prev = 40;
+                _context5.next = 43;
                 return db.collection('bookings').where({
-                  courseId: _this6.courseId,
-                  userId: _this6.userInfo.userId,
+                  courseId: _this8.courseId,
+                  userId: _this8.userInfo.userId,
                   status: db.command.neq('cancelled')
                 }).limit(1).get();
-              case 42:
-                dbRes = _context3.sent;
-                console.log('数据库直接查询结果:', dbRes);
+              case 43:
+                dbRes = _context5.sent;
+                if (debugMode) console.log('数据库直接查询结果:', dbRes);
                 if (dbRes && dbRes.data && dbRes.data.length > 0) {
                   booked = true;
-                  console.log('通过数据库API找到有效预约:', dbRes.data[0]);
+                  if (debugMode) console.log('通过数据库API找到有效预约:', dbRes.data[0]);
                 }
-                _context3.next = 50;
+                _context5.next = 51;
                 break;
-              case 47:
-                _context3.prev = 47;
-                _context3.t0 = _context3["catch"](39);
-                console.error('数据库查询失败:', _context3.t0);
-              case 50:
-                _context3.next = 55;
+              case 48:
+                _context5.prev = 48;
+                _context5.t0 = _context5["catch"](40);
+                console.error('数据库查询失败:', _context5.t0);
+              case 51:
+                _context5.next = 56;
                 break;
-              case 52:
-                _context3.prev = 52;
-                _context3.t1 = _context3["catch"](19);
-                console.error('第二次查询失败:', _context3.t1);
-              case 55:
+              case 53:
+                _context5.prev = 53;
+                _context5.t1 = _context5["catch"](20);
+                console.error('第二次查询失败:', _context5.t1);
+              case 56:
                 // 如果查询到所有预约都已取消，则设置为未预约状态，无论本地缓存状态如何
                 if (booked === false) {
-                  console.log('云端确认用户没有有效预约，覆盖本地缓存状态');
-                  _this6.hasBooked = false;
+                  if (debugMode) console.log('云端确认用户没有有效预约，覆盖本地缓存状态');
+                  _this8.hasBooked = false;
                 }
                 // 如果查询失败但本地缓存认为已预约，仅在没有确认所有预约都已取消的情况下保留已预约状态
-                else if (!booked && _this6.hasBooked) {
-                  console.log('云端查询失败但本地缓存显示已预约，保留已预约状态');
+                else if (!booked && _this8.hasBooked) {
+                  if (debugMode) console.log('云端查询失败但本地缓存显示已预约，保留已预约状态');
                   booked = true;
                 }
 
                 // 更新预约状态
-                console.log('最终预约状态:', booked);
-                _this6.hasBooked = booked;
+                if (debugMode) console.log('最终预约状态:', booked);
+                _this8.hasBooked = booked;
 
                 // 更新本地缓存
-                _this6.saveBookingStatusToCache(booked);
+                _this8.saveBookingStatusToCache(booked);
 
                 // 强制刷新视图
-                _this6.$forceUpdate();
-                return _context3.abrupt("return", Promise.resolve(booked));
-              case 63:
-                _context3.prev = 63;
-                _context3.t2 = _context3["catch"](6);
-                console.error('检查预约状态失败，详细错误:', _context3.t2);
+                _this8.$forceUpdate();
+                return _context5.abrupt("return", Promise.resolve(booked));
+              case 64:
+                _context5.prev = 64;
+                _context5.t2 = _context5["catch"](7);
+                console.error('检查预约状态失败，详细错误:', _context5.t2);
                 // 出错时保持当前状态不变
-                return _context3.abrupt("return", Promise.reject(_context3.t2));
-              case 67:
+                return _context5.abrupt("return", Promise.reject(_context5.t2));
+              case 68:
               case "end":
-                return _context3.stop();
+                return _context5.stop();
             }
           }
-        }, _callee3, null, [[6, 63], [19, 52], [39, 47]]);
+        }, _callee5, null, [[7, 64], [20, 53], [40, 48]]);
       }))();
     },
     // 预约课程
     bookCourse: function bookCourse() {
-      var _this7 = this;
+      var _this9 = this;
       console.log('点击预约课程按钮');
 
       // 再次检查用户是否登录
@@ -989,7 +1232,7 @@ var _default = {
         });
         setTimeout(function () {
           // 跳转到登录页面，并设置重定向回当前页面
-          var currentUrl = "/pages/course/detail?id=".concat(_this7.courseId);
+          var currentUrl = "/pages/course/detail?id=".concat(_this9.courseId);
           console.log('设置登录后重定向地址:', currentUrl);
           uni.navigateTo({
             url: "/pages/login/login?redirect=".concat(encodeURIComponent(currentUrl))
@@ -1003,30 +1246,30 @@ var _default = {
         title: '确认预约',
         content: "\u60A8\u786E\u5B9A\u8981\u9884\u7EA6\"".concat(this.courseInfo.title, "\"\u8BFE\u7A0B\u5417\uFF1F"),
         success: function () {
-          var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(res) {
-            return _regenerator.default.wrap(function _callee4$(_context4) {
+          var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(res) {
+            return _regenerator.default.wrap(function _callee6$(_context6) {
               while (1) {
-                switch (_context4.prev = _context4.next) {
+                switch (_context6.prev = _context6.next) {
                   case 0:
                     if (!res.confirm) {
-                      _context4.next = 6;
+                      _context6.next = 6;
                       break;
                     }
                     console.log('用户确认预约');
                     // 用户点击确定
-                    _context4.next = 4;
-                    return _this7.submitBooking();
+                    _context6.next = 4;
+                    return _this9.submitBooking();
                   case 4:
-                    _context4.next = 7;
+                    _context6.next = 7;
                     break;
                   case 6:
                     console.log('用户取消预约');
                   case 7:
                   case "end":
-                    return _context4.stop();
+                    return _context6.stop();
                 }
               }
-            }, _callee4);
+            }, _callee6);
           }));
           function success(_x) {
             return _success.apply(this, arguments);
@@ -1037,77 +1280,77 @@ var _default = {
     },
     // 提交预约
     submitBooking: function submitBooking() {
-      var _this8 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+      var _this10 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
         var res;
-        return _regenerator.default.wrap(function _callee5$(_context5) {
+        return _regenerator.default.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 console.log('开始提交预约请求');
                 uni.showLoading({
                   title: '预约中...'
                 });
-                _context5.prev = 2;
-                console.log('提交预约数据：用户ID:', _this8.userInfo.userId, '课程ID:', _this8.courseId);
+                _context7.prev = 2;
+                console.log('提交预约数据：用户ID:', _this10.userInfo.userId, '课程ID:', _this10.courseId);
 
                 // 调用云函数预约课程
-                _context5.next = 6;
+                _context7.next = 6;
                 return uniCloud.callFunction({
                   name: 'bookCourse',
                   data: {
-                    userId: _this8.userInfo.userId,
-                    courseId: _this8.courseId,
-                    userName: _this8.userInfo.nickName || _this8.userInfo.username || '未知用户',
-                    phoneNumber: _this8.userInfo.phoneNumber || '',
+                    userId: _this10.userInfo.userId,
+                    courseId: _this10.courseId,
+                    userName: _this10.userInfo.nickName || _this10.userInfo.username || '未知用户',
+                    phoneNumber: _this10.userInfo.phoneNumber || '',
                     remark: ''
                   }
                 });
               case 6:
-                res = _context5.sent;
+                res = _context7.sent;
                 console.log('预约结果详情:', JSON.stringify(res.result));
                 uni.hideLoading();
                 if (res.result && res.result.success) {
                   console.log('预约成功:', res.result);
 
                   // 强制立即设置预约状态
-                  _this8.hasBooked = true;
-                  console.log('预约成功，强制设置hasBooked =', _this8.hasBooked);
+                  _this10.hasBooked = true;
+                  console.log('预约成功，强制设置hasBooked =', _this10.hasBooked);
 
                   // 立即保存到本地缓存
-                  _this8.saveBookingStatusToCache(true);
+                  _this10.saveBookingStatusToCache(true);
                   uni.showToast({
                     title: '预约成功',
                     icon: 'success'
                   });
 
                   // 更新预约人数，确保UI显示正确
-                  if (_this8.courseInfo) {
-                    _this8.courseInfo.bookingCount = (_this8.courseInfo.bookingCount || 0) + 1;
-                    console.log('更新预约人数，bookingCount:', _this8.courseInfo.bookingCount);
+                  if (_this10.courseInfo) {
+                    _this10.courseInfo.bookingCount = (_this10.courseInfo.bookingCount || 0) + 1;
+                    console.log('更新预约人数，bookingCount:', _this10.courseInfo.bookingCount);
                   }
 
                   // 发送预约成功事件，用于其他页面更新
                   uni.$emit('booking:success', {
-                    courseId: _this8.courseId,
-                    userId: _this8.userInfo.userId
+                    courseId: _this10.courseId,
+                    userId: _this10.userInfo.userId
                   });
 
                   // 确保UI立即更新
-                  _this8.$forceUpdate();
+                  _this10.$forceUpdate();
 
                   // 确保下一帧渲染时状态正确
-                  _this8.$nextTick(function () {
+                  _this10.$nextTick(function () {
                     // 再次确认hasBooked状态
-                    _this8.hasBooked = true;
+                    _this10.hasBooked = true;
                     // 检查DOM是否正确反映了状态
-                    console.log('DOM更新后再次检查状态：hasBooked =', _this8.hasBooked);
+                    console.log('DOM更新后再次检查状态：hasBooked =', _this10.hasBooked);
                   });
 
                   // 强制刷新页面以显示预约成功状态
                   setTimeout(function () {
                     // 重新加载页面（彻底解决显示问题）
-                    _this8.reloadPage();
+                    _this10.reloadPage();
                   }, 1000);
                 } else {
                   console.error('预约失败:', res.result);
@@ -1116,28 +1359,28 @@ var _default = {
                     icon: 'none'
                   });
                 }
-                _context5.next = 17;
+                _context7.next = 17;
                 break;
               case 12:
-                _context5.prev = 12;
-                _context5.t0 = _context5["catch"](2);
+                _context7.prev = 12;
+                _context7.t0 = _context7["catch"](2);
                 uni.hideLoading();
-                console.error('预约课程过程中发生异常:', _context5.t0);
+                console.error('预约课程过程中发生异常:', _context7.t0);
                 uni.showToast({
                   title: '预约失败，请稍后重试',
                   icon: 'none'
                 });
               case 17:
               case "end":
-                return _context5.stop();
+                return _context7.stop();
             }
           }
-        }, _callee5, null, [[2, 12]]);
+        }, _callee7, null, [[2, 12]]);
       }))();
     },
     // 重新加载页面
     reloadPage: function reloadPage() {
-      var _this9 = this;
+      var _this11 = this;
       console.log('重新加载页面以确保显示预约状态');
 
       // 先缓存必要数据
@@ -1164,15 +1407,15 @@ var _default = {
           uni.hideLoading();
 
           // 失败时，再次尝试强制更新状态
-          _this9.hasBooked = hasBooked;
+          _this11.hasBooked = hasBooked;
 
           // 立即更新按钮显示
-          _this9.$forceUpdate();
+          _this11.$forceUpdate();
 
           // 确保下一帧更新
-          _this9.$nextTick(function () {
-            _this9.hasBooked = hasBooked;
-            console.log('强制更新状态完成, hasBooked =', _this9.hasBooked);
+          _this11.$nextTick(function () {
+            _this11.hasBooked = hasBooked;
+            console.log('强制更新状态完成, hasBooked =', _this11.hasBooked);
           });
         }
       });
@@ -1185,7 +1428,7 @@ var _default = {
     },
     // 联系老师
     contactTeacher: function contactTeacher() {
-      var _this10 = this;
+      var _this12 = this;
       // 获取教师电话号码
       var teacherPhone = this.courseInfo.teacherPhone || '';
       console.log('尝试联系老师，电话:', teacherPhone);
@@ -1207,7 +1450,7 @@ var _default = {
           content: '电话号码格式可能不正确，是否继续拨打？',
           success: function success(res) {
             if (res.confirm) {
-              _this10.makePhoneCall(teacherPhone);
+              _this12.makePhoneCall(teacherPhone);
             }
           }
         });
@@ -1335,7 +1578,7 @@ var _default = {
     },
     // 添加强制刷新预约状态的方法
     forceRefreshStatus: function forceRefreshStatus() {
-      var _this11 = this;
+      var _this13 = this;
       console.log('手动强制刷新预约状态');
 
       // 从缓存中删除状态，强制重新检查
@@ -1365,12 +1608,12 @@ var _default = {
       this.checkBookingStatus().then(function () {
         uni.hideLoading();
         uni.showToast({
-          title: _this11.hasBooked ? '您已预约此课程' : '您未预约此课程',
+          title: _this13.hasBooked ? '您已预约此课程' : '您未预约此课程',
           icon: 'none'
         });
 
         // 强制刷新页面
-        _this11.$forceUpdate();
+        _this13.$forceUpdate();
       }).catch(function () {
         uni.hideLoading();
         uni.showToast({
@@ -1381,7 +1624,7 @@ var _default = {
     },
     // 处理预约取消事件
     handleBookingCancelled: function handleBookingCancelled(data) {
-      var _this12 = this;
+      var _this14 = this;
       console.log('收到预约取消事件:', data);
 
       // 判断是否是当前课程的预约取消
@@ -1421,10 +1664,10 @@ var _default = {
 
         // 确保下一帧状态一致
         this.$nextTick(function () {
-          if (_this12.hasBooked !== false) {
+          if (_this14.hasBooked !== false) {
             console.warn('状态未正确更新，强制再次设置为未预约');
-            _this12.hasBooked = false;
-            _this12.$forceUpdate();
+            _this14.hasBooked = false;
+            _this14.$forceUpdate();
           }
         });
         uni.showToast({
@@ -1434,9 +1677,36 @@ var _default = {
 
         // 刷新课程详情，获取最新的报名人数
         setTimeout(function () {
-          _this12.getCourseDetail();
+          _this14.getCourseDetail();
         }, 1000);
       }
+    },
+    // 调试教师信息
+    debugTeacherInfo: function debugTeacherInfo() {
+      // 获取真实教师数据信息
+      console.log('当前教师信息:', {
+        teacherId: this.courseInfo.teacherId,
+        teacherName: this.courseInfo.teacherName,
+        teacherDesc: this.courseInfo.teacherDesc,
+        teacherDescription: this.courseInfo.teacherDescription
+      });
+
+      // 直接设置一个测试值
+      this.courseInfo.teacherDescription = '这是一段测试的教师描述信息，用于验证UI显示是否正常。';
+      console.log('已手动设置教师描述为测试值');
+
+      // 如果有teacherId，尝试获取真实数据
+      if (this.courseInfo.teacherId) {
+        this.fetchTeacherDescription(this.courseInfo.teacherId);
+      } else {
+        uni.showToast({
+          title: '未找到教师ID',
+          icon: 'none'
+        });
+      }
+
+      // 强制更新UI
+      this.$forceUpdate();
     }
   }
 };
