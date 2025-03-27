@@ -291,6 +291,11 @@ export default {
             if (openidRes.result && openidRes.result.code === 0 && openidRes.result.data) {
               this.loginState.openid = openidRes.result.data.openid;
               this.loginState.sessionKey = openidRes.result.data.sessionKey;
+              
+              // 有了openid后尝试自动登录
+              if (this.loginState.openid) {
+                this.autoLoginWithOpenid();
+              }
             }
           } catch (error) {
             console.error('静默登录获取openid失败:', error);
@@ -298,6 +303,20 @@ export default {
         }
       } catch (error) {
         console.error('静默登录失败:', error);
+      }
+    },
+    
+    // 自动使用openid登录
+    autoLoginWithOpenid() {
+      const defaultUserInfo = {
+        nickName: '微信用户',
+        avatarUrl: '',
+        gender: 0
+      };
+      
+      if (this.loginState.openid) {
+        console.log('使用已获取的openid登录:', this.loginState.openid);
+        this.loginWithOpenid(this.loginState.openid, defaultUserInfo);
       }
     },
     
@@ -441,11 +460,22 @@ export default {
     // 使用openid登录
     loginWithOpenid(openid, userInfo) {
       console.log('使用openid登录:', openid);
+      
+      // 确保有默认的用户信息
+      const defaultUserInfo = {
+        nickName: '微信用户',
+        avatarUrl: '',
+        gender: 0
+      };
+      
+      // 合并用户提供的信息或使用默认信息
+      const finalUserInfo = userInfo || defaultUserInfo;
+      
       uniCloud.callFunction({
         name: 'login',
         data: {
           openid: openid,
-          userInfo: userInfo,
+          userInfo: finalUserInfo,
           loginType: 'wechat'
         },
         success: (res) => {
@@ -489,80 +519,40 @@ export default {
     },
     
     // 处理登录结果
-    async handleLoginResult(result) {
-      try {
-        console.log('处理登录结果，原始数据:', result);
-        
-        // 检查result.result结构
-        if (result && result.result) {
-          console.log('云函数返回结构:', {
-            code: result.result.code,
-            success: result.result.success,
-            message: result.result.message,
-            hasData: !!result.result.data
-          });
-        }
-        
-        // 处理云函数返回的结构
-        let loginData = result.result || result;
-        
-        if (loginData && (loginData.code === 0 || loginData.success === true) && loginData.data) {
-          let userData = loginData.data;
-          console.log('登录成功，用户数据结构:', Object.keys(userData));
+    handleLoginResult(res) {
+      console.log('处理登录结果，原始数据:', res);
+      
+      // 提取结果数据
+      const result = res.result || {};
+      console.log('云函数返回结构:', result);
+      
+      if (result.code === 0 && result.success && result.data) {
+        // 登录成功，保存用户信息
+        try {
+          // 保存用户信息到本地
+          uni.setStorageSync('userInfo', JSON.stringify(result.data));
+          uni.setStorageSync('token', result.data.userId);
+          uni.setStorageSync('hasLogin', true);
           
-          // 处理返回数据为数组的情况
-          if (Array.isArray(userData) && userData.length > 0) {
-            console.log('用户数据是数组，取第一项');
-            userData = userData[0];
-          }
-          
-          // 确保用户信息包含userId
-          if (!userData.userId && userData._id) {
-            console.log('用户数据中没有userId，使用_id代替:', userData._id);
-            userData.userId = userData._id;
-          }
-          
-          // 保存到本地存储和全局状态
-          console.log('最终保存的用户信息:', userData);
-          uni.setStorageSync('userInfo', JSON.stringify(userData));
-          getApp().globalData.userInfo = userData;
-          
-          // 隐藏加载提示
+          // 隐藏加载
           uni.hideLoading();
           
-          // 显示登录成功提示
-          uni.showToast({
-            title: '登录成功',
-            icon: 'success'
-          });
-          
-          // 发送登录成功事件通知
-          try {
-            uni.$emit('user:login', userData);
-            uni.$emit('login:success', userData);
-            console.log('已发送登录成功事件');
-          } catch (err) {
-            console.error('发送登录事件失败:', err);
-          }
-          
-          // 跳转到重定向页面或首页
-          setTimeout(() => {
-            this.navigateAfterLogin();
-          }, 1000);
-        } else {
-          // 登录失败
+          // 登录成功，进行跳转
+          this.navigateAfterLogin();
+        } catch (e) {
+          console.error('保存用户信息失败:', e);
           uni.hideLoading();
-          console.error('登录失败，返回数据无效:', loginData);
           uni.showToast({
-            title: (loginData && loginData.message) || '登录失败',
+            title: '登录成功，但保存用户信息失败',
             icon: 'none'
           });
         }
-      } catch (e) {
+      } else {
+        // 登录失败
         uni.hideLoading();
-        console.error('处理登录结果错误，详细信息:', e);
+        console.error('登录失败，返回数据无效:', result);
         uni.showToast({
-          title: '登录处理失败',
+          title: result.message || '登录失败，请重试',
           icon: 'none'
         });
       }

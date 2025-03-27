@@ -1,9 +1,9 @@
 (global["webpackJsonp"] = global["webpackJsonp"] || []).push([["pages/user/booking"],{
 
 /***/ 277:
-/*!**************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/main.js?{"page":"pages%2Fuser%2Fbooking"} ***!
-  \**************************************************************************************************/
+/*!************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/main.js?{"page":"pages%2Fuser%2Fbooking"} ***!
+  \************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23,9 +23,9 @@ createPage(_booking.default);
 /***/ }),
 
 /***/ 278:
-/*!*******************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/user/booking.vue ***!
-  \*******************************************************************************/
+/*!*****************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/user/booking.vue ***!
+  \*****************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -35,7 +35,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./booking.vue?vue&type=script&lang=js& */ 281);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
 /* harmony import */ var _booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./booking.vue?vue&type=style&index=0&lang=scss& */ 283);
-/* harmony import */ var _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 44);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 44);
 
 var renderjs
 
@@ -45,7 +45,7 @@ var renderjs
 
 /* normalize component */
 
-var component = Object(_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+var component = Object(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
   _booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["render"],
   _booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -64,31 +64,31 @@ component.options.__file = "pages/user/booking.vue"
 /***/ }),
 
 /***/ 279:
-/*!**************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/user/booking.vue?vue&type=template&id=6e50388e& ***!
-  \**************************************************************************************************************/
+/*!************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/user/booking.vue?vue&type=template&id=6e50388e& ***!
+  \************************************************************************************************************************/
 /*! exports provided: render, staticRenderFns, recyclableRender, components */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./booking.vue?vue&type=template&id=6e50388e& */ 280);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./booking.vue?vue&type=template&id=6e50388e& */ 280);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "recyclableRender", function() { return _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["recyclableRender"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "recyclableRender", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["recyclableRender"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "components", function() { return _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["components"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "components", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_template_id_6e50388e___WEBPACK_IMPORTED_MODULE_0__["components"]; });
 
 
 
 /***/ }),
 
 /***/ 280:
-/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/user/booking.vue?vue&type=template&id=6e50388e& ***!
-  \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/user/booking.vue?vue&type=template&id=6e50388e& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 /*! exports provided: render, staticRenderFns, recyclableRender, components */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -206,25 +206,25 @@ render._withStripped = true
 /***/ }),
 
 /***/ 281:
-/*!********************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/user/booking.vue?vue&type=script&lang=js& ***!
-  \********************************************************************************************************/
+/*!******************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/user/booking.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/babel-loader/lib!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./booking.vue?vue&type=script&lang=js& */ 282);
-/* harmony import */ var _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__);
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
- /* harmony default export */ __webpack_exports__["default"] = (_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default.a); 
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./booking.vue?vue&type=script&lang=js& */ 282);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
 /***/ 282:
-/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/user/booking.vue?vue&type=script&lang=js& ***!
-  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/user/booking.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -490,7 +490,7 @@ var _default = {
     loadBookingList: function loadBookingList() {
       var _this2 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var userInfoStr, userData, userId, localCancelledBookings, status, useClientFiltering, statusForLog, res, allBookings, totalCount, cancelledInList, cancelledBookings, _localCancelledBookings, existingIds, newLocalCancelled;
+        var userInfoStr, userData, userId, localCancelledBookings, status, useClientFiltering, statusForLog, res, allBookings, totalCount, cancelledInList, cancelledBookings, _localCancelledBookings, existingIds, newLocalCancelled, _userId, _localCancelledBookings2;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -672,6 +672,26 @@ var _default = {
                     title: '获取预约记录失败',
                     icon: 'none'
                   });
+
+                  // 错误情况下，尝试从本地加载已取消预约
+                  if (_this2.currentStatus === 'cancelled') {
+                    try {
+                      _userId = _this2.getUserId();
+                      if (_userId) {
+                        _localCancelledBookings2 = _this2.getLocalCancelledBookings(_userId);
+                        if (_localCancelledBookings2.length > 0) {
+                          _this2.bookingList = _localCancelledBookings2;
+                          _this2.statusCounts.cancelled = _localCancelledBookings2.length;
+                          _this2.total = _localCancelledBookings2.length;
+                          _this2.localCancelledLoaded = true;
+                          console.log("\u52A0\u8F7D\u4E86".concat(_localCancelledBookings2.length, "\u6761\u672C\u5730\u5DF2\u53D6\u6D88\u8BB0\u5F55"));
+                          _this2.$forceUpdate();
+                        }
+                      }
+                    } catch (localErr) {
+                      console.error('加载本地已取消记录失败:', localErr);
+                    }
+                  }
                 }
                 _context.next = 41;
                 break;
@@ -685,8 +705,10 @@ var _default = {
                   icon: 'none'
                 });
               case 41:
+                // 更新UI显示
+                _this2.$forceUpdate();
                 return _context.abrupt("return", Promise.resolve());
-              case 42:
+              case 43:
               case "end":
                 return _context.stop();
             }
@@ -798,7 +820,7 @@ var _default = {
     // 将本地已取消的预约同步到云数据库
     syncCancelledBookingsToCloud: function syncCancelledBookingsToCloud(bookings) {
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var _iterator2, _step2, booking, result;
+        var syncedIds, newSyncedIds, syncCount, _iterator2, _step2, booking, result;
         return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -810,25 +832,44 @@ var _default = {
                 return _context2.abrupt("return");
               case 2:
                 console.log("\u5C1D\u8BD5\u540C\u6B65 ".concat(bookings.length, " \u6761\u5DF2\u53D6\u6D88\u9884\u7EA6\u5230\u4E91\u6570\u636E\u5E93"));
+
+                // 获取已同步ID缓存，避免重复同步
+                syncedIds = uni.getStorageSync('synced_cancelled_ids') || '[]';
+                try {
+                  syncedIds = JSON.parse(syncedIds);
+                  if (!Array.isArray(syncedIds)) {
+                    syncedIds = [];
+                  }
+                } catch (e) {
+                  console.error('解析已同步ID列表失败:', e);
+                  syncedIds = [];
+                }
+                newSyncedIds = (0, _toConsumableArray2.default)(syncedIds);
+                syncCount = 0;
                 _iterator2 = _createForOfIteratorHelper(bookings);
-                _context2.prev = 4;
+                _context2.prev = 8;
                 _iterator2.s();
-              case 6:
+              case 10:
                 if ((_step2 = _iterator2.n()).done) {
-                  _context2.next = 30;
+                  _context2.next = 34;
                   break;
                 }
                 booking = _step2.value;
-                _context2.prev = 8;
+                _context2.prev = 12;
                 if (booking._id) {
-                  _context2.next = 11;
+                  _context2.next = 15;
                   break;
                 }
-                return _context2.abrupt("continue", 28);
-              case 11:
-                _context2.prev = 11;
-                console.log("\u5C1D\u8BD5\u540C\u6B65\u9884\u7EA6 ".concat(booking._id, " \u72B6\u6001\u4E3A\u5DF2\u53D6\u6D88"));
-                _context2.next = 15;
+                return _context2.abrupt("continue", 32);
+              case 15:
+                if (!syncedIds.includes(booking._id)) {
+                  _context2.next = 17;
+                  break;
+                }
+                return _context2.abrupt("continue", 32);
+              case 17:
+                _context2.prev = 17;
+                _context2.next = 20;
                 return uniCloud.callFunction({
                   name: 'forceUpdateBooking',
                   data: {
@@ -837,45 +878,61 @@ var _default = {
                     updateCourseCount: true // 确保更新课程报名人数
                   }
                 });
-              case 15:
-                result = _context2.sent;
-                console.log("\u540C\u6B65\u5DF2\u53D6\u6D88\u9884\u7EA6 ".concat(booking._id, " \u7ED3\u679C:"), result.result);
-                if (result.result && result.result.success && result.result.data && result.result.data.courseUpdated) {
-                  console.log("\u8BFE\u7A0B ".concat(booking.courseId || '未知', " \u7684\u62A5\u540D\u4EBA\u6570\u5DF2\u51CF1"));
-                }
-                _context2.next = 23;
-                break;
               case 20:
-                _context2.prev = 20;
-                _context2.t0 = _context2["catch"](11);
+                result = _context2.sent;
+                if (result.result && result.result.success) {
+                  syncCount++;
+                  newSyncedIds.push(booking._id);
+
+                  // 不要频繁打印日志，只在首次同步和最后一条时打印
+                  if (syncCount === 1 || syncCount === bookings.length) {
+                    console.log("\u5DF2\u6210\u529F\u540C\u6B65 ".concat(syncCount, "/").concat(bookings.length, " \u6761\u5DF2\u53D6\u6D88\u9884\u7EA6"));
+                  }
+
+                  // 每成功同步5条记录就保存一次同步缓存
+                  if (syncCount % 5 === 0) {
+                    uni.setStorageSync('synced_cancelled_ids', JSON.stringify(newSyncedIds));
+                  }
+                }
+                _context2.next = 27;
+                break;
+              case 24:
+                _context2.prev = 24;
+                _context2.t0 = _context2["catch"](17);
                 console.error("\u540C\u6B65\u5DF2\u53D6\u6D88\u9884\u7EA6 ".concat(booking._id, " \u5931\u8D25:"), _context2.t0);
-              case 23:
-                _context2.next = 28;
+              case 27:
+                _context2.next = 32;
                 break;
-              case 25:
-                _context2.prev = 25;
-                _context2.t1 = _context2["catch"](8);
-                console.error("\u540C\u6B65\u5DF2\u53D6\u6D88\u9884\u7EA6 ".concat(booking._id, " \u51FA\u9519:"), _context2.t1);
-              case 28:
-                _context2.next = 6;
-                break;
-              case 30:
-                _context2.next = 35;
-                break;
+              case 29:
+                _context2.prev = 29;
+                _context2.t1 = _context2["catch"](12);
+                console.error("\u5904\u7406\u5DF2\u53D6\u6D88\u9884\u7EA6 ".concat(booking._id, " \u51FA\u9519:"), _context2.t1);
               case 32:
-                _context2.prev = 32;
-                _context2.t2 = _context2["catch"](4);
+                _context2.next = 10;
+                break;
+              case 34:
+                _context2.next = 39;
+                break;
+              case 36:
+                _context2.prev = 36;
+                _context2.t2 = _context2["catch"](8);
                 _iterator2.e(_context2.t2);
-              case 35:
-                _context2.prev = 35;
+              case 39:
+                _context2.prev = 39;
                 _iterator2.f();
-                return _context2.finish(35);
-              case 38:
+                return _context2.finish(39);
+              case 42:
+                // 保存最终的同步缓存
+                if (syncCount > 0) {
+                  uni.setStorageSync('synced_cancelled_ids', JSON.stringify(newSyncedIds));
+                  console.log("\u672C\u6B21\u5171\u540C\u6B65 ".concat(syncCount, " \u6761\u5DF2\u53D6\u6D88\u9884\u7EA6\uFF0C\u66F4\u65B0\u540C\u6B65\u7F13\u5B58"));
+                }
+              case 43:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[4, 32, 35, 38], [8, 25], [11, 20]]);
+        }, _callee2, null, [[8, 36, 39, 42], [12, 29], [17, 24]]);
       }))();
     },
     // 获取状态文本
@@ -944,268 +1001,19 @@ var _default = {
         content: '确定要取消此次预约吗？',
         success: function () {
           var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(res) {
-            var userInfoStr, userId, userInfo, bookingDocId, updateSuccess, cloudResult, forceResult, db, updateResult, courseUpdateResult, cancelledBooking, existingIndex;
             return _regenerator.default.wrap(function _callee3$(_context3) {
               while (1) {
                 switch (_context3.prev = _context3.next) {
                   case 0:
-                    if (!res.confirm) {
-                      _context3.next = 87;
-                      break;
+                    if (res.confirm) {
+                      _this3.handleCancel(booking);
                     }
-                    uni.showLoading({
-                      title: '取消中...'
-                    });
-                    _context3.prev = 2;
-                    // 获取当前用户ID，提高安全性
-                    userInfoStr = uni.getStorageSync('userInfo');
-                    userId = '';
-                    if (userInfoStr) {
-                      try {
-                        userInfo = JSON.parse(userInfoStr);
-                        userId = userInfo.userId || userInfo._id || '';
-                      } catch (e) {
-                        console.error('解析用户信息失败:', e);
-                      }
-                    }
-
-                    // 确保bookingDocId有值
-                    bookingDocId = booking._id || '';
-                    if (bookingDocId) {
-                      _context3.next = 12;
-                      break;
-                    }
-                    console.error('预约ID无效:', booking);
-                    uni.showToast({
-                      title: '预约ID无效',
-                      icon: 'none'
-                    });
-                    uni.hideLoading();
-                    return _context3.abrupt("return");
-                  case 12:
-                    console.log('取消预约:', {
-                      _id: bookingDocId,
-                      bookingId: booking.bookingId || '',
-                      courseId: booking.courseId || '',
-                      userId: userId,
-                      bookingUserId: booking.userId || '',
-                      status: booking.status || 'unknown'
-                    });
-
-                    // 标记是否更新成功
-                    updateSuccess = false; // 尝试方法1：使用原有的cancelBooking云函数
-                    _context3.prev = 14;
-                    console.log('尝试方法1：使用cancelBooking云函数');
-                    _context3.next = 18;
-                    return uniCloud.callFunction({
-                      name: 'cancelBooking',
-                      data: {
-                        bookingId: bookingDocId,
-                        userId: userId
-                      }
-                    });
-                  case 18:
-                    cloudResult = _context3.sent;
-                    console.log('方法1结果:', cloudResult.result);
-                    if (cloudResult.result && cloudResult.result.success) {
-                      updateSuccess = true;
-                      console.log('方法1成功：使用cancelBooking云函数更新成功');
-                    }
-                    _context3.next = 26;
-                    break;
-                  case 23:
-                    _context3.prev = 23;
-                    _context3.t0 = _context3["catch"](14);
-                    console.error('方法1失败:', _context3.t0);
-                  case 26:
-                    if (updateSuccess) {
-                      _context3.next = 39;
-                      break;
-                    }
-                    _context3.prev = 27;
-                    console.log('尝试方法2：使用forceUpdateBooking云函数');
-                    _context3.next = 31;
-                    return uniCloud.callFunction({
-                      name: 'forceUpdateBooking',
-                      data: {
-                        bookingId: bookingDocId,
-                        status: 'cancelled',
-                        updateCourseCount: true // 确保更新课程报名人数
-                      }
-                    });
-                  case 31:
-                    forceResult = _context3.sent;
-                    console.log('方法2结果:', forceResult.result);
-                    if (forceResult.result && forceResult.result.success) {
-                      updateSuccess = true;
-                      console.log('方法2成功：使用forceUpdateBooking云函数更新成功');
-                      if (forceResult.result.data && forceResult.result.data.courseUpdated) {
-                        console.log('课程报名人数已成功减1');
-                      }
-                    } else {
-                      console.error('方法2失败，返回结果:', forceResult.result);
-                    }
-                    _context3.next = 39;
-                    break;
-                  case 36:
-                    _context3.prev = 36;
-                    _context3.t1 = _context3["catch"](27);
-                    console.error('方法2失败，错误信息:', _context3.t1);
-                  case 39:
-                    if (updateSuccess) {
-                      _context3.next = 68;
-                      break;
-                    }
-                    _context3.prev = 40;
-                    console.log('尝试方法3：直接操作数据库');
-                    db = uniCloud.database();
-                    _context3.next = 45;
-                    return db.collection('bookings').doc(bookingDocId).update({
-                      status: 'cancelled',
-                      updateTime: new Date(),
-                      cancelTime: new Date()
-                    });
-                  case 45:
-                    updateResult = _context3.sent;
-                    console.log('方法3结果:', updateResult);
-                    if (!(updateResult && updateResult.updated > 0)) {
-                      _context3.next = 63;
-                      break;
-                    }
-                    updateSuccess = true;
-                    console.log('方法3成功：直接更新数据库成功');
-
-                    // 更新课程报名人数
-                    if (!booking.courseId) {
-                      _context3.next = 63;
-                      break;
-                    }
-                    _context3.prev = 51;
-                    console.log('尝试更新课程报名人数:', booking.courseId);
-                    _context3.next = 55;
-                    return db.collection('courses').doc(booking.courseId).update({
-                      bookingCount: db.command.inc(-1)
-                    });
-                  case 55:
-                    courseUpdateResult = _context3.sent;
-                    console.log('课程报名人数更新结果:', courseUpdateResult);
-                    if (courseUpdateResult && courseUpdateResult.updated > 0) {
-                      console.log('课程报名人数已成功减1');
-                    }
-                    _context3.next = 63;
-                    break;
-                  case 60:
-                    _context3.prev = 60;
-                    _context3.t2 = _context3["catch"](51);
-                    console.error('更新课程报名人数失败:', _context3.t2);
-                  case 63:
-                    _context3.next = 68;
-                    break;
-                  case 65:
-                    _context3.prev = 65;
-                    _context3.t3 = _context3["catch"](40);
-                    console.error('方法3失败:', _context3.t3);
-                  case 68:
-                    // 无论是否成功更新数据库，都更新本地状态
-                    if (updateSuccess) {
-                      uni.showToast({
-                        title: '取消成功',
-                        icon: 'success'
-                      });
-                    } else {
-                      console.log('云端更新失败，仅更新本地状态');
-                      uni.showToast({
-                        title: '取消成功(仅本地)',
-                        icon: 'success'
-                      });
-                    }
-
-                    // 更新预约状态计数
-                    if (_this3.currentStatus === 'booked') {
-                      _this3.statusCounts.booked = Math.max(0, _this3.statusCounts.booked - 1);
-                    }
-                    // 增加已取消计数
-                    _this3.statusCounts.cancelled++;
-
-                    // 在内存中更新预约状态
-                    _this3.updateBookingStatus(bookingDocId, 'cancelled');
-
-                    // 如果当前不是"已取消"选项卡，从当前列表中移除该项
-                    if (_this3.currentStatus !== 'cancelled') {
-                      _this3.removeBookingFromList(bookingDocId);
-
-                      // 提示用户可以在"已取消"标签查看
-                      setTimeout(function () {
-                        uni.showToast({
-                          title: '可在"已取消"标签查看',
-                          icon: 'none',
-                          duration: 2000
-                        });
-                      }, 1500);
-                    }
-
-                    // 保存到本地存储
-                    cancelledBooking = _objectSpread(_objectSpread({}, booking), {}, {
-                      status: 'cancelled',
-                      cancelTime: new Date().toISOString()
-                    });
-                    _this3.storeCancelledBooking(cancelledBooking);
-
-                    // 标记预约状态已变更
-                    _this3.markBookingChanged();
-
-                    // 发送取消事件，更新相关页面
-                    uni.$emit('booking:cancel', {
-                      courseId: booking.courseId || '',
-                      userId: userId,
-                      bookingId: bookingDocId
-                    });
-
-                    // 如果当前在"已取消"标签页，重新加载列表以显示最新数据
-                    if (_this3.currentStatus === 'cancelled') {
-                      // 将刚刚取消的预约添加到列表头部
-                      if (cancelledBooking && cancelledBooking._id) {
-                        // 避免重复添加
-                        existingIndex = _this3.bookingList.findIndex(function (item) {
-                          return item && item._id === cancelledBooking._id;
-                        });
-                        if (existingIndex === -1) {
-                          console.log('在已取消标签中添加最新取消的预约记录到头部');
-                          _this3.bookingList.unshift(cancelledBooking);
-                          _this3.total = _this3.bookingList.length;
-                          _this3.$forceUpdate();
-                        } else {
-                          console.log('预约记录已存在于列表中，更新状态');
-                          _this3.bookingList[existingIndex].status = 'cancelled';
-                          _this3.$forceUpdate();
-                        }
-                      } else {
-                        // 如果无法直接添加，则重新加载整个列表
-                        console.log('无法直接添加取消的预约，刷新整个列表');
-                        _this3.resetList();
-                        _this3.loadBookingList();
-                      }
-                    }
-                    _context3.next = 84;
-                    break;
-                  case 80:
-                    _context3.prev = 80;
-                    _context3.t4 = _context3["catch"](2);
-                    console.error('取消预约失败:', _context3.t4);
-                    uni.showToast({
-                      title: '取消失败，请稍后重试',
-                      icon: 'none'
-                    });
-                  case 84:
-                    _context3.prev = 84;
-                    uni.hideLoading();
-                    return _context3.finish(84);
-                  case 87:
+                  case 1:
                   case "end":
                     return _context3.stop();
                 }
               }
-            }, _callee3, null, [[2, 80, 84, 87], [14, 23], [27, 36], [40, 65], [51, 60]]);
+            }, _callee3);
           }));
           function success(_x) {
             return _success.apply(this, arguments);
@@ -1214,48 +1022,359 @@ var _default = {
         }()
       });
     },
-    // 标记预约状态已变更
-    markBookingChanged: function markBookingChanged() {
-      uni.setStorageSync('booking_changed', 'true');
-    },
-    // 更新本地预约状态
-    updateBookingStatus: function updateBookingStatus(bookingId, newStatus) {
-      // 检查参数有效性
-      if (!bookingId) {
-        console.error('更新状态失败: 无效的预约ID');
-        return;
-      }
+    // 新增处理取消操作的方法
+    handleCancel: function handleCancel(booking) {
+      var _this4 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+        var userInfoStr, userId, userInfo, bookingDocId, updateSuccess, cloudResult, updateResult, _updateResult$result, forceResult, _updateResult, db, _updateResult2, _updateResult3, previousStatus, previouslyCancelled, cancelledBooking, existingIndex;
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                console.log('准备取消预约:', JSON.stringify(booking));
+                _context4.prev = 1;
+                uni.showLoading({
+                  title: '取消中...'
+                });
 
-      // 更新内存中的状态
-      var booking = this.bookingList.find(function (item) {
-        return item && item._id === bookingId;
-      });
-      if (booking) {
-        booking.status = newStatus;
-        // 如果是取消状态，确保本地存储也被更新
-        if (newStatus === 'cancelled') {
-          this.storeCancelledBooking(booking);
-        }
-        console.log("\u5DF2\u66F4\u65B0\u9884\u7EA6 ".concat(bookingId, " \u7684\u72B6\u6001\u4E3A ").concat(newStatus));
-      } else {
-        console.warn("\u672A\u627E\u5230\u9884\u7EA6ID\u4E3A ".concat(bookingId, " \u7684\u8BB0\u5F55"));
-      }
-    },
-    // 从列表中移除指定预约
-    removeBookingFromList: function removeBookingFromList(bookingId) {
-      if (!bookingId) {
-        console.error('移除预约失败: 无效的预约ID');
-        return;
-      }
-      var index = this.bookingList.findIndex(function (item) {
-        return item && item._id === bookingId;
-      });
-      if (index !== -1) {
-        this.bookingList.splice(index, 1);
-        console.log("\u5DF2\u4ECE\u5217\u8868\u4E2D\u79FB\u9664\u9884\u7EA6 ".concat(bookingId));
-      } else {
-        console.warn("\u672A\u627E\u5230\u9884\u7EA6ID\u4E3A ".concat(bookingId, " \u7684\u8BB0\u5F55\uFF0C\u65E0\u6CD5\u79FB\u9664"));
-      }
+                // 获取当前用户ID，提高安全性
+                userInfoStr = uni.getStorageSync('userInfo');
+                userId = '';
+                if (userInfoStr) {
+                  try {
+                    userInfo = JSON.parse(userInfoStr);
+                    userId = userInfo.userId || userInfo._id || '';
+                  } catch (e) {
+                    console.error('解析用户信息失败:', e);
+                  }
+                }
+
+                // 确保bookingDocId有值
+                bookingDocId = booking._id || '';
+                if (bookingDocId) {
+                  _context4.next = 12;
+                  break;
+                }
+                console.error('预约ID无效:', booking);
+                uni.showToast({
+                  title: '预约ID无效',
+                  icon: 'none'
+                });
+                uni.hideLoading();
+                return _context4.abrupt("return");
+              case 12:
+                console.log('取消预约:', {
+                  _id: bookingDocId,
+                  bookingId: booking.bookingId || '',
+                  courseId: booking.courseId || '',
+                  userId: userId,
+                  bookingUserId: booking.userId || '',
+                  status: booking.status || 'unknown'
+                });
+                updateSuccess = false; // 尝试方法1：使用cancelBooking云函数
+                _context4.prev = 14;
+                console.log('尝试方法1：使用cancelBooking云函数');
+                _context4.next = 18;
+                return uniCloud.callFunction({
+                  name: 'cancelBooking',
+                  data: {
+                    bookingId: bookingDocId,
+                    userId: userId
+                  }
+                });
+              case 18:
+                cloudResult = _context4.sent;
+                console.log('方法1结果:', JSON.stringify(cloudResult.result));
+                if (!(cloudResult.result && cloudResult.result.success)) {
+                  _context4.next = 40;
+                  break;
+                }
+                updateSuccess = true;
+                console.log('方法1成功：使用cancelBooking云函数更新成功');
+
+                // 检查课程更新状态
+                if (!(cloudResult.result.data && cloudResult.result.data.courseUpdated !== undefined)) {
+                  _context4.next = 40;
+                  break;
+                }
+                console.log('课程更新状态:', cloudResult.result.data.courseUpdated ? '成功' : '失败');
+                if (cloudResult.result.data.courseUpdated) {
+                  _context4.next = 40;
+                  break;
+                }
+                console.warn('❌ 警告: 预约已取消，但课程报名人数可能未减少，尝试直接更新');
+
+                // 如果课程bookingCount未更新，尝试使用forceUpdateBooking云函数直接更新
+                if (!booking.courseId) {
+                  _context4.next = 40;
+                  break;
+                }
+                _context4.prev = 28;
+                console.log('尝试使用forceUpdateBooking云函数直接更新课程报名人数, 课程ID:', booking.courseId);
+                _context4.next = 32;
+                return uniCloud.callFunction({
+                  name: 'forceUpdateBooking',
+                  data: {
+                    courseId: booking.courseId,
+                    updateCourseOnly: true,
+                    decreaseBookingCount: true
+                  }
+                });
+              case 32:
+                updateResult = _context4.sent;
+                console.log('直接更新课程报名人数结果:', JSON.stringify(updateResult.result));
+                if (updateResult.result && updateResult.result.code === 0) {
+                  console.log('✅ 直接更新课程报名人数成功');
+                } else {
+                  console.warn('❌ 直接更新课程报名人数失败:', ((_updateResult$result = updateResult.result) === null || _updateResult$result === void 0 ? void 0 : _updateResult$result.message) || '未知错误');
+                }
+                _context4.next = 40;
+                break;
+              case 37:
+                _context4.prev = 37;
+                _context4.t0 = _context4["catch"](28);
+                console.error('直接更新课程报名人数失败:', _context4.t0);
+              case 40:
+                _context4.next = 45;
+                break;
+              case 42:
+                _context4.prev = 42;
+                _context4.t1 = _context4["catch"](14);
+                console.error('方法1失败:', _context4.t1);
+              case 45:
+                if (updateSuccess) {
+                  _context4.next = 76;
+                  break;
+                }
+                _context4.prev = 46;
+                console.log('尝试方法2：使用forceUpdateBooking云函数');
+                _context4.next = 50;
+                return uniCloud.callFunction({
+                  name: 'forceUpdateBooking',
+                  data: {
+                    bookingId: bookingDocId,
+                    status: 'cancelled',
+                    updateCourseCount: true // 确保更新课程报名人数
+                  }
+                });
+              case 50:
+                forceResult = _context4.sent;
+                console.log('方法2结果:', JSON.stringify(forceResult.result));
+                if (!(forceResult.result && forceResult.result.success)) {
+                  _context4.next = 70;
+                  break;
+                }
+                updateSuccess = true;
+                console.log('方法2成功：使用forceUpdateBooking云函数更新成功');
+
+                // 检查课程更新状态，如果未更新，则尝试直接更新
+                if (!(forceResult.result.data && forceResult.result.data.courseUpdated !== undefined && !forceResult.result.data.courseUpdated)) {
+                  _context4.next = 68;
+                  break;
+                }
+                if (!booking.courseId) {
+                  _context4.next = 68;
+                  break;
+                }
+                _context4.prev = 57;
+                console.log('尝试使用forceUpdateBooking云函数直接更新课程报名人数, 课程ID:', booking.courseId);
+                _context4.next = 61;
+                return uniCloud.callFunction({
+                  name: 'forceUpdateBooking',
+                  data: {
+                    courseId: booking.courseId,
+                    updateCourseOnly: true,
+                    decreaseBookingCount: true
+                  }
+                });
+              case 61:
+                _updateResult = _context4.sent;
+                console.log('直接更新课程报名人数结果:', JSON.stringify(_updateResult.result));
+                _context4.next = 68;
+                break;
+              case 65:
+                _context4.prev = 65;
+                _context4.t2 = _context4["catch"](57);
+                console.error('直接更新课程报名人数失败:', _context4.t2);
+              case 68:
+                _context4.next = 71;
+                break;
+              case 70:
+                console.error('方法2失败，返回结果:', forceResult.result);
+              case 71:
+                _context4.next = 76;
+                break;
+              case 73:
+                _context4.prev = 73;
+                _context4.t3 = _context4["catch"](46);
+                console.error('方法2失败，错误信息:', _context4.t3);
+              case 76:
+                if (updateSuccess) {
+                  _context4.next = 104;
+                  break;
+                }
+                _context4.prev = 77;
+                console.log('尝试方法3：直接操作数据库');
+                db = uniCloud.database();
+                _context4.next = 82;
+                return db.collection('bookings').doc(bookingDocId).update({
+                  status: 'cancelled',
+                  updateTime: new Date(),
+                  cancelTime: new Date()
+                });
+              case 82:
+                _updateResult2 = _context4.sent;
+                console.log('方法3结果:', _updateResult2);
+                if (!(_updateResult2 && _updateResult2.updated > 0)) {
+                  _context4.next = 99;
+                  break;
+                }
+                updateSuccess = true;
+                console.log('方法3成功：直接更新数据库成功');
+
+                // 更新课程报名人数，使用forceUpdateBooking云函数
+                if (!booking.courseId) {
+                  _context4.next = 99;
+                  break;
+                }
+                _context4.prev = 88;
+                console.log('尝试使用forceUpdateBooking云函数直接更新课程报名人数, 课程ID:', booking.courseId);
+                _context4.next = 92;
+                return uniCloud.callFunction({
+                  name: 'forceUpdateBooking',
+                  data: {
+                    courseId: booking.courseId,
+                    updateCourseOnly: true,
+                    decreaseBookingCount: true
+                  }
+                });
+              case 92:
+                _updateResult3 = _context4.sent;
+                console.log('直接更新课程报名人数结果:', JSON.stringify(_updateResult3.result));
+                _context4.next = 99;
+                break;
+              case 96:
+                _context4.prev = 96;
+                _context4.t4 = _context4["catch"](88);
+                console.error('更新课程报名人数失败:', _context4.t4);
+              case 99:
+                _context4.next = 104;
+                break;
+              case 101:
+                _context4.prev = 101;
+                _context4.t5 = _context4["catch"](77);
+                console.error('方法3失败:', _context4.t5);
+              case 104:
+                // 无论是否成功更新数据库，都更新本地状态
+                if (updateSuccess) {
+                  uni.showToast({
+                    title: '取消成功',
+                    icon: 'success'
+                  });
+                } else {
+                  console.log('云端更新失败，仅更新本地状态');
+                  uni.showToast({
+                    title: '取消成功(仅本地)',
+                    icon: 'success'
+                  });
+                }
+
+                // 更新预约状态计数（无论是否成功更新服务器）
+                previousStatus = booking.status || 'unknown'; // 如果之前是已预约状态，减少已预约计数
+                if (previousStatus !== 'cancelled' && (previousStatus === 'pending' || previousStatus === 'confirmed_unpaid' || previousStatus === 'confirmed')) {
+                  _this4.statusCounts.booked = Math.max(0, _this4.statusCounts.booked - 1);
+                }
+                // 如果之前是已完成状态，减少已完成计数
+                else if (previousStatus === 'finished') {
+                  _this4.statusCounts.finished = Math.max(0, _this4.statusCounts.finished - 1);
+                }
+
+                // 增加已取消计数，确保不重复计算
+                previouslyCancelled = booking.status === 'cancelled';
+                if (!previouslyCancelled) {
+                  _this4.statusCounts.cancelled++;
+                }
+
+                // 在内存中更新预约状态
+                _this4.updateBookingStatus(bookingDocId, 'cancelled');
+
+                // 如果当前不是"已取消"选项卡，从当前列表中移除该项
+                if (_this4.currentStatus !== 'cancelled') {
+                  _this4.removeBookingFromList(bookingDocId);
+
+                  // 提示用户可以在"已取消"标签查看
+                  setTimeout(function () {
+                    uni.showToast({
+                      title: "\u5DF2\u53D6\u6D88\uFF0C\u53EF\u5728\"\u5DF2\u53D6\u6D88(".concat(_this4.getTabCount('cancelled'), ")\"\u6807\u7B7E\u67E5\u770B"),
+                      icon: 'none',
+                      duration: 2000
+                    });
+                  }, 1500);
+                }
+
+                // 保存到本地存储
+                cancelledBooking = _objectSpread(_objectSpread({}, booking), {}, {
+                  status: 'cancelled',
+                  cancelTime: new Date().toISOString()
+                });
+                _this4.storeCancelledBooking(cancelledBooking);
+
+                // 标记预约状态已变更
+                _this4.markBookingChanged();
+
+                // 发送取消事件，更新相关页面
+                uni.$emit('booking:cancel', {
+                  courseId: booking.courseId || '',
+                  userId: userId,
+                  bookingId: bookingDocId
+                });
+
+                // 如果当前在"已取消"标签页，重新加载列表以显示最新数据
+                if (_this4.currentStatus === 'cancelled') {
+                  // 将刚刚取消的预约添加到列表头部
+                  if (cancelledBooking && cancelledBooking._id) {
+                    // 避免重复添加
+                    existingIndex = _this4.bookingList.findIndex(function (item) {
+                      return item && item._id === cancelledBooking._id;
+                    });
+                    if (existingIndex === -1) {
+                      console.log('在已取消标签中添加最新取消的预约记录到头部');
+                      _this4.bookingList.unshift(cancelledBooking);
+                      _this4.total = _this4.bookingList.length;
+                      _this4.$forceUpdate();
+                    } else {
+                      console.log('预约记录已存在于列表中，更新状态');
+                      _this4.bookingList[existingIndex].status = 'cancelled';
+                      _this4.$forceUpdate();
+                    }
+                  } else {
+                    // 如果无法直接添加，则重新加载整个列表
+                    console.log('无法直接添加取消的预约，刷新整个列表');
+                    _this4.resetList();
+                    _this4.loadBookingList();
+                  }
+                }
+                _context4.next = 122;
+                break;
+              case 118:
+                _context4.prev = 118;
+                _context4.t6 = _context4["catch"](1);
+                console.error('取消预约失败:', _context4.t6);
+                uni.showToast({
+                  title: '取消失败，请稍后重试',
+                  icon: 'none'
+                });
+              case 122:
+                _context4.prev = 122;
+                uni.hideLoading();
+                return _context4.finish(122);
+              case 125:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, null, [[1, 118, 122, 125], [14, 42], [28, 37], [46, 73], [57, 65], [77, 101], [88, 96]]);
+      }))();
     },
     // 联系老师
     contactTeacher: function contactTeacher(booking, e) {
@@ -1334,52 +1453,61 @@ var _default = {
         // 构建存储键名
         var key = "cancelled_booking_".concat(bookingCopy._id);
 
+        // 检查是否已经存储过
+        var existingData = uni.getStorageSync(key);
+        var isNewStorage = !existingData;
+
         // 保存已取消的预约数据
         uni.setStorageSync(key, JSON.stringify(bookingCopy));
-        console.log('已保存已取消预约数据:', bookingCopy._id);
 
-        // 记录最近取消的预约ID列表
-        var cancelledIds = uni.getStorageSync('cancelled_booking_ids') || '[]';
-        try {
-          cancelledIds = JSON.parse(cancelledIds);
-          if (!Array.isArray(cancelledIds)) {
+        // 只有首次存储才打印日志和执行后续逻辑
+        if (isNewStorage) {
+          console.log('已保存已取消预约数据:', bookingCopy._id);
+
+          // 记录最近取消的预约ID列表
+          var cancelledIds = uni.getStorageSync('cancelled_booking_ids') || '[]';
+          try {
+            cancelledIds = JSON.parse(cancelledIds);
+            if (!Array.isArray(cancelledIds)) {
+              cancelledIds = [];
+            }
+          } catch (e) {
+            console.error('解析已取消预约ID列表失败:', e);
             cancelledIds = [];
           }
-        } catch (e) {
-          console.error('解析已取消预约ID列表失败:', e);
-          cancelledIds = [];
-        }
 
-        // 检查是否已经存在
-        var alreadyExists = cancelledIds.includes(bookingCopy._id);
+          // 检查是否已经存在
+          var alreadyExists = cancelledIds.includes(bookingCopy._id);
 
-        // 添加到列表头部（如果不存在）
-        if (!alreadyExists) {
-          cancelledIds.unshift(bookingCopy._id);
-          // 最多保存20条
-          if (cancelledIds.length > 20) {
-            cancelledIds = cancelledIds.slice(0, 20);
+          // 添加到列表头部（如果不存在）
+          if (!alreadyExists) {
+            cancelledIds.unshift(bookingCopy._id);
+            // 最多保存20条
+            if (cancelledIds.length > 20) {
+              cancelledIds = cancelledIds.slice(0, 20);
+            }
+
+            // 更新计数和标记
+            this.statusCounts.cancelled = cancelledIds.length;
+            this.localCancelledLoaded = true;
+
+            // 保存更新后的ID列表
+            uni.setStorageSync('cancelled_booking_ids', JSON.stringify(cancelledIds));
+
+            // 如果是通过按钮取消的预约，且不在已取消标签页，延迟后切换到已取消标签
+            if (this.currentStatus !== 'cancelled' && !this.autoSwitchToCancel) {
+              this.switchToCancelledTab();
+            }
           }
-
-          // 更新计数和标记
-          this.statusCounts.cancelled = cancelledIds.length;
-          this.localCancelledLoaded = true;
-        }
-
-        // 保存更新后的ID列表
-        uni.setStorageSync('cancelled_booking_ids', JSON.stringify(cancelledIds));
-
-        // 如果不在已取消标签页，延迟后切换到已取消标签
-        if (this.currentStatus !== 'cancelled') {
-          this.switchToCancelledTab();
         }
       } catch (e) {
         console.error('保存已取消预约数据失败:', e);
       }
+      return true;
     },
     // 切换到已取消标签页
     switchToCancelledTab: function switchToCancelledTab() {
-      var _this4 = this;
+      var _this5 = this;
       setTimeout(function () {
         uni.showToast({
           title: '正在前往已取消列表',
@@ -1387,7 +1515,7 @@ var _default = {
           duration: 1500
         });
         setTimeout(function () {
-          _this4.changeTab('cancelled');
+          _this5.changeTab('cancelled');
         }, 1500);
       }, 800);
     },
@@ -1436,6 +1564,59 @@ var _default = {
       } catch (e) {
         console.error('加载本地已取消预约数量失败:', e);
       }
+    },
+    // 更新预约状态
+    updateBookingStatus: function updateBookingStatus(bookingId, status) {
+      if (!bookingId || !status) return;
+      console.log("\u66F4\u65B0\u9884\u7EA6".concat(bookingId, "\u72B6\u6001\u4E3A").concat(status));
+
+      // 查找匹配的预约
+      var index = this.bookingList.findIndex(function (item) {
+        return item && item._id === bookingId;
+      });
+      if (index !== -1) {
+        console.log("\u627E\u5230\u9884\u7EA6\u5728\u5217\u8868\u4E2D\u7684\u4F4D\u7F6E: ".concat(index, ", \u66F4\u65B0\u72B6\u6001"));
+        this.bookingList[index].status = status;
+        this.$forceUpdate();
+      } else {
+        console.log("\u672A\u5728\u5F53\u524D\u5217\u8868\u4E2D\u627E\u5230\u9884\u7EA6: ".concat(bookingId));
+      }
+    },
+    // 从列表中移除预约
+    removeBookingFromList: function removeBookingFromList(bookingId) {
+      if (!bookingId) return;
+      console.log("\u4ECE\u5217\u8868\u4E2D\u79FB\u9664\u9884\u7EA6: ".concat(bookingId));
+
+      // 查找匹配的预约
+      var index = this.bookingList.findIndex(function (item) {
+        return item && item._id === bookingId;
+      });
+      if (index !== -1) {
+        console.log("\u627E\u5230\u9884\u7EA6\u5728\u5217\u8868\u4E2D\u7684\u4F4D\u7F6E: ".concat(index, ", \u79FB\u9664\u5B83"));
+        this.bookingList.splice(index, 1);
+        this.total = Math.max(0, this.total - 1);
+        this.$forceUpdate();
+      } else {
+        console.log("\u672A\u5728\u5F53\u524D\u5217\u8868\u4E2D\u627E\u5230\u9884\u7EA6: ".concat(bookingId));
+      }
+    },
+    // 标记预约状态已变更
+    markBookingChanged: function markBookingChanged() {
+      console.log('标记预约状态已变更');
+      uni.setStorageSync('booking_changed', 'true');
+    },
+    // 获取用户ID
+    getUserId: function getUserId() {
+      try {
+        var userInfoStr = uni.getStorageSync('userInfo');
+        if (userInfoStr) {
+          var userInfo = JSON.parse(userInfoStr);
+          return userInfo.userId || userInfo._id || '';
+        }
+      } catch (e) {
+        console.error('获取用户ID失败:', e);
+      }
+      return '';
     }
   }
 };
@@ -1445,25 +1626,25 @@ exports.default = _default;
 /***/ }),
 
 /***/ 283:
-/*!*****************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/user/booking.vue?vue&type=style&index=0&lang=scss& ***!
-  \*****************************************************************************************************************/
+/*!***************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/user/booking.vue?vue&type=style&index=0&lang=scss& ***!
+  \***************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/postcss-loader/src??ref--8-oneOf-1-3!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!../../../../../Downloads/HBuilderX.4.55.2025030718/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./booking.vue?vue&type=style&index=0&lang=scss& */ 284);
-/* harmony import */ var _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
- /* harmony default export */ __webpack_exports__["default"] = (_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_Downloads_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./booking.vue?vue&type=style&index=0&lang=scss& */ 284);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_booking_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
 /***/ 284:
-/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/Administrator/Desktop/YueKe/Siwei_YueKe/pages/user/booking.vue?vue&type=style&index=0&lang=scss& ***!
-  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/user/booking.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 

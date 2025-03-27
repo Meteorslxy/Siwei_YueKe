@@ -1,0 +1,116 @@
+{
+  "bsonType": "object",
+  "required": [
+    "title",
+    "price"
+  ],
+  "permission": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": true
+  },
+  "properties": {
+    "_id": {
+      "description": "ID，系统自动生成"
+    },
+    "id": {
+      "bsonType": "string",
+      "description": "课程ID"
+    },
+    "title": {
+      "bsonType": "string",
+      "description": "课程标题"
+    },
+    "image": {
+      "bsonType": "string",
+      "description": "课程图片路径"
+    },
+    "coverImage": {
+      "bsonType": "string",
+      "description": "课程封面图片路径"
+    },
+    "tags": {
+      "bsonType": "array",
+      "description": "课程标签",
+      "items": {
+        "bsonType": "string"
+      }
+    },
+    "price": {
+      "bsonType": "string",
+      "description": "课程价格"
+    },
+    "originalPrice": {
+      "bsonType": "int",
+      "description": "原始价格"
+    },
+    "bookingCount": {
+      "bsonType": "int",
+      "description": "报名人数"
+    },
+    "teacherId": {
+      "bsonType": "string",
+      "description": "教师ID"
+    },
+    "description": {
+      "bsonType": "string",
+      "description": "课程描述"
+    },
+    "location": {
+      "bsonType": "string",
+      "description": "课程地点"
+    },
+    "startTime": {
+      "bsonType": "string",
+      "description": "开始时间"
+    },
+    "endTime": {
+      "bsonType": "string",
+      "description": "结束时间"
+    },
+    "teacherAvatar": {
+      "bsonType": "string",
+      "description": "教师头像"
+    },
+    "teacherName": {
+      "bsonType": "string",
+      "description": "教师姓名"
+    },
+    "teacherTitle": {
+      "bsonType": "string",
+      "description": "教师职称"
+    },
+    "educationalStages": {
+      "bsonType": "string",
+      "description": "教育阶段"
+    },
+    "subjects": {
+      "bsonType": "string",
+      "description": "科目"
+    },
+    "courseId": {
+      "bsonType": "string",
+      "description": "课程编号"
+    },
+    "courseCount": {
+      "bsonType": "int",
+      "description": "课时数"
+    },
+    "startDate": {
+      "bsonType": "string",
+      "description": "开始日期"
+    },
+    "endDate": {
+      "bsonType": "string",
+      "description": "结束日期"
+    },
+    "create_date": {
+      "bsonType": "timestamp",
+      "description": "创建时间",
+      "defaultValue": {
+        "$env": "now"
+      }
+    }
+  }
+}

@@ -438,6 +438,26 @@ export default {
             title: '获取预约记录失败',
             icon: 'none'
           })
+          
+          // 错误情况下，尝试从本地加载已取消预约
+          if (this.currentStatus === 'cancelled') {
+            try {
+              const userId = this.getUserId();
+              if (userId) {
+                const localCancelledBookings = this.getLocalCancelledBookings(userId);
+                if (localCancelledBookings.length > 0) {
+                  this.bookingList = localCancelledBookings;
+                  this.statusCounts.cancelled = localCancelledBookings.length;
+                  this.total = localCancelledBookings.length;
+                  this.localCancelledLoaded = true;
+                  console.log(`加载了${localCancelledBookings.length}条本地已取消记录`);
+                  this.$forceUpdate();
+                }
+              }
+            } catch (localErr) {
+              console.error('加载本地已取消记录失败:', localErr);
+            }
+          }
         }
       } catch (e) {
         console.error('获取预约记录失败:', e)
@@ -447,6 +467,9 @@ export default {
           icon: 'none'
         })
       }
+      
+      // 更新UI显示
+      this.$forceUpdate();
       
       return Promise.resolve()
     },
@@ -555,14 +578,32 @@ export default {
       
       console.log(`尝试同步 ${bookings.length} 条已取消预约到云数据库`);
       
+      // 获取已同步ID缓存，避免重复同步
+      let syncedIds = uni.getStorageSync('synced_cancelled_ids') || '[]';
+      try {
+        syncedIds = JSON.parse(syncedIds);
+        if (!Array.isArray(syncedIds)) {
+          syncedIds = [];
+        }
+      } catch (e) {
+        console.error('解析已同步ID列表失败:', e);
+        syncedIds = [];
+      }
+      
+      const newSyncedIds = [...syncedIds];
+      let syncCount = 0;
+      
       for (const booking of bookings) {
         try {
           if (!booking._id) continue;
           
+          // 检查是否已经同步过，避免重复请求
+          if (syncedIds.includes(booking._id)) {
+            continue;
+          }
+          
           // 使用forceUpdateBooking云函数，跳过schema验证
           try {
-            console.log(`尝试同步预约 ${booking._id} 状态为已取消`);
-            
             const result = await uniCloud.callFunction({
               name: 'forceUpdateBooking',
               data: {
@@ -572,17 +613,32 @@ export default {
               }
             });
             
-            console.log(`同步已取消预约 ${booking._id} 结果:`, result.result);
-            
-            if (result.result && result.result.success && result.result.data && result.result.data.courseUpdated) {
-              console.log(`课程 ${booking.courseId || '未知'} 的报名人数已减1`);
+            if (result.result && result.result.success) {
+              syncCount++;
+              newSyncedIds.push(booking._id);
+              
+              // 不要频繁打印日志，只在首次同步和最后一条时打印
+              if (syncCount === 1 || syncCount === bookings.length) {
+                console.log(`已成功同步 ${syncCount}/${bookings.length} 条已取消预约`);
+              }
+              
+              // 每成功同步5条记录就保存一次同步缓存
+              if (syncCount % 5 === 0) {
+                uni.setStorageSync('synced_cancelled_ids', JSON.stringify(newSyncedIds));
+              }
             }
           } catch (e) {
             console.error(`同步已取消预约 ${booking._id} 失败:`, e);
           }
         } catch (e) {
-          console.error(`同步已取消预约 ${booking._id} 出错:`, e);
+          console.error(`处理已取消预约 ${booking._id} 出错:`, e);
         }
+      }
+      
+      // 保存最终的同步缓存
+      if (syncCount > 0) {
+        uni.setStorageSync('synced_cancelled_ids', JSON.stringify(newSyncedIds));
+        console.log(`本次共同步 ${syncCount} 条已取消预约，更新同步缓存`);
       }
     },
     
@@ -660,270 +716,299 @@ export default {
         content: '确定要取消此次预约吗？',
         success: async (res) => {
           if (res.confirm) {
-            uni.showLoading({ title: '取消中...' });
-            
-            try {
-              // 获取当前用户ID，提高安全性
-              const userInfoStr = uni.getStorageSync('userInfo');
-              let userId = '';
-              if (userInfoStr) {
-                try {
-                  const userInfo = JSON.parse(userInfoStr);
-                  userId = userInfo.userId || userInfo._id || '';
-                } catch (e) {
-                  console.error('解析用户信息失败:', e);
-                }
-              }
-              
-              // 确保bookingDocId有值
-              const bookingDocId = booking._id || '';
-              if (!bookingDocId) {
-                console.error('预约ID无效:', booking);
-                uni.showToast({
-                  title: '预约ID无效',
-                  icon: 'none'
-                });
-                uni.hideLoading();
-                return;
-              }
-              
-              console.log('取消预约:', {
-                _id: bookingDocId,
-                bookingId: booking.bookingId || '',
-                courseId: booking.courseId || '',
-                userId: userId,
-                bookingUserId: booking.userId || '',
-                status: booking.status || 'unknown'
-              });
-              
-              // 标记是否更新成功
-              let updateSuccess = false;
-              
-              // 尝试方法1：使用原有的cancelBooking云函数
-              try {
-                console.log('尝试方法1：使用cancelBooking云函数');
-                const cloudResult = await uniCloud.callFunction({
-                  name: 'cancelBooking',
-                  data: {
-                    bookingId: bookingDocId,
-                    userId: userId
-                  }
-                });
-                
-                console.log('方法1结果:', cloudResult.result);
-                
-                if (cloudResult.result && cloudResult.result.success) {
-                  updateSuccess = true;
-                  console.log('方法1成功：使用cancelBooking云函数更新成功');
-                }
-              } catch (err1) {
-                console.error('方法1失败:', err1);
-              }
-              
-              // 如果方法1失败，尝试方法2：使用forceUpdateBooking云函数
-              if (!updateSuccess) {
-                try {
-                  console.log('尝试方法2：使用forceUpdateBooking云函数');
-                  const forceResult = await uniCloud.callFunction({
-                    name: 'forceUpdateBooking',
-                    data: {
-                      bookingId: bookingDocId,
-                      status: 'cancelled',
-                      updateCourseCount: true // 确保更新课程报名人数
-                    }
-                  });
-                  
-                  console.log('方法2结果:', forceResult.result);
-                  
-                  if (forceResult.result && forceResult.result.success) {
-                    updateSuccess = true;
-                    console.log('方法2成功：使用forceUpdateBooking云函数更新成功');
-                    if (forceResult.result.data && forceResult.result.data.courseUpdated) {
-                      console.log('课程报名人数已成功减1');
-                    }
-                  } else {
-                    console.error('方法2失败，返回结果:', forceResult.result);
-                  }
-                } catch (err2) {
-                  console.error('方法2失败，错误信息:', err2);
-                }
-              }
-              
-              // 如果以上方法都失败，尝试方法3：直接更新数据库
-              if (!updateSuccess) {
-                try {
-                  console.log('尝试方法3：直接操作数据库');
-                  const db = uniCloud.database();
-                  const updateResult = await db.collection('bookings')
-                    .doc(bookingDocId)
-                    .update({
-                      status: 'cancelled',
-                      updateTime: new Date(),
-                      cancelTime: new Date()
-                    });
-                  
-                  console.log('方法3结果:', updateResult);
-                  
-                  if (updateResult && updateResult.updated > 0) {
-                    updateSuccess = true;
-                    console.log('方法3成功：直接更新数据库成功');
-                    
-                    // 更新课程报名人数
-                    if (booking.courseId) {
-                      try {
-                        console.log('尝试更新课程报名人数:', booking.courseId);
-                        const courseUpdateResult = await db.collection('courses')
-                          .doc(booking.courseId)
-                          .update({
-                            bookingCount: db.command.inc(-1)
-                          });
-                          
-                        console.log('课程报名人数更新结果:', courseUpdateResult);
-                        if (courseUpdateResult && courseUpdateResult.updated > 0) {
-                          console.log('课程报名人数已成功减1');
-                        }
-                      } catch (courseErr) {
-                        console.error('更新课程报名人数失败:', courseErr);
-                      }
-                    }
-                  }
-                } catch (err3) {
-                  console.error('方法3失败:', err3);
-                }
-              }
-              
-              // 无论是否成功更新数据库，都更新本地状态
-              if (updateSuccess) {
-                uni.showToast({ 
-                  title: '取消成功', 
-                  icon: 'success'
-                });
-              } else {
-                console.log('云端更新失败，仅更新本地状态');
-                uni.showToast({ 
-                  title: '取消成功(仅本地)', 
-                  icon: 'success'
-                });
-              }
-              
-              // 更新预约状态计数
-              if (this.currentStatus === 'booked') {
-                this.statusCounts.booked = Math.max(0, this.statusCounts.booked - 1);
-              }
-              // 增加已取消计数
-              this.statusCounts.cancelled++;
-              
-              // 在内存中更新预约状态
-              this.updateBookingStatus(bookingDocId, 'cancelled');
-              
-              // 如果当前不是"已取消"选项卡，从当前列表中移除该项
-              if (this.currentStatus !== 'cancelled') {
-                this.removeBookingFromList(bookingDocId);
-                
-                // 提示用户可以在"已取消"标签查看
-                setTimeout(() => {
-                  uni.showToast({
-                    title: '可在"已取消"标签查看',
-                    icon: 'none',
-                    duration: 2000
-                  });
-                }, 1500);
-              }
-              
-              // 保存到本地存储
-              const cancelledBooking = {...booking, 
-                status: 'cancelled', 
-                cancelTime: new Date().toISOString()
-              };
-              this.storeCancelledBooking(cancelledBooking);
-              
-              // 标记预约状态已变更
-              this.markBookingChanged();
-              
-              // 发送取消事件，更新相关页面
-              uni.$emit('booking:cancel', {
-                courseId: booking.courseId || '',
-                userId: userId,
-                bookingId: bookingDocId
-              });
-              
-              // 如果当前在"已取消"标签页，重新加载列表以显示最新数据
-              if (this.currentStatus === 'cancelled') {
-                // 将刚刚取消的预约添加到列表头部
-                if (cancelledBooking && cancelledBooking._id) {
-                  // 避免重复添加
-                  const existingIndex = this.bookingList.findIndex(item => item && item._id === cancelledBooking._id);
-                  if (existingIndex === -1) {
-                    console.log('在已取消标签中添加最新取消的预约记录到头部');
-                    this.bookingList.unshift(cancelledBooking);
-                    this.total = this.bookingList.length;
-                    this.$forceUpdate();
-                  } else {
-                    console.log('预约记录已存在于列表中，更新状态');
-                    this.bookingList[existingIndex].status = 'cancelled';
-                    this.$forceUpdate();
-                  }
-                } else {
-                  // 如果无法直接添加，则重新加载整个列表
-                  console.log('无法直接添加取消的预约，刷新整个列表');
-                  this.resetList();
-                  this.loadBookingList();
-                }
-              }
-            } catch (e) {
-              console.error('取消预约失败:', e);
-              uni.showToast({ 
-                title: '取消失败，请稍后重试', 
-                icon: 'none'
-              });
-            } finally {
-              uni.hideLoading();
-            }
+            this.handleCancel(booking);
           }
         }
       });
     },
     
-    // 标记预约状态已变更
-    markBookingChanged() {
-      uni.setStorageSync('booking_changed', 'true');
-    },
-    
-    // 更新本地预约状态
-    updateBookingStatus(bookingId, newStatus) {
-      // 检查参数有效性
-      if (!bookingId) {
-        console.error('更新状态失败: 无效的预约ID');
-        return;
-      }
+    // 新增处理取消操作的方法
+    async handleCancel(booking) {
+      console.log('准备取消预约:', JSON.stringify(booking));
       
-      // 更新内存中的状态
-      const booking = this.bookingList.find(item => item && item._id === bookingId);
-      if (booking) {
-        booking.status = newStatus;
-        // 如果是取消状态，确保本地存储也被更新
-        if (newStatus === 'cancelled') {
-          this.storeCancelledBooking(booking);
+      try {
+        uni.showLoading({ title: '取消中...' });
+        
+        // 获取当前用户ID，提高安全性
+        const userInfoStr = uni.getStorageSync('userInfo');
+        let userId = '';
+        if (userInfoStr) {
+          try {
+            const userInfo = JSON.parse(userInfoStr);
+            userId = userInfo.userId || userInfo._id || '';
+          } catch (e) {
+            console.error('解析用户信息失败:', e);
+          }
         }
-        console.log(`已更新预约 ${bookingId} 的状态为 ${newStatus}`);
-      } else {
-        console.warn(`未找到预约ID为 ${bookingId} 的记录`);
-      }
-    },
-    
-    // 从列表中移除指定预约
-    removeBookingFromList(bookingId) {
-      if (!bookingId) {
-        console.error('移除预约失败: 无效的预约ID');
-        return;
-      }
-      
-      const index = this.bookingList.findIndex(item => item && item._id === bookingId);
-      if (index !== -1) {
-        this.bookingList.splice(index, 1);
-        console.log(`已从列表中移除预约 ${bookingId}`);
-      } else {
-        console.warn(`未找到预约ID为 ${bookingId} 的记录，无法移除`);
+        
+        // 确保bookingDocId有值
+        const bookingDocId = booking._id || '';
+        if (!bookingDocId) {
+          console.error('预约ID无效:', booking);
+          uni.showToast({
+            title: '预约ID无效',
+            icon: 'none'
+          });
+          uni.hideLoading();
+          return;
+        }
+        
+        console.log('取消预约:', {
+          _id: bookingDocId,
+          bookingId: booking.bookingId || '',
+          courseId: booking.courseId || '',
+          userId: userId,
+          bookingUserId: booking.userId || '',
+          status: booking.status || 'unknown'
+        });
+        
+        let updateSuccess = false;
+        
+        // 尝试方法1：使用cancelBooking云函数
+        try {
+          console.log('尝试方法1：使用cancelBooking云函数');
+          const cloudResult = await uniCloud.callFunction({
+            name: 'cancelBooking',
+            data: {
+              bookingId: bookingDocId,
+              userId: userId
+            }
+          });
+          
+          console.log('方法1结果:', JSON.stringify(cloudResult.result));
+          
+          if (cloudResult.result && cloudResult.result.success) {
+            updateSuccess = true;
+            console.log('方法1成功：使用cancelBooking云函数更新成功');
+            
+            // 检查课程更新状态
+            if (cloudResult.result.data && cloudResult.result.data.courseUpdated !== undefined) {
+              console.log('课程更新状态:', cloudResult.result.data.courseUpdated ? '成功' : '失败');
+              if (!cloudResult.result.data.courseUpdated) {
+                console.warn('❌ 警告: 预约已取消，但课程报名人数可能未减少，尝试直接更新');
+                
+                // 如果课程bookingCount未更新，尝试使用forceUpdateBooking云函数直接更新
+                if (booking.courseId) {
+                  try {
+                    console.log('尝试使用forceUpdateBooking云函数直接更新课程报名人数, 课程ID:', booking.courseId);
+                    
+                    const updateResult = await uniCloud.callFunction({
+                      name: 'forceUpdateBooking',
+                      data: {
+                        courseId: booking.courseId,
+                        updateCourseOnly: true,
+                        decreaseBookingCount: true
+                      }
+                    });
+                    
+                    console.log('直接更新课程报名人数结果:', JSON.stringify(updateResult.result));
+                    if (updateResult.result && updateResult.result.code === 0) {
+                      console.log('✅ 直接更新课程报名人数成功');
+                    } else {
+                      console.warn('❌ 直接更新课程报名人数失败:', updateResult.result?.message || '未知错误');
+                    }
+                  } catch (courseUpdateErr) {
+                    console.error('直接更新课程报名人数失败:', courseUpdateErr);
+                  }
+                }
+              }
+            }
+          }
+        } catch (err1) {
+          console.error('方法1失败:', err1);
+        }
+        
+        // 如果方法1失败，尝试方法2：使用forceUpdateBooking云函数
+        if (!updateSuccess) {
+          try {
+            console.log('尝试方法2：使用forceUpdateBooking云函数');
+            const forceResult = await uniCloud.callFunction({
+              name: 'forceUpdateBooking',
+              data: {
+                bookingId: bookingDocId,
+                status: 'cancelled',
+                updateCourseCount: true // 确保更新课程报名人数
+              }
+            });
+            
+            console.log('方法2结果:', JSON.stringify(forceResult.result));
+            
+            if (forceResult.result && forceResult.result.success) {
+              updateSuccess = true;
+              console.log('方法2成功：使用forceUpdateBooking云函数更新成功');
+              
+              // 检查课程更新状态，如果未更新，则尝试直接更新
+              if (forceResult.result.data && forceResult.result.data.courseUpdated !== undefined && !forceResult.result.data.courseUpdated) {
+                if (booking.courseId) {
+                  try {
+                    console.log('尝试使用forceUpdateBooking云函数直接更新课程报名人数, 课程ID:', booking.courseId);
+                    
+                    const updateResult = await uniCloud.callFunction({
+                      name: 'forceUpdateBooking',
+                      data: {
+                        courseId: booking.courseId,
+                        updateCourseOnly: true,
+                        decreaseBookingCount: true
+                      }
+                    });
+                    
+                    console.log('直接更新课程报名人数结果:', JSON.stringify(updateResult.result));
+                  } catch (directUpdateErr) {
+                    console.error('直接更新课程报名人数失败:', directUpdateErr);
+                  }
+                }
+              }
+            } else {
+              console.error('方法2失败，返回结果:', forceResult.result);
+            }
+          } catch (err2) {
+            console.error('方法2失败，错误信息:', err2);
+          }
+        }
+        
+        // 如果以上方法都失败，尝试方法3：直接更新数据库
+        if (!updateSuccess) {
+          try {
+            console.log('尝试方法3：直接操作数据库');
+            const db = uniCloud.database();
+            const updateResult = await db.collection('bookings')
+              .doc(bookingDocId)
+              .update({
+                status: 'cancelled',
+                updateTime: new Date(),
+                cancelTime: new Date()
+              });
+            
+            console.log('方法3结果:', updateResult);
+            
+            if (updateResult && updateResult.updated > 0) {
+              updateSuccess = true;
+              console.log('方法3成功：直接更新数据库成功');
+              
+              // 更新课程报名人数，使用forceUpdateBooking云函数
+              if (booking.courseId) {
+                try {
+                  console.log('尝试使用forceUpdateBooking云函数直接更新课程报名人数, 课程ID:', booking.courseId);
+                  
+                  const updateResult = await uniCloud.callFunction({
+                    name: 'forceUpdateBooking',
+                    data: {
+                      courseId: booking.courseId,
+                      updateCourseOnly: true,
+                      decreaseBookingCount: true
+                    }
+                  });
+                  
+                  console.log('直接更新课程报名人数结果:', JSON.stringify(updateResult.result));
+                } catch (courseErr) {
+                  console.error('更新课程报名人数失败:', courseErr);
+                }
+              }
+            }
+          } catch (err3) {
+            console.error('方法3失败:', err3);
+          }
+        }
+        
+        // 无论是否成功更新数据库，都更新本地状态
+        if (updateSuccess) {
+          uni.showToast({
+            title: '取消成功', 
+            icon: 'success'
+          });
+        } else {
+          console.log('云端更新失败，仅更新本地状态');
+          uni.showToast({
+            title: '取消成功(仅本地)', 
+            icon: 'success'
+          });
+        }
+        
+        // 更新预约状态计数（无论是否成功更新服务器）
+        const previousStatus = booking.status || 'unknown';
+        // 如果之前是已预约状态，减少已预约计数
+        if (previousStatus !== 'cancelled' && 
+            (previousStatus === 'pending' || 
+             previousStatus === 'confirmed_unpaid' || 
+             previousStatus === 'confirmed')) {
+          this.statusCounts.booked = Math.max(0, this.statusCounts.booked - 1);
+        }
+        // 如果之前是已完成状态，减少已完成计数
+        else if (previousStatus === 'finished') {
+          this.statusCounts.finished = Math.max(0, this.statusCounts.finished - 1);
+        }
+        
+        // 增加已取消计数，确保不重复计算
+        const previouslyCancelled = booking.status === 'cancelled';
+        if (!previouslyCancelled) {
+          this.statusCounts.cancelled++;
+        }
+        
+        // 在内存中更新预约状态
+        this.updateBookingStatus(bookingDocId, 'cancelled');
+        
+        // 如果当前不是"已取消"选项卡，从当前列表中移除该项
+        if (this.currentStatus !== 'cancelled') {
+          this.removeBookingFromList(bookingDocId);
+          
+          // 提示用户可以在"已取消"标签查看
+          setTimeout(() => {
+            uni.showToast({
+              title: `已取消，可在"已取消(${this.getTabCount('cancelled')})"标签查看`,
+              icon: 'none',
+              duration: 2000
+            });
+          }, 1500);
+        }
+        
+        // 保存到本地存储
+        const cancelledBooking = {...booking, 
+          status: 'cancelled', 
+          cancelTime: new Date().toISOString()
+        };
+        this.storeCancelledBooking(cancelledBooking);
+        
+        // 标记预约状态已变更
+        this.markBookingChanged();
+        
+        // 发送取消事件，更新相关页面
+        uni.$emit('booking:cancel', {
+          courseId: booking.courseId || '',
+          userId: userId,
+          bookingId: bookingDocId
+        });
+        
+        // 如果当前在"已取消"标签页，重新加载列表以显示最新数据
+        if (this.currentStatus === 'cancelled') {
+          // 将刚刚取消的预约添加到列表头部
+          if (cancelledBooking && cancelledBooking._id) {
+            // 避免重复添加
+            const existingIndex = this.bookingList.findIndex(item => item && item._id === cancelledBooking._id);
+            if (existingIndex === -1) {
+              console.log('在已取消标签中添加最新取消的预约记录到头部');
+              this.bookingList.unshift(cancelledBooking);
+              this.total = this.bookingList.length;
+              this.$forceUpdate();
+            } else {
+              console.log('预约记录已存在于列表中，更新状态');
+              this.bookingList[existingIndex].status = 'cancelled';
+              this.$forceUpdate();
+            }
+          } else {
+            // 如果无法直接添加，则重新加载整个列表
+            console.log('无法直接添加取消的预约，刷新整个列表');
+            this.resetList();
+            this.loadBookingList();
+          }
+        }
+      } catch (e) {
+        console.error('取消预约失败:', e);
+        uni.showToast({
+          title: '取消失败，请稍后重试', 
+          icon: 'none'
+        });
+      } finally {
+        uni.hideLoading();
       }
     },
     
@@ -1009,48 +1094,58 @@ export default {
         // 构建存储键名
         const key = `cancelled_booking_${bookingCopy._id}`;
         
+        // 检查是否已经存储过
+        const existingData = uni.getStorageSync(key);
+        const isNewStorage = !existingData;
+        
         // 保存已取消的预约数据
         uni.setStorageSync(key, JSON.stringify(bookingCopy));
-        console.log('已保存已取消预约数据:', bookingCopy._id);
         
-        // 记录最近取消的预约ID列表
-        let cancelledIds = uni.getStorageSync('cancelled_booking_ids') || '[]';
-        try {
-          cancelledIds = JSON.parse(cancelledIds);
-          if (!Array.isArray(cancelledIds)) {
+        // 只有首次存储才打印日志和执行后续逻辑
+        if (isNewStorage) {
+          console.log('已保存已取消预约数据:', bookingCopy._id);
+          
+          // 记录最近取消的预约ID列表
+          let cancelledIds = uni.getStorageSync('cancelled_booking_ids') || '[]';
+          try {
+            cancelledIds = JSON.parse(cancelledIds);
+            if (!Array.isArray(cancelledIds)) {
+              cancelledIds = [];
+            }
+          } catch (e) {
+            console.error('解析已取消预约ID列表失败:', e);
             cancelledIds = [];
           }
-        } catch (e) {
-          console.error('解析已取消预约ID列表失败:', e);
-          cancelledIds = [];
-        }
-        
-        // 检查是否已经存在
-        const alreadyExists = cancelledIds.includes(bookingCopy._id);
-        
-        // 添加到列表头部（如果不存在）
-        if (!alreadyExists) {
-          cancelledIds.unshift(bookingCopy._id);
-          // 最多保存20条
-          if (cancelledIds.length > 20) {
-            cancelledIds = cancelledIds.slice(0, 20);
-          }
           
-          // 更新计数和标记
-          this.statusCounts.cancelled = cancelledIds.length;
-          this.localCancelledLoaded = true;
-        }
-        
-        // 保存更新后的ID列表
-        uni.setStorageSync('cancelled_booking_ids', JSON.stringify(cancelledIds));
-        
-        // 如果不在已取消标签页，延迟后切换到已取消标签
-        if (this.currentStatus !== 'cancelled') {
-          this.switchToCancelledTab();
+          // 检查是否已经存在
+          const alreadyExists = cancelledIds.includes(bookingCopy._id);
+          
+          // 添加到列表头部（如果不存在）
+          if (!alreadyExists) {
+            cancelledIds.unshift(bookingCopy._id);
+            // 最多保存20条
+            if (cancelledIds.length > 20) {
+              cancelledIds = cancelledIds.slice(0, 20);
+            }
+            
+            // 更新计数和标记
+            this.statusCounts.cancelled = cancelledIds.length;
+            this.localCancelledLoaded = true;
+            
+            // 保存更新后的ID列表
+            uni.setStorageSync('cancelled_booking_ids', JSON.stringify(cancelledIds));
+            
+            // 如果是通过按钮取消的预约，且不在已取消标签页，延迟后切换到已取消标签
+            if (this.currentStatus !== 'cancelled' && !this.autoSwitchToCancel) {
+              this.switchToCancelledTab();
+            }
+          }
         }
       } catch (e) {
         console.error('保存已取消预约数据失败:', e);
       }
+      
+      return true;
     },
     
     // 切换到已取消标签页
@@ -1116,6 +1211,61 @@ export default {
       } catch (e) {
         console.error('加载本地已取消预约数量失败:', e);
       }
+    },
+    
+    // 更新预约状态
+    updateBookingStatus(bookingId, status) {
+      if (!bookingId || !status) return;
+      
+      console.log(`更新预约${bookingId}状态为${status}`);
+      
+      // 查找匹配的预约
+      const index = this.bookingList.findIndex(item => item && item._id === bookingId);
+      if (index !== -1) {
+        console.log(`找到预约在列表中的位置: ${index}, 更新状态`);
+        this.bookingList[index].status = status;
+        this.$forceUpdate();
+      } else {
+        console.log(`未在当前列表中找到预约: ${bookingId}`);
+      }
+    },
+    
+    // 从列表中移除预约
+    removeBookingFromList(bookingId) {
+      if (!bookingId) return;
+      
+      console.log(`从列表中移除预约: ${bookingId}`);
+      
+      // 查找匹配的预约
+      const index = this.bookingList.findIndex(item => item && item._id === bookingId);
+      if (index !== -1) {
+        console.log(`找到预约在列表中的位置: ${index}, 移除它`);
+        this.bookingList.splice(index, 1);
+        this.total = Math.max(0, this.total - 1);
+        this.$forceUpdate();
+      } else {
+        console.log(`未在当前列表中找到预约: ${bookingId}`);
+      }
+    },
+    
+    // 标记预约状态已变更
+    markBookingChanged() {
+      console.log('标记预约状态已变更');
+      uni.setStorageSync('booking_changed', 'true');
+    },
+    
+    // 获取用户ID
+    getUserId() {
+      try {
+        const userInfoStr = uni.getStorageSync('userInfo');
+        if (userInfoStr) {
+          const userInfo = JSON.parse(userInfoStr);
+          return userInfo.userId || userInfo._id || '';
+        }
+      } catch (e) {
+        console.error('获取用户ID失败:', e);
+      }
+      return '';
     }
   }
 }

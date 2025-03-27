@@ -10,7 +10,18 @@ exports.main = async (event, context) => {
   const { userInfo = {}, openid, phoneNumber, code, loginType } = event;
   
   console.log('登录函数调用，参数:', event);
-  console.log('登录类型:', loginType);
+  console.log('登录上下文:', { PLATFORM, APPID, CLIENTIP });
+  console.log('登录类型:', loginType, '平台:', PLATFORM);
+  
+  // 检查基本参数
+  if (!loginType) {
+    console.error('缺少loginType参数');
+    return {
+      code: 1,
+      success: false,
+      message: '登录类型不能为空'
+    };
+  }
   
   try {
     let userId;
@@ -101,10 +112,13 @@ exports.main = async (event, context) => {
         message: '手机号登录成功'
       };
     } else if (loginType === 'wechat') {
-      // 微信登录 - 需要前端传code
+      // 微信登录 - 需要前端传code或openid
+      console.log('处理微信登录，参数:', { openid, code, userInfo });
+      
       if (!code && !openid) {
+        console.error('微信登录缺少必要参数');
         return {
-          code: -1,
+          code: 1,
           success: false,
           message: '微信登录需要code或openid参数'
         };
@@ -161,16 +175,20 @@ exports.main = async (event, context) => {
       }
       
       // 查询用户是否已存在
+      console.log('使用openid查询用户:', wxOpenid);
       const userResult = await db.collection('users')
         .where({
           openid: wxOpenid
         })
         .get();
       
+      console.log('查询用户结果:', userResult);
+      
       if (userResult.data && userResult.data.length > 0) {
         // 用户已存在，更新用户信息
         const existUser = userResult.data[0];
         userId = existUser._id;
+        console.log('用户已存在，ID:', userId);
         
         // 更新用户信息
         if (Object.keys(userInfo).length > 0) {
@@ -189,6 +207,8 @@ exports.main = async (event, context) => {
               language: processedUserInfo.language,
               lastLoginTime: serverDate
             });
+            
+          console.log('用户信息已更新');
         } else {
           // 仅更新登录时间
           await db.collection('users')
@@ -196,34 +216,53 @@ exports.main = async (event, context) => {
             .update({
               lastLoginTime: serverDate
             });
+            
+          console.log('用户登录时间已更新');
         }
       } else {
         // 用户不存在，创建新用户
-        const newUser = processUserInfo(userInfo, wxOpenid);
+        console.log('用户不存在，创建新用户');
+        const processedUserInfo = processUserInfo(userInfo || {}, wxOpenid);
         
         // 添加额外信息
-        newUser.appid = APPID || '';
-        newUser.unionid = event.unionid || '';
-        newUser.createTime = serverDate;
-        newUser.lastLoginTime = serverDate;
-        newUser.platform = PLATFORM;
-        newUser.role = 'user'; // 默认角色为普通用户
-        newUser.status = 0; // 默认状态为正常
+        const newUser = {
+          ...processedUserInfo,
+          appid: APPID || '',
+          unionid: event.unionid || '',
+          createTime: serverDate,
+          lastLoginTime: serverDate,
+          platform: PLATFORM,
+          role: 'user', // 默认角色为普通用户
+          status: 0 // 默认状态为正常
+        };
         
-        const result = await db.collection('users')
-          .add(newUser);
+        console.log('新建用户数据:', newUser);
         
-        userId = result.id;
-        
-        // 更新userId字段，确保与_id一致
-        await db.collection('users')
-          .doc(userId)
-          .update({
-            userId: userId
-          });
+        try {
+          const result = await db.collection('users').add(newUser);
+          userId = result.id;
+          console.log('用户创建成功，ID:', userId);
+          
+          // 更新userId字段，确保与_id一致
+          await db.collection('users')
+            .doc(userId)
+            .update({
+              userId: userId
+            });
+            
+          console.log('用户ID已更新');
+        } catch (err) {
+          console.error('创建用户失败:', err);
+          return {
+            code: -1,
+            success: false,
+            message: '创建用户失败: ' + err.message
+          };
+        }
       }
       
       // 获取用户完整信息
+      console.log('获取用户完整信息, ID:', userId);
       const userData = await db.collection('users')
         .doc(userId)
         .get();
@@ -234,6 +273,8 @@ exports.main = async (event, context) => {
       // 添加userId字段
       filteredData.userId = userId;
       
+      console.log('登录成功，返回用户数据:', filteredData);
+      
       return {
         code: 0,
         success: true,
@@ -242,27 +283,45 @@ exports.main = async (event, context) => {
       };
     } else {
       // 未知登录类型
+      console.error('未知登录类型:', loginType);
       return {
-        code: -1,
+        code: 1,
         success: false,
         message: '未知登录类型'
       };
     }
   } catch (err) {
-    console.error('登录失败:', err);
+    // 详细记录错误信息
+    console.error('登录失败，详细错误:', err);
+    console.error('错误堆栈:', err.stack);
+    
+    // 识别常见错误类型并给出友好提示
+    let errorMessage = '登录失败';
+    
+    if (err.message && err.message.includes('openid')) {
+      errorMessage = 'OpenID 处理错误，请重试';
+    } else if (err.message && (err.message.includes('数据库') || err.message.includes('db'))) {
+      errorMessage = '数据库操作失败，请重试';
+    } else if (err.message && err.message.includes('超时')) {
+      errorMessage = '服务请求超时，请检查网络';
+    }
+    
     return {
       code: -1,
       success: false,
       data: null,
-      message: err.message || '登录失败'
+      message: errorMessage + ': ' + (err.message || '未知错误')
     };
   }
 };
 
 // 处理用户信息
 const processUserInfo = (userInfo, openid) => {
-  // 如果没有用户信息，创建一个基本的用户对象
-  if (!userInfo) {
+  console.log('处理用户信息:', { userInfo, openid });
+  
+  // 如果没有用户信息或用户信息是空对象，创建一个基本的用户对象
+  if (!userInfo || Object.keys(userInfo).length === 0) {
+    console.log('用户信息为空，使用默认值');
     return {
       openid,
       nickName: '微信用户',
@@ -272,7 +331,6 @@ const processUserInfo = (userInfo, openid) => {
       province: '',
       city: '',
       language: 'zh_CN',
-      createTime: Date.now(),
       lastLoginTime: Date.now(),
       role: 'user',
       status: 0
@@ -283,7 +341,7 @@ const processUserInfo = (userInfo, openid) => {
   return {
     openid,
     nickName: userInfo.nickName || userInfo.nickname || '微信用户',
-    avatarUrl: userInfo.avatarUrl || userInfo.avatar || userInfo.avatarUrl || '',
+    avatarUrl: userInfo.avatarUrl || userInfo.avatar || '',
     gender: userInfo.gender || 0,
     country: userInfo.country || '',
     province: userInfo.province || '',
@@ -297,9 +355,22 @@ const processUserInfo = (userInfo, openid) => {
 
 // 过滤用户数据，只返回前端需要的信息
 const filterUserData = (userData) => {
+  // 如果用户数据为空，返回一个基本的空对象
+  if (!userData) {
+    console.error('用户数据为空');
+    return {
+      userId: '',
+      nickName: '未知用户',
+      avatarUrl: '',
+      role: 'user'
+    };
+  }
+  
+  console.log('过滤前的用户数据:', userData);
+  
   // 确保返回必要的用户信息字段
-  return {
-    userId: userData._id,
+  const filteredData = {
+    userId: userData._id || '',
     openid: userData.openid || '',
     nickName: userData.nickName || userData.nickname || '微信用户',
     avatarUrl: userData.avatarUrl || userData.avatar || '',
@@ -312,4 +383,8 @@ const filterUserData = (userData) => {
     role: userData.role || 'user',
     phoneNumber: userData.phoneNumber || ''
   };
+  
+  console.log('过滤后的用户数据:', filteredData);
+  
+  return filteredData;
 }; 

@@ -1,6 +1,6 @@
 {
   "bsonType": "object",
-  "required": ["userId", "courseId"],
+  "required": ["userId", "courseId", "status"],
   "permission": {
     "read": true,
     "create": true,
@@ -17,63 +17,107 @@
     },
     "userId": {
       "bsonType": "string",
-      "description": "用户ID"
+      "description": "用户ID",
+      "foreignKey": "uni-id-users._id"
     },
     "courseId": {
       "bsonType": "string",
-      "description": "课程ID"
+      "description": "课程ID",
+      "foreignKey": "courses._id"
     },
     "courseTitle": {
       "bsonType": "string",
-      "description": "课程标题"
+      "description": "课程标题",
+      "trim": "both"
+    },
+    "courseName": {
+      "bsonType": "string",
+      "description": "课程名称（兼容字段）",
+      "trim": "both"
+    },
+    "startTime": {
+      "bsonType": "date",
+      "description": "课程开始时间"
+    },
+    "endTime": {
+      "bsonType": "date",
+      "description": "课程结束时间"
     },
     "courseStartTime": {
       "bsonType": "string",
-      "description": "课程开始时间"
+      "description": "课程开始时间（字符串格式）"
     },
     "courseEndTime": {
       "bsonType": "string",
-      "description": "课程结束时间"
+      "description": "课程结束时间（字符串格式）"
     },
     "schoolName": {
       "bsonType": "string",
-      "description": "校区名称"
+      "description": "校区名称",
+      "trim": "both"
     },
     "studentName": {
       "bsonType": "string",
-      "description": "学生姓名"
+      "description": "学生姓名",
+      "trim": "both"
     },
     "contactPhone": {
       "bsonType": "string",
-      "description": "联系电话"
+      "description": "联系电话",
+      "trim": "both"
+    },
+    "teacherPhone": {
+      "bsonType": "string",
+      "description": "教师电话",
+      "trim": "both"
+    },
+    "teacherName": {
+      "bsonType": "string",
+      "description": "教师名称",
+      "trim": "both"
     },
     "remark": {
       "bsonType": "string",
-      "description": "备注信息"
+      "description": "备注信息",
+      "trim": "both"
     },
     "status": {
       "bsonType": "string",
-      "description": "预约状态：pending-待确认，confirmed_unpaid-已确认未支付，confirmed-已确认已支付，finished-已完成，cancelled-已取消",
-      "enum": ["pending", "confirmed_unpaid", "confirmed", "finished", "cancelled"],
+      "description": "预约状态：pending-待确认，confirmed_unpaid-已确认未支付，confirmed-已确认已支付，finished-已完成，cancelled-已取消，cancel-已取消（兼容）",
+      "enum": ["pending", "confirmed_unpaid", "confirmed", "finished", "cancelled", "cancel"],
       "defaultValue": "pending"
     },
     "paymentStatus": {
       "bsonType": "string",
-      "description": "支付状态：unpaid-未支付，paid-已支付",
-      "enum": ["unpaid", "paid"],
+      "description": "支付状态：unpaid-未支付，paid-已支付，cancelled-已取消",
+      "enum": ["unpaid", "paid", "cancelled"],
       "defaultValue": "unpaid"
     },
     "createTime": {
-      "bsonType": "string",
-      "description": "创建时间"
+      "bsonType": "timestamp",
+      "description": "创建时间",
+      "defaultValue": {
+        "$env": "now"
+      }
     },
     "updateTime": {
-      "bsonType": "string",
-      "description": "更新时间"
+      "bsonType": "timestamp",
+      "description": "更新时间",
+      "defaultValue": {
+        "$env": "now"
+      }
     },
     "cancelTime": {
-      "bsonType": "string",
+      "bsonType": "timestamp",
       "description": "取消时间"
+    },
+    "confirmTime": {
+      "bsonType": "timestamp",
+      "description": "确认时间"
+    },
+    "finishTime": {
+      "bsonType": "timestamp",
+      "description": "完成时间"
     }
   }
 } 

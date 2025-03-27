@@ -1,0 +1,8 @@
+{
+  "name": "testDecreaseBookingCount",
+  "version": "1.0.0",
+  "description": "测试减少课程bookingCount的云函数",
+  "main": "index.js",
+  "author": "yueke",
+  "license": "ISC"
+} 
