@@ -118,7 +118,7 @@
 }
 .detail-content {
   padding: 30rpx;
-  margin-top: calc(44px + 25px + 10px);
+  margin-top: calc(44px + 25px + 30px);
 }
 .detail-content .article-header {
   margin-bottom: 40rpx;
@@ -171,6 +171,14 @@
   background-color: rgba(236, 122, 73, 0.05);
   padding: 20rpx;
   border-radius: 12rpx;
+}
+.detail-content .article-content .article-image {
+  margin: 30rpx 0;
+}
+.detail-content .article-content .article-image .content-image {
+  width: 100%;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 .detail-content .article-content :deep(._p) {
   margin-bottom: 24rpx;

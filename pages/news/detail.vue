@@ -21,8 +21,9 @@
         </view>
       </view>
       
+      <!-- 显示coverImage -->
       <view class="article-cover" v-if="newsInfo.coverImage">
-        <image class="cover-image" :src="newsInfo.coverImage" mode="widthFix"></image>
+        <image class="cover-image" :src="getImageUrl(newsInfo.coverImage)" mode="widthFix"></image>
       </view>
       
       <view class="article-content">
@@ -43,6 +44,11 @@
         
         <!-- 4. 都不存在时显示暂无内容 -->
         <view class="no-content" v-else>暂无内容</view>
+        
+        <!-- 如果有image字段且与coverImage不同，则在内容下方显示image -->
+        <view class="article-image" v-if="newsInfo.image && newsInfo.image !== newsInfo.coverImage">
+          <image class="content-image" :src="getImageUrl(newsInfo.image)" mode="widthFix"></image>
+        </view>
       </view>
     </view>
 
@@ -115,12 +121,34 @@ export default {
         if (result && result.data) {
           this.newsInfo = result.data;
           
+          // 处理图片URL
+          if (this.newsInfo.coverImage) {
+            this.newsInfo.coverImage = this.getImageUrl(this.newsInfo.coverImage);
+          }
+          
+          if (this.newsInfo.image) {
+            this.newsInfo.image = this.getImageUrl(this.newsInfo.image);
+          }
+          
+          // 检查两个图片是否一样，避免重复显示
+          if (this.newsInfo.coverImage && this.newsInfo.image && 
+              this.newsInfo.coverImage === this.newsInfo.image) {
+            console.log('图片路径相同，只显示一张');
+          } else if (this.newsInfo.coverImage && this.newsInfo.image) {
+            console.log('包含两个不同的图片:');
+            console.log('- 封面图:', this.newsInfo.coverImage);
+            console.log('- 内容图:', this.newsInfo.image);
+          }
+          
           // 打印详细的数据结构，方便调试
           console.log('新闻详情数据结构:', {
             title: this.newsInfo.title,
             content: this.newsInfo.content ? '有内容' : '无内容',
             summary: this.newsInfo.summary ? '有摘要' : '无摘要',
             coverImage: this.newsInfo.coverImage ? '有封面图' : '无封面图',
+            image: this.newsInfo.image ? '有图片' : '无图片',
+            coverImageUrl: this.newsInfo.coverImage,  // 添加具体的图片URL
+            imageUrl: this.newsInfo.image,            // 添加具体的图片URL
             publishTime: this.newsInfo.publishTime,
             createTime: this.newsInfo.createTime,
             source: this.newsInfo.source,
@@ -168,6 +196,29 @@ export default {
       const day = d.getDate().toString().padStart(2, '0');
       
       return `${year}-${month}-${day}`;
+    },
+    
+    // 获取图片URL，处理图片路径
+    getImageUrl(path) {
+      if (!path) return '/static/images/default-news.png';
+      
+      // 如果是完整路径，直接返回
+      if (path.startsWith('http')) {
+        return path;
+      }
+      
+      // 确保路径以/开头
+      if (!path.startsWith('/')) {
+        path = '/' + path;
+      }
+      
+      // 特殊处理static路径
+      if (!path.startsWith('/static') && path.includes('/static/')) {
+        path = path.substring(path.indexOf('/static'));
+      }
+      
+      console.log('处理后的图片路径:', path);
+      return path;
     },
     
     // 格式化内容
@@ -283,7 +334,7 @@ export default {
 
 .detail-content {
   padding: 30rpx;
-  margin-top: calc(44px + var(--status-bar-height) + 10px);
+  margin-top: calc(44px + var(--status-bar-height) + 30px);
   
   .article-header {
     margin-bottom: 40rpx;
@@ -343,6 +394,16 @@ export default {
         background-color: rgba(236, 122, 73, 0.05);
         padding: 20rpx;
         border-radius: 12rpx;
+      }
+    }
+    
+    .article-image {
+      margin: 30rpx 0;
+      
+      .content-image {
+        width: 100%;
+        border-radius: 12rpx;
+        box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
       }
     }
     

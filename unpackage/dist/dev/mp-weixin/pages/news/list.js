@@ -108,10 +108,12 @@ var render = function () {
     !_vm.loading && !(g0 === 0)
       ? _vm.__map(_vm.newsList, function (item, index) {
           var $orig = _vm.__get_orig(item)
-          var m0 = _vm.formatDate(item.publishTime || item.createTime)
+          var m0 = _vm.getImageUrl(item.coverImage || item.image)
+          var m1 = _vm.formatDate(item.publishTime || item.createTime)
           return {
             $orig: $orig,
             m0: m0,
+            m1: m1,
           }
         })
       : null
@@ -362,6 +364,26 @@ var _default = {
         console.error('格式化日期失败:', e);
         return '';
       }
+    },
+    // 获取图片URL，处理图片路径
+    getImageUrl: function getImageUrl(path) {
+      if (!path) return '/static/images/default-news.png';
+
+      // 如果是完整路径，直接返回
+      if (path.startsWith('http')) {
+        return path;
+      }
+
+      // 确保路径以/开头
+      if (!path.startsWith('/')) {
+        path = '/' + path;
+      }
+
+      // 特殊处理static路径
+      if (!path.startsWith('/static') && path.includes('/static/')) {
+        path = path.substring(path.indexOf('/static'));
+      }
+      return path;
     },
     // 页面导航
     navigateTo: function navigateTo(url) {

@@ -107,8 +107,18 @@ var render = function () {
     ? _vm.formatDate(_vm.newsInfo.publishTime || _vm.newsInfo.createTime)
     : null
   var m1 =
+    _vm.newsInfo && _vm.newsInfo.coverImage
+      ? _vm.getImageUrl(_vm.newsInfo.coverImage)
+      : null
+  var m2 =
     _vm.newsInfo && _vm.newsInfo.content
       ? _vm.formatContent(_vm.newsInfo.content)
+      : null
+  var m3 =
+    _vm.newsInfo &&
+    _vm.newsInfo.image &&
+    _vm.newsInfo.image !== _vm.newsInfo.coverImage
+      ? _vm.getImageUrl(_vm.newsInfo.image)
       : null
   _vm.$mp.data = Object.assign(
     {},
@@ -116,6 +126,8 @@ var render = function () {
       $root: {
         m0: m0,
         m1: m1,
+        m2: m2,
+        m3: m3,
       },
     }
   )
@@ -161,6 +173,12 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -284,12 +302,34 @@ var _default = {
                 if (result && result.data) {
                   _this.newsInfo = result.data;
 
+                  // 处理图片URL
+                  if (_this.newsInfo.coverImage) {
+                    _this.newsInfo.coverImage = _this.getImageUrl(_this.newsInfo.coverImage);
+                  }
+                  if (_this.newsInfo.image) {
+                    _this.newsInfo.image = _this.getImageUrl(_this.newsInfo.image);
+                  }
+
+                  // 检查两个图片是否一样，避免重复显示
+                  if (_this.newsInfo.coverImage && _this.newsInfo.image && _this.newsInfo.coverImage === _this.newsInfo.image) {
+                    console.log('图片路径相同，只显示一张');
+                  } else if (_this.newsInfo.coverImage && _this.newsInfo.image) {
+                    console.log('包含两个不同的图片:');
+                    console.log('- 封面图:', _this.newsInfo.coverImage);
+                    console.log('- 内容图:', _this.newsInfo.image);
+                  }
+
                   // 打印详细的数据结构，方便调试
                   console.log('新闻详情数据结构:', {
                     title: _this.newsInfo.title,
                     content: _this.newsInfo.content ? '有内容' : '无内容',
                     summary: _this.newsInfo.summary ? '有摘要' : '无摘要',
                     coverImage: _this.newsInfo.coverImage ? '有封面图' : '无封面图',
+                    image: _this.newsInfo.image ? '有图片' : '无图片',
+                    coverImageUrl: _this.newsInfo.coverImage,
+                    // 添加具体的图片URL
+                    imageUrl: _this.newsInfo.image,
+                    // 添加具体的图片URL
                     publishTime: _this.newsInfo.publishTime,
                     createTime: _this.newsInfo.createTime,
                     source: _this.newsInfo.source,
@@ -345,6 +385,27 @@ var _default = {
       var month = (d.getMonth() + 1).toString().padStart(2, '0');
       var day = d.getDate().toString().padStart(2, '0');
       return "".concat(year, "-").concat(month, "-").concat(day);
+    },
+    // 获取图片URL，处理图片路径
+    getImageUrl: function getImageUrl(path) {
+      if (!path) return '/static/images/default-news.png';
+
+      // 如果是完整路径，直接返回
+      if (path.startsWith('http')) {
+        return path;
+      }
+
+      // 确保路径以/开头
+      if (!path.startsWith('/')) {
+        path = '/' + path;
+      }
+
+      // 特殊处理static路径
+      if (!path.startsWith('/static') && path.includes('/static/')) {
+        path = path.substring(path.indexOf('/static'));
+      }
+      console.log('处理后的图片路径:', path);
+      return path;
     },
     // 格式化内容
     formatContent: function formatContent(content) {

@@ -238,6 +238,15 @@ async function handleNews(data) {
       updateTime: data.updateTime || Date.now()
     };
     
+    // 如果有coverImage，设置image字段，反之亦然
+    if (data.coverImage) {
+      newsData.coverImage = data.coverImage;
+      newsData.image = data.coverImage; // 同时设置image字段
+    } else if (data.image) {
+      newsData.image = data.image;
+      newsData.coverImage = data.image; // 同时设置coverImage字段
+    }
+    
     // 插入数据库
     const result = await db.collection('news').add(newsData);
     

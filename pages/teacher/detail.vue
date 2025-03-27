@@ -2,7 +2,7 @@
   <view class="teacher-detail">
     <view class="teacher-header">
       <view class="avatar-container">
-        <image class="teacher-avatar" :src="getImageUrl(teacher.avatarId || teacher.avatar)" mode="aspectFill"></image>
+        <image class="teacher-avatar" :src="getImageUrl(teacher.avatarId || teacher.avatar)" mode="aspectFit"></image>
       </view>
       
       <view class="teacher-info">
@@ -27,15 +27,26 @@
       <!-- 教师简介 -->
       <view v-if="currentTab === 0" class="intro-container">
         <view class="section-title">教师简介</view>
-        <view class="intro-text">{{teacher.introduction || '暂无简介'}}</view>
+        <view class="intro-text">{{teacher.description || teacher.introduction || '暂无简介'}}</view>
         
         <view class="section-title">教学经历</view>
         <view class="experience-list">
-          <view class="experience-item" v-for="(item, index) in teacher.experiences || []" :key="index">
+          <!-- 使用计算属性或方法来处理复杂条件，避免在模板中使用typeof -->
+          <view class="experience-item" v-if="hasArrayExperience">
+            <view v-for="(item, idx) in teacher.experience" :key="idx" class="experience-desc">
+              {{item}}
+            </view>
+          </view>
+          <!-- 使用简单条件判断 -->
+          <view class="experience-item" v-else-if="hasStringExperience">
+            <view class="experience-desc">{{teacher.experience}}</view>
+          </view>
+          <!-- 如果有experiences数组，显示数组内容 -->
+          <view class="experience-item" v-for="(item, index) in teacher.experiences || []" :key="'exp-'+index">
             <view class="experience-time">{{item.time}}</view>
             <view class="experience-desc">{{item.description}}</view>
           </view>
-          <empty-tip v-if="!teacher.experiences || teacher.experiences.length === 0" tip="暂无教学经历" :show="true"></empty-tip>
+          <empty-tip v-if="showEmptyExperienceTip" tip="暂无教学经历" :show="true"></empty-tip>
         </view>
         
         <view class="section-title">所获奖项</view>
@@ -44,13 +55,13 @@
             <view class="award-time">{{item.time}}</view>
             <view class="award-name">{{item.name}}</view>
           </view>
-          <empty-tip v-if="!teacher.awards || teacher.awards.length === 0" tip="暂无获奖信息" :show="true"></empty-tip>
+          <empty-tip v-if="showEmptyAwardsTip" tip="暂无获奖信息" :show="true"></empty-tip>
         </view>
       </view>
       
       <!-- 课程列表 -->
       <view v-if="currentTab === 1" class="course-container">
-        <view v-if="courseList.length > 0" class="course-list">
+        <view v-if="hasCourses" class="course-list">
           <course-card 
             v-for="(course, index) in courseList" 
             :key="course._id || index" 
@@ -66,7 +77,7 @@
       
       <!-- 学员评价 -->
       <view v-if="currentTab === 2" class="reviews-container">
-        <view v-if="reviewList.length > 0" class="review-list">
+        <view v-if="hasReviews" class="review-list">
           <view class="review-item" v-for="(review, index) in reviewList" :key="review._id || index">
             <view class="review-header">
               <image class="reviewer-avatar" :src="review.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
@@ -100,6 +111,8 @@ export default {
         avatar: '',
         avatarId: '',
         introduction: '',
+        description: '',
+        experience: '',
         experiences: [],
         awards: []
       },
@@ -124,6 +137,36 @@ export default {
       defaultAvatar: '/static/images/default-avatar.png'
     }
   },
+  computed: {
+    // 使用计算属性处理复杂条件判断
+    hasArrayExperience() {
+      return Array.isArray(this.teacher.experience) && this.teacher.experience.length > 0;
+    },
+    hasStringExperience() {
+      return this.teacher.experience && typeof this.teacher.experience === 'string';
+    },
+    showEmptyExperienceTip() {
+      if (Array.isArray(this.teacher.experience) && this.teacher.experience.length > 0) {
+        return false;
+      }
+      if (this.teacher.experience && typeof this.teacher.experience === 'string') {
+        return false;
+      }
+      if (this.teacher.experiences && this.teacher.experiences.length > 0) {
+        return false;
+      }
+      return true;
+    },
+    showEmptyAwardsTip() {
+      return !this.teacher.awards || this.teacher.awards.length === 0;
+    },
+    hasCourses() {
+      return this.courseList && this.courseList.length > 0;
+    },
+    hasReviews() {
+      return this.reviewList && this.reviewList.length > 0;
+    }
+  },
   onLoad(options) {
     if (options.id) {
       this.teacherId = options.id;
@@ -141,7 +184,12 @@ export default {
           console.log('教师原始数据:', JSON.stringify(res.data));
           
           // 确保数据中有avatarId字段，如果没有尝试其他可能的字段名
-          const teacherData = res.data;
+          const teacherData = { ...this.teacher }; // 创建一个副本，包含默认值
+          
+          // 合并接口返回的数据
+          Object.assign(teacherData, res.data);
+          
+          // 处理头像字段
           if (!teacherData.avatarId && teacherData.avatarID) {
             teacherData.avatarId = teacherData.avatarID;
           }
@@ -149,9 +197,36 @@ export default {
             teacherData.avatarId = teacherData.avatar_id;
           }
           
+          // 如果没有description字段，尝试使用introduction
+          if (!teacherData.description && teacherData.introduction) {
+            teacherData.description = teacherData.introduction;
+          }
+          
+          // 处理experience字段
+          if (!teacherData.experience) {
+            teacherData.experience = [];
+          } else if (typeof teacherData.experience === 'string') {
+            // 如果是字符串，转换为单项数组
+            console.log('将experience字符串转换为数组');
+            teacherData.experience = [teacherData.experience];
+          } else if (Array.isArray(teacherData.experience)) {
+            console.log('experience是数组，包含', teacherData.experience.length, '项');
+          }
+          
+          // 确保其他字段也被正确初始化
+          if (!teacherData.experiences) {
+            teacherData.experiences = [];
+          }
+          
+          if (!teacherData.awards) {
+            teacherData.awards = [];
+          }
+          
           this.teacher = teacherData;
           console.log('教师处理后数据:', this.teacher);
           console.log('头像ID:', this.teacher.avatarId);
+          console.log('教师简介(description):', this.teacher.description);
+          console.log('教学经历(experience):', this.teacher.experience);
           
           uni.setNavigationBarTitle({ title: this.teacher.name });
           
@@ -213,23 +288,62 @@ export default {
       const params = {
         page: this.page,
         pageSize: this.pageSize,
-        teacherId: this.teacherId
+        teacherId: this.teacherId // 确保传递教师ID参数
       };
       
       uni.showLoading({ title: '加载中' });
+      
+      console.log('获取教师课程，参数:', params);
+      console.log('当前教师名称:', this.teacher.name);
+      
+      // 处理教师名称，去掉可能的"老师"后缀
+      const teacherNameForMatch = this.teacher.name.replace(/老师$/, '');
+      console.log('用于匹配的教师名称:', teacherNameForMatch);
+      
+      // 使用教师详情接口返回的课程数据
+      if (this.teacher && this.teacher.courses && this.teacher.courses.length > 0) {
+        console.log('使用教师详情中的课程数据，课程数量:', this.teacher.courses.length);
+        // 筛选出当前教师的课程 - 通过teacherName匹配老师名称
+        const filteredCourses = this.teacher.courses.filter(course => {
+          // 检查课程的teacherName字段是否包含当前教师的名字
+          return course.teacherName && 
+                 (course.teacherName.includes(teacherNameForMatch) || 
+                  (teacherNameForMatch.includes(course.teacherName)));
+        });
+        
+        console.log('筛选后的教师课程数量:', filteredCourses.length);
+        this.courseList = filteredCourses;
+        this.hasMore = false; // 因为已经一次性获取了所有匹配的课程
+        this.loadMoreStatus = 'noMore';
+        this.loading = false;
+        uni.hideLoading();
+        return;
+      }
       
       // 调用获取课程列表接口
       this.$api.course.getCourseList(params)
         .then(res => {
           const list = res.data || [];
+          console.log('获取到课程列表原始数据:', list.length);
+          
+          // 筛选出当前教师的课程 - 通过teacherName匹配老师名称
+          const filteredList = list.filter(course => {
+            return course.teacherName && 
+                   (course.teacherName.includes(teacherNameForMatch) || 
+                    (teacherNameForMatch.includes(course.teacherName)));
+          });
+          
+          console.log('筛选后的教师课程数量:', filteredList.length);
           
           if (this.page === 1) {
-            this.courseList = list;
+            this.courseList = filteredList;
           } else {
-            this.courseList = [...this.courseList, ...list];
+            this.courseList = [...this.courseList, ...filteredList];
           }
           
-          this.hasMore = list.length === this.pageSize;
+          // 根据筛选后的列表长度与原列表长度判断是否有更多数据
+          // 如果筛选后的列表小于原列表，可能意味着有些课程被过滤掉了
+          this.hasMore = list.length === this.pageSize && filteredList.length > 0;
           this.loadMoreStatus = this.hasMore ? 'more' : 'noMore';
         })
         .catch(err => {
@@ -262,13 +376,15 @@ export default {
       
       uni.showLoading({ title: '加载中' });
       
-      // 这里假设有一个获取教师评价的接口
-      wx.cloud.callFunction({
-        name: 'getTeacherReviews',
-        data: params,
-        success: res => {
-          if (res.result && res.result.data) {
-            const list = res.result.data || [];
+      console.log('获取教师评价，参数:', params);
+      
+      // 检查 API 是否存在
+      if (this.$api.teacher.getTeacherReviews) {
+        // 使用 this.$api 接口
+        this.$api.teacher.getTeacherReviews(params)
+          .then(res => {
+            const list = res.data || [];
+            console.log('获取到教师评价列表:', list.length);
             
             if (this.reviewPage === 1) {
               this.reviewList = list;
@@ -278,27 +394,37 @@ export default {
             
             this.hasMoreReviews = list.length === this.pageSize;
             this.reviewLoadMoreStatus = this.hasMoreReviews ? 'more' : 'noMore';
-          } else {
-            uni.showToast({
-              title: '获取评价失败',
-              icon: 'none'
-            });
-            this.reviewLoadMoreStatus = 'more';
-          }
-        },
-        fail: err => {
-          console.error('获取评价失败', err);
-          uni.showToast({
-            title: '获取评价失败',
-            icon: 'none'
+          })
+          .catch(err => {
+            console.error('获取评价列表失败', err);
+            this.handleReviewError();
+          })
+          .finally(() => {
+            this.reviewLoading = false;
+            uni.hideLoading();
           });
-          this.reviewLoadMoreStatus = 'more';
-        },
-        complete: () => {
-          this.reviewLoading = false;
-          uni.hideLoading();
-        }
+      } else {
+        console.warn('教师评价接口未定义，使用空数据');
+        this.handleReviewError();
+        this.reviewLoading = false;
+        uni.hideLoading();
+      }
+    },
+    
+    // 处理评价获取失败
+    handleReviewError() {
+      // 设置空数据
+      if (this.reviewPage === 1) {
+        this.reviewList = [];
+      }
+      
+      uni.showToast({
+        title: '暂无评价数据',
+        icon: 'none'
       });
+      
+      this.hasMoreReviews = false;
+      this.reviewLoadMoreStatus = 'noMore';
     },
     
     // 加载更多课程
@@ -429,14 +555,16 @@ export default {
     margin-bottom: 20rpx;
     
     .avatar-container {
-      width: 160rpx;
-      height: 160rpx;
+      width: 180rpx;
+      height: 180rpx;
       margin-bottom: 20rpx;
+      overflow: hidden;
+      border-radius: 50%;
       
       .teacher-avatar {
         width: 100%;
         height: 100%;
-        border-radius: 50%;
+        object-fit: cover;
       }
     }
     
@@ -549,6 +677,8 @@ export default {
       .experience-desc, .award-name {
         font-size: 28rpx;
         color: #333;
+        line-height: 1.6;
+        margin-bottom: 10rpx;
       }
     }
     

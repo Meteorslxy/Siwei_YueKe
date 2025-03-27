@@ -103,6 +103,22 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
+  var l0 = _vm.__map(_vm.newsList, function (item, index) {
+    var $orig = _vm.__get_orig(item)
+    var m0 = _vm.getNewsImageUrl(item.coverImage || item.image)
+    return {
+      $orig: $orig,
+      m0: m0,
+    }
+  })
+  _vm.$mp.data = Object.assign(
+    {},
+    {
+      $root: {
+        l0: l0,
+      },
+    }
+  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -468,6 +484,26 @@ var _default = {
 
       // 否则作为云端图片处理
       return "/static/images/".concat(path);
+    },
+    // 获取新闻图片URL - 处理图片路径
+    getNewsImageUrl: function getNewsImageUrl(path) {
+      if (!path) return '/static/images/default-news.png';
+
+      // 如果是完整路径，直接返回
+      if (path.startsWith('http')) {
+        return path;
+      }
+
+      // 确保路径以/开头
+      if (!path.startsWith('/')) {
+        path = '/' + path;
+      }
+
+      // 特殊处理static路径
+      if (!path.startsWith('/static') && path.includes('/static/')) {
+        path = path.substring(path.indexOf('/static'));
+      }
+      return path;
     },
     // 格式化课程时间
     formatCourseTime: function formatCourseTime(startTime, endTime) {

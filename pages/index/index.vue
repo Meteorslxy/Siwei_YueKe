@@ -43,7 +43,7 @@
           v-for="(item, index) in newsList" 
           :key="index"
           @click="navigateToNewsDetail(item)">
-          <image class="news-image" :src="item.coverImage" mode="aspectFill"></image>
+          <image class="news-image" :src="getNewsImageUrl(item.coverImage || item.image)" mode="aspectFill"></image>
           <view class="news-content">
             <text class="news-title">{{item.title}}</text>
             <text class="news-desc">{{item.digest}}</text>
@@ -279,6 +279,28 @@ export default {
       
       // 否则作为云端图片处理
       return `/static/images/${path}`;
+    },
+    
+    // 获取新闻图片URL - 处理图片路径
+    getNewsImageUrl(path) {
+      if (!path) return '/static/images/default-news.png';
+      
+      // 如果是完整路径，直接返回
+      if (path.startsWith('http')) {
+        return path;
+      }
+      
+      // 确保路径以/开头
+      if (!path.startsWith('/')) {
+        path = '/' + path;
+      }
+      
+      // 特殊处理static路径
+      if (!path.startsWith('/static') && path.includes('/static/')) {
+        path = path.substring(path.indexOf('/static'));
+      }
+      
+      return path;
     },
     
     // 格式化课程时间

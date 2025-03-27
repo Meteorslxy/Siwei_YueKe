@@ -32,7 +32,7 @@
           v-for="(item, index) in newsList" 
           :key="index"
           @click="navigateTo(`/pages/news/detail?id=${item._id || item.id}`)">
-          <image class="news-image" :src="item.coverImage" mode="aspectFill"></image>
+          <image class="news-image" :src="getImageUrl(item.coverImage || item.image)" mode="aspectFill"></image>
           <view class="news-content">
             <view class="news-title">{{item.title}}</view>
             <view class="news-desc">{{item.digest}}</view>
@@ -184,6 +184,28 @@ export default {
       }
     },
     
+    // 获取图片URL，处理图片路径
+    getImageUrl(path) {
+      if (!path) return '/static/images/default-news.png';
+      
+      // 如果是完整路径，直接返回
+      if (path.startsWith('http')) {
+        return path;
+      }
+      
+      // 确保路径以/开头
+      if (!path.startsWith('/')) {
+        path = '/' + path;
+      }
+      
+      // 特殊处理static路径
+      if (!path.startsWith('/static') && path.includes('/static/')) {
+        path = path.substring(path.indexOf('/static'));
+      }
+      
+      return path;
+    },
+    
     // 页面导航
     navigateTo(url) {
       console.log('导航到:', url);
@@ -305,7 +327,7 @@ export default {
 
 .news-list {
   padding: 20rpx 30rpx;
-  margin-top: calc(44px + var(--status-bar-height) + 10px);
+  margin-top: calc(44px + var(--status-bar-height) + 30px);
   
   .news-item {
     display: flex;

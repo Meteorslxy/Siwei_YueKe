@@ -78,14 +78,16 @@
   margin-bottom: 20rpx;
 }
 .teacher-detail .teacher-header .avatar-container {
-  width: 160rpx;
-  height: 160rpx;
+  width: 180rpx;
+  height: 180rpx;
   margin-bottom: 20rpx;
+  overflow: hidden;
+  border-radius: 50%;
 }
 .teacher-detail .teacher-header .avatar-container .teacher-avatar {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  object-fit: cover;
 }
 .teacher-detail .teacher-header .teacher-info {
   text-align: center;
@@ -184,6 +186,8 @@
 .teacher-detail .teacher-content .experience-list .experience-desc, .teacher-detail .teacher-content .experience-list .award-name, .teacher-detail .teacher-content .awards-list .experience-desc, .teacher-detail .teacher-content .awards-list .award-name {
   font-size: 28rpx;
   color: #333;
+  line-height: 1.6;
+  margin-bottom: 10rpx;
 }
 .teacher-detail .teacher-content .review-list .review-item {
   background-color: #fff;

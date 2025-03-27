@@ -133,18 +133,8 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   var m0 = _vm.getImageUrl(_vm.teacher.avatarId || _vm.teacher.avatar)
-  var g0 =
-    _vm.currentTab === 0
-      ? !_vm.teacher.experiences || _vm.teacher.experiences.length === 0
-      : null
-  var g1 =
-    _vm.currentTab === 0
-      ? !_vm.teacher.awards || _vm.teacher.awards.length === 0
-      : null
-  var g2 = _vm.currentTab === 1 ? _vm.courseList.length : null
-  var g3 = _vm.currentTab === 2 ? _vm.reviewList.length : null
   var l0 =
-    _vm.currentTab === 2 && g3 > 0
+    _vm.currentTab === 2 && _vm.hasReviews
       ? _vm.__map(_vm.reviewList, function (review, index) {
           var $orig = _vm.__get_orig(review)
           var m1 = _vm.formatDate(review.createTime)
@@ -159,10 +149,6 @@ var render = function () {
     {
       $root: {
         m0: m0,
-        g0: g0,
-        g1: g1,
-        g2: g2,
-        g3: g3,
         l0: l0,
       },
     }
@@ -200,7 +186,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni, wx) {
+/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -208,6 +194,20 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -309,6 +309,8 @@ var _default = {
         avatar: '',
         avatarId: '',
         introduction: '',
+        description: '',
+        experience: '',
         experiences: [],
         awards: []
       },
@@ -338,6 +340,36 @@ var _default = {
       defaultAvatar: '/static/images/default-avatar.png'
     };
   },
+  computed: {
+    // 使用计算属性处理复杂条件判断
+    hasArrayExperience: function hasArrayExperience() {
+      return Array.isArray(this.teacher.experience) && this.teacher.experience.length > 0;
+    },
+    hasStringExperience: function hasStringExperience() {
+      return this.teacher.experience && typeof this.teacher.experience === 'string';
+    },
+    showEmptyExperienceTip: function showEmptyExperienceTip() {
+      if (Array.isArray(this.teacher.experience) && this.teacher.experience.length > 0) {
+        return false;
+      }
+      if (this.teacher.experience && typeof this.teacher.experience === 'string') {
+        return false;
+      }
+      if (this.teacher.experiences && this.teacher.experiences.length > 0) {
+        return false;
+      }
+      return true;
+    },
+    showEmptyAwardsTip: function showEmptyAwardsTip() {
+      return !this.teacher.awards || this.teacher.awards.length === 0;
+    },
+    hasCourses: function hasCourses() {
+      return this.courseList && this.courseList.length > 0;
+    },
+    hasReviews: function hasReviews() {
+      return this.reviewList && this.reviewList.length > 0;
+    }
+  },
   onLoad: function onLoad(options) {
     if (options.id) {
       this.teacherId = options.id;
@@ -358,16 +390,47 @@ var _default = {
           console.log('教师原始数据:', JSON.stringify(res.data));
 
           // 确保数据中有avatarId字段，如果没有尝试其他可能的字段名
-          var teacherData = res.data;
+          var teacherData = _objectSpread({}, _this.teacher); // 创建一个副本，包含默认值
+
+          // 合并接口返回的数据
+          Object.assign(teacherData, res.data);
+
+          // 处理头像字段
           if (!teacherData.avatarId && teacherData.avatarID) {
             teacherData.avatarId = teacherData.avatarID;
           }
           if (!teacherData.avatarId && teacherData.avatar_id) {
             teacherData.avatarId = teacherData.avatar_id;
           }
+
+          // 如果没有description字段，尝试使用introduction
+          if (!teacherData.description && teacherData.introduction) {
+            teacherData.description = teacherData.introduction;
+          }
+
+          // 处理experience字段
+          if (!teacherData.experience) {
+            teacherData.experience = [];
+          } else if (typeof teacherData.experience === 'string') {
+            // 如果是字符串，转换为单项数组
+            console.log('将experience字符串转换为数组');
+            teacherData.experience = [teacherData.experience];
+          } else if (Array.isArray(teacherData.experience)) {
+            console.log('experience是数组，包含', teacherData.experience.length, '项');
+          }
+
+          // 确保其他字段也被正确初始化
+          if (!teacherData.experiences) {
+            teacherData.experiences = [];
+          }
+          if (!teacherData.awards) {
+            teacherData.awards = [];
+          }
           _this.teacher = teacherData;
           console.log('教师处理后数据:', _this.teacher);
           console.log('头像ID:', _this.teacher.avatarId);
+          console.log('教师简介(description):', _this.teacher.description);
+          console.log('教学经历(experience):', _this.teacher.experience);
           uni.setNavigationBarTitle({
             title: _this.teacher.name
           });
@@ -428,21 +491,55 @@ var _default = {
       var params = {
         page: this.page,
         pageSize: this.pageSize,
-        teacherId: this.teacherId
+        teacherId: this.teacherId // 确保传递教师ID参数
       };
+
       uni.showLoading({
         title: '加载中'
       });
+      console.log('获取教师课程，参数:', params);
+      console.log('当前教师名称:', this.teacher.name);
+
+      // 处理教师名称，去掉可能的"老师"后缀
+      var teacherNameForMatch = this.teacher.name.replace(/老师$/, '');
+      console.log('用于匹配的教师名称:', teacherNameForMatch);
+
+      // 使用教师详情接口返回的课程数据
+      if (this.teacher && this.teacher.courses && this.teacher.courses.length > 0) {
+        console.log('使用教师详情中的课程数据，课程数量:', this.teacher.courses.length);
+        // 筛选出当前教师的课程 - 通过teacherName匹配老师名称
+        var filteredCourses = this.teacher.courses.filter(function (course) {
+          // 检查课程的teacherName字段是否包含当前教师的名字
+          return course.teacherName && (course.teacherName.includes(teacherNameForMatch) || teacherNameForMatch.includes(course.teacherName));
+        });
+        console.log('筛选后的教师课程数量:', filteredCourses.length);
+        this.courseList = filteredCourses;
+        this.hasMore = false; // 因为已经一次性获取了所有匹配的课程
+        this.loadMoreStatus = 'noMore';
+        this.loading = false;
+        uni.hideLoading();
+        return;
+      }
 
       // 调用获取课程列表接口
       this.$api.course.getCourseList(params).then(function (res) {
         var list = res.data || [];
+        console.log('获取到课程列表原始数据:', list.length);
+
+        // 筛选出当前教师的课程 - 通过teacherName匹配老师名称
+        var filteredList = list.filter(function (course) {
+          return course.teacherName && (course.teacherName.includes(teacherNameForMatch) || teacherNameForMatch.includes(course.teacherName));
+        });
+        console.log('筛选后的教师课程数量:', filteredList.length);
         if (_this2.page === 1) {
-          _this2.courseList = list;
+          _this2.courseList = filteredList;
         } else {
-          _this2.courseList = [].concat((0, _toConsumableArray2.default)(_this2.courseList), (0, _toConsumableArray2.default)(list));
+          _this2.courseList = [].concat((0, _toConsumableArray2.default)(_this2.courseList), (0, _toConsumableArray2.default)(filteredList));
         }
-        _this2.hasMore = list.length === _this2.pageSize;
+
+        // 根据筛选后的列表长度与原列表长度判断是否有更多数据
+        // 如果筛选后的列表小于原列表，可能意味着有些课程被过滤掉了
+        _this2.hasMore = list.length === _this2.pageSize && filteredList.length > 0;
         _this2.loadMoreStatus = _this2.hasMore ? 'more' : 'noMore';
       }).catch(function (err) {
         console.error('获取课程列表失败', err);
@@ -472,42 +569,47 @@ var _default = {
       uni.showLoading({
         title: '加载中'
       });
+      console.log('获取教师评价，参数:', params);
 
-      // 这里假设有一个获取教师评价的接口
-      wx.cloud.callFunction({
-        name: 'getTeacherReviews',
-        data: params,
-        success: function success(res) {
-          if (res.result && res.result.data) {
-            var list = res.result.data || [];
-            if (_this3.reviewPage === 1) {
-              _this3.reviewList = list;
-            } else {
-              _this3.reviewList = [].concat((0, _toConsumableArray2.default)(_this3.reviewList), (0, _toConsumableArray2.default)(list));
-            }
-            _this3.hasMoreReviews = list.length === _this3.pageSize;
-            _this3.reviewLoadMoreStatus = _this3.hasMoreReviews ? 'more' : 'noMore';
+      // 检查 API 是否存在
+      if (this.$api.teacher.getTeacherReviews) {
+        // 使用 this.$api 接口
+        this.$api.teacher.getTeacherReviews(params).then(function (res) {
+          var list = res.data || [];
+          console.log('获取到教师评价列表:', list.length);
+          if (_this3.reviewPage === 1) {
+            _this3.reviewList = list;
           } else {
-            uni.showToast({
-              title: '获取评价失败',
-              icon: 'none'
-            });
-            _this3.reviewLoadMoreStatus = 'more';
+            _this3.reviewList = [].concat((0, _toConsumableArray2.default)(_this3.reviewList), (0, _toConsumableArray2.default)(list));
           }
-        },
-        fail: function fail(err) {
-          console.error('获取评价失败', err);
-          uni.showToast({
-            title: '获取评价失败',
-            icon: 'none'
-          });
-          _this3.reviewLoadMoreStatus = 'more';
-        },
-        complete: function complete() {
+          _this3.hasMoreReviews = list.length === _this3.pageSize;
+          _this3.reviewLoadMoreStatus = _this3.hasMoreReviews ? 'more' : 'noMore';
+        }).catch(function (err) {
+          console.error('获取评价列表失败', err);
+          _this3.handleReviewError();
+        }).finally(function () {
           _this3.reviewLoading = false;
           uni.hideLoading();
-        }
+        });
+      } else {
+        console.warn('教师评价接口未定义，使用空数据');
+        this.handleReviewError();
+        this.reviewLoading = false;
+        uni.hideLoading();
+      }
+    },
+    // 处理评价获取失败
+    handleReviewError: function handleReviewError() {
+      // 设置空数据
+      if (this.reviewPage === 1) {
+        this.reviewList = [];
+      }
+      uni.showToast({
+        title: '暂无评价数据',
+        icon: 'none'
       });
+      this.hasMoreReviews = false;
+      this.reviewLoadMoreStatus = 'noMore';
     },
     // 加载更多课程
     loadMore: function loadMore() {
@@ -613,7 +715,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 
