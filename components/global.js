@@ -18,4 +18,8 @@ Vue.component('booking-item', BookingItem)
 
 // 教师卡片组件
 import TeacherCard from './teacher-card/teacher-card.vue'
-Vue.component('teacher-card', TeacherCard) 
+Vue.component('teacher-card', TeacherCard)
+
+// 收藏按钮组件
+import FavoriteButton from './favorite-button/favorite-button.vue'
+Vue.component('favorite-button', FavoriteButton) 

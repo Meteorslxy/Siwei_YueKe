@@ -48,7 +48,7 @@
       <view class="menu-group">
         <view class="menu-title">我的服务</view>
         <view class="menu-list">
-          <view class="menu-list-item" @click="navigateTo('/pages/user/favorite')">
+          <view class="menu-list-item" @click="navigateTo('/pages/user/favorite/index')">
             <text class="list-icon iconfont icon-favorite"></text>
             <text class="list-text">我的收藏</text>
             <text class="list-arrow iconfont icon-right"></text>
@@ -69,11 +69,11 @@
             <text class="list-arrow iconfont icon-right"></text>
           </view>
           <!-- 图片上传 -->
-          <view class="menu-list-item" @click="navigateTo('/pages/user/upload-image')">
+          <!-- <view class="menu-list-item" @click="navigateTo('/pages/user/upload-image')">
             <text class="list-icon iconfont icon-upload"></text>
             <text class="list-text">图片上传</text>
             <text class="list-arrow iconfont icon-right"></text>
-          </view>
+          </view> -->
           <!-- 管理员工具入口 - 开发环境可见 -->
           <view v-if="isDev" class="menu-list-item" @click="navigateTo('/pages/admin/import-data')">
             <text class="list-icon iconfont icon-setting"></text>

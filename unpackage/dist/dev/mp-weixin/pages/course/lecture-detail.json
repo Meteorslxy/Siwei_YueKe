@@ -3,6 +3,7 @@
   "navigationBarBackgroundColor": "#EC7A49",
   "navigationBarTextStyle": "white",
   "usingComponents": {
+    "favorite-button": "/components/favorite-button/favorite-button",
     "empty-tip": "/components/empty-tip/empty-tip"
   }
 }

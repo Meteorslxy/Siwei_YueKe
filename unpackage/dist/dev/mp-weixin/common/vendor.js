@@ -18462,6 +18462,14 @@ var _default = {
       "navigationBarTextStyle": "white"
     }
   }, {
+    "path": "pages/user/favorite/index",
+    "style": {
+      "navigationBarTitleText": "我的收藏",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "enablePullDownRefresh": true
+    }
+  }, {
     "path": "pages/course/detail",
     "style": {
       "navigationBarTitleText": "课程详情",
@@ -18843,6 +18851,7 @@ var _loadMore = _interopRequireDefault(__webpack_require__(/*! ./load-more/load-
 var _courseCard = _interopRequireDefault(__webpack_require__(/*! ./course-card/course-card.vue */ 60));
 var _bookingItem = _interopRequireDefault(__webpack_require__(/*! ./booking-item/booking-item.vue */ 67));
 var _teacherCard = _interopRequireDefault(__webpack_require__(/*! ./teacher-card/teacher-card.vue */ 74));
+var _favoriteButton = _interopRequireDefault(__webpack_require__(/*! ./favorite-button/favorite-button.vue */ 333));
 // 空数据提示组件
 
 _vue.default.component('empty-tip', _emptyTip.default);
@@ -18862,6 +18871,10 @@ _vue.default.component('booking-item', _bookingItem.default);
 // 教师卡片组件
 
 _vue.default.component('teacher-card', _teacherCard.default);
+
+// 收藏按钮组件
+
+_vue.default.component('favorite-button', _favoriteButton.default);
 
 /***/ }),
 /* 46 */,
@@ -19134,6 +19147,49 @@ var userApi = {
     return (0, _request.default)({
       name: 'getBookingCount',
       data: {}
+    });
+  },
+  // 添加收藏
+  addFavorite: function addFavorite(data) {
+    console.log('调用addFavorite，参数:', data);
+    return (0, _request.default)({
+      name: 'addFavorite',
+      data: data
+    }).then(function (res) {
+      return debugAPI('addFavorite返回', res);
+    });
+  },
+  // 取消收藏
+  removeFavorite: function removeFavorite(favoriteId) {
+    console.log('调用removeFavorite，ID:', favoriteId);
+    return (0, _request.default)({
+      name: 'removeFavorite',
+      data: {
+        favoriteId: favoriteId
+      }
+    }).then(function (res) {
+      return debugAPI('removeFavorite返回', res);
+    });
+  },
+  // 获取收藏列表
+  getFavoriteList: function getFavoriteList() {
+    var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    console.log('调用getFavoriteList，参数:', data);
+    return (0, _request.default)({
+      name: 'getFavoriteList',
+      data: data
+    }).then(function (res) {
+      return debugAPI('getFavoriteList返回', res);
+    });
+  },
+  // 检查是否已收藏
+  checkFavorite: function checkFavorite(data) {
+    console.log('调用checkFavorite，参数:', data);
+    return (0, _request.default)({
+      name: 'checkFavorite',
+      data: data
+    }).then(function (res) {
+      return debugAPI('checkFavorite返回', res);
     });
   }
 };

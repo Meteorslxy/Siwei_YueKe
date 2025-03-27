@@ -1,10 +1,20 @@
 <template>
   <view class="detail-container">
     <!-- 课程封面 -->
-    <view class="course-cover">
-      <image class="cover-image" :src="courseInfo.coverImage" mode="aspectFill"></image>
-      <view class="cover-mask"></view>
+    <view class="course-header">
+      <image class="course-cover" :src="courseInfo.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
+      <view class="course-overlay"></view>
       <view class="course-title">{{courseInfo.title}}</view>
+      <!-- 添加收藏按钮 -->
+      <view class="favorite-wrapper">
+        <favorite-button 
+          :itemId="courseId" 
+          itemType="course" 
+          :itemTitle="courseInfo.title" 
+          :itemCover="courseInfo.coverImage || '/static/images/course-default.jpg'"
+          @favorite-change="onFavoriteChange"
+        ></favorite-button>
+      </view>
     </view>
     
     <!-- 课程ID调试信息，仅在调试模式下显示 -->
@@ -106,7 +116,13 @@
 </template>
 
 <script>
+// 引入收藏按钮组件
+import FavoriteButton from '@/components/favorite-button/favorite-button.vue';
+
 export default {
+  components: {
+    FavoriteButton
+  },
   data() {
     return {
       courseId: '',
@@ -1433,6 +1449,11 @@ export default {
       
       // 强制更新UI
       this.$forceUpdate();
+    },
+    
+    // 收藏状态变化
+    onFavoriteChange(isFavorite) {
+      console.log('收藏状态变化:', isFavorite);
     }
   }
 }
@@ -1446,32 +1467,49 @@ export default {
 }
 
 /* 课程封面 */
-.course-cover {
-  height: 400rpx;
+.course-header {
   position: relative;
+  height: 400rpx;
   
-  .cover-image {
+  .course-cover {
     width: 100%;
     height: 100%;
+    object-fit: cover;
   }
   
-  .cover-mask {
+  .course-overlay {
     position: absolute;
+    top: 0;
     left: 0;
-    bottom: 0;
     width: 100%;
-    height: 60%;
-    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
   }
   
   .course-title {
     position: absolute;
-    bottom: 30rpx;
+    bottom: 40rpx;
     left: 30rpx;
-    right: 30rpx;
+    right: 90rpx;
     color: #fff;
-    font-size: 36rpx;
+    font-size: 38rpx;
     font-weight: bold;
+    line-height: 1.4;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .favorite-wrapper {
+    position: absolute;
+    top: 20rpx;
+    right: 20rpx;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 80rpx;
+    height: 80rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
   }
 }
 

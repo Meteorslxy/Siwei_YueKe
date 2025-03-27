@@ -4,6 +4,15 @@
       <image class="lecture-image" :src="lecture.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
       <view class="lecture-overlay"></view>
       <view class="lecture-title">{{lecture.title}}</view>
+      <view class="favorite-wrapper">
+        <favorite-button 
+          :itemId="lectureId" 
+          itemType="lecture" 
+          :itemTitle="lecture.title" 
+          :itemCover="lecture.coverImage || '/static/images/course-default.jpg'"
+          @favorite-change="onFavoriteChange"
+        ></favorite-button>
+      </view>
     </view>
     
     <view class="lecture-info">
@@ -106,7 +115,12 @@
 </template>
 
 <script>
+import FavoriteButton from '@/components/favorite-button/favorite-button.vue';
+
 export default {
+  components: {
+    FavoriteButton
+  },
   data() {
     return {
       lectureId: '',
@@ -250,6 +264,11 @@ export default {
       } else {
         return '即将开始';
       }
+    },
+    
+    // 收藏状态变化
+    onFavoriteChange(isFavorite) {
+      console.log('收藏状态变化:', isFavorite);
     }
   }
 }
@@ -264,32 +283,47 @@ export default {
   
   .lecture-header {
     position: relative;
-    height: 360rpx;
+    height: 400rpx;
     
     .lecture-image {
       width: 100%;
       height: 100%;
+      object-fit: cover;
     }
     
     .lecture-overlay {
       position: absolute;
-      left: 0;
       top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
     }
     
     .lecture-title {
       position: absolute;
+      bottom: 40rpx;
       left: 30rpx;
-      bottom: 30rpx;
-      right: 30rpx;
+      right: 90rpx;
       color: #fff;
-      font-size: 36rpx;
+      font-size: 38rpx;
       font-weight: bold;
-      line-height: 1.3;
-      text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
+      line-height: 1.4;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .favorite-wrapper {
+      position: absolute;
+      top: 20rpx;
+      right: 20rpx;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      width: 80rpx;
+      height: 80rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
     }
   }
   

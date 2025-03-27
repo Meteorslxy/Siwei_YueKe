@@ -9,13 +9,18 @@
     
     <view class="lecture-list">
       <block v-if="lectureList.length > 0">
-        <view class="lecture-item" v-for="(lecture, index) in lectureList" :key="lecture._id || index" @click="goToDetail(lecture)">
+        <view class="lecture-item" 
+              v-for="(lecture, index) in lectureList" 
+              :key="lecture._id || index" 
+              :data-lecture-id="lecture._id"
+              :data-index="index"
+              @tap.stop="handleLectureClick($event, lecture)">
           <view class="lecture-image">
             <image :src="lecture.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
           </view>
           
           <view class="lecture-info">
-            <view class="lecture-title">{{lecture.title}}</view>
+            <view class="lecture-title">{{lecture.title || '无标题'}}</view>
             
             <view class="lecture-meta">
               <view class="lecture-time">
@@ -25,12 +30,12 @@
               
               <view class="lecture-location">
                 <text class="iconfont icon-location"></text>
-                <text>{{lecture.location}}</text>
+                <text>{{lecture.location || '待定'}}</text>
               </view>
             </view>
             
             <view class="lecture-speaker">
-              <text>主讲人：{{lecture.speaker}}</text>
+              <text>主讲人：{{lecture.speaker || '待定'}}</text>
             </view>
             
             <view class="lecture-status" :class="{ 'status-ongoing': isOngoing(lecture), 'status-end': isEnded(lecture) }">
@@ -101,10 +106,18 @@ export default {
         .then(res => {
           const list = res.data || [];
           
+          // 验证每个讲座对象是否有_id
+          const validList = list.map(item => {
+            if (!item._id) {
+              console.warn('发现没有_id的讲座数据:', item);
+            }
+            return item;
+          });
+          
           if (this.page === 1) {
-            this.lectureList = list;
+            this.lectureList = validList;
           } else {
-            this.lectureList = [...this.lectureList, ...list];
+            this.lectureList = [...this.lectureList, ...validList];
           }
           
           this.hasMore = list.length === this.pageSize;
@@ -135,8 +148,55 @@ export default {
       }
     },
     
+    // 处理讲座点击
+    handleLectureClick(event, lecture) {
+      console.log('handleLectureClick事件触发，event:', event);
+      console.log('handleLectureClick传入的lecture:', lecture);
+      console.log('事件currentTarget:', event.currentTarget);
+      console.log('事件target:', event.target);
+      
+      // 获取数据集
+      const dataset = event.currentTarget.dataset;
+      console.log('点击项的dataset:', dataset);
+      
+      // 使用dataset作为备用
+      if (!lecture && dataset && dataset.lectureId) {
+        console.log('lecture参数为空，尝试从dataset获取lectureId:', dataset.lectureId);
+        const index = dataset.index;
+        if (this.lectureList && this.lectureList[index]) {
+          console.log('从列表中获取到讲座数据', this.lectureList[index]);
+          lecture = this.lectureList[index];
+        }
+      }
+      
+      this.goToDetail(lecture);
+    },
+    
     // 跳转到详情页
     goToDetail(lecture) {
+      console.log('goToDetail被调用，lecture:', lecture);
+      
+      if (!lecture) {
+        console.error('讲座对象为undefined');
+        const currentRoute = getCurrentPages().pop().route;
+        console.log('当前页面路由:', currentRoute);
+        
+        uni.showToast({
+          title: '讲座信息不完整',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      if (!lecture._id) {
+        console.error('讲座没有_id字段', lecture);
+        uni.showToast({
+          title: '讲座信息不完整',
+          icon: 'none'
+        });
+        return;
+      }
+      
       uni.navigateTo({
         url: `/pages/course/lecture-detail?id=${lecture._id}`
       });

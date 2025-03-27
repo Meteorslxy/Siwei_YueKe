@@ -6,7 +6,19 @@
       </view>
       
       <view class="teacher-info">
-        <view class="teacher-name">{{teacher.name}}</view>
+        <view class="name-favorite">
+          <view class="teacher-name">{{teacher.name}}</view>
+          <!-- 收藏按钮 -->
+          <view class="header-favorite">
+            <favorite-button 
+              :itemId="teacherId" 
+              itemType="teacher" 
+              :itemTitle="teacher.name" 
+              :itemCover="teacher.avatar || '/static/images/default-avatar.png'"
+              @favorite-change="onFavoriteChange"
+            ></favorite-button>
+          </view>
+        </view>
         <view class="teacher-title">{{teacher.title}}</view>
       </view>
     </view>
@@ -97,11 +109,23 @@
         <load-more :status="reviewLoadMoreStatus" @click="loadMoreReviews"></load-more>
       </view>
     </view>
+
+    <!-- 移除底部横幅中的收藏按钮，使用顶部的收藏按钮 -->
+    <view class="teacher-banner" v-if="false">
+      <image class="banner-image" :src="'/static/images/banner-bg.jpg'" mode="aspectFill"></image>
+      <view class="banner-overlay"></view>
+    </view>
   </view>
 </template>
 
 <script>
+// 引入收藏按钮组件
+import FavoriteButton from '@/components/favorite-button/favorite-button.vue';
+
 export default {
+  components: {
+    FavoriteButton
+  },
   data() {
     return {
       teacherId: '',
@@ -535,6 +559,11 @@ export default {
         .catch(err => {
           console.error('获取图片失败:', err);
         });
+    },
+    
+    // 收藏状态变化
+    onFavoriteChange(isFavorite) {
+      console.log('收藏状态变化:', isFavorite);
     }
   }
 }
@@ -547,35 +576,46 @@ export default {
   background-color: #f7f7f7;
   
   .teacher-header {
+    padding: 30rpx;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40rpx 0;
     background-color: #fff;
-    margin-bottom: 20rpx;
     
     .avatar-container {
-      width: 180rpx;
-      height: 180rpx;
-      margin-bottom: 20rpx;
-      overflow: hidden;
+      width: 160rpx;
+      height: 160rpx;
+      margin-right: 30rpx;
       border-radius: 50%;
+      overflow: hidden;
+      border: 6rpx solid rgba(236, 122, 73, 0.2);
       
       .teacher-avatar {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        border-radius: 50%;
       }
     }
     
     .teacher-info {
-      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      
+      .name-favorite {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10rpx;
+      }
       
       .teacher-name {
         font-size: 36rpx;
         font-weight: bold;
         color: #333;
-        margin-bottom: 10rpx;
+      }
+      
+      .header-favorite {
+        margin-right: 10rpx;
       }
       
       .teacher-title {
@@ -737,6 +777,26 @@ export default {
           line-height: 1.5;
         }
       }
+    }
+  }
+
+  .teacher-banner {
+    height: 260rpx;
+    position: relative;
+    
+    .banner-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .banner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.3);
     }
   }
 }

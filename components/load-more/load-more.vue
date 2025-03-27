@@ -1,5 +1,5 @@
 <template>
-  <view class="load-more" @click="onClick">
+  <view class="load-more" @click.stop="onClick">
     <view class="loading" v-if="status === 'loading'">
       <view class="loading-icon"></view>
       <text class="loading-text">加载中...</text>
@@ -19,9 +19,22 @@ export default {
     }
   },
   methods: {
-    onClick() {
+    onClick(event) {
+      // 防止事件冒泡
+      if (event) {
+        if (event.stopPropagation) {
+          event.stopPropagation();
+        }
+        // 小程序环境特殊处理
+        if (event.mp) {
+          event.mp.stopPropagation();
+        }
+      }
+      
+      // 只有非loading状态下触发点击事件
       if (this.status !== 'loading') {
-        this.$emit('click')
+        console.log('load-more 组件点击');
+        this.$emit('click');
       }
     }
   }

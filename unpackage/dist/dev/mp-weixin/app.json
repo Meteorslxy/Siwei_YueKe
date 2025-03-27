@@ -3,6 +3,7 @@
     "pages/index/index",
     "pages/course/course",
     "pages/user/user",
+    "pages/user/favorite/index",
     "pages/course/detail",
     "pages/teacher/detail",
     "pages/login/login",

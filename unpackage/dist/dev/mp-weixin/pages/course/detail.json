@@ -2,5 +2,7 @@
   "navigationBarTitleText": "课程详情",
   "navigationBarBackgroundColor": "#EC7A49",
   "navigationBarTextStyle": "white",
-  "usingComponents": {}
+  "usingComponents": {
+    "favorite-button": "/components/favorite-button/favorite-button"
+  }
 }

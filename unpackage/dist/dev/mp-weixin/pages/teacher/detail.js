@@ -101,6 +101,9 @@ __webpack_require__.r(__webpack_exports__);
 var components
 try {
   components = {
+    favoriteButton: function () {
+      return __webpack_require__.e(/*! import() | components/favorite-button/favorite-button */ "components/favorite-button/favorite-button").then(__webpack_require__.bind(null, /*! @/components/favorite-button/favorite-button.vue */ 333))
+    },
     emptyTip: function () {
       return __webpack_require__.e(/*! import() | components/empty-tip/empty-tip */ "components/empty-tip/empty-tip").then(__webpack_require__.bind(null, /*! @/components/empty-tip/empty-tip.vue */ 46))
     },
@@ -197,109 +200,15 @@ var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+var FavoriteButton = function FavoriteButton() {
+  __webpack_require__.e(/*! require.ensure | components/favorite-button/favorite-button */ "components/favorite-button/favorite-button").then((function () {
+    return resolve(__webpack_require__(/*! @/components/favorite-button/favorite-button.vue */ 333));
+  }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
+};
 var _default = {
+  components: {
+    FavoriteButton: FavoriteButton
+  },
   data: function data() {
     return {
       teacherId: '',
@@ -711,6 +620,10 @@ var _default = {
       }).catch(function (err) {
         console.error('获取图片失败:', err);
       });
+    },
+    // 收藏状态变化
+    onFavoriteChange: function onFavoriteChange(isFavorite) {
+      console.log('收藏状态变化:', isFavorite);
     }
   }
 };

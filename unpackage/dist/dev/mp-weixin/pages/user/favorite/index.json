@@ -1,11 +1,10 @@
 {
-  "navigationBarTitleText": "教师详情",
+  "navigationBarTitleText": "我的收藏",
   "navigationBarBackgroundColor": "#EC7A49",
   "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
   "usingComponents": {
-    "favorite-button": "/components/favorite-button/favorite-button",
     "empty-tip": "/components/empty-tip/empty-tip",
-    "course-card": "/components/course-card/course-card",
     "load-more": "/components/load-more/load-more"
   }
 }

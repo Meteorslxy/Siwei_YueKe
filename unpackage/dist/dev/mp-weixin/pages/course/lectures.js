@@ -245,6 +245,11 @@ var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/
 //
 //
 //
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -296,10 +301,18 @@ var _default = {
       // 调用获取讲座列表接口
       this.$api.lecture.getLectureList(params).then(function (res) {
         var list = res.data || [];
+
+        // 验证每个讲座对象是否有_id
+        var validList = list.map(function (item) {
+          if (!item._id) {
+            console.warn('发现没有_id的讲座数据:', item);
+          }
+          return item;
+        });
         if (_this.page === 1) {
-          _this.lectureList = list;
+          _this.lectureList = validList;
         } else {
-          _this.lectureList = [].concat((0, _toConsumableArray2.default)(_this.lectureList), (0, _toConsumableArray2.default)(list));
+          _this.lectureList = [].concat((0, _toConsumableArray2.default)(_this.lectureList), (0, _toConsumableArray2.default)(validList));
         }
         _this.hasMore = list.length === _this.pageSize;
         _this.loadMoreStatus = _this.hasMore ? 'more' : 'noMore';
@@ -324,8 +337,49 @@ var _default = {
         this.getLectureList();
       }
     },
+    // 处理讲座点击
+    handleLectureClick: function handleLectureClick(event, lecture) {
+      console.log('handleLectureClick事件触发，event:', event);
+      console.log('handleLectureClick传入的lecture:', lecture);
+      console.log('事件currentTarget:', event.currentTarget);
+      console.log('事件target:', event.target);
+
+      // 获取数据集
+      var dataset = event.currentTarget.dataset;
+      console.log('点击项的dataset:', dataset);
+
+      // 使用dataset作为备用
+      if (!lecture && dataset && dataset.lectureId) {
+        console.log('lecture参数为空，尝试从dataset获取lectureId:', dataset.lectureId);
+        var index = dataset.index;
+        if (this.lectureList && this.lectureList[index]) {
+          console.log('从列表中获取到讲座数据', this.lectureList[index]);
+          lecture = this.lectureList[index];
+        }
+      }
+      this.goToDetail(lecture);
+    },
     // 跳转到详情页
     goToDetail: function goToDetail(lecture) {
+      console.log('goToDetail被调用，lecture:', lecture);
+      if (!lecture) {
+        console.error('讲座对象为undefined');
+        var currentRoute = getCurrentPages().pop().route;
+        console.log('当前页面路由:', currentRoute);
+        uni.showToast({
+          title: '讲座信息不完整',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!lecture._id) {
+        console.error('讲座没有_id字段', lecture);
+        uni.showToast({
+          title: '讲座信息不完整',
+          icon: 'none'
+        });
+        return;
+      }
       uni.navigateTo({
         url: "/pages/course/lecture-detail?id=".concat(lecture._id)
       });

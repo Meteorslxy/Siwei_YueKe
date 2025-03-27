@@ -141,8 +141,21 @@ var _default = {
   },
 
   methods: {
-    onClick: function onClick() {
+    onClick: function onClick(event) {
+      // 防止事件冒泡
+      if (event) {
+        if (event.stopPropagation) {
+          event.stopPropagation();
+        }
+        // 小程序环境特殊处理
+        if (event.mp) {
+          event.mp.stopPropagation();
+        }
+      }
+
+      // 只有非loading状态下触发点击事件
       if (this.status !== 'loading') {
+        console.log('load-more 组件点击');
         this.$emit('click');
       }
     }

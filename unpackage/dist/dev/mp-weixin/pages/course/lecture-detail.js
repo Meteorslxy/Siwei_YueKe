@@ -101,6 +101,9 @@ __webpack_require__.r(__webpack_exports__);
 var components
 try {
   components = {
+    favoriteButton: function () {
+      return __webpack_require__.e(/*! import() | components/favorite-button/favorite-button */ "components/favorite-button/favorite-button").then(__webpack_require__.bind(null, /*! @/components/favorite-button/favorite-button.vue */ 333))
+    },
     emptyTip: function () {
       return __webpack_require__.e(/*! import() | components/empty-tip/empty-tip */ "components/empty-tip/empty-tip").then(__webpack_require__.bind(null, /*! @/components/empty-tip/empty-tip.vue */ 46))
     },
@@ -204,114 +207,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+var FavoriteButton = function FavoriteButton() {
+  __webpack_require__.e(/*! require.ensure | components/favorite-button/favorite-button */ "components/favorite-button/favorite-button").then((function () {
+    return resolve(__webpack_require__(/*! @/components/favorite-button/favorite-button.vue */ 333));
+  }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
+};
 var _default = {
+  components: {
+    FavoriteButton: FavoriteButton
+  },
   data: function data() {
     return {
       lectureId: '',
@@ -450,6 +354,10 @@ var _default = {
       } else {
         return '即将开始';
       }
+    },
+    // 收藏状态变化
+    onFavoriteChange: function onFavoriteChange(isFavorite) {
+      console.log('收藏状态变化:', isFavorite);
     }
   }
 };

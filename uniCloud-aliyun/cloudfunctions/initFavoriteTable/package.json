@@ -1,0 +1,12 @@
+{
+  "name": "initFavoriteTable",
+  "version": "1.0.0",
+  "description": "初始化收藏功能数据表",
+  "main": "index.js",
+  "dependencies": {},
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 60,
+    "triggers": []
+  }
+} 

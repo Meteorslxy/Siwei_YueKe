@@ -1,0 +1,188 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.favorite-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7f7f7;
+}
+.filter-bar {
+  display: flex;
+  background-color: #fff;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-bottom: 1rpx solid #eee;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.filter-bar .filter-item {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+.filter-bar .filter-item.active {
+  color: #FF6B00;
+  font-weight: bold;
+}
+.filter-bar .filter-item.active:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background-color: #FF6B00;
+  border-radius: 2rpx;
+}
+.favorite-list {
+  flex: 1;
+  padding: 20rpx;
+}
+.favorite-list .favorite-item {
+  display: flex;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  padding: 20rpx;
+}
+.favorite-list .favorite-item .item-content {
+  flex: 1;
+  display: flex;
+}
+.favorite-list .favorite-item .item-image {
+  width: 160rpx;
+  height: 120rpx;
+  margin-right: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+.favorite-list .favorite-item .item-image image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.favorite-list .favorite-item .item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.favorite-list .favorite-item .item-info .item-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  line-height: 1.4;
+}
+.favorite-list .favorite-item .item-info .item-type {
+  font-size: 24rpx;
+  color: #FF6B00;
+  background-color: rgba(255, 107, 0, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  display: inline-block;
+  margin-bottom: 10rpx;
+}
+.favorite-list .favorite-item .item-info .item-time {
+  font-size: 22rpx;
+  color: #999;
+}
+.favorite-list .favorite-item .item-action {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 20rpx;
+}
+.favorite-list .favorite-item .item-action .action-btn {
+  padding: 10rpx 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border-radius: 8rpx;
+}
+.favorite-list .favorite-item .item-action .action-btn .iconfont {
+  font-size: 36rpx;
+  color: #999;
+  margin-bottom: 6rpx;
+}
+.favorite-list .favorite-item .item-action .action-btn .delete-text {
+  font-size: 20rpx;
+  color: #999;
+}
+.favorite-list .favorite-item .item-action .delete-btn .iconfont, .favorite-list .favorite-item .item-action .delete-btn .delete-text {
+  color: #FF3B30;
+}
+

@@ -26,6 +26,15 @@
             }
         },
         {
+            "path": "pages/user/favorite/index",
+            "style": {
+                "navigationBarTitleText": "我的收藏",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
             "path": "pages/course/detail",
             "style": {
                 "navigationBarTitleText": "课程详情",

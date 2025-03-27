@@ -212,6 +212,42 @@ const userApi = {
       name: 'getBookingCount',
       data: {}
     });
+  },
+  
+  // 添加收藏
+  addFavorite(data) {
+    console.log('调用addFavorite，参数:', data);
+    return request({
+      name: 'addFavorite',
+      data
+    }).then(res => debugAPI('addFavorite返回', res));
+  },
+  
+  // 取消收藏
+  removeFavorite(favoriteId) {
+    console.log('调用removeFavorite，ID:', favoriteId);
+    return request({
+      name: 'removeFavorite',
+      data: { favoriteId }
+    }).then(res => debugAPI('removeFavorite返回', res));
+  },
+  
+  // 获取收藏列表
+  getFavoriteList(data = {}) {
+    console.log('调用getFavoriteList，参数:', data);
+    return request({
+      name: 'getFavoriteList',
+      data
+    }).then(res => debugAPI('getFavoriteList返回', res));
+  },
+  
+  // 检查是否已收藏
+  checkFavorite(data) {
+    console.log('调用checkFavorite，参数:', data);
+    return request({
+      name: 'checkFavorite',
+      data
+    }).then(res => debugAPI('checkFavorite返回', res));
   }
 }
 

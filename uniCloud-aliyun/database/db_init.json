@@ -1,0 +1,57 @@
+{
+  "collection": {
+    "favorites": {
+      "data": [],
+      "index": [
+        {
+          "IndexName": "idx_user_type",
+          "MgoKeySchema": {
+            "MgoIndexKeys": [
+              {
+                "Name": "userId",
+                "Direction": "1"
+              },
+              {
+                "Name": "itemType",
+                "Direction": "1"
+              }
+            ],
+            "MgoIsUnique": false
+          }
+        },
+        {
+          "IndexName": "idx_user_item_type",
+          "MgoKeySchema": {
+            "MgoIndexKeys": [
+              {
+                "Name": "userId",
+                "Direction": "1"
+              },
+              {
+                "Name": "itemId",
+                "Direction": "1"
+              },
+              {
+                "Name": "itemType",
+                "Direction": "1"
+              }
+            ],
+            "MgoIsUnique": true
+          }
+        },
+        {
+          "IndexName": "idx_create_time",
+          "MgoKeySchema": {
+            "MgoIndexKeys": [
+              {
+                "Name": "createTime",
+                "Direction": "-1"
+              }
+            ],
+            "MgoIsUnique": false
+          }
+        }
+      ]
+    }
+  }
+} 

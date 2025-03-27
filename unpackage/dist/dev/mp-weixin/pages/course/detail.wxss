@@ -70,30 +70,46 @@
   padding-bottom: 120rpx;
 }
 /* 课程封面 */
-.course-cover {
-  height: 400rpx;
+.course-header {
   position: relative;
+  height: 400rpx;
 }
-.course-cover .cover-image {
+.course-header .course-cover {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
-.course-cover .cover-mask {
+.course-header .course-overlay {
   position: absolute;
+  top: 0;
   left: 0;
-  bottom: 0;
   width: 100%;
-  height: 60%;
-  background-image: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6));
 }
-.course-cover .course-title {
+.course-header .course-title {
   position: absolute;
-  bottom: 30rpx;
+  bottom: 40rpx;
   left: 30rpx;
-  right: 30rpx;
+  right: 90rpx;
   color: #fff;
-  font-size: 36rpx;
+  font-size: 38rpx;
   font-weight: bold;
+  line-height: 1.4;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.course-header .favorite-wrapper {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
 }
 /* 课程信息卡片 */
 .info-card {

@@ -1,0 +1,48 @@
+{
+  "bsonType": "object",
+  "required": ["userId", "itemId", "itemType", "createTime"],
+  "permission": {
+    "read": true,
+    "create": "auth.uid != null",
+    "update": "doc.userId == auth.uid",
+    "delete": "doc.userId == auth.uid"
+  },
+  "properties": {
+    "_id": {
+      "description": "ID，系统自动生成"
+    },
+    "userId": {
+      "bsonType": "string",
+      "description": "用户ID，关联用户表"
+    },
+    "itemId": {
+      "bsonType": "string",
+      "description": "被收藏项目的ID"
+    },
+    "itemType": {
+      "bsonType": "string",
+      "description": "被收藏项目的类型，如course、lecture、teacher等",
+      "enum": ["course", "lecture", "teacher", "news"]
+    },
+    "itemTitle": {
+      "bsonType": "string",
+      "description": "被收藏项目的标题"
+    },
+    "itemCover": {
+      "bsonType": "string",
+      "description": "被收藏项目的封面图URL"
+    },
+    "itemUrl": {
+      "bsonType": "string",
+      "description": "被收藏项目的详情页URL"
+    },
+    "createTime": {
+      "bsonType": "timestamp",
+      "description": "收藏时间"
+    },
+    "updateTime": {
+      "bsonType": "timestamp",
+      "description": "更新时间"
+    }
+  }
+} 
