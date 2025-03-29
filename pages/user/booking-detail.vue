@@ -21,7 +21,7 @@
       </view>
       <view class="info-row">
         <text class="info-label">课程时间：</text>
-        <text class="info-value">{{formatCourseTime(bookingDetail.courseStartTime, bookingDetail.courseEndTime)}}</text>
+        <text class="info-value">{{formattedCourseTime}}</text>
       </view>
       <view class="info-row">
         <text class="info-label">校区地点：</text>
@@ -42,7 +42,7 @@
       </view>
       <view class="info-row">
         <text class="info-label">联系电话：</text>
-        <text class="info-value">{{bookingDetail.contactPhone}}</text>
+        <text class="info-value">{{bookingDetail.userPhoneNumber || '暂无'}}</text>
       </view>
       <view class="info-row" v-if="bookingDetail.remark">
         <text class="info-label">备注信息：</text>
@@ -51,17 +51,18 @@
     </view>
     
     <!-- 操作区域 -->
-    <view class="action-bar">
-      <view class="action-btn outline" @click="goBack">返回列表</view>
-      
-      <block v-if="bookingDetail.status === 'pending' || bookingDetail.status === 'confirmed_unpaid'">
-        <view class="action-btn primary" @click="cancelBooking">取消预约</view>
-      </block>
-      
-      <block v-if="bookingDetail.status === 'confirmed'">
-        <view class="action-btn" @click="contactTeacher">联系老师</view>
-        <view class="action-btn primary" @click="navigateToCourse">查看课程</view>
-      </block>
+    <view class="action-area">
+      <view class="action-bar">
+        <view class="action-btn outline" @click="goBack">返回列表</view>
+        
+        <block v-if="bookingDetail.status === 'pending' || bookingDetail.status === 'confirmed_unpaid'">
+          <view class="action-btn primary" @click="cancelBooking">取消预约</view>
+        </block>
+        
+        <block v-if="bookingDetail.status === 'confirmed'">
+          <view class="action-btn primary" @click="contactTeacher">联系老师</view>
+        </block>
+      </view>
     </view>
     
     <!-- 取消预约弹窗 -->
@@ -87,13 +88,15 @@ export default {
         bookingId: '',
         courseId: '',
         courseTitle: '',
+        courseTime: '',
         courseStartTime: '',
         courseEndTime: '',
         schoolName: '',
         studentName: '',
-        contactPhone: '',
+        userPhoneNumber: '',
         remark: '',
         status: 'pending',
+        paymentStatus: '',
         createTime: ''
       }
     }
@@ -117,10 +120,18 @@ export default {
       return this.getStatusIcon(this.bookingDetail.status);
     },
     statusText() {
-      return this.getStatusText(this.bookingDetail.status);
+      return this.getStatusText(this.bookingDetail.status, this.bookingDetail.paymentStatus);
     },
     statusDesc() {
-      return this.getStatusDesc(this.bookingDetail.status);
+      return this.getStatusDesc(this.bookingDetail.status, this.bookingDetail.paymentStatus);
+    },
+    formattedCourseTime() {
+      // 从课程开始和结束时间格式化课程时间
+      if (this.bookingDetail.courseStartTime && this.bookingDetail.courseEndTime) {
+        return `${this.bookingDetail.courseStartTime} - ${this.bookingDetail.courseEndTime}`;
+      } else {
+        return this.bookingDetail.courseTime || '暂无';
+      }
     }
   },
   methods: {
@@ -151,7 +162,13 @@ export default {
         console.log('预约详情云函数返回结果:', res.result)
         
         if (res.result && res.result.success && res.result.data) {
-          this.bookingDetail = res.result.data
+          // 合并返回的数据
+          this.bookingDetail = {
+            ...this.bookingDetail,
+            ...res.result.data,
+            courseTime: res.result.data.courseTime || this.formatCourseTimeFromFields(res.result.data),
+            userPhoneNumber: res.result.data.userPhoneNumber || ''
+          }
           console.log('获取到预约详情:', this.bookingDetail)
         } else {
           console.error('获取预约详情失败:', res.result)
@@ -171,20 +188,12 @@ export default {
       }
     },
     
-    // 格式化课程时间
-    formatCourseTime(startTime, endTime) {
-      if (!startTime) return ''
-      
-      const formatDateTime = (dateStr) => {
-        const date = new Date(dateStr)
-        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    // 从字段格式化课程时间
+    formatCourseTimeFromFields(data) {
+      if (data.courseStartTime && data.courseEndTime) {
+        return `${data.courseStartTime} - ${data.courseEndTime}`;
       }
-      
-      if (endTime) {
-        return `${formatDateTime(startTime)} 至 ${formatDateTime(endTime)}`
-      }
-      
-      return formatDateTime(startTime)
+      return '';
     },
     
     // 格式化预约时间
@@ -197,7 +206,24 @@ export default {
     
     // 返回列表
     goBack() {
-      uni.navigateBack()
+      // 如果有课程ID，则跳转到课程详情
+      if (this.bookingDetail && this.bookingDetail.courseId) {
+        // 检查是否是从课程详情页来的
+        const pages = getCurrentPages();
+        const prevPage = pages[pages.length - 2];
+        
+        // 如果前一个页面不是课程详情，且课程未取消，则跳转到课程详情
+        if (prevPage && !prevPage.route.includes('/pages/course/detail') && this.bookingDetail.status !== 'cancelled') {
+          console.log('返回并跳转到课程详情页');
+          uni.redirectTo({
+            url: `/pages/course/detail?id=${this.bookingDetail.courseId}`
+          });
+          return;
+        }
+      }
+      
+      // 默认返回上一页
+      uni.navigateBack();
     },
     
     // 取消预约
@@ -353,7 +379,7 @@ export default {
     // 联系老师
     contactTeacher() {
       // 检查是否有联系电话
-      const phoneNumber = this.bookingDetail.contactPhone || this.bookingDetail.teacherPhone || '';
+      const phoneNumber = this.bookingDetail.userPhoneNumber || this.bookingDetail.teacherPhone || '';
       
       if (!phoneNumber) {
         uni.showToast({
@@ -374,13 +400,6 @@ export default {
       });
     },
     
-    // 查看课程详情
-    navigateToCourse() {
-      uni.navigateTo({
-        url: `/pages/course/detail?id=${this.bookingDetail.courseId}`
-      })
-    },
-    
     // 获取状态图标
     getStatusIcon(status) {
       switch(status) {
@@ -398,14 +417,21 @@ export default {
     },
     
     // 获取状态文本
-    getStatusText(status) {
+    getStatusText(status, paymentStatus) {
+      // 如果支付状态为已付款，优先显示已支付状态
+      if (paymentStatus === 'paid') {
+        return status === 'confirmed' ? '已确认（已缴费）' : 
+               status === 'finished' ? '已完成' : 
+               status === 'cancelled' ? '已取消' : '已缴费';
+      }
+      
       switch(status) {
         case 'pending':
           return '待确认（未缴费）';
         case 'confirmed_unpaid':
           return '已确认（未缴费）';
         case 'confirmed':
-          return '已确认（已缴费）';
+          return paymentStatus === 'paid' ? '已确认（已缴费）' : '已确认（未缴费）';
         case 'finished':
           return '已完成';
         case 'cancelled':
@@ -416,14 +442,21 @@ export default {
     },
     
     // 获取状态描述
-    getStatusDesc(status) {
+    getStatusDesc(status, paymentStatus) {
+      // 如果支付状态为已付款，优先显示已支付状态的描述
+      if (paymentStatus === 'paid') {
+        return status === 'confirmed' ? '教师已确认您的预约，您已完成缴费，请按时参加课程' : 
+               status === 'finished' ? '课程已顺利完成，感谢您的参与' : 
+               status === 'cancelled' ? '预约已取消' : '您已完成缴费，等待教师确认';
+      }
+      
       switch(status) {
         case 'pending':
           return '您的预约正在等待教师确认，未缴费状态可随时取消';
         case 'confirmed_unpaid':
           return '教师已确认您的预约，但您尚未缴费，请及时缴费或取消';
         case 'confirmed':
-          return '教师已确认您的预约，您已完成缴费，请按时参加课程';
+          return paymentStatus === 'paid' ? '教师已确认您的预约，您已完成缴费，请按时参加课程' : '教师已确认您的预约，但您尚未缴费，请及时缴费或取消';
         case 'finished':
           return '课程已顺利完成，感谢您的参与';
         case 'cancelled':
@@ -439,8 +472,9 @@ export default {
 <style lang="scss">
 .detail-container {
   min-height: 100vh;
-  background-color: $bg-color;
+  background-color: #f5f5f5;
   padding-bottom: 120rpx;
+  position: relative;
 }
 
 /* 图标样式 */
@@ -558,35 +592,38 @@ export default {
 }
 
 /* 操作区域 */
-.action-bar {
+.action-area {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  display: flex;
-  padding: 20rpx;
   background-color: #fff;
-  box-shadow: 0 -2rpx 6rpx rgba(0, 0, 0, 0.05);
+  padding: 20rpx 30rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
   
-  .action-btn {
-    flex: 1;
-    height: 80rpx;
-    line-height: 80rpx;
-    text-align: center;
-    font-size: 28rpx;
-    color: $text-color;
-    background-color: #f5f5f5;
-    border-radius: 40rpx;
-    margin: 0 10rpx;
+  .action-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30rpx;
     
-    &.outline {
-      background-color: #fff;
-      border: 1rpx solid $border-color;
-    }
-    
-    &.primary {
-      color: #fff;
-      background-color: $theme-color;
+    .action-btn {
+      flex: 1;
+      height: 80rpx;
+      line-height: 80rpx;
+      text-align: center;
+      border-radius: 40rpx;
+      font-size: 28rpx;
+      
+      &.outline {
+        border: 1rpx solid $theme-color;
+        color: $theme-color;
+      }
+      
+      &.primary {
+        background-color: $theme-color;
+        color: #fff;
+      }
     }
   }
 }

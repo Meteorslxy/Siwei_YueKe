@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * 悦课小程序云函数连接测试
+ * 云函数入口文件
+ * 四维教育小程序云函数连接测试
  * @description 用于测试云函数连接状态的函数
  */
 exports.main = async (event, context) => {

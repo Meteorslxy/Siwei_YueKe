@@ -1,5 +1,17 @@
 <template>
   <view class="teacher-detail">
+    <!-- 固定在右上角的收藏按钮 -->
+    <view class="fixed-favorite-wrapper" :style="{top: statusBarHeight + 'px'}">
+      <favorite-button 
+        :itemId="teacherId" 
+        itemType="teacher" 
+        :itemTitle="teacher.name" 
+        :itemCover="teacher.avatar || '/static/images/default-avatar.png'"
+        @favorite-change="onFavoriteChange"
+        @statusBarHeight="onStatusBarHeight"
+      ></favorite-button>
+    </view>
+    
     <view class="teacher-header">
       <view class="avatar-container">
         <image class="teacher-avatar" :src="getImageUrl(teacher.avatarId || teacher.avatar)" mode="aspectFit"></image>
@@ -8,8 +20,8 @@
       <view class="teacher-info">
         <view class="name-favorite">
           <view class="teacher-name">{{teacher.name}}</view>
-          <!-- 收藏按钮 -->
-          <view class="header-favorite">
+          <!-- 注释掉原来的收藏按钮 -->
+          <!-- <view class="header-favorite">
             <favorite-button 
               :itemId="teacherId" 
               itemType="teacher" 
@@ -17,7 +29,7 @@
               :itemCover="teacher.avatar || '/static/images/default-avatar.png'"
               @favorite-change="onFavoriteChange"
             ></favorite-button>
-          </view>
+          </view> -->
         </view>
         <view class="teacher-title">{{teacher.title}}</view>
       </view>
@@ -158,7 +170,8 @@ export default {
       hasMore: true,
       hasMoreReviews: true,
       imageCache: {},
-      defaultAvatar: '/static/images/default-avatar.png'
+      defaultAvatar: '/static/images/default-avatar.png',
+      statusBarHeight: 90 // 默认状态栏高度（rpx单位）
     }
   },
   computed: {
@@ -561,9 +574,16 @@ export default {
         });
     },
     
-    // 收藏状态变化
+    // 收藏状态变更
     onFavoriteChange(isFavorite) {
-      console.log('收藏状态变化:', isFavorite);
+      console.log('收藏状态变更:', isFavorite);
+    },
+    
+    // 获取状态栏高度
+    onStatusBarHeight(height) {
+      // 状态栏高度 + 10px的间距
+      this.statusBarHeight = height + 10;
+      console.log('教师详情页设置状态栏高度:', this.statusBarHeight);
     }
   }
 }
@@ -799,5 +819,12 @@ export default {
       background: rgba(0,0,0,0.3);
     }
   }
+}
+
+/* 固定在右上角的收藏按钮 */
+.fixed-favorite-wrapper {
+  position: fixed;
+  right: 30rpx;
+  z-index: 9999;
 }
 </style> 

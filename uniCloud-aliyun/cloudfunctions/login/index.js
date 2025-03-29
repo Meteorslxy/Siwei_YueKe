@@ -7,11 +7,11 @@ const dbCmd = db.command;
 exports.main = async (event, context) => {
   // 获取客户端信息
   const { PLATFORM, APPID, CLIENTIP } = context;
-  const { userInfo = {}, openid, phoneNumber, code, loginType } = event;
+  const { userInfo = {}, openid, phoneNumber, code, loginType, checkOnly = false } = event;
   
   console.log('登录函数调用，参数:', event);
   console.log('登录上下文:', { PLATFORM, APPID, CLIENTIP });
-  console.log('登录类型:', loginType, '平台:', PLATFORM);
+  console.log('登录类型:', loginType, '平台:', PLATFORM, '是否仅检查:', checkOnly);
   
   // 检查基本参数
   if (!loginType) {
@@ -183,6 +183,18 @@ exports.main = async (event, context) => {
         .get();
       
       console.log('查询用户结果:', userResult);
+      
+      // 如果仅检查用户是否存在，则返回结果
+      if (checkOnly) {
+        const userExists = userResult.data && userResult.data.length > 0;
+        console.log('仅检查用户是否存在, 结果:', userExists);
+        return {
+          code: 0,
+          success: true,
+          userExists,
+          message: userExists ? '用户已存在' : '用户不存在'
+        };
+      }
       
       if (userResult.data && userResult.data.length > 0) {
         // 用户已存在，更新用户信息

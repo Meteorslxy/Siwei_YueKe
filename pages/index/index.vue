@@ -116,6 +116,10 @@ export default {
     // 获取状态栏高度
     this.getStatusBarHeight()
   },
+  onShow() {
+    // 每次显示页面时刷新数据，确保显示最新数据
+    this.getRecommendCourses()
+  },
   onPullDownRefresh() {
     Promise.all([
       this.getNews(),
@@ -123,6 +127,11 @@ export default {
     ]).then(() => {
       uni.stopPullDownRefresh()
     })
+  },
+  // 小程序从后台切换到前台时触发
+  onTabItemTap() {
+    // 当用户点击Tab切换到此页面时刷新数据
+    this.getRecommendCourses()
   },
   methods: {
     // 初始化应用

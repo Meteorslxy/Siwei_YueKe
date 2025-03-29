@@ -260,4 +260,10 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.3);
 }
+/* 固定在右上角的收藏按钮 */
+.fixed-favorite-wrapper {
+  position: fixed;
+  right: 30rpx;
+  z-index: 9999;
+}
 

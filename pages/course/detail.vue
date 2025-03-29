@@ -1,20 +1,22 @@
 <template>
   <view class="detail-container">
+    <!-- 固定在右上角的收藏按钮 -->
+    <view class="fixed-favorite-wrapper" :style="{top: statusBarHeight + 'px'}">
+      <favorite-button 
+        :itemId="courseId" 
+        itemType="course" 
+        :itemTitle="courseInfo.title" 
+        :itemCover="courseInfo.coverImage || '/static/images/course-default.jpg'"
+        @favorite-change="onFavoriteChange"
+        @statusBarHeight="onStatusBarHeight"
+      ></favorite-button>
+    </view>
+    
     <!-- 课程封面 -->
     <view class="course-header">
       <image class="course-cover" :src="courseInfo.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
       <view class="course-overlay"></view>
       <view class="course-title">{{courseInfo.title}}</view>
-      <!-- 添加收藏按钮 -->
-      <view class="favorite-wrapper">
-        <favorite-button 
-          :itemId="courseId" 
-          itemType="course" 
-          :itemTitle="courseInfo.title" 
-          :itemCover="courseInfo.coverImage || '/static/images/course-default.jpg'"
-          @favorite-change="onFavoriteChange"
-        ></favorite-button>
-      </view>
     </view>
     
     <!-- 课程ID调试信息，仅在调试模式下显示 -->
@@ -128,7 +130,8 @@ export default {
       courseId: '',
       courseInfo: {},
       hasBooked: false,
-      userInfo: null
+      userInfo: null,
+      statusBarHeight: 90 // 默认状态栏高度（rpx单位）
     }
   },
   mounted() {
@@ -534,45 +537,31 @@ export default {
         console.log('教师查询API结果:', result);
         
         if (result && result.data && result.data.length > 0) {
-          const teacherData = result.data[0];
-          console.log('通过教师列表API找到教师数据:', teacherData);
+          // 确保查询匹配的是准确的教师名称
+          const foundTeacher = result.data.find(item => item.name === nameForSearch);
           
-          // 更新教师信息
-          if (teacherData.description) {
-            this.courseInfo.teacherDescription = teacherData.description;
-            console.log('已更新教师描述信息:', teacherData.description);
-          } else if (teacherData.introduction) {
-            this.courseInfo.teacherDescription = teacherData.introduction;
-            console.log('使用教师introduction作为描述:', teacherData.introduction);
+          if (foundTeacher) {
+            console.log('通过教师列表API找到匹配的教师数据:', foundTeacher);
+            
+            // 更新教师信息
+            if (foundTeacher.description) {
+              this.courseInfo.teacherDescription = foundTeacher.description;
+              console.log('已更新教师描述信息:', foundTeacher.description);
+            } else if (foundTeacher.introduction) {
+              this.courseInfo.teacherDescription = foundTeacher.introduction;
+              console.log('使用教师introduction作为描述:', foundTeacher.introduction);
+            } else {
+              // 如果都没有，尝试直接给定简介
+              this.courseInfo.teacherDescription = '该教师暂无详细介绍';
+            }
           } else {
-            // 如果都没有，尝试直接给定简介
-            this.courseInfo.teacherDescription = '该教师暂无详细介绍';
+            console.log('API返回的教师数据中没有找到精确匹配:', nameForSearch);
+            this.courseInfo.teacherDescription = `${teacherName}，暂无详细介绍。`;
           }
-          
-          // 强制更新UI
-          this.$forceUpdate();
-          return;
-        }
-        
-        // 如果API没找到，尝试直接硬编码匹配
-        // 这是一个备用方案，确保重要教师的简介能正确显示
-        const teacherProfiles = {
-          '叶爽': '有多年教学经验，曾获得多项教学奖项。',
-          '潘蕾': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
-          '叶爽老师': '有多年教学经验，曾获得多项教学奖项。',
-          '潘蕾老师': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
-          '吐爽': '有多年教学经验，曾获得多项教学奖项。'
-        };
-        
-        if (teacherProfiles[teacherName]) {
-          this.courseInfo.teacherDescription = teacherProfiles[teacherName];
-          console.log('使用硬编码的教师简介:', teacherProfiles[teacherName]);
-        } else if (teacherProfiles[nameForSearch]) {
-          this.courseInfo.teacherDescription = teacherProfiles[nameForSearch];
-          console.log('使用硬编码的教师简介(不带老师后缀):', teacherProfiles[nameForSearch]);
         } else {
-          // 如果都没有，使用默认简介
-          this.courseInfo.teacherDescription = `${teacherName}，暂无详细介绍。`;
+          // API没有找到任何教师信息
+          console.log('未能从API查询到教师信息，显示默认信息');
+          this.courseInfo.teacherDescription = `暂无详细介绍`;
         }
         
         // 强制更新UI
@@ -580,23 +569,8 @@ export default {
       } catch (error) {
         console.error('通过名称查询教师失败:', error);
         
-        // 尝试使用硬编码备用数据
-        const teacherProfiles = {
-          '叶爽': '有多年教学经验，曾获得多项教学奖项。',
-          '潘蕾': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
-          '叶爽老师': '有多年教学经验，曾获得多项教学奖项。',
-          '潘蕾老师': '原学而思S级教师（年级前10%），原学而思高端班、冲刺班授课老师，原学而思资深教研，资深备课负责人',
-          '吐爽': '有多年教学经验，曾获得多项教学奖项。'
-        };
-        
-        if (teacherProfiles[teacherName]) {
-          this.courseInfo.teacherDescription = teacherProfiles[teacherName];
-          console.log('使用硬编码的教师简介:', teacherProfiles[teacherName]);
-        } else {
-          // 设置默认值并更新UI
-          this.courseInfo.teacherDescription = `${teacherName}，暂无详细介绍。`;
-        }
-        
+        // 错误情况下，显示默认信息
+        this.courseInfo.teacherDescription = `暂无详细介绍`;
         this.$forceUpdate();
       }
     },
@@ -1451,9 +1425,16 @@ export default {
       this.$forceUpdate();
     },
     
-    // 收藏状态变化
+    // 收藏状态变更
     onFavoriteChange(isFavorite) {
-      console.log('收藏状态变化:', isFavorite);
+      console.log('收藏状态变更:', isFavorite);
+    },
+    
+    // 获取状态栏高度
+    onStatusBarHeight(height) {
+      // 状态栏高度 + 10px的间距
+      this.statusBarHeight = height + 10;
+      console.log('课程详情页设置状态栏高度:', this.statusBarHeight);
     }
   }
 }
@@ -1496,20 +1477,6 @@ export default {
     font-weight: bold;
     line-height: 1.4;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  }
-  
-  .favorite-wrapper {
-    position: absolute;
-    top: 20rpx;
-    right: 20rpx;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    width: 80rpx;
-    height: 80rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -1765,5 +1732,12 @@ export default {
       cursor: not-allowed;
     }
   }
+}
+
+/* 固定在右上角的收藏按钮 */
+.fixed-favorite-wrapper {
+  position: fixed;
+  right: 30rpx;
+  z-index: 9999;
 }
 </style> 

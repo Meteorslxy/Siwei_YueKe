@@ -19,38 +19,51 @@
         class="booking-item" 
         v-for="(item, index) in filteredBookingList" 
         :key="item._id || index"
-        @click="viewDetail(item)">
-        <view class="booking-header">
-          <view class="course-title">{{item.courseTitle}}</view>
-          <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item.status)}}</view>
+        @click="viewDetail(item, $event)"
+        :data-booking-id="item._id"
+        :data-course-id="item.courseId">
+        <view class="booking-content">
+          <view class="booking-main">
+            <view class="course-info">
+              <view class="course-title">{{item.courseTitle}}</view>
+              <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item)}}</view>
+            </view>
+            
+            <view class="booking-details">
+              <view class="details-column left-column">
+                <view class="detail-row">
+                  <text class="detail-label">预约编号</text>
+                  <text class="detail-value">{{item.bookingId}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">课程时间</text>
+                  <text class="detail-value">{{formatCourseTime(item)}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">校区地点</text>
+                  <text class="detail-value">{{item.schoolName}}</text>
+                </view>
+              </view>
+              
+              <view class="details-column right-column">
+                <view class="detail-row">
+                  <text class="detail-label">学生姓名</text>
+                  <text class="detail-value">{{item.studentName}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">联系电话</text>
+                  <text class="detail-value">{{item.contactPhone || '暂无'}}</text>
+                </view>
+              </view>
+            </view>
+            
+            <view class="booking-time">
+              {{formatBookingTime(item.createTime)}}
+            </view>
+          </view>
         </view>
         
-        <view class="booking-info">
-          <view class="info-row">
-            <text class="info-label">预约编号：</text>
-            <text class="info-value">{{item.bookingId}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">课程时间：</text>
-            <text class="info-value">{{formatCourseTime(item.courseStartTime, item.courseEndTime)}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">校区地点：</text>
-            <text class="info-value">{{item.schoolName}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">学生姓名：</text>
-            <text class="info-value">{{item.studentName}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">联系电话：</text>
-            <text class="info-value">{{item.contactPhone}}</text>
-          </view>
-        </view>
-        
-        <view class="booking-footer">
-          <view class="booking-time">{{formatBookingTime(item.createTime)}}</view>
-          
+        <view class="booking-footer" v-if="showActions(item)">
           <view class="booking-actions">
             <view class="action-btn primary" 
                   v-if="item && item.status !== 'cancelled' && item.status !== 'finished'"
@@ -58,9 +71,6 @@
             <view class="action-btn" 
                   v-if="item && (item.status === 'confirmed' || item.status === 'confirmed_unpaid')"
                   @click.stop="$event => contactTeacher(item, $event)">联系老师</view>
-            <view class="action-btn" 
-                  v-if="item && item.status !== 'cancelled'"
-                  @click.stop="$event => navigateToCourse(item.courseId, $event)">查看课程</view>
           </view>
         </view>
       </view>
@@ -643,7 +653,17 @@ export default {
     },
     
     // 获取状态文本
-    getStatusText(status) {
+    getStatusText(item) {
+      // 对于特殊状态的处理
+      if (item.status === 'pending' && item.paymentStatus === 'paid') {
+        return '已缴费';
+      }
+      
+      if (item.status === 'confirmed' && item.paymentStatus === 'unpaid') {
+        return '未缴费';
+      }
+      
+      // 标准状态的显示
       const statusMap = {
         'pending': '未缴费',
         'confirmed_unpaid': '未缴费',
@@ -651,23 +671,136 @@ export default {
         'finished': '已完成',
         'cancelled': '已取消'
       };
-      return statusMap[status] || '未知状态';
+      
+      return statusMap[item.status] || '未知状态';
     },
     
     // 格式化课程时间
-    formatCourseTime(startTime, endTime) {
-      if (!startTime) return ''
-      
-      const formatDate = (dateStr) => {
-        const date = new Date(dateStr)
-        return `${date.getMonth() + 1}月${date.getDate()}日`
+    formatCourseTime(item) {
+      // 如果有courseTime字段，优先使用该字段
+      if (item.courseTime) {
+        return item.courseTime;
       }
       
-      if (endTime) {
-        return `${formatDate(startTime)} - ${formatDate(endTime)}`
+      // 日期范围格式化
+      const formatDateRange = () => {
+        // 确保有日期数据
+        if (!item.courseStartDate && !item.courseEndDate) {
+          return '';
+        }
+        
+        // 格式化单个日期
+        const formatDate = (dateStr) => {
+          try {
+            if (!dateStr) return '';
+            
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
+              return dateStr;
+            }
+            
+            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+          } catch (e) {
+            return dateStr;
+          }
+        };
+        
+        // 如果有开始和结束日期，显示范围
+        if (item.courseStartDate && item.courseEndDate) {
+          return `${formatDate(item.courseStartDate)}至${formatDate(item.courseEndDate)}`;
+        } else if (item.courseStartDate) {
+          return formatDate(item.courseStartDate);
+        } else if (item.courseEndDate) {
+          return formatDate(item.courseEndDate);
+        }
+        
+        return '';
+      };
+      
+      // 时间段格式化
+      const formatTimeRange = () => {
+        // 确保有时间数据
+        if (!item.courseStartTime && !item.courseEndTime) {
+          return '';
+        }
+        
+        // 处理简单的时间字符串
+        const formatTime = (timeStr) => {
+          if (!timeStr) return '';
+          
+          // 如果是简单的时间字符串，直接返回
+          if (typeof timeStr === 'string' && 
+              (timeStr.includes(':') || timeStr.match(/^\d{1,2}:\d{2}$/))) {
+            return timeStr;
+          }
+          
+          // 如果是日期时间，提取时间部分
+          try {
+            const date = new Date(timeStr);
+            if (!isNaN(date.getTime())) {
+              return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+            }
+          } catch (e) {
+            // 忽略错误
+          }
+          
+          return timeStr;
+        };
+        
+        // 如果有开始和结束时间，显示范围
+        if (item.courseStartTime && item.courseEndTime) {
+          return `${formatTime(item.courseStartTime)}-${formatTime(item.courseEndTime)}`;
+        } else if (item.courseStartTime) {
+          return formatTime(item.courseStartTime);
+        } else if (item.courseEndTime) {
+          return formatTime(item.courseEndTime);
+        }
+        
+        return '';
+      };
+      
+      // 组合日期和时间
+      const dateRange = formatDateRange();
+      const timeRange = formatTimeRange();
+      
+      if (dateRange && timeRange) {
+        return `${dateRange} ${timeRange}`;
+      } else if (dateRange) {
+        return dateRange;
+      } else if (timeRange) {
+        return timeRange;
       }
       
-      return formatDate(startTime)
+      // 处理原始的startTime和endTime（如果存在）
+      if (item.startTime || item.endTime) {
+        try {
+          const formatFullDateTime = (dateTimeStr) => {
+            if (!dateTimeStr) return '';
+            
+            const date = new Date(dateTimeStr);
+            if (isNaN(date.getTime())) {
+              return dateTimeStr;
+            }
+            
+            const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+            
+            return `${dateStr} ${timeStr}`;
+          };
+          
+          if (item.startTime && item.endTime) {
+            return `${formatFullDateTime(item.startTime)}至${formatFullDateTime(item.endTime)}`;
+          } else if (item.startTime) {
+            return formatFullDateTime(item.startTime);
+          } else if (item.endTime) {
+            return formatFullDateTime(item.endTime);
+          }
+        } catch (e) {
+          console.error('格式化完整日期时间出错:', e);
+        }
+      }
+      
+      return '暂无';
     },
     
     // 格式化预约时间
@@ -679,20 +812,76 @@ export default {
     },
     
     // 查看预约详情
-    viewDetail(booking) {
-      // 检查参数有效性
-      if (!booking || typeof booking !== 'object' || !booking._id) {
-        console.error('无效的预约数据:', booking);
+    viewDetail(booking, event) {
+      // 检查点击事件的数据
+      try {
+        // 如果booking为空，尝试从事件对象中获取数据
+        if (!booking) {
+          const eventTarget = event && event.currentTarget;
+          if (eventTarget) {
+            const bookingId = eventTarget.dataset.bookingId;
+            const courseId = eventTarget.dataset.courseId;
+            
+            console.log('从事件对象获取数据:', { bookingId, courseId });
+            
+            // 如果可以直接获取课程ID，则直接跳转
+            if (courseId) {
+              this.navigateToCourse(courseId);
+              return;
+            }
+            
+            // 如果只有预约ID，则跳转到预约详情
+            if (bookingId) {
+              uni.navigateTo({
+                url: `/pages/user/booking-detail?id=${bookingId}`
+              });
+              return;
+            }
+          }
+          
+          console.warn('预约数据为空，无法处理点击事件');
+          return;
+        }
+        
+        // 检查booking参数是否有效
+        if (typeof booking !== 'object') {
+          console.error('无效的预约数据类型:', typeof booking);
+          uni.showToast({
+            title: '无效的预约数据',
+            icon: 'none'
+          });
+          return;
+        }
+        
+        // 确保booking对象有_id或courseId至少一个
+        if (!booking._id && !booking.courseId) {
+          console.error('预约数据缺少必要字段:', booking);
+          uni.showToast({
+            title: '无效的预约数据',
+            icon: 'none'
+          });
+          return;
+        }
+        
+        // 如果存在课程ID，则直接跳转到课程详情页
+        if (booking.courseId) {
+          console.log('跳转到课程详情页:', booking.courseId);
+          this.navigateToCourse(booking.courseId);
+          return;
+        }
+        
+        // 否则跳转到预约详情页
+        console.log('跳转到预约详情页:', booking._id);
+        uni.navigateTo({
+          url: `/pages/user/booking-detail?id=${booking._id}`
+        });
+      } catch (error) {
+        console.error('处理预约点击事件出错:', error);
         uni.showToast({
-          title: '无效的预约数据',
+          title: '处理失败，请重试',
           icon: 'none'
         });
-        return;
       }
-      
-      uni.navigateTo({
-        url: `/pages/user/booking-detail?id=${booking._id}`
-      })
     },
     
     // 取消预约
@@ -1064,6 +1253,12 @@ export default {
         return;
       }
       
+      // 检查课程ID是否为有效的MongoDB ObjectId格式
+      if (typeof courseId !== 'string' || courseId.length !== 24) {
+        console.warn('课程ID格式可能不正确:', courseId);
+      }
+      
+      // 跳转到课程详情页
       uni.navigateTo({
         url: `/pages/course/detail?id=${courseId}`
       })
@@ -1266,6 +1461,15 @@ export default {
         console.error('获取用户ID失败:', e);
       }
       return '';
+    },
+    
+    // 在methods部分添加检查是否显示操作按钮的方法
+    showActions(item) {
+      return item && (
+        item.status !== 'cancelled' && item.status !== 'finished' ||
+        (item.status === 'confirmed' || item.status === 'confirmed_unpaid') ||
+        item.status !== 'cancelled'
+      );
     }
   }
 }
@@ -1275,70 +1479,59 @@ export default {
 .booking-container {
   min-height: 100vh;
   background-color: $bg-color;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 状态筛选选项卡 */
 .tab-bar {
   display: flex;
-  background-color: #fff;
-  border-bottom: 1rpx solid $border-color-light;
+  background-color: #ffffff;
+  padding: 20rpx 0;
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
   
   .tab-item {
     flex: 1;
-    height: 80rpx;
-    line-height: 80rpx;
     text-align: center;
-    font-size: 28rpx;
-    color: $text-color;
+    font-size: 30rpx;
+    color: $text-color-light;
     position: relative;
-    
-    .badge {
-      position: absolute;
-      top: 6rpx;
-      right: 10%;
-      min-width: 28rpx;
-      height: 28rpx;
-      line-height: 28rpx;
-      padding: 0 6rpx;
-      font-size: 18rpx;
-      text-align: center;
-      color: #fff;
-      background-color: #FF3B30;
-      border-radius: 14rpx;
-      transform: translateX(50%);
-      z-index: 2;
-      
-      @media screen and (max-width: 375px) {
-        right: 5%;
-        min-width: 24rpx;
-        height: 24rpx;
-        line-height: 24rpx;
-        font-size: 16rpx;
-      }
-    }
+    padding: 10rpx 0;
     
     &.active {
       color: $theme-color;
       font-weight: bold;
       
-      .badge {
-        background-color: $theme-color;
-      }
-      
       &::after {
         content: '';
         position: absolute;
-        bottom: 0;
+        bottom: -10rpx;
         left: 50%;
         transform: translateX(-50%);
         width: 40rpx;
-        height: 4rpx;
+        height: 6rpx;
         background-color: $theme-color;
-        border-radius: 2rpx;
+        border-radius: 3rpx;
       }
+    }
+    
+    .badge {
+      position: absolute;
+      top: -8rpx;
+      right: 50%;
+      margin-right: -50rpx;
+      min-width: 32rpx;
+      height: 32rpx;
+      border-radius: 16rpx;
+      background-color: $theme-color;
+      color: #ffffff;
+      font-size: 20rpx;
+      line-height: 32rpx;
+      text-align: center;
+      padding: 0 6rpx;
+      font-weight: normal;
     }
   }
 }
@@ -1348,138 +1541,165 @@ export default {
   padding: 20rpx;
   
   .booking-item {
-    margin-bottom: 20rpx;
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 12rpx;
+    margin-bottom: 20rpx;
     overflow: hidden;
-    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+    position: relative;
     
-    &.highlight-new {
-      animation: highlight-pulse 2s ease-in-out;
-      border: 2rpx solid #FF3B30;
+    &:active {
+      transform: scale(0.99);
+      transition: transform 0.2s;
     }
     
-    .booking-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20rpx;
-      border-bottom: 1rpx solid $border-color-light;
+    .booking-content {
+      padding: 16rpx;
       
-      .course-title {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: $text-color;
-        flex: 1;
-      }
-      
-      .booking-status {
-        font-size: 24rpx;
-        padding: 6rpx 12rpx;
-        border-radius: 6rpx;
-        
-        &.status-pending {
-          color: #FF9500;
-          background-color: rgba(#FF9500, 0.1);
-        }
-        
-        &.status-confirmed_unpaid {
-          color: #FF9500;
-          background-color: rgba(#FF9500, 0.1);
-        }
-        
-        &.status-confirmed {
-          color: #4CD964;
-          background-color: rgba(#4CD964, 0.1);
-        }
-        
-        &.status-finished {
-          color: #007AFF;
-          background-color: rgba(#007AFF, 0.1);
-        }
-        
-        &.status-cancelled {
-          color: #FF3B30;
-          background-color: rgba(#FF3B30, 0.1);
-          position: relative;
-          padding-left: 20rpx;
+      .booking-main {
+        .course-info {
+          display: flex;
+          margin-bottom: 16rpx;
+          align-items: flex-start;
           
-          &::before {
-            content: "✕";
-            position: absolute;
-            left: 6rpx;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 18rpx;
+          .course-title {
+            flex: 3;
+            font-size: 30rpx;
             font-weight: bold;
+            color: $text-color;
+            margin-right: 15rpx;
+            line-height: 1.4;
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+          }
+          
+          .booking-status {
+            flex: 1;
+            font-size: 24rpx;
+            padding: 6rpx 16rpx;
+            border-radius: 20rpx;
+            text-align: center;
+            white-space: nowrap;
+            align-self: flex-start;
+            
+            &.status-pending {
+              background-color: #FFF3E0;
+              color: #FF9800;
+            }
+            
+            &.status-confirmed, &.status-confirmed_unpaid {
+              background-color: #E0F7FA;
+              color: #00BCD4;
+            }
+            
+            &.status-finished {
+              background-color: #E8F5E9;
+              color: #4CAF50;
+            }
+            
+            &.status-cancelled, &.status-cancel {
+              background-color: #EEEEEE;
+              color: #9E9E9E;
+            }
+          }
+        }
+        
+        .booking-details {
+          display: flex;
+          
+          .details-column {
+            &.left-column {
+              flex: 1.2;
+              margin-right: 10rpx;
+            }
+            
+            &.right-column {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+            }
+            
+            .detail-row {
+              margin-bottom: 10rpx;
+              
+              .detail-label {
+                font-size: 24rpx;
+                color: $text-color-grey;
+                margin-bottom: 4rpx;
+                display: block;
+                position: relative;
+                padding-left: 16rpx;
+                
+                &::before {
+                  content: '';
+                  position: absolute;
+                  left: 0;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  width: 6rpx;
+                  height: 6rpx;
+                  background-color: $theme-color;
+                  border-radius: 50%;
+                }
+              }
+              
+              .detail-value {
+                font-size: 26rpx;
+                color: $text-color;
+                display: block;
+                word-break: break-word;
+                padding-left: 16rpx;
+                line-height: 1.3;
+              }
+            }
           }
         }
       }
     }
     
-    .booking-info {
-      padding: 20rpx;
-      
-      .info-row {
-        display: flex;
-        margin-bottom: 16rpx;
-        
-        &:last-child {
-          margin-bottom: 0;
-        }
-        
-        .info-label {
-          width: 160rpx;
-          font-size: 26rpx;
-          color: $text-color-grey;
-        }
-        
-        .info-value {
-          flex: 1;
-          font-size: 26rpx;
-          color: $text-color;
-        }
-      }
+    .booking-time {
+      font-size: 24rpx;
+      color: $text-color-light;
+      text-align: right;
+      padding: 0 16rpx 12rpx 0;
+      position: relative;
+      bottom: 0;
+      right: 0;
     }
     
     .booking-footer {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20rpx;
+      justify-content: flex-end;
+      padding: 12rpx 16rpx;
       border-top: 1rpx solid $border-color-light;
-      
-      .booking-time {
-        font-size: 24rpx;
-        color: $text-color-grey;
-      }
       
       .booking-actions {
         display: flex;
         
         .action-btn {
-          margin-left: 20rpx;
-          height: 56rpx;
-          line-height: 56rpx;
-          padding: 0 20rpx;
           font-size: 24rpx;
+          padding: 6rpx 16rpx;
+          border-radius: 24rpx;
+          margin-left: 16rpx;
+          border: 1rpx solid $border-color;
           color: $text-color;
-          background-color: #f5f5f5;
-          border-radius: 28rpx;
+          background-color: #ffffff;
           
           &.primary {
-            color: #fff;
             background-color: $theme-color;
+            color: #ffffff;
+            border-color: $theme-color;
+          }
+          
+          &:active {
+            opacity: 0.8;
           }
         }
       }
     }
   }
-}
-
-@keyframes highlight-pulse {
-  0% { box-shadow: 0 0 0 rgba(255, 59, 48, 0.4); }
-  50% { box-shadow: 0 0 20rpx rgba(255, 59, 48, 0.6); }
-  100% { box-shadow: 0 0 0 rgba(255, 59, 48, 0.4); }
 }
 </style> 

@@ -98,19 +98,6 @@
   line-height: 1.4;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
-.lecture-detail .lecture-header .favorite-wrapper {
-  position: absolute;
-  top: 20rpx;
-  right: 20rpx;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  width: 80rpx;
-  height: 80rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
-}
 .lecture-detail .lecture-info {
   background-color: #fff;
   padding: 30rpx;
@@ -279,5 +266,11 @@
 .lecture-detail .action-bar .action-button[disabled] {
   background-color: #ccc;
   color: #fff;
+}
+/* 固定在右上角的收藏按钮 */
+.fixed-favorite-wrapper {
+  position: fixed;
+  right: 30rpx;
+  z-index: 9999;
 }
 

@@ -1,18 +1,21 @@
 <template>
   <view class="lecture-detail">
+    <!-- 固定在右上角的收藏按钮 -->
+    <view class="fixed-favorite-wrapper" :style="{top: statusBarHeight + 'px'}">
+      <favorite-button 
+        :itemId="lectureId" 
+        itemType="lecture" 
+        :itemTitle="lecture.title" 
+        :itemCover="lecture.coverImage || '/static/images/course-default.jpg'"
+        @favorite-change="onFavoriteChange"
+        @statusBarHeight="onStatusBarHeight"
+      ></favorite-button>
+    </view>
+    
     <view class="lecture-header">
       <image class="lecture-image" :src="lecture.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
       <view class="lecture-overlay"></view>
       <view class="lecture-title">{{lecture.title}}</view>
-      <view class="favorite-wrapper">
-        <favorite-button 
-          :itemId="lectureId" 
-          itemType="lecture" 
-          :itemTitle="lecture.title" 
-          :itemCover="lecture.coverImage || '/static/images/course-default.jpg'"
-          @favorite-change="onFavoriteChange"
-        ></favorite-button>
-      </view>
     </view>
     
     <view class="lecture-info">
@@ -145,7 +148,8 @@ export default {
         { name: '相关讲座', id: 'related' }
       ],
       currentTab: 0,
-      loading: false
+      loading: false,
+      statusBarHeight: 90 // 默认状态栏高度（rpx单位）
     }
   },
   onLoad(options) {
@@ -266,9 +270,16 @@ export default {
       }
     },
     
-    // 收藏状态变化
+    // 收藏状态变更
     onFavoriteChange(isFavorite) {
-      console.log('收藏状态变化:', isFavorite);
+      console.log('收藏状态变更:', isFavorite);
+    },
+    
+    // 获取状态栏高度
+    onStatusBarHeight(height) {
+      // 状态栏高度 + 10px的间距
+      this.statusBarHeight = height + 10;
+      console.log('讲座详情页设置状态栏高度:', this.statusBarHeight);
     }
   }
 }
@@ -310,20 +321,6 @@ export default {
       font-weight: bold;
       line-height: 1.4;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .favorite-wrapper {
-      position: absolute;
-      top: 20rpx;
-      right: 20rpx;
-      background-color: rgba(255, 255, 255, 0.8);
-      border-radius: 50%;
-      width: 80rpx;
-      height: 80rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
     }
   }
   
@@ -530,5 +527,12 @@ export default {
       }
     }
   }
+}
+
+/* 固定在右上角的收藏按钮 */
+.fixed-favorite-wrapper {
+  position: fixed;
+  right: 30rpx;
+  z-index: 9999;
 }
 </style> 

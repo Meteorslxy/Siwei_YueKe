@@ -61,7 +61,27 @@ exports.main = async (event, context) => {
       };
     }
     
+    // 获取用户手机号
+    let userPhoneNumber = '';
+    try {
+      const userResult = await db.collection('users')
+        .doc(userId)
+        .field({ phoneNumber: true })
+        .get();
+      
+      if (userResult.data && userResult.data.phoneNumber) {
+        userPhoneNumber = userResult.data.phoneNumber;
+        console.log('获取到用户手机号:', userPhoneNumber);
+      } else {
+        console.log('用户无手机号或未找到用户信息');
+      }
+    } catch (userErr) {
+      console.error('获取用户信息失败:', userErr);
+      // 继续执行，不影响预约详情返回
+    }
+    
     // 获取关联的课程信息
+    let courseTime = '';
     if (booking.courseId) {
       try {
         console.log('查询关联课程详情:', booking.courseId);
@@ -83,6 +103,13 @@ exports.main = async (event, context) => {
           if (!booking.teacherName && courseResult.data.teacherName) {
             booking.teacherName = courseResult.data.teacherName;
           }
+          
+          // 格式化课程时间
+          if (courseResult.data.startTime && courseResult.data.endTime) {
+            courseTime = `${courseResult.data.startTime} 至 ${courseResult.data.endTime}`;
+          } else if (courseResult.data.time) {
+            courseTime = courseResult.data.time;
+          }
         }
       } catch (courseErr) {
         console.error('获取课程信息失败:', courseErr);
@@ -96,21 +123,28 @@ exports.main = async (event, context) => {
     // 构建详细信息
     const bookingDetail = {
       _id: booking._id,
-      bookingId: `B${formattedId}`,
+      bookingId: booking.bookingId || `B${formattedId}`,
       userId: booking.userId,
       courseId: booking.courseId,
       courseTitle: booking.courseTitle || booking.courseName || '未知课程',
-      courseStartTime: booking.startTime,
-      courseEndTime: booking.endTime,
+      // 如果有开始和结束时间，优先使用并格式化
+      courseStartTime: booking.courseStartTime || booking.startTime || '',
+      courseEndTime: booking.courseEndTime || booking.endTime || '',
+      // 已经格式化好的课程时间
+      courseTime: courseTime || (booking.courseTime || ''),
       schoolName: booking.schoolName || '未知校区',
-      studentName: booking.studentName,
-      contactPhone: booking.contactPhone,
-      remark: booking.remark,
-      status: booking.status,
-      createTime: booking.createTime,
-      confirmTime: booking.confirmTime,
-      cancelTime: booking.cancelTime,
-      finishTime: booking.finishTime
+      studentName: booking.studentName || '未知学生',
+      contactPhone: booking.contactPhone || '',
+      // 添加用户手机号
+      userPhoneNumber: userPhoneNumber,
+      remark: booking.remark || '',
+      status: booking.status || 'pending',
+      // 添加支付状态
+      paymentStatus: booking.paymentStatus || '',
+      createTime: booking.createTime || '',
+      confirmTime: booking.confirmTime || '',
+      cancelTime: booking.cancelTime || '',
+      finishTime: booking.finishTime || ''
     };
     
     return {

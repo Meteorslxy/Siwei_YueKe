@@ -166,4 +166,75 @@
 .login-container .footer .agreement .link {
   color: #FF6B00;
 }
+/* 手机号登录弹窗样式 */
+.phone-login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+.phone-login-modal .modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+.phone-login-modal .modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  background-color: #fff;
+  width: 580rpx;
+  border-radius: 12rpx;
+  padding: 30rpx;
+}
+.phone-login-modal .modal-content .modal-title {
+  font-size: 32rpx;
+  text-align: center;
+  margin-bottom: 30rpx;
+  font-weight: 500;
+  color: #333;
+}
+.phone-login-modal .modal-content .input-box {
+  margin-bottom: 30rpx;
+  border-bottom: 1px solid #eee;
+  padding: 10rpx 0;
+}
+.phone-login-modal .modal-content .input-box input {
+  height: 80rpx;
+  font-size: 32rpx;
+  width: 100%;
+}
+.phone-login-modal .modal-content .input-box .input-placeholder {
+  color: #bbb;
+}
+.phone-login-modal .modal-content .modal-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+.phone-login-modal .modal-content .modal-buttons .modal-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 30rpx;
+  margin: 0 10rpx;
+  border-radius: 40rpx;
+}
+.phone-login-modal .modal-content .modal-buttons .modal-btn::after {
+  border: none;
+}
+.phone-login-modal .modal-content .modal-buttons .cancel-btn {
+  background-color: #f5f5f5;
+  color: #666;
+}
+.phone-login-modal .modal-content .modal-buttons .confirm-btn {
+  background-color: #47c76d;
+  color: #fff;
+}
 

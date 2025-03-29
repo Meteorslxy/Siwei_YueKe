@@ -1,7 +1,7 @@
 <template>
   <view class="favorite-button" @click.stop="toggleFavorite">
     <view :class="['heart-icon', {'is-favorite': isFavorite}]">
-      <text class="iconfont" :class="isFavorite ? 'icon-heart-fill' : 'icon-heart'"></text>
+      <text class="heart-symbol">{{ isFavorite ? '♥' : '♡' }}</text>
     </view>
   </view>
 </template>
@@ -45,13 +45,32 @@ export default {
     return {
       isFavorite: this.initialFavorite,
       favoriteId: '', // 收藏记录ID
-      loading: false
+      loading: false,
+      navBarHeight: 0, // 导航栏高度
+      statusBarHeight: 0 // 状态栏高度
     }
   },
   created() {
     // 确保收藏表已初始化
     this.ensureFavoriteTableExists();
     this.checkFavoriteStatus();
+    // 获取系统信息
+    try {
+      const systemInfo = uni.getSystemInfoSync();
+      this.statusBarHeight = systemInfo.statusBarHeight;
+      // 小程序导航栏高度（单位px）
+      const navBarHeight = 44; // 默认导航栏高度
+      this.navBarHeight = navBarHeight;
+      
+      console.log('状态栏高度:', this.statusBarHeight);
+      console.log('导航栏高度:', this.navBarHeight);
+      
+      // 通知父组件状态栏和导航栏高度
+      this.$emit('statusBarHeight', this.statusBarHeight);
+      this.$emit('navBarHeight', this.navBarHeight);
+    } catch (e) {
+      console.error('获取系统信息失败:', e);
+    }
   },
   methods: {
     // 确保收藏表已初始化
@@ -287,24 +306,35 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 10;
   
   .heart-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60rpx;
-    height: 60rpx;
+    width: 70rpx;
+    height: 70rpx;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
     
-    .iconfont {
-      font-size: 44rpx;
-      color: #999999;
+    .heart-symbol {
+      font-size: 46rpx;
+      color: #FF0000;
       transition: all 0.3s;
+      line-height: 1;
     }
     
     &.is-favorite {
-      .iconfont {
-        color: #FF6B00;
+      .heart-symbol {
+        color: #FF0000;
+        transform: scale(1.2);
       }
+    }
+    
+    &:active {
+      transform: scale(0.9);
     }
   }
 }

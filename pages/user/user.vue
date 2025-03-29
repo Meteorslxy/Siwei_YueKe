@@ -58,12 +58,12 @@
             <text class="list-text">意见反馈</text>
             <text class="list-arrow iconfont icon-right"></text>
           </view>
-          <view class="menu-list-item" @click="navigateTo('/pages/user/about')">
+          <view class="menu-list-item" @click="navigateTo('/pages/user/about/index')">
             <text class="list-icon iconfont icon-about"></text>
             <text class="list-text">关于我们</text>
             <text class="list-arrow iconfont icon-right"></text>
           </view>
-          <view class="menu-list-item" @click="navigateTo('/pages/user/setting')">
+          <view class="menu-list-item" @click="navigateTo('/pages/user/setting/index')">
             <text class="list-icon iconfont icon-setting"></text>
             <text class="list-text">设置</text>
             <text class="list-arrow iconfont icon-right"></text>

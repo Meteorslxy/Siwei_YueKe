@@ -105,4 +105,12 @@
 
 .icon-setting:before {
   content: "\e617";
+}
+
+.icon-heart:before {
+  content: "\e618";
+}
+
+.icon-heart-fill:before {
+  content: "\e619";
 } 

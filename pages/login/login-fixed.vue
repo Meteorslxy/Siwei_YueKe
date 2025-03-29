@@ -2,7 +2,7 @@
   <view class="login-container">
     <view class="header">
       <image class="logo" src="../../static/images/logo.png" mode="aspectFit"></image>
-      <view class="title">悦课</view>
+      <view class="title">四维教育</view>
       <view class="subtitle">艺术教育预约平台</view>
     </view>
     

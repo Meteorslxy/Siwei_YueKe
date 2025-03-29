@@ -4,6 +4,7 @@
     <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px' }">
       <view class="nav-back" @click="navigateBack">
         <view class="back-arrow"></view>
+        <text class="back-text">返回</text>
       </view>
       <view class="nav-title">最新通知</view>
       <view class="nav-right">
@@ -226,37 +227,19 @@ export default {
     
     // 返回上一页
     navigateBack() {
-      console.log('点击返回按钮');
-      
-      // 判断是否可以返回上一页
-      const pages = getCurrentPages();
-      if (pages.length > 1) {
-        uni.navigateBack({
-          delta: 1,
-          success: () => {
-            console.log('返回上一页成功');
-          },
-          fail: (err) => {
-            console.error('返回上一页失败:', err);
-            // 如果返回失败，尝试跳转到首页
-            uni.switchTab({
-              url: '/pages/index/index'
-            });
-          }
-        });
-      } else {
-        // 如果没有上一页，返回首页
-        console.log('没有上一页，返回首页');
-        uni.switchTab({
-          url: '/pages/index/index'
-        });
-      }
+      uni.navigateBack({
+        fail: () => {
+          // 如果无法返回上一页，则回到首页
+          uni.switchTab({
+            url: '/pages/index/index'
+          });
+        }
+      });
     },
     
-    // 添加刷新方法
+    // 刷新列表
     refreshList() {
       this.page = 1;
-      this.newsList = [];
       this.hasMore = true;
       this.getNewsList();
     }
@@ -275,52 +258,50 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
+  width: 100%;
   background-color: $theme-color;
-  color: #fff;
+  color: white;
+  z-index: 100;
   display: flex;
   align-items: center;
-  padding-bottom: 10px;
-  z-index: 100;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  height: 44px;
   
   .nav-back {
-    width: 88rpx;
-    height: 44px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding: 0 30rpx;
+    height: 44px;
+    width: 160rpx;
     
     .back-arrow {
-      width: 24rpx;
-      height: 24rpx;
-      border-top: 4rpx solid #fff;
-      border-left: 4rpx solid #fff;
+      width: 16px;
+      height: 16px;
+      border-top: 2px solid white;
+      border-left: 2px solid white;
       transform: rotate(-45deg);
-      margin-left: 10rpx;
     }
     
-    &:active {
-      opacity: 0.8;
+    .back-text {
+      font-size: 28rpx;
+      margin-left: 10rpx;
+      color: white;
     }
   }
   
   .nav-title {
     flex: 1;
     text-align: center;
-    font-size: 34rpx;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: bold;
   }
   
   .nav-right {
-    width: 88rpx;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 160rpx;
+    text-align: right;
+    padding-right: 30rpx;
     
     .iconfont {
-      font-size: 36rpx;
+      font-size: 18px;
     }
   }
 }

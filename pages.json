@@ -222,6 +222,22 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white"
             }
+        },
+        {
+            "path": "pages/user/about/index",
+            "style": {
+                "navigationBarTitleText": "关于我们",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/user/setting/index",
+            "style": {
+                "navigationBarTitleText": "设置",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
         }
     ],
     "globalStyle": {

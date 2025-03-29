@@ -37,6 +37,28 @@
         </view>
       </view>
     </view>
+    
+    <!-- 手机号登录弹窗 -->
+    <view class="phone-login-modal" v-if="showPhoneLoginModal">
+      <view class="modal-mask" @click="closePhoneLoginModal"></view>
+      <view class="modal-content">
+        <view class="modal-title">手机号登录</view>
+        <view class="input-box">
+          <input 
+            type="number" 
+            maxlength="11" 
+            placeholder="请输入您的手机号" 
+            placeholder-class="input-placeholder"
+            v-model="phoneNumber"
+            focus 
+          />
+        </view>
+        <view class="modal-buttons">
+          <button class="modal-btn cancel-btn" @click="closePhoneLoginModal">取消</button>
+          <button class="modal-btn confirm-btn" @click="confirmPhoneLogin(phoneNumber)">确定</button>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -47,6 +69,8 @@ export default {
       redirectUrl: '',
       isSupport: false, // 是否支持一键登录
       statusBarHeight: 0,
+      phoneNumber: '', // 手机号输入
+      showPhoneLoginModal: false, // 是否显示手机号登录弹窗
       loginState: {
         code: '', // 微信登录code
         openid: '', // 用户openid
@@ -106,84 +130,40 @@ export default {
     
     // 手机号一键登录
     handlePhoneLogin() {
-      // #ifdef APP-PLUS
-      if (this.isSupport) {
-        uni.login({
-          provider: 'univerify',
-          univerifyStyle: {
-            // 自定义登录框样式
-            backgroundColor: '#ffffff',
-            buttons: {
-              iconWidth: '45px',
-              iconHeight: '45px',
-              list: [{
-                  iconPath: '/static/images/logo.png',
-                  title: '微信登录'
-                },
-                {
-                  iconPath: '/static/images/logo.png',
-                  title: '微博登录'
-                }
-              ]
-            }
-          },
-          success: (res) => {
-            // 登录成功
-            console.log('一键登录成功:', res.authResult);
-            // 获取到access_token，调用云函数换取手机号
-            this.getPhoneNumber(res.authResult.access_token);
-          },
-          fail: (err) => {
-            console.error('一键登录失败:', err);
-            uni.showToast({
-              title: '登录失败，请重试',
-              icon: 'none'
-            });
-          }
-        });
-      } else {
-        // #endif
-        
-        // 不支持一键登录，使用普通手机号登录
-        this.showPhoneLoginModal();
-        
-        // #ifdef APP-PLUS
-      }
-      // #endif
+      this.phoneNumber = '';
+      this.showPhoneLoginModal = true;
     },
     
-    // 显示手机号登录弹窗
-    showPhoneLoginModal() {
-      uni.showModal({
-        title: '手机号登录',
-        content: '请输入您的手机号码',
-        editable: true,
-        placeholderText: '请输入手机号',
-        success: (res) => {
-          if (res.confirm) {
-            const phoneNumber = res.content;
-            if (!phoneNumber) {
-              uni.showToast({
-                title: '请输入手机号',
-                icon: 'none'
-              });
-              return;
-            }
-            
-            // 简单验证手机号
-            if (!/^1\d{10}$/.test(phoneNumber)) {
-              uni.showToast({
-                title: '请输入正确的手机号',
-                icon: 'none'
-              });
-              return;
-            }
-            
-            // 直接使用手机号登录
-            this.loginWithPhone(phoneNumber);
-          }
-        }
-      });
+    // 关闭手机号登录弹窗
+    closePhoneLoginModal() {
+      this.phoneNumber = '';
+      this.showPhoneLoginModal = false;
+    },
+    
+    // 确认手机号登录
+    confirmPhoneLogin(phoneNumber) {
+      if (!phoneNumber) {
+        uni.showToast({
+          title: '请输入手机号',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 简单验证手机号
+      if (!/^1\d{10}$/.test(phoneNumber)) {
+        uni.showToast({
+          title: '请输入正确的手机号',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 关闭弹窗
+      this.showPhoneLoginModal = false;
+      
+      // 直接使用手机号登录
+      this.loginWithPhone(phoneNumber);
     },
     
     // 获取手机号
@@ -294,7 +274,7 @@ export default {
               
               // 有了openid后尝试自动登录
               if (this.loginState.openid) {
-                this.autoLoginWithOpenid();
+                this.checkUserExistsAndLogin();
               }
             }
           } catch (error) {
@@ -304,6 +284,51 @@ export default {
       } catch (error) {
         console.error('静默登录失败:', error);
       }
+    },
+    
+    // 检查用户是否已存在，如果已存在则自动登录
+    checkUserExistsAndLogin() {
+      if (!this.loginState.openid) return;
+      
+      // 显示加载中
+      uni.showLoading({
+        title: '检查登录状态',
+        mask: true
+      });
+      
+      const defaultUserInfo = {
+        nickName: '微信用户',
+        avatarUrl: '',
+        gender: 0
+      };
+      
+      // 调用云函数检查用户是否存在并自动登录
+      uniCloud.callFunction({
+        name: 'login',
+        data: {
+          openid: this.loginState.openid,
+          userInfo: defaultUserInfo,
+          loginType: 'wechat',
+          checkOnly: true  // 添加标记，仅检查用户是否存在
+        },
+        success: (res) => {
+          uni.hideLoading();
+          console.log('检查用户存在结果:', res);
+          
+          if (res.result && res.result.code === 0 && res.result.userExists) {
+            console.log('用户已存在，自动登录');
+            // 用户已存在，自动登录
+            this.loginWithOpenid(this.loginState.openid, defaultUserInfo);
+          } else {
+            console.log('用户不存在，需要点击登录按钮');
+            // 用户不存在，不进行自动登录，等待用户点击登录按钮
+          }
+        },
+        fail: (err) => {
+          uni.hideLoading();
+          console.error('检查用户存在失败:', err);
+        }
+      });
     },
     
     // 自动使用openid登录
@@ -856,6 +881,88 @@ export default {
       
       .link {
         color: #FF6B00;
+      }
+    }
+  }
+}
+
+/* 手机号登录弹窗样式 */
+.phone-login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  
+  .modal-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+  }
+  
+  .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    width: 580rpx;
+    border-radius: 12rpx;
+    padding: 30rpx;
+    
+    .modal-title {
+      font-size: 32rpx;
+      text-align: center;
+      margin-bottom: 30rpx;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .input-box {
+      margin-bottom: 30rpx;
+      border-bottom: 1px solid #eee;
+      padding: 10rpx 0;
+      
+      input {
+        height: 80rpx;
+        font-size: 32rpx;
+        width: 100%;
+      }
+      
+      .input-placeholder {
+        color: #bbb;
+      }
+    }
+    
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      
+      .modal-btn {
+        flex: 1;
+        height: 80rpx;
+        line-height: 80rpx;
+        font-size: 30rpx;
+        margin: 0 10rpx;
+        border-radius: 40rpx;
+        
+        &::after {
+          border: none;
+        }
+      }
+      
+      .cancel-btn {
+        background-color: #f5f5f5;
+        color: #666;
+      }
+      
+      .confirm-btn {
+        background-color: #47c76d;
+        color: #fff;
       }
     }
   }

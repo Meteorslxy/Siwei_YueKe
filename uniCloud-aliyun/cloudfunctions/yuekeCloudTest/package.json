@@ -1,7 +1,7 @@
 {
   "name": "yuekeCloudTest",
   "version": "1.0.0",
-  "description": "悦课小程序云函数连接测试",
+  "description": "四维教育小程序云函数连接测试",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

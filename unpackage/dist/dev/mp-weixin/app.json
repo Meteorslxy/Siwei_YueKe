@@ -26,7 +26,9 @@
     "pages/news/list",
     "pages/news/detail",
     "pages/user/booking",
-    "pages/user/booking-detail"
+    "pages/user/booking-detail",
+    "pages/user/about/index",
+    "pages/user/setting/index"
   ],
   "subPackages": [],
   "window": {

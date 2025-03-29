@@ -66,8 +66,9 @@
 /* 选项卡 */
 .detail-container {
   min-height: 100vh;
-  background-color: var(--bg-color);
+  background-color: #f5f5f5;
   padding-bottom: 120rpx;
+  position: relative;
 }
 /* 图标样式 */
 .iconfont {
@@ -175,33 +176,35 @@
   color: var(--text-color);
 }
 /* 操作区域 */
-.action-bar {
+.action-area {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  display: flex;
-  padding: 20rpx;
   background-color: #fff;
-  box-shadow: 0 -2rpx 6rpx rgba(0, 0, 0, 0.05);
+  padding: 20rpx 30rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
-.action-bar .action-btn {
+.action-area .action-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30rpx;
+}
+.action-area .action-bar .action-btn {
   flex: 1;
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
-  font-size: 28rpx;
-  color: var(--text-color);
-  background-color: #f5f5f5;
   border-radius: 40rpx;
-  margin: 0 10rpx;
+  font-size: 28rpx;
 }
-.action-bar .action-btn.outline {
-  background-color: #fff;
-  border: 1rpx solid var(--border-color);
+.action-area .action-bar .action-btn.outline {
+  border: 1rpx solid var(--theme-color);
+  color: var(--theme-color);
 }
-.action-bar .action-btn.primary {
-  color: #fff;
+.action-area .action-bar .action-btn.primary {
   background-color: var(--theme-color);
+  color: #fff;
 }
 
