@@ -899,10 +899,15 @@ export default {
         return;
       }
       
+      // 检查支付状态
+      const hasPaid = booking.paymentStatus === 'paid' || 
+                      booking.status === 'confirmed' ||
+                      booking.isPaid === true;
+      
       // 确认是否取消
       uni.showModal({
         title: '取消预约',
-        content: '确定要取消此次预约吗？',
+        content: hasPaid ? '您已完成缴费，确定要取消此次预约吗？' : '确定要取消此次预约吗？',
         success: async (res) => {
           if (res.confirm) {
             this.handleCancel(booking);

@@ -238,6 +238,38 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white"
             }
+        },
+        {
+            "path": "pages/user/profile/index",
+            "style": {
+                "navigationBarTitleText": "个人资料",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/user/phone/index",
+            "style": {
+                "navigationBarTitleText": "手机绑定",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/user/wechat/index",
+            "style": {
+                "navigationBarTitleText": "微信账号",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/common/input-page",
+            "style": {
+                "navigationBarTitleText": "输入",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
         }
     ],
     "globalStyle": {

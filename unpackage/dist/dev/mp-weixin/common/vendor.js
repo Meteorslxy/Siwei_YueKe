@@ -18710,6 +18710,34 @@ var _default = {
       "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
+  }, {
+    "path": "pages/user/profile/index",
+    "style": {
+      "navigationBarTitleText": "个人资料",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/phone/index",
+    "style": {
+      "navigationBarTitleText": "手机绑定",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/wechat/index",
+    "style": {
+      "navigationBarTitleText": "微信账号",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/common/input-page",
+    "style": {
+      "navigationBarTitleText": "输入",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
   }],
   "globalStyle": {
     "navigationBarTextStyle": "black",
@@ -18789,6 +18817,155 @@ function _interopRequireDefault(obj) {
   };
 }
 module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 404:
+/*!**************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/modules/user.js ***!
+  \**************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+exports.getUserInfo = getUserInfo;
+exports.getWxOpenid = getWxOpenid;
+exports.login = login;
+exports.logout = logout;
+exports.updatePhoneNumber = updatePhoneNumber;
+var _request = _interopRequireDefault(__webpack_require__(/*! ../request */ 89));
+/**
+ * 用户相关API
+ */
+
+/**
+ * 用户登录
+ * @param {Object} params - 登录参数
+ * @param {String} params.code - 微信登录code
+ * @param {Object} params.userInfo - 用户信息
+ * @param {String} params.loginType - 登录类型 wechat/phone
+ * @param {String} params.phoneNumber - 手机号(loginType为phone时必填)
+ * @returns {Promise} API请求Promise
+ */
+function login() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用login API，参数:', params);
+  return (0, _request.default)({
+    name: 'login',
+    data: params
+  });
+}
+
+/**
+ * 获取微信OpenID
+ * @param {Object} params - 请求参数
+ * @param {String} params.code - 微信登录code
+ * @returns {Promise} API请求Promise
+ */
+function getWxOpenid() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用getWxOpenid API，参数:', params);
+  if (!params.code) {
+    return Promise.reject(new Error('缺少code参数'));
+  }
+  return (0, _request.default)({
+    name: 'getWxOpenid',
+    data: params
+  });
+}
+
+/**
+ * 获取用户信息
+ * @returns {Promise} API请求Promise
+ */
+function getUserInfo() {
+  return (0, _request.default)({
+    name: 'getUserInfo',
+    data: {}
+  });
+}
+
+/**
+ * 退出登录
+ * @returns {Promise} API请求Promise
+ */
+function logout() {
+  return (0, _request.default)({
+    name: 'logout',
+    data: {}
+  });
+}
+
+/**
+ * 更新用户手机号
+ * @param {Object} params - 请求参数
+ * @param {String} params.phoneNumber - 新的手机号码
+ * @returns {Promise} API请求Promise
+ */
+function updatePhoneNumber() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用updatePhoneNumber API，参数:', params);
+  if (!params.phoneNumber) {
+    return Promise.reject(new Error('缺少phoneNumber参数'));
+  }
+
+  // 尝试获取所有可能的token
+  var uniIdToken = uni.getStorageSync('uni_id_token') || '';
+  var token = uni.getStorageSync('token') || '';
+  var userToken = uni.getStorageSync('userToken') || '';
+
+  // 获取优先级: uniIdToken > token > userToken
+  var effectiveToken = uniIdToken || token || userToken;
+
+  // 获取可能的用户ID
+  var userId = '';
+  try {
+    var userInfoStr = uni.getStorageSync('userInfo');
+    if (userInfoStr) {
+      var userInfo = JSON.parse(userInfoStr);
+      userId = userInfo._id || userInfo.userId || userInfo.id || '';
+    }
+  } catch (e) {
+    console.error('获取用户ID失败:', e);
+  }
+  console.log('使用token:', {
+    'uni_id_token': !!uniIdToken,
+    'token': !!token,
+    'userToken': !!userToken,
+    'effectiveToken': !!effectiveToken,
+    'userId': userId
+  });
+  return (0, _request.default)({
+    name: 'updateUserInfo',
+    data: {
+      update: {
+        phoneNumber: params.phoneNumber
+      },
+      // 以多种方式提供身份信息，提高成功率
+      uniIdToken: effectiveToken,
+      token: effectiveToken,
+      userToken: effectiveToken,
+      userId: userId,
+      phoneNumber: params.phoneNumber
+    }
+  });
+}
+var _default = {
+  login: login,
+  getWxOpenid: getWxOpenid,
+  getUserInfo: getUserInfo,
+  logout: logout,
+  updatePhoneNumber: updatePhoneNumber
+};
+exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 

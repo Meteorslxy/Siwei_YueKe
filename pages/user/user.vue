@@ -82,19 +82,18 @@
           </view>
         </view>
       </view>
+    </view>
+
+    <!-- 退出登录 (放在页面底部) -->
+    <view class="bottom-area">
+      <!-- 管理员入口按钮 (隐藏起来，但开发者或管理员可以通过特定操作激活) -->
+      <view class="admin-entry-btn" v-if="isDev" @click="navigateToAdminLogin">管理员入口</view>
       
-      <!-- 退出登录 -->
+      <!-- 退出登录按钮 -->
       <view v-if="hasUserInfo" class="logout-btn" @click="logout">退出登录</view>
-    </view>
-
-    <!-- 管理功能区域 -->
-    <view class="section admin-section" v-if="false">
-      <!-- 已禁用管理功能 -->
-    </view>
-
-    <!-- 管理员入口按钮 -->
-    <view class="menu-section">
-      <view class="admin-entry-btn" @click="navigateToAdminLogin">管理员入口</view>
+      
+      <!-- 安全区域 -->
+      <view class="safe-area-bottom"></view>
     </view>
   </view>
 </template>
@@ -283,11 +282,15 @@ export default {
         if (res.result && res.result.code === 0) {
           // 获取counts下的数据
           const counts = res.result.data.counts || {};
+          // 修复"可使用"预约数量计算，确保与预约列表页显示一致
+          // 注意：已预约(booked) = 待确认(pending) + 已确认未付款(confirmed_unpaid) + 已确认(confirmed)
           this.bookingCounts = {
-            usable: counts.pending + counts.confirmed || 0,
+            usable: (counts.pending || 0) + (counts.confirmed_unpaid || 0) + (counts.confirmed || 0),
             expired: counts.finished || 0,
             canceled: counts.cancelled || 0
           };
+          
+          console.log('获取到的预约数量:', JSON.stringify(this.bookingCounts));
           
           // 如果用户有未完成的预约，在tabBar上添加红点提示
           if (this.bookingCounts.usable > 0) {
@@ -419,6 +422,8 @@ export default {
 .user-container {
   min-height: 100vh;
   background-color: $bg-color;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 用户信息区域 */
@@ -579,20 +584,15 @@ export default {
       }
     }
   }
-  
-  .logout-btn {
-    margin-top: 40rpx;
-    height: 90rpx;
-    line-height: 90rpx;
-    text-align: center;
-    background-color: #fff;
-    border-radius: 12rpx;
-    font-size: 32rpx;
-    color: #FF3B30;
-  }
+}
+
+/* 底部区域 */
+.bottom-area {
+  margin-top: auto;
+  padding: 30rpx 20rpx;
   
   .admin-entry-btn {
-    margin-top: 20rpx;
+    margin-bottom: 20rpx;
     height: 90rpx;
     line-height: 90rpx;
     text-align: center;
@@ -602,56 +602,20 @@ export default {
     color: #2C405A;
     border: 1px solid #eee;
   }
-}
-
-/* 管理功能区域 */
-.section.admin-section {
-  margin-top: 20rpx;
-  padding: 20rpx;
-  background-color: #fff;
-  border-radius: 12rpx;
   
-  .section-title {
+  .logout-btn {
+    height: 90rpx;
+    line-height: 90rpx;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 12rpx;
     font-size: 32rpx;
-    font-weight: bold;
-    color: $text-color;
-    margin-bottom: 30rpx;
+    color: #FF3B30;
+    margin-bottom: 20rpx;
   }
   
-  .admin-menu {
-    .menu-item {
-      display: flex;
-      align-items: center;
-      height: 100rpx;
-      border-bottom: 1rpx solid $border-color-light;
-      
-      &:last-child {
-        border-bottom: none;
-      }
-      
-      .item-icon {
-        font-size: 36rpx;
-        color: $theme-color;
-        margin-right: 20rpx;
-      }
-      
-      .item-info {
-        flex: 1;
-        .item-name {
-          font-size: 28rpx;
-          color: $text-color;
-        }
-        .item-desc {
-          font-size: 24rpx;
-          color: $text-color-light;
-        }
-      }
-      
-      .iconfont.icon-right {
-        font-size: 24rpx;
-        color: $text-color-light;
-      }
-    }
+  .safe-area-bottom {
+    height: 50rpx;
   }
 }
 </style> 

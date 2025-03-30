@@ -1,16 +1,15 @@
 <template>
   <view class="about-container">
     <view class="header">
-      <image class="logo" src="/static/images/logo.png" mode="aspectFit"></image>
-      <text class="title">四维教育</text>
+      <image class="logo" src="/static/images/logo.png" mode="widthFix"></image>
       <text class="version">版本 1.0.0</text>
     </view>
     
     <view class="content">
       <view class="section">
-        <view class="section-title">关于四维教育</view>
+        <view class="section-title">关于我们</view>
         <view class="section-content">
-          <text class="paragraph">四维教育是一个专注于教育培训的小程序平台，致力于为学生提供高质量的课程和教育资源，让学习变得更加高效和有趣。</text>
+          <text class="paragraph">我们是一个专注于教育培训的平台，致力于为学生提供高质量的课程和教育资源，让学习变得更加高效和有趣。</text>
           <text class="paragraph">我们提供了丰富的课程内容，涵盖小学、初中、高中多个学科，同时还有优秀的教师资源，帮助学生更好地学习和成长。</text>
         </view>
       </view>
@@ -51,11 +50,11 @@
           </view>
           <view class="contact-item">
             <text class="contact-label">电子邮箱：</text>
-            <text class="contact-value">support@siwei.com</text>
+            <text class="contact-value">support@example.com</text>
           </view>
           <view class="contact-item">
             <text class="contact-label">官方网站：</text>
-            <text class="contact-value">www.siwei.com</text>
+            <text class="contact-value">www.example.com</text>
           </view>
         </view>
       </view>
@@ -102,16 +101,9 @@ export default {
   background-color: #fff;
   
   .logo {
-    width: 160rpx;
-    height: 160rpx;
+    width: 300rpx;
+    height: auto;
     margin-bottom: 20rpx;
-  }
-  
-  .title {
-    font-size: 40rpx;
-    font-weight: bold;
-    color: $text-color;
-    margin-bottom: 10rpx;
   }
   
   .version {

@@ -266,6 +266,9 @@ var _default = {
       this.$api.lecture.getLectureDetail(this.lectureId).then(function (res) {
         if (res && res.data) {
           _this.lecture = res.data;
+
+          // 处理封面图片路径
+          _this.processImageUrls();
           uni.setNavigationBarTitle({
             title: _this.lecture.title
           });
@@ -285,6 +288,73 @@ var _default = {
         _this.loading = false;
         uni.hideLoading();
       });
+    },
+    // 处理图片URL
+    processImageUrls: function processImageUrls() {
+      // 处理主图片
+      if (this.lecture.coverImage) {
+        // 检查是否为完整URL（以http或https开头）
+        if (this.lecture.coverImage.startsWith('http://') || this.lecture.coverImage.startsWith('https://')) {
+          // 保持原样，这是完整的URL
+          console.log('使用云存储URL作为讲座封面图:', this.lecture.coverImage);
+        }
+        // 检查是否为本地路径（以/开头）
+        else if (this.lecture.coverImage.startsWith('/')) {
+          // 已经是本地路径，保持原样
+          console.log('使用本地绝对路径作为讲座封面图:', this.lecture.coverImage);
+        }
+        // 其他情况，可能是相对路径
+        else {
+          this.lecture.coverImage = "/static/images/course/".concat(this.lecture.coverImage);
+          console.log('转换为本地相对路径作为讲座封面图:', this.lecture.coverImage);
+        }
+      } else {
+        this.lecture.coverImage = '/static/images/course-default.jpg';
+      }
+
+      // 处理推荐讲座的图片
+      if (this.lecture.recommendLectures && this.lecture.recommendLectures.length > 0) {
+        this.lecture.recommendLectures.forEach(function (item) {
+          if (item.coverImage) {
+            // 检查是否为完整URL
+            if (item.coverImage.startsWith('http://') || item.coverImage.startsWith('https://')) {
+              // 保持原样
+              console.log('使用云存储URL作为推荐讲座封面图:', item.coverImage);
+            }
+            // 检查是否为本地路径
+            else if (item.coverImage.startsWith('/')) {
+              // 已经是本地路径，保持原样
+              console.log('使用本地绝对路径作为推荐讲座封面图:', item.coverImage);
+            }
+            // 其他情况，转为本地相对路径
+            else {
+              item.coverImage = "/static/images/course/".concat(item.coverImage);
+              console.log('转换为本地相对路径作为推荐讲座封面图:', item.coverImage);
+            }
+          } else {
+            item.coverImage = '/static/images/course-default.jpg';
+          }
+        });
+      }
+
+      // 处理讲师头像
+      if (this.lecture.speakerInfo && this.lecture.speakerInfo.avatar) {
+        // 检查是否为完整URL
+        if (this.lecture.speakerInfo.avatar.startsWith('http://') || this.lecture.speakerInfo.avatar.startsWith('https://')) {
+          // 保持原样
+          console.log('使用云存储URL作为讲师头像:', this.lecture.speakerInfo.avatar);
+        }
+        // 检查是否为本地路径
+        else if (this.lecture.speakerInfo.avatar.startsWith('/')) {
+          // 已经是本地路径，保持原样
+          console.log('使用本地绝对路径作为讲师头像:', this.lecture.speakerInfo.avatar);
+        }
+        // 其他情况，转为本地相对路径
+        else {
+          this.lecture.speakerInfo.avatar = "/static/images/teacher/".concat(this.lecture.speakerInfo.avatar);
+          console.log('转换为本地相对路径作为讲师头像:', this.lecture.speakerInfo.avatar);
+        }
+      }
     },
     // 切换标签
     switchTab: function switchTab(index) {

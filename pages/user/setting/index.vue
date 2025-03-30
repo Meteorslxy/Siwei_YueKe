@@ -3,14 +3,14 @@
     <view class="section">
       <view class="section-title">账号设置</view>
       <view class="setting-list">
-        <view class="setting-item">
+        <view class="setting-item" @click="showFeatureInDevelopment('个人资料')">
           <text class="item-label">个人资料</text>
           <view class="item-action">
             <text class="item-arrow iconfont icon-right"></text>
           </view>
         </view>
         
-        <view class="setting-item">
+        <view class="setting-item" @click="showPhoneInputPopup">
           <text class="item-label">手机号码</text>
           <view class="item-action">
             <text class="item-value">{{phoneNumber || '未绑定'}}</text>
@@ -18,7 +18,7 @@
           </view>
         </view>
         
-        <view class="setting-item">
+        <view class="setting-item" @click="showFeatureInDevelopment('微信账号管理')">
           <text class="item-label">微信账号</text>
           <view class="item-action">
             <text class="item-value">已绑定</text>
@@ -73,7 +73,7 @@
           </view>
         </view>
         
-        <view class="setting-item" @click="navigateTo('/pages/user/about/index')">
+        <view class="setting-item" @click="navigateToAbout">
           <text class="item-label">关于我们</text>
           <view class="item-action">
             <text class="item-arrow iconfont icon-right"></text>
@@ -85,10 +85,13 @@
 </template>
 
 <script>
+import { updatePhoneNumber } from '@/api/modules/user.js';
+
 export default {
   data() {
     return {
-      phoneNumber: '',
+      phoneNumber: '', // 显示用的脱敏手机号
+      fullPhoneNumber: '', // 存储完整手机号
       cacheSize: '0.00MB',
       version: '1.0.0',
       notifications: {
@@ -101,6 +104,8 @@ export default {
   onLoad() {
     this.loadUserInfo();
     this.calculateCacheSize();
+    // 调试登录状态
+    this.checkLoginStatus();
   },
   methods: {
     // 加载用户信息
@@ -109,10 +114,13 @@ export default {
         const userInfoStr = uni.getStorageSync('userInfo');
         if (userInfoStr) {
           const userInfo = JSON.parse(userInfoStr);
-          this.phoneNumber = userInfo.phoneNumber || '';
-          if (this.phoneNumber && this.phoneNumber.length > 7) {
-            // 手机号码脱敏处理
-            this.phoneNumber = this.phoneNumber.substr(0, 3) + '****' + this.phoneNumber.substr(-4);
+          this.fullPhoneNumber = userInfo.phoneNumber || '';
+          
+          // 处理显示用的手机号（脱敏）
+          if (this.fullPhoneNumber && this.fullPhoneNumber.length > 7) {
+            this.phoneNumber = this.fullPhoneNumber.substr(0, 3) + '****' + this.fullPhoneNumber.substr(-4);
+          } else {
+            this.phoneNumber = '';
           }
         }
       } catch (e) {
@@ -178,10 +186,10 @@ export default {
       }, 1000);
     },
     
-    // 页面导航
-    navigateTo(url) {
+    // 跳转到关于我们页面
+    navigateToAbout() {
       uni.navigateTo({
-        url,
+        url: '/pages/user/about/index',
         fail: (err) => {
           console.error('页面跳转失败:', err);
           uni.showToast({
@@ -189,6 +197,254 @@ export default {
             icon: 'none'
           });
         }
+      });
+    },
+    
+    // 显示功能开发中提示
+    showFeatureInDevelopment(feature) {
+      uni.showToast({
+        title: `${feature}功能开发中，敬请期待！`,
+        icon: 'none',
+        duration: 2000
+      });
+    },
+    
+    // 显示手机号码输入弹窗
+    showPhoneInputPopup() {
+      // 检查是否已经绑定了手机号
+      if (this.phoneNumber) {
+        // 已绑定手机号，显示已绑定信息并提供更改选项
+        uni.showModal({
+          title: '手机号码已绑定',
+          content: `当前绑定手机号：${this.fullPhoneNumber}`,
+          confirmText: '更改绑定',
+          cancelText: '取消',
+          success: (res) => {
+            if (res.confirm) {
+              // 用户选择更改绑定
+              this.showEditableModal();
+            }
+          }
+        });
+        return;
+      }
+      
+      // 未绑定手机号，直接显示输入框
+      this.showEditableModal();
+    },
+    
+    // 显示可编辑的手机号输入框
+    showEditableModal() {
+      // 使用带输入框的模态框（图三）
+      uni.showModal({
+        title: '绑定手机号',
+        placeholderText: '请输入11位手机号码',
+        editable: true,
+        confirmText: '确定',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            const inputPhone = res.content.trim();
+            // 验证手机号格式
+            if (!/^1\d{10}$/.test(inputPhone)) {
+              // 手机号格式错误，显示图二的提示样式
+              this.showInvalidPhonePrompt();
+              return;
+            }
+            
+            // 保存手机号
+            this.savePhoneNumber(inputPhone);
+          }
+        },
+        fail: (err) => {
+          console.error('可编辑模态框失败:', err);
+          // 如果可编辑模态框不可用，使用备选方案
+          this.showPhoneInputAlternative();
+        }
+      });
+    },
+    
+    // 显示无效手机号提示
+    showInvalidPhonePrompt() {
+      uni.showModal({
+        title: '绑定手机号',
+        content: '请输入11位手机号码',
+        confirmText: '重新绑定',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            // 用户点击"重新绑定"，回到图三的输入界面
+            this.showEditableModal();
+          }
+        }
+      });
+      
+      // 也可以设置3秒后自动回到输入界面
+      setTimeout(() => {
+        // 获取当前所有模态框，只有当仍在显示无效手机号提示时才自动关闭
+        const pages = getCurrentPages();
+        const currentPage = pages[pages.length - 1];
+        if (currentPage && currentPage.route && currentPage.route.includes('setting')) {
+          this.showEditableModal();
+        }
+      }, 3000);
+    },
+    
+    // 备选的手机号输入方法
+    showPhoneInputAlternative() {
+      // 在这个方法中，我们使用通用的输入页面来模拟图三的界面样式
+      uni.navigateTo({
+        url: '/pages/common/input-page?title=绑定手机号&placeholder=请输入11位手机号码&maxlength=11&type=number',
+        events: {
+          // 监听输入完成事件
+          inputDone: (value) => {
+            if (value && /^1\d{10}$/.test(value)) {
+              this.savePhoneNumber(value);
+            } else {
+              // 手机号格式错误，显示图二的提示样式
+              this.showInvalidPhonePrompt();
+            }
+          }
+        },
+        fail: () => {
+          // 如果页面跳转失败，则使用简单的提示框
+          this.showInvalidPhonePrompt();
+        }
+      });
+    },
+    
+    // 保存手机号码
+    savePhoneNumber(phoneNumber) {
+      // 显示加载提示
+      uni.showLoading({
+        title: '正在绑定...',
+        mask: true
+      });
+      
+      // 检查是否登录 - 尝试获取所有可能的token
+      const uniIdToken = uni.getStorageSync('uni_id_token') || '';
+      const token = uni.getStorageSync('token') || '';
+      const userToken = uni.getStorageSync('userToken') || '';
+      
+      // 获取优先级: uniIdToken > token > userToken
+      const effectiveToken = uniIdToken || token || userToken;
+      
+      // 登录状态调试
+      console.log('保存手机号时的登录状态:', {
+        'uni_id_token': !!uniIdToken,
+        'token': !!token,
+        'userToken': !!userToken,
+        'effectiveToken': !!effectiveToken,
+        'userInfo': !!uni.getStorageSync('userInfo')
+      });
+      
+      if (!effectiveToken) {
+        uni.hideLoading();
+        uni.showModal({
+          title: '未登录',
+          content: '您需要登录后才能绑定手机号',
+          confirmText: '去登录',
+          success: (res) => {
+            if (res.confirm) {
+              // 跳转到登录页面
+              uni.navigateTo({
+                url: '/pages/login/login'
+              });
+            }
+          }
+        });
+        return;
+      }
+      
+      // 首先更新到云数据库
+      updatePhoneNumber({ phoneNumber })
+        .then(res => {
+          if (res.code === 0) {
+            // 云端更新成功，再更新本地存储
+            try {
+              const userInfoStr = uni.getStorageSync('userInfo');
+              let userInfo = userInfoStr ? JSON.parse(userInfoStr) : {};
+              
+              // 更新完整手机号变量
+              this.fullPhoneNumber = phoneNumber;
+              userInfo.phoneNumber = phoneNumber;
+              uni.setStorageSync('userInfo', JSON.stringify(userInfo));
+              
+              // 更新显示的手机号(脱敏处理)
+              this.phoneNumber = phoneNumber.substr(0, 3) + '****' + phoneNumber.substr(-4);
+              
+              uni.hideLoading();
+              uni.showToast({
+                title: '手机号绑定成功',
+                icon: 'success'
+              });
+            } catch (e) {
+              console.error('保存用户信息到本地失败:', e);
+              uni.hideLoading();
+              uni.showToast({
+                title: '本地绑定失败',
+                icon: 'none'
+              });
+            }
+          } else if (res.code === -1 && res.message && res.message.includes('登录')) {
+            // 登录过期或未登录
+            uni.hideLoading();
+            uni.showModal({
+              title: '登录已过期',
+              content: '您的登录已过期，请重新登录后再绑定手机号',
+              confirmText: '去登录',
+              success: (modalRes) => {
+                if (modalRes.confirm) {
+                  // 跳转到登录页面
+                  uni.navigateTo({
+                    url: '/pages/login/login'
+                  });
+                }
+              }
+            });
+          } else {
+            // 云端更新失败
+            console.error('更新手机号到云数据库失败:', res.message);
+            uni.hideLoading();
+            uni.showToast({
+              title: res.message || '绑定失败，请稍后重试',
+              icon: 'none'
+            });
+          }
+        })
+        .catch(err => {
+          console.error('调用更新手机号API失败:', err);
+          uni.hideLoading();
+          
+          // 检查是否是网络错误
+          if (err.errMsg && err.errMsg.includes('request:fail')) {
+            uni.showToast({
+              title: '网络连接失败，请检查网络',
+              icon: 'none',
+              duration: 2000
+            });
+          } else {
+            uni.showToast({
+              title: '网络异常，请稍后重试',
+              icon: 'none',
+              duration: 2000
+            });
+          }
+        });
+    },
+    
+    // 检查登录状态
+    checkLoginStatus() {
+      // 检查所有可能的token存储
+      const uniIdToken = uni.getStorageSync('uni_id_token');
+      const token = uni.getStorageSync('token');
+      const userToken = uni.getStorageSync('userToken');
+      
+      console.log('登录状态检查:', {
+        'uni_id_token': !!uniIdToken,
+        'token': !!token,
+        'userToken': !!userToken,
+        'userInfo': !!uni.getStorageSync('userInfo')
       });
     }
   }

@@ -64,89 +64,84 @@
 /* 组件变量 */
 /* 导航栏 */
 /* 选项卡 */
-.about-container {
+.phone-container {
   min-height: 100vh;
   background-color: var(--bg-color);
-  padding-bottom: 40rpx;
+  padding: 0 30rpx;
 }
 .header {
+  height: 88rpx;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 60rpx 0;
+  justify-content: center;
   background-color: #fff;
+  position: relative;
+  margin: 0 -30rpx;
 }
-.header .logo {
-  width: 300rpx;
-  height: auto;
-  margin-bottom: 20rpx;
+.header .title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: var(--text-color);
 }
-.header .version {
-  font-size: 24rpx;
-  color: var(--text-color-light);
-}
-.content {
-  padding: 30rpx;
-}
-.content .section {
+.phone-form {
+  margin-top: 30rpx;
   background-color: #fff;
   border-radius: 12rpx;
-  margin-bottom: 30rpx;
-  overflow: hidden;
+  padding: 0 20rpx;
 }
-.content .section .section-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  padding: 30rpx;
-  color: var(--text-color);
+.phone-form .form-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 0;
   border-bottom: 1rpx solid var(--border-color);
 }
-.content .section .section-content {
-  padding: 30rpx;
+.phone-form .form-item:last-child {
+  border-bottom: none;
 }
-.content .section .section-content .paragraph {
-  font-size: 28rpx;
-  color: var(--text-color);
-  line-height: 1.6;
-  margin-bottom: 20rpx;
-  display: block;
-}
-.feature-item {
-  display: flex;
-  margin-bottom: 30rpx;
-}
-.feature-item .feature-icon {
-  font-size: 48rpx;
-  color: var(--theme-color);
-  margin-right: 20rpx;
-}
-.feature-item .feature-info {
-  flex: 1;
-}
-.feature-item .feature-info .feature-title {
+.phone-form .form-item .item-label {
   font-size: 30rpx;
-  font-weight: bold;
   color: var(--text-color);
-  margin-bottom: 10rpx;
-  display: block;
+  width: 120rpx;
 }
-.feature-item .feature-info .feature-desc {
+.phone-form .form-item .input {
+  flex: 1;
+  height: 60rpx;
+  font-size: 28rpx;
+}
+.phone-form .form-item .verify-btn {
+  width: 200rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  font-size: 24rpx;
+  color: #fff;
+  background-color: var(--theme-color);
+  border-radius: 30rpx;
+  padding: 0;
+  margin: 0;
+}
+.phone-form .form-item .verify-btn[disabled] {
+  background-color: #ccc;
+}
+.submit-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 32rpx;
+  color: #fff;
+  background-color: var(--theme-color);
+  border-radius: 44rpx;
+  margin-top: 50rpx;
+}
+.submit-btn[disabled] {
+  background-color: #ccc;
+}
+.tips {
+  margin-top: 30rpx;
+  padding: 0 20rpx;
+}
+.tips .tips-text {
   font-size: 26rpx;
   color: var(--text-color-light);
-  line-height: 1.5;
-}
-.contact-item {
-  display: flex;
-  margin-bottom: 20rpx;
-}
-.contact-item .contact-label {
-  font-size: 28rpx;
-  color: var(--text-color);
-  width: 180rpx;
-}
-.contact-item .contact-value {
-  font-size: 28rpx;
-  color: var(--theme-color);
-  flex: 1;
+  line-height: 1.6;
 }
 

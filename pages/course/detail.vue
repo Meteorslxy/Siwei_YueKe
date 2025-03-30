@@ -421,15 +421,45 @@ export default {
       }
       
       // 处理封面图片路径
-      if (this.courseInfo.coverImage && !this.courseInfo.coverImage.startsWith('/')) {
-        this.courseInfo.coverImage = `/static/images/course/${this.courseInfo.coverImage}`;
-      } else if (!this.courseInfo.coverImage && this.courseInfo.image) {
-        // 使用image字段作为备选
-        this.courseInfo.coverImage = this.courseInfo.image.startsWith('/') ? 
-          this.courseInfo.image : `/static/images/course/${this.courseInfo.image}`;
-      } else if (!this.courseInfo.coverImage) {
-        // 没有封面图时使用默认图片
+      if (this.courseInfo.coverImage) {
+        // 检查是否为完整URL（以http或https开头）
+        if (this.courseInfo.coverImage.startsWith('http://') || this.courseInfo.coverImage.startsWith('https://')) {
+          // 保持原样，这是完整的URL
+          console.log('使用云存储URL作为封面图:', this.courseInfo.coverImage);
+        } 
+        // 检查是否为本地路径（以/开头）
+        else if (this.courseInfo.coverImage.startsWith('/')) {
+          // 已经是本地路径，保持原样
+          console.log('使用本地绝对路径作为封面图:', this.courseInfo.coverImage);
+        } 
+        // 其他情况，可能是相对路径
+        else {
+          this.courseInfo.coverImage = `/static/images/course/${this.courseInfo.coverImage}`;
+          console.log('转换为本地相对路径作为封面图:', this.courseInfo.coverImage);
+        }
+      } 
+      // 处理备选字段image
+      else if (!this.courseInfo.coverImage && this.courseInfo.image) {
+        // 检查image字段是否为完整URL
+        if (this.courseInfo.image.startsWith('http://') || this.courseInfo.image.startsWith('https://')) {
+          this.courseInfo.coverImage = this.courseInfo.image;
+          console.log('使用image字段的云存储URL作为封面图:', this.courseInfo.coverImage);
+        }
+        // 检查是否为本地路径
+        else if (this.courseInfo.image.startsWith('/')) {
+          this.courseInfo.coverImage = this.courseInfo.image;
+          console.log('使用image字段的本地绝对路径作为封面图:', this.courseInfo.coverImage);
+        }
+        // 其他情况，转为本地相对路径
+        else {
+          this.courseInfo.coverImage = `/static/images/course/${this.courseInfo.image}`;
+          console.log('将image字段转换为本地相对路径作为封面图:', this.courseInfo.coverImage);
+        }
+      } 
+      // 没有任何图片时使用默认图片
+      else {
         this.courseInfo.coverImage = '/static/images/course/course1.jpg';
+        console.log('使用默认图片作为封面图');
       }
       
       // 预加载教师头像

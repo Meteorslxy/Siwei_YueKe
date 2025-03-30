@@ -249,7 +249,6 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
-//
 var _default = {
   data: function data() {
     return {
@@ -460,12 +459,14 @@ var _default = {
                 res = _context2.sent;
                 if (res.result && res.result.code === 0) {
                   // 获取counts下的数据
-                  counts = res.result.data.counts || {};
+                  counts = res.result.data.counts || {}; // 修复"可使用"预约数量计算，确保与预约列表页显示一致
+                  // 注意：已预约(booked) = 待确认(pending) + 已确认未付款(confirmed_unpaid) + 已确认(confirmed)
                   _this3.bookingCounts = {
-                    usable: counts.pending + counts.confirmed || 0,
+                    usable: (counts.pending || 0) + (counts.confirmed_unpaid || 0) + (counts.confirmed || 0),
                     expired: counts.finished || 0,
                     canceled: counts.cancelled || 0
                   };
+                  console.log('获取到的预约数量:', JSON.stringify(_this3.bookingCounts));
 
                   // 如果用户有未完成的预约，在tabBar上添加红点提示
                   if (_this3.bookingCounts.usable > 0) {
