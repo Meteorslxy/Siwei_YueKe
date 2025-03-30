@@ -53,7 +53,16 @@ export default {
   created() {
     // 确保收藏表已初始化
     this.ensureFavoriteTableExists();
-    this.checkFavoriteStatus();
+    
+    // 从父组件传入的initialFavorite进行初始化
+    if (this.initialFavorite) {
+      console.log('使用父组件传递的初始收藏状态:', this.initialFavorite);
+      this.isFavorite = true;
+    } else {
+      // 否则从服务器检查收藏状态
+      this.checkFavoriteStatus();
+    }
+    
     // 获取系统信息
     try {
       const systemInfo = uni.getSystemInfoSync();
@@ -274,6 +283,15 @@ export default {
           title: '操作失败',
           icon: 'none'
         });
+      }
+    },
+    
+    // 手动更新收藏状态
+    updateFavoriteStatus(status, favoriteId = '') {
+      console.log('手动更新收藏状态:', status, '收藏ID:', favoriteId);
+      this.isFavorite = !!status;
+      if (favoriteId) {
+        this.favoriteId = favoriteId;
       }
     },
     

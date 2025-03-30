@@ -63,6 +63,12 @@
 						path: '/pages/admin/content-upload/index',
 						icon: 'icon-upload',
 						color: '#9270CA'
+					},
+					{
+						name: '课程教师关联',
+						path: '/pages/admin/course-teacher-update',
+						icon: 'icon-link',
+						color: '#FF9800'
 					}
 				]
 			}

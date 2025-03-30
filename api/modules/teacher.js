@@ -69,18 +69,43 @@ export function getTeacherList(params = {}) {
 
 /**
  * 获取教师详情
- * @param {String} id - 教师ID
+ * @param {Object|String} params - 请求参数或教师ID
+ * @param {String} params.id - 教师ID
+ * @param {String} params.name - 教师名称(可选，当id找不到时尝试通过名称查询)
  * @returns {Promise} API请求Promise
  */
-export function getTeacherDetail(id) {
-  if (!id) {
-    return Promise.reject(new Error('教师ID不能为空'));
+export function getTeacherDetail(params) {
+  // 兼容旧的API调用方式（直接传递ID字符串）
+  if (typeof params === 'string') {
+    console.log('以旧格式调用getTeacherDetail API，ID:', params);
+    params = { id: params };
+  } else {
+    console.log('以新格式调用getTeacherDetail API，参数:', params);
+    params = params || {};
+  }
+  
+  // 检查参数
+  if (!params.id && !params.name) {
+    return Promise.reject(new Error('教师ID或名称至少要提供一个'));
+  }
+  
+  // 创建请求参数对象
+  const requestData = {};
+  
+  // 设置ID参数
+  if (params.id) {
+    requestData.id = params.id;
+  }
+  
+  // 设置名称参数
+  if (params.name) {
+    requestData.name = params.name;
   }
   
   return request({
     url: 'getTeacherDetail',
     method: 'GET',
-    data: { id }
+    data: requestData
   });
 }
 

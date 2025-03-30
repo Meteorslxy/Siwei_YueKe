@@ -263,11 +263,28 @@ const teacherApi = {
   },
   
   // 获取教师详情
-  getTeacherDetail(id) {
-    console.log('调用getTeacherDetail，ID:', id);
+  getTeacherDetail(params) {
+    console.log('调用getTeacherDetail，ID:', params);
+    
+    // 处理参数，确保以正确的格式传递给云函数
+    let requestData = {};
+    
+    // 如果params是字符串，将其视为ID
+    if (typeof params === 'string') {
+      requestData = { id: params };
+    } 
+    // 如果params是对象，正确传递其中的id和name属性
+    else if (typeof params === 'object' && params !== null) {
+      requestData = { ...params };
+      
+      // 输出调试信息
+      if (params.id) console.log('请求包含教师ID:', params.id);
+      if (params.name) console.log('请求包含教师名称:', params.name);
+    }
+    
     return request({
       name: 'getTeacherDetail',
-      data: { id }
+      data: requestData
     }).then(res => debugAPI('getTeacherDetail返回', res));
   }
 }

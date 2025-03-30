@@ -3,6 +3,7 @@
     <!-- 固定在右上角的收藏按钮 -->
     <view class="fixed-favorite-wrapper" :style="{top: statusBarHeight + 'px'}">
       <favorite-button 
+        ref="favoriteBtn"
         :itemId="courseId" 
         itemType="course" 
         :itemTitle="courseInfo.title" 
@@ -73,8 +74,11 @@
     
     <!-- 师资介绍 -->
     <view class="teacher-intro">
-      <view class="detail-title">师资介绍</view>
-      <view class="teacher-card">
+      <view class="detail-title">
+        师资介绍
+        <text class="title-hint">点击查看详情 <text class="iconfont icon-right"></text></text>
+      </view>
+      <view class="teacher-card" @click="navigateToTeacherDetail">
         <image class="teacher-avatar" 
                :src="courseInfo.teacherAvatarUrl || courseInfo.teacherAvatar || '/static/images/teacher/default-avatar.png'" 
                mode="aspectFill"></image>
@@ -231,6 +235,9 @@ export default {
           console.warn('延迟检查预约状态失败，忽略错误:', err);
         });
       }, 1000);
+      
+      // 主动检查课程收藏状态，确保收藏按钮正确显示
+      this.checkCourseFavoriteStatus();
     } else {
       uni.showToast({
         title: '未找到课程ID',
@@ -409,6 +416,53 @@ export default {
         console.log('复制教师描述信息到teacherDescription字段');
       }
       
+      // 处理teacherId字段，确保它是有效的字符串类型
+      if (this.courseInfo.teacherId) {
+        console.log('原始teacherId值:', JSON.stringify(this.courseInfo.teacherId), '类型:', typeof this.courseInfo.teacherId);
+        
+        // 检查teacherId的类型
+        if (typeof this.courseInfo.teacherId === 'object') {
+          // 如果是对象（可能是MongoDB的ObjectId），尝试转换为字符串
+          try {
+            if (this.courseInfo.teacherId._id) {
+              console.log('从teacherId对象中提取_id属性');
+              this.courseInfo.teacherId = this.courseInfo.teacherId._id.toString();
+            } else if (typeof this.courseInfo.teacherId.toString === 'function') {
+              console.log('使用toString()方法转换teacherId');
+              this.courseInfo.teacherId = this.courseInfo.teacherId.toString();
+            } else {
+              console.warn('无法从对象中提取有效的teacherId');
+              this.courseInfo.teacherId = null;
+            }
+          } catch (e) {
+            console.error('转换teacherId失败:', e);
+            this.courseInfo.teacherId = null;
+          }
+        } else if (typeof this.courseInfo.teacherId !== 'string' && typeof this.courseInfo.teacherId !== 'number') {
+          // 如果不是字符串或数字类型，置为null
+          console.warn('teacherId不是有效的字符串或数字类型:', typeof this.courseInfo.teacherId);
+          this.courseInfo.teacherId = null;
+        } else {
+          // 确保是字符串类型，并去除可能的空格或特殊字符
+          this.courseInfo.teacherId = String(this.courseInfo.teacherId).trim();
+          
+          // 检查字符串是否包含特殊格式，如引号或Unicode转义
+          if (this.courseInfo.teacherId.startsWith('"') && this.courseInfo.teacherId.endsWith('"')) {
+            // 处理可能被错误地包含了引号的ID
+            this.courseInfo.teacherId = this.courseInfo.teacherId.substring(1, this.courseInfo.teacherId.length - 1);
+            console.log('去除引号后的teacherId:', this.courseInfo.teacherId);
+          }
+          
+          // 确保ID不为空字符串
+          if (!this.courseInfo.teacherId || this.courseInfo.teacherId === '') {
+            console.warn('处理后的teacherId为空，置为null');
+            this.courseInfo.teacherId = null;
+          } else {
+            console.log('最终的teacherId格式化后值:', this.courseInfo.teacherId);
+          }
+        }
+      }
+      
       // 获取教师描述信息 - 先尝试通过名称查询，这样更可靠
       if (this.courseInfo.teacherName) {
         console.log('优先通过教师名称查询教师信息:', this.courseInfo.teacherName);
@@ -477,14 +531,89 @@ export default {
         if (this.courseInfo.teacherName) {
           console.log('尝试通过教师名称查询教师信息:', this.courseInfo.teacherName);
           this.fetchTeacherByName(this.courseInfo.teacherName);
-          return;
         }
         return;
       }
+
+      console.log('fetchTeacherDescription接收到的原始teacherId:', JSON.stringify(teacherId), '类型:', typeof teacherId);
+
+      // 确保teacherId是有效的字符串类型
+      let validTeacherId = teacherId;
+      if (typeof teacherId === 'object') {
+        try {
+          if (teacherId._id) {
+            validTeacherId = teacherId._id.toString();
+            console.log('从对象中提取教师ID:', validTeacherId);
+          } else if (typeof teacherId.toString === 'function') {
+            validTeacherId = teacherId.toString();
+            console.log('使用toString()方法转换教师ID:', validTeacherId);
+          } else {
+            console.warn('无法从对象中提取有效教师ID，改用名称查询');
+            if (this.courseInfo.teacherName) {
+              this.fetchTeacherByName(this.courseInfo.teacherName);
+            }
+            return;
+          }
+        } catch (e) {
+          console.error('尝试转换教师ID失败:', e);
+          if (this.courseInfo.teacherName) {
+            this.fetchTeacherByName(this.courseInfo.teacherName);
+          }
+          return;
+        }
+      } else if (typeof teacherId !== 'string' && typeof teacherId !== 'number') {
+        console.warn('教师ID不是有效的字符串或数字类型:', typeof teacherId);
+        if (this.courseInfo.teacherName) {
+          this.fetchTeacherByName(this.courseInfo.teacherName);
+        }
+        return;
+      } else {
+        // 确保是字符串类型并进行清理
+        validTeacherId = String(teacherId).trim();
+        
+        // 检查是否被包裹在引号中
+        if (validTeacherId.startsWith('"') && validTeacherId.endsWith('"')) {
+          validTeacherId = validTeacherId.substring(1, validTeacherId.length - 1);
+          console.log('去除引号后的teacherId:', validTeacherId);
+        }
+        
+        // 检查字符串是否为空
+        if (!validTeacherId || validTeacherId === '') {
+          console.warn('处理后的teacherId为空，改用名称查询');
+          if (this.courseInfo.teacherName) {
+            this.fetchTeacherByName(this.courseInfo.teacherName);
+          }
+          return;
+        }
+      }
+      
+      console.log('处理后的最终有效teacherId:', validTeacherId);
       
       try {
-        console.log('开始获取教师详情:', teacherId);
-        const result = await this.$api.teacher.getTeacherDetail(teacherId);
+        // 构建请求参数
+        const params = {};
+        
+        // 仅当ID有效时才添加
+        if (validTeacherId) {
+          params.id = validTeacherId;
+          console.log('向API传递teacherId:', validTeacherId);
+        }
+        
+        // 如果有教师名称，也一并传入作为备选
+        if (this.courseInfo.teacherName) {
+          params.name = this.courseInfo.teacherName;
+          console.log('向API传递teacherName:', this.courseInfo.teacherName);
+        }
+        
+        // 如果既没有有效ID也没有名称，则无法查询
+        if (!validTeacherId && !this.courseInfo.teacherName) {
+          console.error('缺少教师查询条件，无法获取教师详情');
+          this.courseInfo.teacherDescription = '暂无详细介绍';
+          this.$forceUpdate();
+          return;
+        }
+        
+        const result = await this.$api.teacher.getTeacherDetail(params);
         
         console.log('教师详情API返回结果:', result);
         
@@ -1460,11 +1589,185 @@ export default {
       console.log('收藏状态变更:', isFavorite);
     },
     
+    // 检查课程收藏状态
+    async checkCourseFavoriteStatus() {
+      if (!this.courseId) return;
+      
+      try {
+        const userInfo = uni.getStorageSync('userInfo');
+        if (!userInfo) return;
+        
+        const userData = JSON.parse(userInfo);
+        const userId = userData.userId || userData._id;
+        if (!userId) return;
+        
+        console.log('检查课程收藏状态, courseId:', this.courseId);
+        
+        // 调用API检查是否已收藏
+        const res = await this.$api.user.checkFavorite({
+          userId,
+          itemType: 'course',
+          itemId: this.courseId
+        });
+        
+        if (res && res.code === 0 && res.data) {
+          console.log('课程已被收藏，更新按钮状态');
+          
+          // 获取收藏按钮组件实例并更新状态
+          this.$nextTick(() => {
+            const favoriteBtn = this.$refs.favoriteBtn;
+            if (favoriteBtn) {
+              favoriteBtn.updateFavoriteStatus(true, res.data._id);
+            }
+          });
+        }
+      } catch (error) {
+        console.error('检查课程收藏状态失败:', error);
+      }
+    },
+    
     // 获取状态栏高度
     onStatusBarHeight(height) {
       // 状态栏高度 + 10px的间距
       this.statusBarHeight = height + 10;
       console.log('课程详情页设置状态栏高度:', this.statusBarHeight);
+    },
+    
+    // 新增：点击师资介绍跳转到教师详情页
+    navigateToTeacherDetail() {
+      console.log('尝试导航到教师详情页');
+      
+      // 获取教师ID和名称
+      let teacherId = this.courseInfo.teacherId;
+      let teacherName = this.courseInfo.teacherName;
+      
+      console.log('准备导航用的原始teacherId:', JSON.stringify(teacherId), '类型:', typeof teacherId);
+      
+      // 检查是否有可用的教师信息
+      if (!teacherId && !teacherName) {
+        console.warn('教师信息不完整，没有找到teacherId或teacherName');
+        uni.showToast({
+          title: '教师信息不完整',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 记录teacherId的原始类型
+      console.log('教师ID类型检查:', {
+        id: teacherId,
+        type: typeof teacherId,
+        isObject: teacherId !== null && typeof teacherId === 'object',
+        toString: teacherId ? teacherId.toString() : null
+      });
+      
+      // 确保teacherId是字符串格式
+      if (teacherId && typeof teacherId === 'object') {
+        // 如果ID是对象(可能是MongoDB ObjectId)，尝试转换
+        try {
+          if (teacherId._id) {
+            teacherId = teacherId._id;
+            console.log('从对象中提取_id属性:', teacherId);
+          } else {
+            teacherId = teacherId.toString();
+            console.log('将对象转换为字符串:', teacherId);
+          }
+        } catch (error) {
+          console.error('转换teacherId失败:', error);
+          teacherId = null;
+        }
+      }
+      
+      // 如果ID不是字符串或数字，设置为空
+      if (teacherId && typeof teacherId !== 'string' && typeof teacherId !== 'number') {
+        console.warn('teacherId类型无效:', typeof teacherId);
+        teacherId = null;
+      }
+      
+      // 检查最终结果
+      if (!teacherId && !teacherName) {
+        console.error('处理后没有有效的teacherId或teacherName');
+        uni.showToast({
+          title: '教师信息不完整',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      console.log('处理后的最终teacherId:', teacherId, '教师名称:', teacherName);
+      
+      // 构建URL查询参数，传递ID和名称（在ID无效时作为备选）
+      let url = '/pages/teacher/detail?';
+      const params = [];
+      
+      if (teacherId) {
+        params.push(`id=${encodeURIComponent(teacherId)}`);
+      }
+      
+      if (teacherName) {
+        params.push(`name=${encodeURIComponent(teacherName)}`);
+      }
+      
+      // 检查教师是否已被收藏，并传递收藏状态
+      this.checkTeacherFavoriteStatus(teacherId).then(isFavorite => {
+        if (isFavorite) {
+          // 添加收藏状态参数
+          params.push(`favorite=1`);
+        }
+        
+        url += params.join('&');
+        console.log('跳转URL:', url);
+        
+        // 导航到教师详情页面
+        uni.navigateTo({
+          url: url,
+          success: () => {
+            console.log('成功导航到教师详情页');
+          },
+          fail: (error) => {
+            console.error('导航到教师详情页失败:', error);
+            uni.showToast({
+              title: '页面跳转失败',
+              icon: 'none'
+            });
+          }
+        });
+      });
+    },
+    
+    // 检查教师收藏状态
+    async checkTeacherFavoriteStatus(teacherId) {
+      if (!teacherId) return false;
+      
+      try {
+        const userInfo = uni.getStorageSync('userInfo');
+        if (!userInfo) return false;
+        
+        const userData = JSON.parse(userInfo);
+        const userId = userData.userId || userData._id;
+        if (!userId) return false;
+        
+        // 构建检查参数
+        const checkData = {
+          userId,
+          itemType: 'teacher',
+          itemId: teacherId
+        };
+        
+        // 调用API检查是否已收藏
+        const res = await this.$api.user.checkFavorite(checkData);
+        
+        if (res && res.code === 0 && res.data) {
+          console.log('教师已被收藏');
+          return true;
+        } else {
+          console.log('教师未被收藏');
+          return false;
+        }
+      } catch (error) {
+        console.error('检查教师收藏状态失败:', error);
+        return false;
+      }
     }
   }
 }
@@ -1588,6 +1891,9 @@ export default {
   margin-bottom: 20rpx;
   position: relative;
   padding-left: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
   &::before {
     content: '';
@@ -1598,6 +1904,17 @@ export default {
     width: 6rpx;
     background-color: $theme-color;
     border-radius: 3rpx;
+  }
+  
+  .title-hint {
+    font-size: 24rpx;
+    font-weight: normal;
+    color: $text-color-light;
+    margin-left: auto;
+    
+    .iconfont {
+      font-size: 24rpx;
+    }
   }
 }
 
@@ -1611,6 +1928,16 @@ export default {
 .teacher-card {
   display: flex;
   margin-top: 30rpx;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  
+  &:hover, &:active {
+    background-color: #f8f8f8;
+    transform: translateY(-2rpx);
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  }
   
   .teacher-avatar {
     width: 120rpx;

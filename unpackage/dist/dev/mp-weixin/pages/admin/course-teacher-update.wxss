@@ -1,0 +1,223 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.container {
+  padding: 30rpx;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+.header {
+  margin-bottom: 40rpx;
+}
+.header .title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+.form-group {
+  margin-bottom: 30rpx;
+}
+.form-group .label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  display: block;
+}
+.form-group .tips {
+  font-size: 26rpx;
+  color: #999;
+  line-height: 1.5;
+}
+.form-group .radio-group {
+  display: flex;
+  flex-direction: row;
+}
+.form-group .radio-group .radio-item {
+  margin-right: 30rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+}
+.form-group .picker-item {
+  background-color: #fff;
+  border: 1px solid #eee;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+.form-group .picker-item .placeholder {
+  color: #999;
+}
+.info-card {
+  background-color: #fff;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  margin-top: 10rpx;
+}
+.info-card .info-item {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+.info-card .info-item:last-child {
+  margin-bottom: 0;
+}
+.info-card .info-item .info-label {
+  width: 200rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+.info-card .info-item .info-value {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+}
+.submit-btn {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  background-color: #007AFF;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 8rpx;
+  margin-top: 20rpx;
+}
+.submit-btn:disabled {
+  background-color: #ccc;
+}
+.result-section {
+  margin-top: 50rpx;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+.result-card {
+  background-color: #fff;
+  border-radius: 8rpx;
+  padding: 20rpx;
+}
+.result-card .result-item {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+.result-card .result-item .result-label {
+  width: 100rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+.result-card .result-item .result-value {
+  flex: 1;
+  font-size: 26rpx;
+}
+.result-card .result-item .result-value.success {
+  color: #4CD964;
+  font-weight: bold;
+}
+.result-card .result-item .result-value.failed {
+  color: #FF3B30;
+  font-weight: bold;
+}
+.result-card .result-message {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1px solid #eee;
+  font-size: 26rpx;
+  color: #666;
+}
+.result-details {
+  margin-top: 40rpx;
+}
+.result-details .result-list .result-list-item {
+  background-color: #fff;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  border-left: 4rpx solid #ccc;
+}
+.result-details .result-list .result-list-item.success {
+  border-left-color: #4CD964;
+}
+.result-details .result-list .result-list-item.failed {
+  border-left-color: #FF3B30;
+}
+.result-details .result-list .result-list-item .result-list-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+.result-details .result-list .result-list-item .result-list-detail {
+  font-size: 26rpx;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+}
+.result-details .result-list .result-list-item .result-list-detail .error-text {
+  color: #FF3B30;
+}
+

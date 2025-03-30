@@ -18665,6 +18665,13 @@ var _default = {
       "navigationBarTextStyle": "white"
     }
   }, {
+    "path": "pages/admin/course-teacher-update",
+    "style": {
+      "navigationBarTitleText": "课程教师关联",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
     "path": "pages/news/list",
     "style": {
       "navigationBarTitleText": "最新通知",
@@ -19252,6 +19259,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _request = _interopRequireDefault(__webpack_require__(/*! ./request.js */ 89));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -19532,13 +19540,29 @@ var teacherApi = {
     });
   },
   // 获取教师详情
-  getTeacherDetail: function getTeacherDetail(id) {
-    console.log('调用getTeacherDetail，ID:', id);
+  getTeacherDetail: function getTeacherDetail(params) {
+    console.log('调用getTeacherDetail，ID:', params);
+
+    // 处理参数，确保以正确的格式传递给云函数
+    var requestData = {};
+
+    // 如果params是字符串，将其视为ID
+    if (typeof params === 'string') {
+      requestData = {
+        id: params
+      };
+    }
+    // 如果params是对象，正确传递其中的id和name属性
+    else if ((0, _typeof2.default)(params) === 'object' && params !== null) {
+      requestData = _objectSpread({}, params);
+
+      // 输出调试信息
+      if (params.id) console.log('请求包含教师ID:', params.id);
+      if (params.name) console.log('请求包含教师名称:', params.name);
+    }
     return (0, _request.default)({
       name: 'getTeacherDetail',
-      data: {
-        id: id
-      }
+      data: requestData
     }).then(function (res) {
       return debugAPI('getTeacherDetail返回', res);
     });

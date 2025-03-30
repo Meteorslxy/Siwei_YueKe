@@ -23,6 +23,7 @@
     "pages/admin/news",
     "pages/admin/booking",
     "pages/admin/content-upload/index",
+    "pages/admin/course-teacher-update",
     "pages/news/list",
     "pages/news/detail",
     "pages/user/booking",

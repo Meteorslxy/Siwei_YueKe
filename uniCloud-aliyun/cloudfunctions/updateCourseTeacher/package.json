@@ -1,0 +1,9 @@
+{
+  "name": "updateCourseTeacher",
+  "version": "1.0.0",
+  "description": "更新课程的teacherId字段，关联到teachers表",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+} 

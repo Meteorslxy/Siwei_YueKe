@@ -3,10 +3,12 @@
     <!-- 固定在右上角的收藏按钮 -->
     <view class="fixed-favorite-wrapper" :style="{top: statusBarHeight + 'px'}">
       <favorite-button 
+        ref="favoriteBtn"
         :itemId="teacherId" 
         itemType="teacher" 
         :itemTitle="teacher.name" 
-        :itemCover="teacher.avatar || '/static/images/default-avatar.png'"
+        :itemCover="teacher.avatar || '/static/image/teacher-avatar.png'"
+        :initialFavorite="initialFavorite"
         @favorite-change="onFavoriteChange"
         @statusBarHeight="onStatusBarHeight"
       ></favorite-button>
@@ -104,7 +106,7 @@
         <view v-if="hasReviews" class="review-list">
           <view class="review-item" v-for="(review, index) in reviewList" :key="review._id || index">
             <view class="review-header">
-              <image class="reviewer-avatar" :src="review.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+              <image class="reviewer-avatar" :src="review.avatar || '/static/image/teacher-avatar.png'" mode="aspectFill"></image>
               <view class="reviewer-info">
                 <view class="reviewer-name">{{review.userName}}</view>
                 <view class="review-time">{{formatDate(review.createTime)}}</view>
@@ -141,6 +143,7 @@ export default {
   data() {
     return {
       teacherId: '',
+      teacherName: '',
       teacher: {
         name: '',
         title: '',
@@ -170,8 +173,9 @@ export default {
       hasMore: true,
       hasMoreReviews: true,
       imageCache: {},
-      defaultAvatar: '/static/images/default-avatar.png',
-      statusBarHeight: 90 // 默认状态栏高度（rpx单位）
+      defaultAvatar: '/static/image/teacher-avatar.png',
+      statusBarHeight: 90, // 默认状态栏高度（rpx单位）
+      initialFavorite: false
     }
   },
   computed: {
@@ -205,9 +209,53 @@ export default {
     }
   },
   onLoad(options) {
-    if (options.id) {
-      this.teacherId = options.id;
+    console.log('教师详情页收到原始参数:', options);
+    
+    // 正确处理参数，确保对URL编码的值进行解码
+    this.teacherId = options.id || '';
+    
+    // 解码教师名称参数
+    if (options.name) {
+      try {
+        // 如果名称是URL编码的，先进行解码
+        if (options.name.includes('%')) {
+          this.teacherName = decodeURIComponent(options.name);
+          console.log('解码后的教师名称:', this.teacherName);
+        } else {
+          this.teacherName = options.name;
+        }
+      } catch (e) {
+        console.error('解码教师名称失败:', e);
+        this.teacherName = options.name; // 使用原始值
+      }
+    } else {
+      this.teacherName = '';
+    }
+    
+    // 检查是否传入收藏状态
+    this.initialFavorite = options.favorite === '1';
+    if (this.initialFavorite) {
+      console.log('教师已被收藏，初始化收藏状态为true');
+      // 在DOM更新后，手动更新收藏按钮状态
+      this.$nextTick(() => {
+        // 获取收藏按钮组件实例
+        const favoriteBtn = this.$refs.favoriteBtn;
+        if (favoriteBtn) {
+          favoriteBtn.updateFavoriteStatus(true);
+        }
+      });
+    }
+    
+    console.log('处理后的参数: teacherId =', this.teacherId, 'teacherName =', this.teacherName, 'initialFavorite =', this.initialFavorite);
+    
+    // 需要至少有ID或名称之一
+    if (this.teacherId || this.teacherName) {
       this.getTeacherDetail();
+    } else {
+      uni.showToast({
+        title: '参数错误',
+        icon: 'none'
+      });
     }
   },
   methods: {
@@ -215,8 +263,48 @@ export default {
     getTeacherDetail() {
       uni.showLoading({ title: '加载中' });
       
+      // 构建请求参数
+      const params = {};
+      
+      // 对ID参数进行处理，确保格式正确
+      if (this.teacherId) {
+        // 处理可能被包裹在引号中的ID
+        let validTeacherId = this.teacherId.trim();
+        
+        if (validTeacherId.startsWith('"') && validTeacherId.endsWith('"')) {
+          validTeacherId = validTeacherId.substring(1, validTeacherId.length - 1);
+          console.log('去除引号后的teacherId:', validTeacherId);
+        }
+        
+        // 如果有效，添加到参数中
+        if (validTeacherId) {
+          params.id = validTeacherId;
+          console.log('使用处理后的teacherId:', validTeacherId);
+        }
+      }
+      
+      // 对名称参数进行处理
+      if (this.teacherName) {
+        // 确保名称是已解码的
+        params.name = this.teacherName.trim();
+        console.log('使用教师名称:', params.name);
+      }
+      
+      console.log('获取教师详情参数:', params);
+      
+      // 如果既没有ID也没有名称，显示错误
+      if (!params.id && !params.name) {
+        console.error('缺少有效参数，无法获取教师详情');
+        uni.hideLoading();
+        uni.showToast({
+          title: '参数错误',
+          icon: 'none'
+        });
+        return;
+      }
+      
       // 使用uniCloud调用云函数
-      this.$api.teacher.getTeacherDetail(this.teacherId).then(res => {
+      this.$api.teacher.getTeacherDetail(params).then(res => {
         if (res && res.data) {
           console.log('教师原始数据:', JSON.stringify(res.data));
           
@@ -225,6 +313,12 @@ export default {
           
           // 合并接口返回的数据
           Object.assign(teacherData, res.data);
+          
+          // 如果原本没有ID但现在获取到了，更新teacherId
+          if (!this.teacherId && teacherData._id) {
+            this.teacherId = teacherData._id;
+            console.log('从教师数据中更新teacherId:', this.teacherId);
+          }
           
           // 处理头像字段
           if (!teacherData.avatarId && teacherData.avatarID) {
@@ -239,22 +333,7 @@ export default {
             teacherData.description = teacherData.introduction;
           }
           
-          // 处理experience字段
-          if (!teacherData.experience) {
-            teacherData.experience = [];
-          } else if (typeof teacherData.experience === 'string') {
-            // 如果是字符串，转换为单项数组
-            console.log('将experience字符串转换为数组');
-            teacherData.experience = [teacherData.experience];
-          } else if (Array.isArray(teacherData.experience)) {
-            console.log('experience是数组，包含', teacherData.experience.length, '项');
-          }
-          
-          // 确保其他字段也被正确初始化
-          if (!teacherData.experiences) {
-            teacherData.experiences = [];
-          }
-          
+          // 确保awards是数组
           if (!teacherData.awards) {
             teacherData.awards = [];
           }
@@ -269,17 +348,26 @@ export default {
           
           // 预加载头像
           if (this.teacher.avatarId) {
-            console.log('预加载头像ID:', this.teacher.avatarId);
-            this.preloadImage(this.teacher.avatarId);
+            console.log('头像ID:', this.teacher.avatarId);
+            // 不再调用preloadImage方法
           } else if (this.teacher.avatar) {
-            console.log('预加载头像(avatar):', this.teacher.avatar);
-            this.preloadImage(this.teacher.avatar);
+            console.log('头像URL:', this.teacher.avatar);
+            // 不再调用preloadImage方法
           } else {
             console.log('教师没有头像数据');
           }
         } else {
+          console.warn('API返回数据异常:', res);
+          
+          // 使用可用的信息显示基本内容
+          if (this.teacherName) {
+            this.teacher.name = this.teacherName;
+            this.teacher.description = `暂时无法获取"${this.teacherName}"的详细信息，请稍后再试。`;
+            uni.setNavigationBarTitle({ title: this.teacherName });
+          }
+          
           uni.showToast({
-            title: '获取教师信息失败',
+            title: '获取教师信息不完整',
             icon: 'none'
           });
         }
@@ -293,6 +381,14 @@ export default {
         }
       }).catch(err => {
         console.error('获取教师详情失败', err);
+        
+        // 使用可用的信息显示基本内容
+        if (this.teacherName) {
+          this.teacher.name = this.teacherName;
+          this.teacher.description = `暂时无法获取"${this.teacherName}"的详细信息，请稍后再试。`;
+          uni.setNavigationBarTitle({ title: this.teacherName });
+        }
+        
         uni.showToast({
           title: '获取教师信息失败',
           icon: 'none'
@@ -502,76 +598,34 @@ export default {
       return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
     },
     
-    // 获取图片URL
-    getImageUrl(imageId) {
-      console.log('获取图片URL:', imageId);
-      
-      // 如果是路径格式，直接返回
-      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
-        console.log('使用路径格式图片:', imageId);
-        return imageId;
+    // 处理图片URL，确保正确加载
+    getImageUrl(src) {
+      if (!src) {
+        console.log('使用默认头像');
+        return this.defaultAvatar;
       }
       
-      // 尝试从缓存获取
-      if (imageId && this.imageCache[imageId]) {
-        console.log('从缓存获取图片:', imageId);
-        return this.imageCache[imageId];
-      }
+      // 检查是否为完整URL（以http或https开头）
+      if (src.startsWith('http://') || src.startsWith('https://')) {
+        console.log('使用云存储URL作为头像:', src);
+        return src;
+      } 
       
-      // 如果有ID但没缓存，尝试加载
-      if (imageId) {
-        console.log('尝试加载图片:', imageId);
-        this.preloadImage(imageId);
-      }
+      // 检查是否为本地路径（以/开头）
+      if (src.startsWith('/')) {
+        // 已经是本地路径，保持原样
+        console.log('使用本地路径作为头像:', src);
+        return src;
+      } 
       
-      // 返回默认头像
-      console.log('使用默认头像');
-      return this.defaultAvatar;
+      // 其他情况，可能是相对路径
+      console.log('转换为本地相对路径作为头像:', `/static/images/teacher/${src}`);
+      return `/static/images/teacher/${src}`;
     },
     
-    // 预加载图片
-    preloadImage(imageId) {
-      console.log('预加载图片开始:', imageId);
-      
-      // 如果已经是URL格式，直接缓存
-      if (imageId && (imageId.startsWith('/') || imageId.startsWith('http'))) {
-        this.imageCache[imageId] = imageId;
-        console.log('已缓存URL格式图片:', imageId);
-        return;
-      }
-      
-      // 调用API获取图片URL
-      this.$api.file.getImage(imageId)
-        .then(res => {
-          console.log('预加载图片完整结果:', JSON.stringify(res));
-          
-          // 处理不同格式的返回数据
-          if (res && res.data && res.data.url) {
-            // 处理包含data.url的情况
-            this.imageCache[imageId] = res.data.url;
-            console.log('已缓存图片URL:', res.data.url);
-            // 强制视图更新
-            this.$forceUpdate();
-          } else if (res && res.imageData && res.imageData.url) {
-            // 处理包含imageData.url的情况
-            this.imageCache[imageId] = res.imageData.url;
-            console.log('从imageData获取到图片URL:', res.imageData.url);
-            // 强制视图更新
-            this.$forceUpdate();
-          } else if (res && res.imageData && res.imageData.base64Data) {
-            // 处理base64数据的情况
-            const base64Url = 'data:image/jpeg;base64,' + res.imageData.base64Data;
-            this.imageCache[imageId] = base64Url;
-            console.log('从imageData.base64Data生成图片URL');
-            // 强制视图更新
-            this.$forceUpdate();
-          } else {
-            console.error('获取图片URL失败,返回数据结构不正确:', res);
-          }
-        })
-        .catch(err => {
-          console.error('获取图片失败:', err);
-        });
+    // 强制刷新图片（处理可能的缓存问题）
+    refreshImage() {
+      this.$forceUpdate();
     },
     
     // 收藏状态变更

@@ -188,6 +188,14 @@
             }
         },
         {
+            "path": "pages/admin/course-teacher-update",
+            "style": {
+                "navigationBarTitleText": "课程教师关联",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
             "path": "pages/news/list",
             "style": {
                 "navigationBarTitleText": "最新通知",

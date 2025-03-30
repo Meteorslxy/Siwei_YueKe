@@ -1714,7 +1714,16 @@ var _default = {
   created: function created() {
     // 确保收藏表已初始化
     this.ensureFavoriteTableExists();
-    this.checkFavoriteStatus();
+
+    // 从父组件传入的initialFavorite进行初始化
+    if (this.initialFavorite) {
+      console.log('使用父组件传递的初始收藏状态:', this.initialFavorite);
+      this.isFavorite = true;
+    } else {
+      // 否则从服务器检查收藏状态
+      this.checkFavoriteStatus();
+    }
+
     // 获取系统信息
     try {
       var systemInfo = uni.getSystemInfoSync();
@@ -2025,6 +2034,15 @@ var _default = {
           }
         }, _callee4, null, [[4, 32]]);
       }))();
+    },
+    // 手动更新收藏状态
+    updateFavoriteStatus: function updateFavoriteStatus(status) {
+      var favoriteId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      console.log('手动更新收藏状态:', status, '收藏ID:', favoriteId);
+      this.isFavorite = !!status;
+      if (favoriteId) {
+        this.favoriteId = favoriteId;
+      }
     },
     // 获取项目URL
     getItemUrl: function getItemUrl() {
