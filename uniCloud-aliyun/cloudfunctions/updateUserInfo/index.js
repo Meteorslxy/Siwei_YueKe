@@ -8,6 +8,10 @@ exports.main = async (event, context) => {
   try {
     console.log('更新用户信息', event);
     
+    // 增加参数原始内容的日志输出
+    console.log('更新用户信息 - 原始参数:', JSON.stringify(event));
+    console.log('更新用户信息 - update字段:', JSON.stringify(event.update));
+    
     // 获取更新的字段
     const { update } = event;
     
@@ -64,7 +68,7 @@ exports.main = async (event, context) => {
       if (!userId) {
         try {
           // 尝试通过token字段查询
-          const userInfo = await db.collection('users')
+          const userInfo = await db.collection('uni-id-users')
             .where({
               token: uniIdToken
             })
@@ -73,10 +77,10 @@ exports.main = async (event, context) => {
           
           if (userInfo.data && userInfo.data.length > 0) {
             userId = userInfo.data[0]._id;
-            console.log('从users表token字段查询到userId:', userId);
+            console.log('从uni-id-users表token字段查询到userId:', userId);
           }
         } catch (e) {
-          console.error('通过token查询users表失败:', e);
+          console.error('通过token查询uni-id-users表失败:', e);
         }
       }
       
@@ -84,9 +88,9 @@ exports.main = async (event, context) => {
       if (!userId && update.phoneNumber) {
         try {
           // 查询是否有与该手机号关联的用户
-          const userByPhone = await db.collection('users')
+          const userByPhone = await db.collection('uni-id-users')
             .where({
-              phoneNumber: update.phoneNumber
+              mobile: update.phoneNumber
             })
             .limit(1)
             .get();
@@ -135,7 +139,7 @@ exports.main = async (event, context) => {
     console.log('最终确定的userId:', userId);
     
     // 检查用户是否存在
-    const userCheck = await db.collection('users')
+    const userCheck = await db.collection('uni-id-users')
       .doc(userId)
       .get();
     
@@ -148,7 +152,7 @@ exports.main = async (event, context) => {
     }
     
     // 执行更新
-    const allowedFields = ['phoneNumber', 'nickName', 'avatarUrl', 'gender', 'province', 'city', 'country'];
+    const allowedFields = ['phoneNumber', 'mobile', 'nickName', 'avatarUrl', 'gender', 'province', 'city', 'country'];
     const updateData = {};
     
     // 只更新允许的字段
@@ -156,6 +160,17 @@ exports.main = async (event, context) => {
       if (update[key] !== undefined) {
         updateData[key] = update[key];
       }
+    }
+    
+    // 确保mobile字段存在
+    if (update.phoneNumber && !updateData.mobile) {
+      updateData.mobile = update.phoneNumber;
+    }
+    
+    // 如果外部直接传递了mobile字段，也添加到更新数据中
+    if (event.mobile && typeof event.mobile === 'string') {
+      console.log('从event根参数中获取到mobile:', event.mobile);
+      updateData.mobile = event.mobile;
     }
     
     // 如果没有要更新的字段
@@ -171,18 +186,66 @@ exports.main = async (event, context) => {
     
     console.log('更新用户数据:', {userId, updateData});
     
-    // 更新用户信息
-    await db.collection('users')
-      .doc(userId)
-      .update(updateData);
-    
-    return {
-      code: 0,
-      message: '更新成功',
-      data: {
-        updated: updateData
+    try {
+      // 直接使用set方法而不是update，确保字段被更新
+      const updateResult = await db.collection('uni-id-users')
+        .doc(userId)
+        .update(updateData);
+      
+      console.log('数据库更新结果:', updateResult);
+      
+      // 更新后再次查询验证
+      const verifyUpdate = await db.collection('uni-id-users')
+        .doc(userId)
+        .get();
+      
+      console.log('更新后的用户数据:', verifyUpdate.data);
+      
+      // 检查mobile字段是否存在
+      const userAfterUpdate = verifyUpdate.data && verifyUpdate.data[0];
+      if (userAfterUpdate && !userAfterUpdate.mobile && update.phoneNumber) {
+        console.log('mobile字段更新失败，尝试单独更新mobile字段');
+        
+        // 尝试单独更新mobile字段
+        await db.collection('uni-id-users')
+          .doc(userId)
+          .update({
+            mobile: update.phoneNumber
+          });
+        
+        console.log('mobile字段单独更新完成');
+        
+        // 尝试使用set方法强制更新
+        try {
+          console.log('尝试使用set方法更新mobile字段');
+          // 获取当前用户所有字段
+          const currentUser = userAfterUpdate;
+          // 添加mobile字段
+          currentUser.mobile = update.phoneNumber;
+          // 使用set方法替换整个文档
+          await db.collection('uni-id-users')
+            .doc(userId)
+            .set(currentUser);
+          console.log('set方法更新完成');
+        } catch (setErr) {
+          console.error('set方法更新失败:', setErr);
+        }
       }
-    };
+      
+      return {
+        code: 0,
+        message: '更新成功',
+        data: {
+          updated: updateData
+        }
+      };
+    } catch (updateErr) {
+      console.error('数据库更新操作失败:', updateErr);
+      return {
+        code: -1,
+        message: '数据库更新失败: ' + updateErr.message
+      };
+    }
   } catch (err) {
     console.error('更新用户信息失败:', err);
     return {

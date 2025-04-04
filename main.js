@@ -1,6 +1,9 @@
 import Vue from 'vue'
 import App from './App'
 
+// 引入uni-id-pages
+import uniIdPageInit from '@/uni_modules/uni-id-pages/init.js'
+
 // 禁用wx.cloud - 微信小程序环境
 // #ifdef MP-WEIXIN
 // 完全禁用微信云开发，使其返回null

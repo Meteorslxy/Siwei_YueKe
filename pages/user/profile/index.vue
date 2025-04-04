@@ -87,9 +87,12 @@ export default {
     // 加载用户信息
     loadUserInfo() {
       try {
-        const userInfoStr = uni.getStorageSync('userInfo');
-        if (userInfoStr) {
-          this.userInfo = JSON.parse(userInfoStr);
+        const userInfoStorage = uni.getStorageSync('userInfo');
+        if (userInfoStorage) {
+          // 检查是否已经是对象，避免重复解析
+          const userInfo = typeof userInfoStorage === 'string' ? JSON.parse(userInfoStorage) : userInfoStorage;
+          // 将获取到的用户信息合并到当前对象
+          Object.assign(this.userInfo, userInfo);
         }
       } catch (e) {
         console.error('加载用户信息失败:', e);

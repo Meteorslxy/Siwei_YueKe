@@ -27,6 +27,10 @@
       "bsonType": "string",
       "description": "手机号码"
     },
+    "passwordHash": {
+      "bsonType": "string",
+      "description": "密码哈希值"
+    },
     "nickName": {
       "bsonType": "string",
       "description": "用户昵称"

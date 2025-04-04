@@ -221,17 +221,24 @@ export default {
         try {
           const userInfoStr = uni.getStorageSync('userInfo');
           if (userInfoStr) {
-            const userData = JSON.parse(userInfoStr);
-            const userId = userData.userId || userData._id;
-            if (userId) {
-              // 从本地存储获取已取消预约
-              const localCancelledBookings = this.getLocalCancelledBookings(userId);
-              if (localCancelledBookings && localCancelledBookings.length > 0) {
-                console.log(`找到${localCancelledBookings.length}条本地已取消记录，立即显示`);
-                this.bookingList = localCancelledBookings;
-                this.total = localCancelledBookings.length;
-                this.$forceUpdate();
+            try {
+              // 检查是否已经是对象
+              const userData = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+              const userId = userData.userId || userData._id || userData.uid || 
+                             (userData.userInfo && userData.userInfo._id) ||
+                             (userData.userInfo && userData.userInfo.uid) || '';
+              if (userId) {
+                // 从本地存储获取已取消预约
+                const localCancelledBookings = this.getLocalCancelledBookings(userId);
+                if (localCancelledBookings && localCancelledBookings.length > 0) {
+                  console.log(`找到${localCancelledBookings.length}条本地已取消记录，立即显示`);
+                  this.bookingList = localCancelledBookings;
+                  this.total = localCancelledBookings.length;
+                  this.$forceUpdate();
+                }
               }
+            } catch (e) {
+              console.error('尝试直接加载本地已取消记录失败:', e);
             }
           }
         } catch (e) {
@@ -274,7 +281,8 @@ export default {
         
         let userData = null
         try {
-          userData = JSON.parse(userInfoStr)
+          // 检查是否已经是对象
+          userData = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
           console.log('解析到的用户信息:', userData)
         } catch (e) {
           console.error('解析用户信息失败:', e)
@@ -285,7 +293,9 @@ export default {
           return Promise.resolve()
         }
         
-        const userId = userData.userId || userData._id
+        const userId = userData.userId || userData._id || userData.uid || 
+                       (userData.userInfo && userData.userInfo._id) ||
+                       (userData.userInfo && userData.userInfo.uid) || '';
         if (!userId) {
           console.error('未找到有效的用户ID')
           uni.showToast({
@@ -496,7 +506,8 @@ export default {
         // 获取已取消预约ID列表
         let cancelledIds = uni.getStorageSync('cancelled_booking_ids') || '[]';
         try {
-          cancelledIds = JSON.parse(cancelledIds);
+          // 检查是否已经是数组
+          cancelledIds = typeof cancelledIds === 'string' ? JSON.parse(cancelledIds) : cancelledIds;
           if (!Array.isArray(cancelledIds)) {
             console.warn('已取消预约ID列表格式不正确，重置为空数组');
             cancelledIds = [];
@@ -527,7 +538,8 @@ export default {
           
           if (bookingStr) {
             try {
-              const booking = JSON.parse(bookingStr);
+              // 检查是否已经是对象
+              const booking = typeof bookingStr === 'string' ? JSON.parse(bookingStr) : bookingStr;
               
               // 确保必要字段存在
               if (!booking || !booking._id) {
@@ -591,7 +603,8 @@ export default {
       // 获取已同步ID缓存，避免重复同步
       let syncedIds = uni.getStorageSync('synced_cancelled_ids') || '[]';
       try {
-        syncedIds = JSON.parse(syncedIds);
+        // 检查是否已经是数组
+        syncedIds = typeof syncedIds === 'string' ? JSON.parse(syncedIds) : syncedIds;
         if (!Array.isArray(syncedIds)) {
           syncedIds = [];
         }
@@ -928,8 +941,11 @@ export default {
         let userId = '';
         if (userInfoStr) {
           try {
-            const userInfo = JSON.parse(userInfoStr);
-            userId = userInfo.userId || userInfo._id || '';
+            // 检查是否已经是对象
+            const userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+            userId = userInfo.userId || userInfo._id || userInfo.uid || 
+                   (userInfo.userInfo && userInfo.userInfo._id) ||
+                   (userInfo.userInfo && userInfo.userInfo.uid) || '';
           } catch (e) {
             console.error('解析用户信息失败:', e);
           }
@@ -1392,12 +1408,16 @@ export default {
       try {
         const userInfoStr = uni.getStorageSync('userInfo');
         if (userInfoStr) {
-          const userData = JSON.parse(userInfoStr);
-          const userId = userData.userId || userData._id;
+          // 检查是否已经是对象
+          const userData = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+          const userId = userData.userId || userData._id || userData.uid || 
+                         (userData.userInfo && userData.userInfo._id) ||
+                         (userData.userInfo && userData.userInfo.uid) || '';
           if (userId) {
             const cancelledIds = uni.getStorageSync('cancelled_booking_ids') || '[]';
             try {
-              const ids = JSON.parse(cancelledIds);
+              // 检查是否已经是数组
+              const ids = typeof cancelledIds === 'string' ? JSON.parse(cancelledIds) : cancelledIds;
               if (Array.isArray(ids)) {
                 this.statusCounts.cancelled = ids.length;
                 this.localCancelledLoaded = true;
@@ -1459,8 +1479,11 @@ export default {
       try {
         const userInfoStr = uni.getStorageSync('userInfo');
         if (userInfoStr) {
-          const userInfo = JSON.parse(userInfoStr);
-          return userInfo.userId || userInfo._id || '';
+          // 检查是否已经是对象
+          const userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+          return userInfo.userId || userInfo._id || userInfo.uid || 
+                 (userInfo.userInfo && userInfo.userInfo._id) ||
+                 (userInfo.userInfo && userInfo.userInfo.uid) || '';
         }
       } catch (e) {
         console.error('获取用户ID失败:', e);

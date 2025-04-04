@@ -214,6 +214,45 @@ const userApi = {
     });
   },
   
+  // 报名课程
+  enrollCourse(data) {
+    console.log('调用enrollCourse，参数:', data);
+    return request({
+      name: 'enrollCourse',
+      data
+    });
+  },
+  
+  // 获取报名列表
+  getEnrollments(data) {
+    console.log('调用getEnrollments，参数:', data);
+    return request({
+      name: 'getEnrollments',
+      data
+    });
+  },
+  
+  // 获取报名详情
+  getEnrollmentDetail(id) {
+    console.log('调用getEnrollmentDetail，参数:', id);
+    return request({
+      name: 'getEnrollmentDetail',
+      data: { id }
+    });
+  },
+  
+  // 取消报名
+  cancelEnrollment(id, reason) {
+    console.log('调用cancelEnrollment，参数:', id, reason);
+    return request({
+      name: 'cancelEnrollment',
+      data: { 
+        enrollmentId: id,
+        reason: reason || '用户取消'
+      }
+    });
+  },
+  
   // 添加收藏
   addFavorite(data) {
     console.log('调用addFavorite，参数:', data);

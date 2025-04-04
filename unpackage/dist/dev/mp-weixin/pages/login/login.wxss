@@ -92,10 +92,24 @@
   align-items: center;
   justify-content: center;
 }
-.login-container .custom-nav .nav-content .nav-title {
+.login-container .custom-nav .nav-content .nav-back {
+  position: absolute;
+  left: 15px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-container .custom-nav .nav-content .nav-back .back-icon {
+  font-size: 28px;
+  font-weight: bold;
   color: #fff;
-  font-size: 16px;
-  font-weight: 500;
+}
+.login-container .custom-nav .nav-content .nav-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
 }
 .login-container .content {
   position: relative;
@@ -115,32 +129,44 @@
   height: 120rpx;
 }
 .login-container .content .auth-buttons {
-  margin-top: 460rpx;
+  margin-top: 180px;
+  /* 增加顶部间距，将按钮往下移 */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 .login-container .content .auth-buttons .auth-btn {
-  width: 80%;
-  height: 88rpx;
-  line-height: 88rpx;
-  text-align: center;
-  border-radius: 44rpx;
-  font-size: 32rpx;
+  position: relative;
+  width: 90%;
+  height: 90rpx;
+  line-height: 90rpx;
   margin-bottom: 30rpx;
-  border: none;
+  border-radius: 45rpx;
+  font-size: 32rpx;
+  font-weight: 500;
 }
-.login-container .content .auth-buttons .auth-btn::after {
-  border: none;
-}
-.login-container .content .auth-buttons .wechat-btn {
-  background-color: #47c76d;
+.login-container .content .auth-buttons .auth-btn.wechat-btn {
+  background-color: #07C160;
   color: #fff;
 }
-.login-container .content .auth-buttons .phone-btn {
-  background-color: #fff;
-  color: #333;
-  border: 2rpx solid rgba(0, 0, 0, 0.1);
+.login-container .content .auth-buttons .auth-btn.other-login-btn {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.login-container .content .auth-buttons .auth-btn.debug-btn {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.login-container .content .auth-buttons .auth-btn .btn-icon {
+  position: absolute;
+  left: 30rpx;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  width: 40rpx;
+  height: 40rpx;
 }
 .login-container .footer {
   position: fixed;
@@ -153,17 +179,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
-  color: #666;
+  padding: 0 30rpx;
+  flex-wrap: wrap;
 }
 .login-container .footer .agreement .dot {
   width: 8rpx;
   height: 8rpx;
-  background-color: #666;
+  background-color: #fff;
+  /* 改为白色 */
   border-radius: 50%;
   margin-right: 8rpx;
 }
+.login-container .footer .agreement .agreement-text {
+  font-size: 28rpx;
+  /* 增大字体 */
+  color: #fff;
+  /* 改为白色 */
+}
 .login-container .footer .agreement .link {
+  font-size: 28rpx;
+  /* 增大字体 */
   color: #FF6B00;
 }
 /* 手机号登录弹窗样式 */
@@ -237,4 +272,77 @@
   background-color: #47c76d;
   color: #fff;
 }
+.captcha-img-box {
+  margin: 20rpx 0;
+  text-align: center;
+}
+.captcha-img-box .captcha-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8rpx;
+}
+.captcha-img-box .refresh-text {
+  display: block;
+  font-size: 24rpx;
+  color: #47c76d;
+  margin-top: 10rpx;
+}
+.login-options-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+.login-options-modal .modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.login-options-modal .modal-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 30rpx;
+}
+.login-options-modal .modal-content .modal-title {
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 40rpx;
+}
+.login-options-modal .modal-content .login-options .login-option-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+.login-options-modal .modal-content .login-options .login-option-item .option-icon {
+  font-size: 40rpx;
+  margin-right: 20rpx;
+}
+.login-options-modal .modal-content .login-options .login-option-item .option-text {
+  font-size: 32rpx;
+  color: #333;
+}
+.login-options-modal .modal-content .modal-close {
+  margin-top: 40rpx;
+  text-align: center;
+}
+.login-options-modal .modal-content .modal-close .close-btn {
+  display: inline-block;
+  padding: 20rpx 60rpx;
+  border-radius: 40rpx;
+  background-color: #f5f5f5;
+  color: #333;
+  font-size: 28rpx;
+}
+/* 移除了选择登录方式按钮的样式 */
 

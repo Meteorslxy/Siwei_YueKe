@@ -61,6 +61,10 @@ exports.main = async (event, context) => {
     
     // 按用户ID查询
     if (userId) {
+      // 增加更多调试信息
+      console.log('查询的用户ID:', userId, '类型:', typeof userId);
+      
+      // 增加用户ID查询的灵活性
       whereCondition.userId = userId;
     }
     
@@ -71,7 +75,17 @@ exports.main = async (event, context) => {
     
     // 按状态查询
     if (status) {
-      whereCondition.status = status;
+      // 处理多状态查询，如status=pending,confirmed
+      if (typeof status === 'string' && status.includes(',')) {
+        const statusArray = status.split(',').map(s => s.trim());
+        console.log('处理多状态查询:', statusArray);
+        whereCondition.status = dbCmd.in(statusArray);
+      } else if (Array.isArray(status)) {
+        console.log('使用状态数组:', status);
+        whereCondition.status = dbCmd.in(status);
+      } else {
+        whereCondition.status = status;
+      }
     }
     
     // 处理"可使用"状态 - 包括待确认和已确认状态
@@ -79,7 +93,7 @@ exports.main = async (event, context) => {
       whereCondition.status = dbCmd.in(['pending', 'confirmed', 'confirmed_unpaid']);
     }
     
-    console.log('查询条件:', whereCondition);
+    console.log('查询条件:', JSON.stringify(whereCondition));
     
     // 先获取总数
     const countResult = await db.collection('bookings')

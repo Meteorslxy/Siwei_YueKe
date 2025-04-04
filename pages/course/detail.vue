@@ -739,12 +739,23 @@ export default {
       if (!this.courseInfo.teacherAvatar) return;
       
       try {
-        // 判断是否是本地图片路径（以/static开头或/开头）
-        if (this.courseInfo.teacherAvatar.startsWith('/static') || 
-            this.courseInfo.teacherAvatar.startsWith('/')) {
-          console.log('使用本地头像图片:', this.courseInfo.teacherAvatar);
-          // 如果是本地路径，直接使用
+        // 检查是否为完整URL（以http或https开头）
+        if (this.courseInfo.teacherAvatar.startsWith('http://') || this.courseInfo.teacherAvatar.startsWith('https://')) {
+          console.log('使用云存储URL作为教师头像:', this.courseInfo.teacherAvatar);
           this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
+        } 
+        // 检查是否为本地路径（以/开头）
+        else if (this.courseInfo.teacherAvatar.startsWith('/')) {
+          // 已经是本地路径，但可能不是最终需要的头像
+          console.log('临时使用本地路径作为教师头像:', this.courseInfo.teacherAvatar);
+          this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
+          
+          // 如果有teacherName，尝试从数据库获取正确的头像
+          if (this.courseInfo.teacherName) {
+            this.fetchTeacherAvatarFromDB(this.courseInfo.teacherName);
+          } else if (this.courseInfo.teacherId) {
+            this.fetchTeacherAvatarByID(this.courseInfo.teacherId);
+          }
         } else {
           // 否则从云端获取
           console.log('从云端获取头像图片:', this.courseInfo.teacherAvatar);
@@ -755,8 +766,63 @@ export default {
         }
       } catch (error) {
         console.error('加载教师头像失败:', error);
-        // 加载失败时使用默认头像
+        // 加载失败时使用默认头像，并尝试从数据库获取
         this.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
+        
+        // 如果有teacherName，尝试从数据库获取正确的头像
+        if (this.courseInfo.teacherName) {
+          this.fetchTeacherAvatarFromDB(this.courseInfo.teacherName);
+        } else if (this.courseInfo.teacherId) {
+          this.fetchTeacherAvatarByID(this.courseInfo.teacherId);
+        }
+      }
+    },
+    
+    // 从数据库获取教师头像
+    async fetchTeacherAvatarFromDB(teacherName) {
+      if (!teacherName) return;
+      
+      try {
+        console.log('通过名称从数据库获取教师头像:', teacherName);
+        
+        // 准备查询参数，去除可能的空格
+        const nameForSearch = teacherName.trim();
+        
+        // 调用API获取教师信息
+        const result = await this.$api.teacher.getTeacherList({ name: nameForSearch });
+        
+        if (result && result.code === 0 && result.data && result.data.length > 0) {
+          // 查找精确匹配的教师
+          const foundTeacher = result.data.find(item => item.name === nameForSearch);
+          
+          if (foundTeacher && foundTeacher.avatar) {
+            console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
+            this.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
+            this.$forceUpdate();
+          }
+        }
+      } catch (error) {
+        console.error('通过名称获取教师头像失败:', error);
+      }
+    },
+    
+    // 通过ID从数据库获取教师头像
+    async fetchTeacherAvatarByID(teacherId) {
+      if (!teacherId) return;
+      
+      try {
+        console.log('通过ID从数据库获取教师头像:', teacherId);
+        
+        // 调用API获取教师详情
+        const result = await this.$api.teacher.getTeacherDetail({ id: teacherId });
+        
+        if (result && result.code === 0 && result.data && result.data.avatar) {
+          console.log('从数据库获取到教师头像URL:', result.data.avatar);
+          this.courseInfo.teacherAvatarUrl = result.data.avatar;
+          this.$forceUpdate();
+        }
+      } catch (error) {
+        console.error('通过ID获取教师头像失败:', error);
       }
     },
     
@@ -780,43 +846,104 @@ export default {
     loadUserInfo() {
       console.log('加载用户信息');
       
+      // 检查uni-id-token是否存在
+      const token = uni.getStorageSync('uni_id_token');
+      console.log('uni-id-token:', token ? '存在' : '不存在');
+      
       // 调试全局用户信息
       const globalUserInfo = getApp().globalData.userInfo;
       console.log('全局用户信息:', globalUserInfo);
       
       const userInfoStr = uni.getStorageSync('userInfo');
-      console.log('本地存储用户信息字符串:', userInfoStr ? '存在(长度:' + userInfoStr.length + ')' : '不存在');
+      console.log('本地存储用户信息字符串:', userInfoStr ? '存在' : '不存在');
       
+      // 尝试从本地存储获取用户信息
       if (userInfoStr) {
         try {
-          this.userInfo = JSON.parse(userInfoStr);
-          console.log('当前用户信息解析成功:', this.userInfo);
+          // 判断userInfoStr的类型，如果已经是对象，则直接使用，否则尝试JSON解析
+          this.userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+          console.log('从本地存储获取用户信息成功, 类型:', typeof this.userInfo);
           
-          // 确保userInfo包含userId
-          if (!this.userInfo.userId && this.userInfo._id) {
-            console.log('用户信息中没有userId，使用_id代替:', this.userInfo._id);
-            this.userInfo.userId = this.userInfo._id;
+          // 检查并处理ID字段
+          if (this.userInfo) {
+            // 检查各种可能的ID字段
+            const userId = this.userInfo.userId || this.userInfo.uid || 
+                          this.userInfo._id || 
+                          (this.userInfo.userInfo && this.userInfo.userInfo._id) || 
+                          (this.userInfo.userInfo && this.userInfo.userInfo.uid);
+            
+            // 如果找到了有效的ID，将其规范化保存到userId字段
+            if (userId) {
+              this.userInfo.userId = userId;
+              console.log('规范化用户ID:', userId);
+            } else {
+              console.warn('用户信息中没有找到有效的ID字段', this.userInfo);
+              console.log('用户信息对象包含的字段:', Object.keys(this.userInfo));
+              
+              // 输出子属性
+              if (this.userInfo.userInfo) {
+                console.log('userInfo子对象包含的字段:', Object.keys(this.userInfo.userInfo));
+              }
+            }
           }
-          
-          console.log('用户ID:', this.userInfo.userId);
         } catch (e) {
-          console.error('解析用户信息失败:', e);
-          this.userInfo = null;
+          console.error('从本地存储重新解析用户信息失败:', e);
+        }
+      }
+      
+      // 如果没有从userInfo中获取到有效信息，尝试从token中获取
+      if (!this.userInfo || !this.userInfo.userId) {
+        if (token) {
+          console.log('尝试通过uni-id-token获取用户信息');
           
-          // 尝试从全局状态恢复
-          if (globalUserInfo) {
-            console.log('从全局状态恢复用户信息');
-            this.userInfo = globalUserInfo;
+          // 调用云函数获取当前用户信息
+          uniCloud.callFunction({
+            name: 'getUserInfoByToken',
+            success: (res) => {
+              console.log('通过token获取用户信息结果:', res);
+              if (res.result && res.result.code === 0 && res.result.userInfo) {
+                this.userInfo = res.result.userInfo;
+                this.userInfo.userId = res.result.userInfo._id;
+                console.log('通过token成功获取用户信息:', this.userInfo);
+                
+                // 更新本地存储
+                uni.setStorageSync('userInfo', this.userInfo);
+                
+                // 重新检查预约状态
+                this.checkBookingStatus();
+              }
+            },
+            fail: (err) => {
+              console.error('通过token获取用户信息失败:', err);
+            }
+          });
+        }
+      }
+      
+      // 如果本地存储没有，但全局变量有，则使用全局变量
+      if (!this.userInfo && globalUserInfo) {
+        this.userInfo = globalUserInfo;
+        console.log('从全局变量获取用户信息成功');
+        
+        // 同样处理全局变量中的ID
+        if (this.userInfo) {
+          const userId = this.userInfo.userId || this.userInfo.uid || 
+                       this.userInfo._id || 
+                       (this.userInfo.userInfo && this.userInfo.userInfo._id) || 
+                       (this.userInfo.userInfo && this.userInfo.userInfo.uid);
+            
+          if (userId) {
+            this.userInfo.userId = userId;
+            console.log('规范化全局用户ID:', userId);
           }
         }
-      } else {
-        console.log('本地存储中没有用户信息');
-        this.userInfo = globalUserInfo || null;
       }
       
       // 最终检查
-      if (this.userInfo) {
-        console.log('最终用户信息:', this.userInfo);
+      if (this.userInfo && this.userInfo.userId) {
+        console.log('最终用户信息有效，使用ID:', this.userInfo.userId);
+      } else if (this.userInfo) {
+        console.warn('有用户信息但无法确定用户ID');
       } else {
         console.log('用户未登录');
       }
@@ -828,7 +955,22 @@ export default {
     // 处理登录成功事件
     handleLoginSuccess(userData) {
       console.log('收到登录成功事件，更新用户数据:', userData);
-      this.userInfo = userData;
+      
+      if (userData) {
+        this.userInfo = userData;
+        
+        // 规范化处理用户ID
+        const userId = userData.userId || userData.uid || userData._id || 
+                     (userData.userInfo && userData.userInfo._id) ||
+                     (userData.userInfo && userData.userInfo.uid);
+        
+        if (userId) {
+          this.userInfo.userId = userId;
+          console.log('登录成功后规范化用户ID:', userId);
+        } else {
+          console.warn('登录成功但无法确定用户ID，可能导致预约失败', userData);
+        }
+      }
       
       // 登录成功后重新检查预约状态
       setTimeout(() => {
@@ -1090,49 +1232,34 @@ export default {
     bookCourse() {
       console.log('点击预约课程按钮');
       
-      // 再次检查用户是否登录
-      if (!this.userInfo || !this.userInfo.userId) {
-        this.userInfo = null;
-        
-        // 尝试从本地和全局重新加载用户信息
-        const userInfoStr = uni.getStorageSync('userInfo');
-        if (userInfoStr) {
-          try {
-            this.userInfo = JSON.parse(userInfoStr);
-            console.log('从本地存储重新获取用户信息:', this.userInfo);
-          } catch (e) {
-            console.error('从本地存储重新解析用户信息失败:', e);
-          }
-        }
-        
-        // 如果本地存储没有，尝试从全局获取
-        if (!this.userInfo) {
-          const globalUserInfo = getApp().globalData.userInfo;
-          if (globalUserInfo) {
-            this.userInfo = globalUserInfo;
-            console.log('从全局状态获取用户信息:', this.userInfo);
-          }
-        }
-      }
-      
       // 如果仍然未登录
-      if (!this.userInfo || !this.userInfo.userId) {
-        console.log('用户未登录，跳转到登录页面');
-        uni.showToast({
-          title: '请先登录',
-          icon: 'none'
-        });
-        
-        setTimeout(() => {
-          // 跳转到登录页面，并设置重定向回当前页面
-          const currentUrl = `/pages/course/detail?id=${this.courseId}`;
-          console.log('设置登录后重定向地址:', currentUrl);
-          uni.navigateTo({
-            url: `/pages/login/login?redirect=${encodeURIComponent(currentUrl)}`
-          });
-        }, 1500);
+      if (!this.userInfo) {
+        console.log('未找到用户信息对象，用户未登录');
+        this.showLoginTip();
         return;
       }
+      
+      // 检查用户信息中的各种可能的ID字段
+      const userId = this.userInfo.userId || this.userInfo.uid || 
+                     this.userInfo._id || 
+                     (this.userInfo.userInfo && this.userInfo.userInfo._id) || 
+                     (this.userInfo.userInfo && this.userInfo.userInfo.uid);
+      
+      if (!userId) {
+        console.log('用户信息中没有有效的ID字段，无法预约课程', this.userInfo);
+        // 输出用户信息的所有键
+        console.log('用户信息对象包含的字段:', Object.keys(this.userInfo));
+        if (this.userInfo.userInfo) {
+          console.log('userInfo子对象包含的字段:', Object.keys(this.userInfo.userInfo));
+        }
+        
+        this.showLoginTip();
+        return;
+      }
+      
+      // 找到了有效的用户ID，储存起来
+      this.userInfo.userId = userId;
+      console.log('找到有效的用户ID:', userId);
       
       // 显示确认弹窗
       uni.showModal({
@@ -1159,16 +1286,48 @@ export default {
       });
       
       try {
-        console.log('提交预约数据：用户ID:', this.userInfo.userId, '课程ID:', this.courseId);
+        // 确保有有效的用户ID
+        const userId = this.userInfo.userId || this.userInfo.uid || this.userInfo._id || 
+                     (this.userInfo.userInfo && this.userInfo.userInfo._id) || 
+                     (this.userInfo.userInfo && this.userInfo.userInfo.uid);
+        
+        if (!userId) {
+          console.error('无法确定用户ID，预约失败');
+          uni.hideLoading();
+          uni.showToast({
+            title: '用户信息不完整，请重新登录',
+            icon: 'none'
+          });
+          return;
+        }
+        
+        // 获取用户名称
+        const userName = this.userInfo.nickName || 
+                       this.userInfo.nickname || 
+                       this.userInfo.username || 
+                       (this.userInfo.userInfo && this.userInfo.userInfo.nickname) ||
+                       '微信用户';
+                       
+        // 获取手机号
+        const phoneNumber = this.userInfo.phoneNumber || 
+                          this.userInfo.mobile ||
+                          (this.userInfo.userInfo && this.userInfo.userInfo.mobile) ||
+                          '';
+        
+        console.log('提交预约数据：用户ID:', userId, '课程ID:', this.courseId);
+        console.log('用户名称:', userName, '手机号:', phoneNumber || '(未提供)');
+        
+        // 输出更详细的用户信息调试
+        console.log('用户数据详情:', JSON.stringify(this.userInfo));
         
         // 调用云函数预约课程
         const res = await uniCloud.callFunction({
           name: 'bookCourse',
           data: {
-            userId: this.userInfo.userId,
+            userId: userId,
             courseId: this.courseId,
-            userName: this.userInfo.nickName || this.userInfo.username || '未知用户',
-            phoneNumber: this.userInfo.phoneNumber || '',
+            userName: userName,
+            phoneNumber: phoneNumber,
             remark: ''
           }
         });
@@ -1768,6 +1927,24 @@ export default {
         console.error('检查教师收藏状态失败:', error);
         return false;
       }
+    },
+    
+    // 添加一个显示登录提示的方法
+    showLoginTip() {
+      console.log('用户未登录，跳转到登录页面');
+      uni.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      
+      setTimeout(() => {
+        // 跳转到登录页面，并设置重定向回当前页面
+        const currentUrl = `/pages/course/detail?id=${this.courseId}`;
+        console.log('设置登录后重定向地址:', currentUrl);
+        uni.navigateTo({
+          url: `/pages/login/login?redirect=${encodeURIComponent(currentUrl)}`
+        });
+      }, 1500);
     }
   }
 }

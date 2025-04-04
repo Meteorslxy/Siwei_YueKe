@@ -22,7 +22,7 @@
     
     <view class="card-lower">
       <view class="teacher-info">
-        <image class="teacher-avatar" :src="course.teacherAvatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+        <image class="teacher-avatar" :src="getTeacherAvatar(course)" mode="aspectFill"></image>
         <text class="teacher-name">{{course.teacherName}}</text>
         <text class="teacher-title">{{course.teacherTitle || ''}}</text>
       </view>
@@ -90,6 +90,44 @@ export default {
         console.error('时间格式化错误:', e, startTime, endTime);
         return startTime || '时间待定'; // 发生错误时返回原值或默认值
       }
+    },
+    getTeacherAvatar(course) {
+      // 如果没有教师信息，返回默认头像
+      if (!course.teacherName) {
+        return '/static/images/default-avatar.png';
+      }
+      
+      // 处理教师头像URL - 优先顺序：teacherAvatar > avatar > 默认头像
+      if (course.teacherAvatar) {
+        // 检查teacherAvatar是否为完整URL
+        if (course.teacherAvatar.startsWith('http://') || course.teacherAvatar.startsWith('https://')) {
+          return course.teacherAvatar;
+        }
+        
+        // 检查是否为本地资源路径
+        if (course.teacherAvatar.startsWith('/')) {
+          return course.teacherAvatar;
+        }
+        
+        // 可能是文件ID，尝试使用完整路径
+        return course.teacherAvatar;
+      }
+      
+      // 如果课程中有avatar字段，也可能是教师头像
+      if (course.avatar) {
+        if (course.avatar.startsWith('http://') || course.avatar.startsWith('https://')) {
+          return course.avatar;
+        }
+        
+        if (course.avatar.startsWith('/')) {
+          return course.avatar;
+        }
+        
+        return course.avatar;
+      }
+      
+      // 最后返回默认头像
+      return '/static/images/default-avatar.png';
     }
   }
 }

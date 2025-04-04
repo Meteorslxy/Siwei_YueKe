@@ -21,7 +21,7 @@
   "compileType": "miniprogram",
   "libVersion": "3.7.10",
   "appid": "wx64b3a851f619fc04",
-  "projectname": "约课小程序",
+  "projectname": "四维教育",
   "condition": {},
   "cloudfunctionRoot": "uniCloud-aliyun/cloudfunctions/",
   "editorSetting": {

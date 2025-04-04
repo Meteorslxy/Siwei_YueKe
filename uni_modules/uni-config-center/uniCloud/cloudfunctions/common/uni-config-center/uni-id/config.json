@@ -1,0 +1,69 @@
+{
+  "passwordSecret": "yuekePasswordSecret-2023",
+  "tokenSecret": "yuekeTokenSecret-2023",
+  "tokenExpiresIn": 86400,
+  "tokenExpiresThreshold": 3600,
+  "passwordErrorLimit": 6,
+  "passwordErrorRetryTime": 3600,
+  "autoSetInviteCode": false,
+  "forceInviteCode": false,
+
+  "mp-weixin": {
+    "oauth": {
+      "weixin": {
+        "appid": "wx64b3a851f619fc04",
+        "appsecret": "c5c9c4047bf0c292e28f5019a950b18d"
+      }
+    },
+    "appid": "wx64b3a851f619fc04",
+    "appsecret": "c5c9c4047bf0c292e28f5019a950b18d"
+  },
+
+  "app": {
+    "tokenExpiresIn": 2592000,
+    "oauth": {
+      "weixin": {
+        "appid": "",
+        "appsecret": ""
+      },
+      "apple": {
+        "bundleId": ""
+      }
+    }
+  },
+
+  "service": {
+    "sms": {
+      "name": "uniSms",
+      "codeExpiresIn": 300,
+      "smsKey": "your-sms-key",
+      "smsSecret": "your-sms-secret",
+      "template": {
+        "templateId": "your-template-id",
+        "name": "default"
+      }
+    },
+    "univerify": {
+      "appid": "your-univerify-appid",
+      "apiKey": "your-univerify-apiKey",
+      "apiSecret": "your-univerify-apiSecret"
+    }
+  },
+  
+  "mp-alipay": {
+    "oauth": {
+      "alipay": {
+        "appid": "",
+        "privateKey": ""
+      }
+    }
+  },
+  "h5": {
+    "oauth": {
+      "weixin": {
+        "appid": "",
+        "appsecret": ""
+      }
+    }
+  }
+} 

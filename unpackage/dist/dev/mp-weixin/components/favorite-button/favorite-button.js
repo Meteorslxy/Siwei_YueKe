@@ -1,6 +1,6 @@
 (global["webpackJsonp"] = global["webpackJsonp"] || []).push([["components/favorite-button/favorite-button"],{
 
-/***/ 81:
+/***/ 83:
 /*!*****************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/favorite-button/favorite-button.vue ***!
   \*****************************************************************************************************************/
@@ -9,10 +9,10 @@
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _favorite_button_vue_vue_type_template_id_6c434d0c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./favorite-button.vue?vue&type=template&id=6c434d0c& */ 82);
-/* harmony import */ var _favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./favorite-button.vue?vue&type=script&lang=js& */ 84);
+/* harmony import */ var _favorite_button_vue_vue_type_template_id_6c434d0c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./favorite-button.vue?vue&type=template&id=6c434d0c& */ 84);
+/* harmony import */ var _favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./favorite-button.vue?vue&type=script&lang=js& */ 86);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./favorite-button.vue?vue&type=style&index=0&lang=scss& */ 86);
+/* harmony import */ var _favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./favorite-button.vue?vue&type=style&index=0&lang=scss& */ 88);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 44);
 
 var renderjs
@@ -41,7 +41,7 @@ component.options.__file = "components/favorite-button/favorite-button.vue"
 
 /***/ }),
 
-/***/ 82:
+/***/ 84:
 /*!************************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/favorite-button/favorite-button.vue?vue&type=template&id=6c434d0c& ***!
   \************************************************************************************************************************************************/
@@ -50,7 +50,7 @@ component.options.__file = "components/favorite-button/favorite-button.vue"
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_template_id_6c434d0c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./favorite-button.vue?vue&type=template&id=6c434d0c& */ 83);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_template_id_6c434d0c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./favorite-button.vue?vue&type=template&id=6c434d0c& */ 85);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_template_id_6c434d0c___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_template_id_6c434d0c___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
@@ -63,7 +63,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ 83:
+/***/ 85:
 /*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/favorite-button/favorite-button.vue?vue&type=template&id=6c434d0c& ***!
   \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -90,7 +90,7 @@ render._withStripped = true
 
 /***/ }),
 
-/***/ 84:
+/***/ 86:
 /*!******************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/favorite-button/favorite-button.vue?vue&type=script&lang=js& ***!
   \******************************************************************************************************************************************/
@@ -99,14 +99,14 @@ render._withStripped = true
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./favorite-button.vue?vue&type=script&lang=js& */ 85);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./favorite-button.vue?vue&type=script&lang=js& */ 87);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
-/***/ 85:
+/***/ 87:
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/favorite-button/favorite-button.vue?vue&type=script&lang=js& ***!
   \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -177,6 +177,7 @@ var _default = {
     };
   },
   created: function created() {
+    var _this = this;
     // 确保收藏表已初始化
     this.ensureFavoriteTableExists();
 
@@ -185,8 +186,14 @@ var _default = {
       console.log('使用父组件传递的初始收藏状态:', this.initialFavorite);
       this.isFavorite = true;
     } else {
-      // 否则从服务器检查收藏状态
+      // 立即检查一次收藏状态
       this.checkFavoriteStatus();
+
+      // 延迟300ms后再检查一次，确保状态正确
+      setTimeout(function () {
+        console.log('延迟检查收藏状态...');
+        _this.checkFavoriteStatus();
+      }, 300);
     }
 
     // 获取系统信息
@@ -239,14 +246,14 @@ var _default = {
     },
     // 检查收藏状态
     checkFavoriteStatus: function checkFavoriteStatus() {
-      var _this = this;
+      var _this2 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var userInfo, userId, res;
+        var userInfo, userData, userId, res;
         return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                if (_this.itemId) {
+                if (_this2.itemId) {
                   _context2.next = 2;
                   break;
                 }
@@ -260,45 +267,70 @@ var _default = {
                 }
                 return _context2.abrupt("return");
               case 6:
-                userId = JSON.parse(userInfo).userId || JSON.parse(userInfo)._id;
+                try {
+                  userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
+                } catch (e) {
+                  console.error('解析用户数据失败:', e);
+                  userData = userInfo; // 如果解析失败，使用原始数据
+                }
+                userId = userData.userId || userData._id || userData.uid || userData.userInfo && userData.userInfo._id || userData.userInfo && userData.userInfo.uid || '';
                 if (userId) {
-                  _context2.next = 9;
+                  _context2.next = 10;
                   break;
                 }
                 return _context2.abrupt("return");
-              case 9:
-                _context2.next = 11;
-                return _this.$api.user.checkFavorite({
+              case 10:
+                _context2.next = 12;
+                return _this2.$api.user.checkFavorite({
                   userId: userId,
-                  itemId: _this.itemId,
-                  itemType: _this.itemType
+                  itemId: _this2.itemId,
+                  itemType: _this2.itemType
                 });
-              case 11:
+              case 12:
                 res = _context2.sent;
-                if (res && res.code === 0 && res.data) {
-                  _this.isFavorite = true;
-                  _this.favoriteId = res.data._id || '';
+                console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
+                if (res && res.code === 0) {
+                  // 1. 优先检查结果对象中的isFavorite字段
+                  if (typeof res.isFavorite === 'boolean') {
+                    _this2.isFavorite = res.isFavorite;
+                  }
+                  // 2. 检查data中的isFavorite字段
+                  else if (res.data && typeof res.data.isFavorite === 'boolean') {
+                    _this2.isFavorite = res.data.isFavorite;
+                  }
+                  // 3. 如果data存在且不为空，则视为已收藏
+                  else if (res.data && res.data._id) {
+                    _this2.isFavorite = true;
+                  }
+                  // 4. 都不符合则未收藏
+                  else {
+                    _this2.isFavorite = false;
+                  }
+
+                  // 获取收藏ID
+                  _this2.favoriteId = res.data && res.data._id || '';
+                  console.log('❤️ 最终收藏状态:', _this2.isFavorite ? '已收藏' : '未收藏', '收藏ID:', _this2.favoriteId);
                 } else {
-                  _this.isFavorite = false;
-                  _this.favoriteId = '';
+                  _this2.isFavorite = false;
+                  _this2.favoriteId = '';
                 }
-                _context2.next = 18;
+                _context2.next = 20;
                 break;
-              case 15:
-                _context2.prev = 15;
+              case 17:
+                _context2.prev = 17;
                 _context2.t0 = _context2["catch"](2);
                 console.error('检查收藏状态失败:', _context2.t0);
-              case 18:
+              case 20:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[2, 15]]);
+        }, _callee2, null, [[2, 17]]);
       }))();
     },
     // 检查是否已收藏
     checkIsFavorite: function checkIsFavorite() {
-      var _this2 = this;
+      var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
         var userInfo, userData, userId, checkData, res;
         return _regenerator.default.wrap(function _callee3$(_context3) {
@@ -306,13 +338,13 @@ var _default = {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _context3.prev = 0;
-                if (!(!_this2.itemType || !_this2.itemId)) {
+                if (!(!_this3.itemType || !_this3.itemId)) {
                   _context3.next = 6;
                   break;
                 }
-                console.error('收藏检查失败: 缺少必要参数', _this2.itemType, _this2.itemId);
-                _this2.isFavorite = false;
-                _this2.favoriteId = '';
+                console.error('收藏检查失败: 缺少必要参数', _this3.itemType, _this3.itemId);
+                _this3.isFavorite = false;
+                _this3.favoriteId = '';
                 return _context3.abrupt("return");
               case 6:
                 userInfo = uni.getStorageSync('userInfo');
@@ -320,50 +352,86 @@ var _default = {
                   _context3.next = 11;
                   break;
                 }
-                _this2.isFavorite = false;
-                _this2.favoriteId = '';
+                _this3.isFavorite = false;
+                _this3.favoriteId = '';
                 return _context3.abrupt("return");
               case 11:
-                userData = JSON.parse(userInfo);
-                userId = userData.userId || userData._id; // 构建检查参数
+                try {
+                  userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
+                } catch (e) {
+                  console.error('解析用户数据失败:', e);
+                  userData = userInfo; // 如果解析失败，使用原始数据
+                }
+                userId = userData.userId || userData._id || userData.uid || userData.userInfo && userData.userInfo._id || userData.userInfo && userData.userInfo.uid || '';
+                if (userId) {
+                  _context3.next = 18;
+                  break;
+                }
+                console.log('无法获取用户ID，视为未收藏');
+                _this3.isFavorite = false;
+                _this3.favoriteId = '';
+                return _context3.abrupt("return");
+              case 18:
+                // 构建检查参数
                 checkData = {
                   userId: userId,
-                  itemType: _this2.itemType,
-                  itemId: _this2.itemId
-                }; // 调用API检查是否已收藏
-                _context3.next = 16;
-                return _this2.$api.user.checkFavorite(checkData);
-              case 16:
+                  itemType: _this3.itemType,
+                  itemId: _this3.itemId
+                };
+                console.log('检查收藏状态，参数:', checkData);
+
+                // 调用API检查是否已收藏
+                _context3.next = 22;
+                return _this3.$api.user.checkFavorite(checkData);
+              case 22:
                 res = _context3.sent;
+                console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
                 if (res && res.code === 0) {
-                  _this2.isFavorite = res.data.isFavorite || false;
-                  _this2.favoriteId = res.data.favoriteId || '';
-                  console.log('收藏状态:', _this2.isFavorite ? '已收藏' : '未收藏', '收藏ID:', _this2.favoriteId);
+                  // 1. 优先检查结果对象中的isFavorite字段
+                  if (typeof res.isFavorite === 'boolean') {
+                    _this3.isFavorite = res.isFavorite;
+                  }
+                  // 2. 检查data中的isFavorite字段
+                  else if (res.data && typeof res.data.isFavorite === 'boolean') {
+                    _this3.isFavorite = res.data.isFavorite;
+                  }
+                  // 3. 如果data存在且不为空，则视为已收藏
+                  else if (res.data && res.data._id) {
+                    _this3.isFavorite = true;
+                  }
+                  // 4. 都不符合则未收藏
+                  else {
+                    _this3.isFavorite = false;
+                  }
+
+                  // 获取收藏ID
+                  _this3.favoriteId = res.data && res.data._id || '';
+                  console.log('❤️ 最终收藏状态:', _this3.isFavorite ? '已收藏' : '未收藏', '收藏ID:', _this3.favoriteId);
                 } else {
-                  _this2.isFavorite = false;
-                  _this2.favoriteId = '';
+                  _this3.isFavorite = false;
+                  _this3.favoriteId = '';
                 }
-                _context3.next = 25;
+                _context3.next = 32;
                 break;
-              case 20:
-                _context3.prev = 20;
+              case 27:
+                _context3.prev = 27;
                 _context3.t0 = _context3["catch"](0);
                 console.error('检查收藏状态失败:', _context3.t0);
-                _this2.isFavorite = false;
-                _this2.favoriteId = '';
-              case 25:
+                _this3.isFavorite = false;
+                _this3.favoriteId = '';
+              case 32:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, null, [[0, 20]]);
+        }, _callee3, null, [[0, 27]]);
       }))();
     },
     // 切换收藏状态
     toggleFavorite: function toggleFavorite() {
-      var _this3 = this;
+      var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
-        var userInfo, userData, userId, res, favoriteData, _res;
+        var userInfo, userData, token, userDetailRes, freshUserInfo, userId, _token, tokenParts, base64Payload, payload, uniIdUserInfo, uniIdData, deviceId, res, favoriteData, _res;
         return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -389,28 +457,167 @@ var _default = {
                 return _context4.abrupt("return");
               case 4:
                 _context4.prev = 4;
-                userData = JSON.parse(userInfo);
-                userId = userData.userId || userData._id; // 检查必要参数
-                if (!(!_this3.itemType || !_this3.itemId)) {
-                  _context4.next = 11;
+                // 安全地解析用户数据
+
+                try {
+                  userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
+                } catch (e) {
+                  console.error('解析用户数据失败:', e);
+                  userData = userInfo; // 如果解析失败，使用原始数据
+                }
+
+                console.log('用户数据:', userData);
+
+                // 更新用户信息：尝试通过云函数获取最新信息
+                _context4.prev = 7;
+                console.log('尝试获取最新用户信息...');
+
+                // 获取token
+                token = uni.getStorageSync('uni_id_token');
+                if (!token) {
+                  _context4.next = 16;
                   break;
                 }
-                console.error('收藏操作失败: 缺少必要参数', _this3.itemType, _this3.itemId);
+                _context4.next = 13;
+                return uniCloud.callFunction({
+                  name: 'getUserInfoByToken',
+                  data: {
+                    uniIdToken: token
+                  }
+                });
+              case 13:
+                userDetailRes = _context4.sent;
+                console.log('getUserInfoByToken结果:', userDetailRes);
+                if (userDetailRes.result && userDetailRes.result.code === 0 && userDetailRes.result.userInfo) {
+                  freshUserInfo = userDetailRes.result.userInfo;
+                  console.log('获取到最新用户信息:', freshUserInfo);
+
+                  // 更新到本地存储
+                  uni.setStorageSync('userInfo', freshUserInfo);
+
+                  // 更新当前使用的userData
+                  userData = freshUserInfo;
+                }
+              case 16:
+                _context4.next = 21;
+                break;
+              case 18:
+                _context4.prev = 18;
+                _context4.t0 = _context4["catch"](7);
+                console.error('刷新用户信息失败:', _context4.t0);
+              case 21:
+                // 获取用户ID，支持多种字段格式
+                userId = ''; // 第1步：尝试直接从uni-id-token中获取uid
+                try {
+                  _token = uni.getStorageSync('uni_id_token');
+                  if (_token) {
+                    console.log('尝试从token中解析获取用户ID');
+                    try {
+                      // 解析token
+                      tokenParts = _token.split('.');
+                      if (tokenParts.length === 3) {
+                        // 解码payload部分
+                        base64Payload = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
+                        payload = JSON.parse(atob(base64Payload));
+                        console.log('Token payload:', payload);
+                        if (payload.uid) {
+                          userId = payload.uid;
+                          console.log('从token获取到用户ID(uid):', userId);
+                        }
+                      }
+                    } catch (tokenError) {
+                      console.error('解析token失败:', tokenError);
+                    }
+                  }
+                } catch (e) {
+                  console.error('获取token失败:', e);
+                }
+
+                // 第2步：如果没有从token获取，尝试从用户对象获取
+                if (!userId) {
+                  if (userData._id) {
+                    userId = userData._id;
+                    console.log('使用用户对象中的_id:', userId);
+                  } else if (userData.uid) {
+                    userId = userData.uid;
+                    console.log('使用用户对象中的uid:', userId);
+                  } else if (userData.userId) {
+                    userId = userData.userId;
+                    console.log('使用用户对象中的userId:', userId);
+                  } else if (userData.userInfo && userData.userInfo._id) {
+                    userId = userData.userInfo._id;
+                    console.log('使用嵌套userInfo中的_id:', userId);
+                  } else if (userData.userInfo && userData.userInfo.uid) {
+                    userId = userData.userInfo.uid;
+                    console.log('使用嵌套userInfo中的uid:', userId);
+                  }
+                }
+
+                // 第3步：如果还没有ID，尝试从uni-id-pages-userInfo获取
+                if (!userId) {
+                  try {
+                    uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+                    if (uniIdUserInfo) {
+                      console.log('尝试从uni-id-pages-userInfo获取用户ID');
+                      uniIdData = typeof uniIdUserInfo === 'string' ? JSON.parse(uniIdUserInfo) : uniIdUserInfo;
+                      if (uniIdData._id) userId = uniIdData._id;else if (uniIdData.uid) userId = uniIdData.uid;
+                    }
+                  } catch (e) {
+                    console.error('从uni-id-pages-userInfo获取ID失败:', e);
+                  }
+                }
+
+                // 第4步：如果还是没有用户ID，使用临时ID
+                if (!userId) {
+                  // 生成一个持久的设备ID
+                  deviceId = uni.getStorageSync('device_id');
+                  if (!deviceId) {
+                    deviceId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+                    uni.setStorageSync('device_id', deviceId);
+                  }
+                  userId = deviceId;
+                  console.log('使用临时设备ID作为用户ID:', userId);
+                }
+
+                // 检查用户ID
+                if (userId) {
+                  _context4.next = 31;
+                  break;
+                }
+                console.error('收藏操作失败: 无法获取用户ID', userData);
+                uni.showToast({
+                  title: '用户信息不完整，请重新登录',
+                  icon: 'none'
+                });
+
+                // 跳转到登录页面
+                setTimeout(function () {
+                  uni.navigateTo({
+                    url: '/pages/login/login'
+                  });
+                }, 1500);
+                return _context4.abrupt("return");
+              case 31:
+                if (!(!_this4.itemType || !_this4.itemId)) {
+                  _context4.next = 35;
+                  break;
+                }
+                console.error('收藏操作失败: 缺少必要参数', _this4.itemType, _this4.itemId);
                 uni.showToast({
                   title: '参数错误',
                   icon: 'none'
                 });
                 return _context4.abrupt("return");
-              case 11:
+              case 35:
                 uni.showLoading({
-                  title: _this3.isFavorite ? '取消中' : '收藏中'
+                  title: _this4.isFavorite ? '取消中' : '收藏中'
                 });
-                if (!_this3.isFavorite) {
-                  _context4.next = 24;
+                if (!_this4.isFavorite) {
+                  _context4.next = 48;
                   break;
                 }
-                if (_this3.favoriteId) {
-                  _context4.next = 18;
+                if (_this4.favoriteId) {
+                  _context4.next = 42;
                   break;
                 }
                 console.error('取消收藏失败: 缺少收藏ID');
@@ -420,20 +627,26 @@ var _default = {
                   icon: 'none'
                 });
                 return _context4.abrupt("return");
-              case 18:
-                _context4.next = 20;
-                return _this3.$api.user.removeFavorite(_this3.favoriteId);
-              case 20:
+              case 42:
+                _context4.next = 44;
+                return _this4.$api.user.removeFavorite(_this4.favoriteId);
+              case 44:
                 res = _context4.sent;
                 if (res && res.code === 0) {
-                  _this3.isFavorite = false;
-                  _this3.favoriteId = '';
+                  _this4.isFavorite = false;
+                  _this4.favoriteId = '';
                   uni.hideLoading();
                   uni.showToast({
                     title: '已取消收藏',
                     icon: 'success'
                   });
-                  _this3.$emit('favoriteChange', false);
+
+                  // 强制更新收藏状态（解决有时状态不更新的问题）
+                  _this4.$nextTick(function () {
+                    console.log('强制更新收藏状态为:', false);
+                    _this4.isFavorite = false;
+                  });
+                  _this4.$emit('favoriteChange', false);
                 } else {
                   uni.hideLoading();
                   uni.showToast({
@@ -441,63 +654,77 @@ var _default = {
                     icon: 'none'
                   });
                 }
-                _context4.next = 30;
+                _context4.next = 55;
                 break;
-              case 24:
+              case 48:
                 // 添加收藏
                 // 构建收藏数据
                 favoriteData = {
                   userId: userId,
-                  itemType: _this3.itemType,
-                  itemId: _this3.itemId,
-                  itemTitle: _this3.itemTitle || '',
-                  itemCover: _this3.itemCover || '',
-                  itemUrl: _this3.itemUrl || "/pages/".concat(_this3.itemType, "/detail?id=").concat(_this3.itemId),
+                  // 确保使用正确的用户ID
+                  itemType: _this4.itemType,
+                  itemId: _this4.itemId,
+                  itemTitle: _this4.itemTitle || '',
+                  itemCover: _this4.itemCover || '',
+                  itemUrl: _this4.itemUrl || "/pages/".concat(_this4.itemType, "/detail?id=").concat(_this4.itemId),
                   createTime: Date.now()
-                }; // 根据类型调整URL
-                if (_this3.itemType === 'lecture') {
-                  favoriteData.itemUrl = "/pages/course/lecture-detail?id=".concat(_this3.itemId);
-                } else if (_this3.itemType === 'teacher') {
-                  favoriteData.itemUrl = "/pages/teacher/detail?id=".concat(_this3.itemId);
+                };
+                console.log('添加收藏数据:', favoriteData);
+
+                // 根据类型调整URL
+                if (_this4.itemType === 'lecture') {
+                  favoriteData.itemUrl = "/pages/course/lecture-detail?id=".concat(_this4.itemId);
+                } else if (_this4.itemType === 'teacher') {
+                  favoriteData.itemUrl = "/pages/teacher/detail?id=".concat(_this4.itemId);
                 }
-                _context4.next = 28;
-                return _this3.$api.user.addFavorite(favoriteData);
-              case 28:
+                _context4.next = 53;
+                return _this4.$api.user.addFavorite(favoriteData);
+              case 53:
                 _res = _context4.sent;
                 if (_res && _res.code === 0) {
-                  _this3.isFavorite = true;
-                  _this3.favoriteId = _res.data.favoriteId || '';
+                  _this4.isFavorite = true;
+                  _this4.favoriteId = _res.data._id || _res.data.favoriteId || '';
                   uni.hideLoading();
                   uni.showToast({
                     title: '收藏成功',
                     icon: 'success'
                   });
-                  _this3.$emit('favoriteChange', true);
+
+                  // 强制更新收藏状态（解决有时状态不更新的问题）
+                  _this4.$nextTick(function () {
+                    console.log('强制更新收藏状态为:', true);
+                    _this4.isFavorite = true;
+                  });
+                  _this4.$emit('favoriteChange', true);
                 } else {
                   uni.hideLoading();
                   uni.showToast({
                     title: '操作失败',
-                    icon: 'none'
+                    icon: 'none',
+                    duration: 3000
                   });
+                  if (_res && _res.message) {
+                    console.error('收藏失败原因:', _res.message);
+                  }
                 }
-              case 30:
-                _context4.next = 37;
+              case 55:
+                _context4.next = 62;
                 break;
-              case 32:
-                _context4.prev = 32;
-                _context4.t0 = _context4["catch"](4);
-                console.error('收藏操作失败:', _context4.t0);
+              case 57:
+                _context4.prev = 57;
+                _context4.t1 = _context4["catch"](4);
+                console.error('收藏操作失败:', _context4.t1);
                 uni.hideLoading();
                 uni.showToast({
                   title: '操作失败',
                   icon: 'none'
                 });
-              case 37:
+              case 62:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, null, [[4, 32]]);
+        }, _callee4, null, [[4, 57], [7, 18]]);
       }))();
     },
     // 手动更新收藏状态
@@ -526,6 +753,33 @@ var _default = {
           url = '';
       }
       return url;
+    },
+    // 处理图片资源地址，添加默认图片处理
+    processImageUrl: function processImageUrl(url) {
+      if (!url) {
+        return this.getDefaultImage();
+      }
+
+      // 检查图片是否为本地路径
+      if (url.startsWith('/static/')) {
+        // 添加错误处理，在图片加载失败时使用默认图片
+        console.log('处理本地图片路径:', url);
+        return url;
+      }
+      return url;
+    },
+    // 获取默认图片
+    getDefaultImage: function getDefaultImage() {
+      switch (this.itemType) {
+        case 'course':
+          return '/static/images/default-course.jpg';
+        case 'lecture':
+          return '/static/images/default-lecture.jpg';
+        case 'teacher':
+          return '/static/images/default-teacher.jpg';
+        default:
+          return '/static/images/default.jpg';
+      }
     }
   }
 };
@@ -534,7 +788,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 86:
+/***/ 88:
 /*!***************************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/favorite-button/favorite-button.vue?vue&type=style&index=0&lang=scss& ***!
   \***************************************************************************************************************************************************/
@@ -543,14 +797,14 @@ exports.default = _default;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./favorite-button.vue?vue&type=style&index=0&lang=scss& */ 87);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./favorite-button.vue?vue&type=style&index=0&lang=scss& */ 89);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_favorite_button_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
-/***/ 87:
+/***/ 89:
 /*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/favorite-button/favorite-button.vue?vue&type=style&index=0&lang=scss& ***!
   \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -569,7 +823,7 @@ __webpack_require__.r(__webpack_exports__);
     'components/favorite-button/favorite-button-create-component',
     {
         'components/favorite-button/favorite-button-create-component':(function(module, exports, __webpack_require__){
-            __webpack_require__('2')['createComponent'](__webpack_require__(81))
+            __webpack_require__('2')['createComponent'](__webpack_require__(83))
         })
     },
     [['components/favorite-button/favorite-button-create-component']]

@@ -35,7 +35,22 @@
     "pages/user/wechat/index",
     "pages/common/input-page"
   ],
-  "subPackages": [],
+  "subPackages": [
+    {
+      "root": "uni_modules/uni-id-pages/pages",
+      "pages": [
+        "login/login-withoutpwd",
+        "login/login-withpwd",
+        "login/login-smscode",
+        "register/register",
+        "retrieve/retrieve",
+        "common/webview/webview",
+        "userinfo/userinfo",
+        "userinfo/bind-mobile/bind-mobile",
+        "userinfo/cropImage/cropImage"
+      ]
+    }
+  ],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "四维教育",

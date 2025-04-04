@@ -73,15 +73,53 @@
 /* 用户信息区域 */
 .user-info-section {
   position: relative;
-  height: 380rpx;
+  height: 280rpx;
 }
 .user-info-section .user-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 260rpx;
+  height: 200rpx;
   background-color: #EC7A49;
+  /* 返回按钮样式 */
+  /* 刷新按钮样式 */
+}
+.user-info-section .user-bg .back-button {
+  position: absolute;
+  top: 80rpx;
+  left: 30rpx;
+  width: 60rpx;
+  height: 60rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+.user-info-section .user-bg .back-button text {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+.user-info-section .user-bg .refresh-button {
+  position: absolute;
+  top: 80rpx;
+  right: 30rpx;
+  width: 60rpx;
+  height: 60rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+.user-info-section .user-bg .refresh-button text {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
 }
 .user-info-section .user-info {
   position: absolute;
@@ -136,7 +174,7 @@
 /* 菜单区域 */
 .menu-section {
   padding: 20rpx;
-  margin-top: 160rpx;
+  margin-top: 40rpx;
 }
 .menu-section .menu-group {
   background-color: #fff;
@@ -149,6 +187,14 @@
   font-weight: bold;
   color: var(--text-color);
   margin-bottom: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.menu-section .menu-group .menu-title .refresh-link {
+  font-size: 24rpx;
+  color: var(--theme-color);
+  font-weight: normal;
 }
 .menu-section .menu-group .menu-content {
   display: flex;
@@ -208,6 +254,19 @@
   font-size: 24rpx;
   color: var(--text-color-light);
 }
+.menu-section .menu-group .menu-list .menu-list-item.test-btn {
+  background-color: #f8f8f8;
+  margin-bottom: 10rpx;
+  border-radius: 8rpx;
+  height: 110rpx;
+}
+.menu-section .menu-group .menu-list .menu-list-item.test-btn .list-icon {
+  color: #1974FF;
+}
+.menu-section .menu-group .menu-list .menu-list-item.test-btn .list-text {
+  color: #1974FF;
+  font-weight: bold;
+}
 /* 底部区域 */
 .bottom-area {
   margin-top: auto;
@@ -236,5 +295,33 @@
 }
 .bottom-area .safe-area-bottom {
   height: 50rpx;
+}
+/* 当没有内容时的重新加载提示 */
+.reload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 20rpx;
+}
+.reload-container image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+.reload-container text {
+  font-size: 28rpx;
+  color: var(--text-color);
+  margin-bottom: 20rpx;
+}
+.reload-container button {
+  font-size: 32rpx;
+  background-color: var(--theme-color);
+  color: #fff;
+  border-radius: 40rpx;
+  padding: 0 40rpx;
+  height: 80rpx;
+  line-height: 80rpx;
 }
 

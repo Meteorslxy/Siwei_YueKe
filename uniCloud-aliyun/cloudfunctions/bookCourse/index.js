@@ -31,11 +31,53 @@ exports.main = async (event, context) => {
   
   try {
     // 获取用户信息
-    console.log('检查用户信息:', userId);
-    const userResult = await db.collection('users').doc(userId).get();
+    console.log('检查用户信息, userId:', userId, '类型:', typeof userId);
     
-    if (!userResult.data || userResult.data.length === 0) {
-      console.log('用户不存在');
+    // 添加更多调试信息
+    let userResult;
+    
+    // 采用多种方式尝试查询用户
+    try {
+      console.log('尝试方法1: 使用doc直接查询');
+      userResult = await db.collection('uni-id-users').doc(userId).get();
+      console.log('方法1查询结果:', userResult);
+    } catch (err1) {
+      console.error('方法1查询失败:', err1);
+      
+      try {
+        console.log('尝试方法2: 使用where查询_id');
+        userResult = await db.collection('uni-id-users').where({
+          _id: userId
+        }).get();
+        console.log('方法2查询结果:', userResult);
+      } catch (err2) {
+        console.error('方法2查询失败:', err2);
+        
+        try {
+          console.log('尝试方法3: 使用where查询uid');
+          userResult = await db.collection('uni-id-users').where({
+            uid: userId
+          }).get();
+          console.log('方法3查询结果:', userResult);
+        } catch (err3) {
+          console.error('方法3查询失败:', err3);
+          throw new Error('无法查询到用户信息，所有尝试均失败');
+        }
+      }
+    }
+    
+    // 增强用户数据检查
+    if (!userResult || !userResult.data) {
+      console.error('查询结果没有data字段');
+      return {
+        code: -1,
+        success: false,
+        message: '用户信息查询结果异常'
+      };
+    }
+    
+    if (userResult.data.length === 0) {
+      console.log('用户数据为空数组');
       return {
         code: -1,
         success: false,
@@ -43,9 +85,16 @@ exports.main = async (event, context) => {
       };
     }
     
+    // 获取用户数据
     const userData = userResult.data[0] || userResult.data;
-    const studentName = userName || userData.nickName || userData.username || '未知用户';
-    const contactPhone = phoneNumber || userData.phoneNumber || '';
+    console.log('查询到的用户数据:', userData);
+    
+    // 使用uni-id-users的字段名
+    const studentName = userName || userData.nickname || userData.username || '未知用户';
+    const contactPhone = phoneNumber || userData.mobile || '';
+    
+    console.log('使用的学生姓名:', studentName);
+    console.log('使用的联系电话:', contactPhone);
     
     // 获取课程信息
     console.log('检查课程信息:', courseId);
@@ -79,9 +128,14 @@ exports.main = async (event, context) => {
     
     // 检查用户是否已经预约过该课程
     console.log('检查用户是否已预约过该课程');
+    
+    // 保存用户的真实ID（可能是_id或uid）
+    const realUserId = userData._id;
+    console.log('使用真实用户ID:', realUserId);
+    
     const existResult = await db.collection('bookings')
       .where({
-        userId: userId,
+        userId: realUserId,
         courseId: courseId,
         status: dbCmd.in(['pending', 'confirmed'])
       })
@@ -103,7 +157,7 @@ exports.main = async (event, context) => {
     
     // 创建预约记录
     const bookingData = {
-      userId: userId,
+      userId: realUserId, // 使用真实用户ID
       courseId: courseId,
       courseTitle: course.title || '',
       courseStartTime: course.startTime || '',

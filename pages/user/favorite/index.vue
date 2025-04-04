@@ -23,7 +23,9 @@
         >
           <view class="item-content" @click="handleClick(index)">
             <view class="item-image">
-              <image :src="item.itemCover || '/static/images/course-default.jpg'" mode="aspectFill"></image>
+              <image :src="item.itemCover || getDefaultImage(item.itemType)" 
+                mode="aspectFill" 
+                @error="handleImageError(index)"></image>
             </view>
             
             <view class="item-info">
@@ -110,8 +112,31 @@ export default {
           return;
         }
         
-        const userData = JSON.parse(userInfo);
-        const userId = userData.userId || userData._id;
+        // 安全地解析用户数据
+        let userData;
+        try {
+          userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
+        } catch (e) {
+          console.error('解析用户数据失败:', e);
+          userData = userInfo; // 如果解析失败，使用原始数据
+        }
+        
+        // 获取用户ID，支持多种字段格式
+        const userId = userData.userId || userData._id || userData.uid || 
+                     (userData.userInfo && userData.userInfo._id) || 
+                     (userData.userInfo && userData.userInfo.uid) || '';
+                     
+        // 检查用户ID
+        if (!userId) {
+          console.error('获取收藏列表失败: 无法获取用户ID', userData);
+          this.loading = false;
+          this.loadMoreStatus = 'more';
+          uni.showToast({
+            title: '用户信息不完整，请重新登录',
+            icon: 'none'
+          });
+          return;
+        }
         
         // 构建请求参数
         const params = {
@@ -121,6 +146,7 @@ export default {
           type: this.tabs[this.currentTab].type
         };
         
+        console.log('获取收藏列表，参数:', params);
         uni.showLoading({ title: '加载中' });
         
         const res = await this.$api.user.getFavoriteList(params);
@@ -146,6 +172,11 @@ export default {
               if (match && match[1]) {
                 processedItem.itemId = match[1];
               }
+            }
+            
+            // 确保图片地址有效
+            if (!processedItem.itemCover) {
+              processedItem.itemCover = this.getDefaultImage(processedItem.itemType);
             }
             
             return processedItem;
@@ -175,6 +206,20 @@ export default {
         this.loading = false;
         uni.hideLoading();
         uni.stopPullDownRefresh();
+      }
+    },
+    
+    // 获取默认图片
+    getDefaultImage(itemType) {
+      switch (itemType) {
+        case 'course':
+          return '/static/images/default-course.jpg';
+        case 'lecture':
+          return '/static/images/default-lecture.jpg';
+        case 'teacher':
+          return '/static/images/default-teacher.jpg';
+        default:
+          return '/static/images/default.jpg';
       }
     },
     
@@ -356,6 +401,23 @@ export default {
       
       const date = new Date(timestamp);
       return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    },
+    
+    // 处理图片加载错误
+    handleImageError(index) {
+      if (index < 0 || index >= this.favoriteList.length) {
+        console.error('无效的索引:', index);
+        return;
+      }
+      
+      const item = this.favoriteList[index];
+      if (!item) {
+        console.error('索引对应的收藏项为空:', index);
+        return;
+      }
+      
+      console.log('图片加载错误, 索引:', index);
+      item.itemCover = this.getDefaultImage(item.itemType);
     }
   }
 }

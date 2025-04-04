@@ -113,8 +113,17 @@ export default {
       try {
         const userInfoStr = uni.getStorageSync('userInfo');
         if (userInfoStr) {
-          const userInfo = JSON.parse(userInfoStr);
-          this.fullPhoneNumber = userInfo.phoneNumber || '';
+          // 检查是否已经是对象，避免重复解析
+          let userInfo;
+          if (typeof userInfoStr === 'string') {
+            userInfo = JSON.parse(userInfoStr);
+          } else {
+            // 已经是对象
+            userInfo = userInfoStr;
+          }
+          
+          // 优先使用mobile字段，兼容phoneNumber字段
+          this.fullPhoneNumber = userInfo.mobile || userInfo.phoneNumber || '';
           
           // 处理显示用的手机号（脱敏）
           if (this.fullPhoneNumber && this.fullPhoneNumber.length > 7) {
@@ -363,11 +372,23 @@ export default {
             // 云端更新成功，再更新本地存储
             try {
               const userInfoStr = uni.getStorageSync('userInfo');
-              let userInfo = userInfoStr ? JSON.parse(userInfoStr) : {};
+              let userInfo;
+              
+              // 检查是否已经是对象，避免重复解析
+              if (typeof userInfoStr === 'string') {
+                userInfo = JSON.parse(userInfoStr);
+              } else if (userInfoStr && typeof userInfoStr === 'object') {
+                // 已经是对象
+                userInfo = userInfoStr;
+              } else {
+                // 没有用户信息或格式不正确，创建新对象
+                userInfo = {};
+              }
               
               // 更新完整手机号变量
               this.fullPhoneNumber = phoneNumber;
               userInfo.phoneNumber = phoneNumber;
+              userInfo.mobile = phoneNumber; // 同时保存mobile字段
               uni.setStorageSync('userInfo', JSON.stringify(userInfo));
               
               // 更新显示的手机号(脱敏处理)

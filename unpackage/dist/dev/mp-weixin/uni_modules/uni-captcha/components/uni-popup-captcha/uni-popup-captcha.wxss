@@ -1,0 +1,116 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+.data-v-aac61fb2:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+view.data-v-aac61fb2 {
+  display: flex;
+  flex-direction: column;
+}
+.popup-captcha.data-v-aac61fb2 {
+  display: flex;
+  max-width: 600px;
+  width: 600rpx;
+  padding-bottom: 0;
+  background-color: #FFF;
+  border-radius: 10px;
+  flex-direction: column;
+  position: relative;
+}
+.popup-captcha .content.data-v-aac61fb2 {
+  padding: 1.3em 0.8em;
+}
+.popup-captcha .title.data-v-aac61fb2 {
+  text-align: center;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+  font-weight: 400;
+  font-size: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #111;
+  margin-bottom: 15px;
+}
+.button-box.data-v-aac61fb2 {
+  height: 44px;
+  border-top: solid 1px #eee;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+}
+.button-box.data-v-aac61fb2, .btn.data-v-aac61fb2 {
+  height: 44px;
+  line-height: 44px;
+}
+.button-box .btn.data-v-aac61fb2 {
+  flex: 1;
+  margin: 1px;
+  text-align: center;
+}
+.button-box .confirm.data-v-aac61fb2 {
+  color: #007aff;
+  border-left: solid 1px #eee;
+}
+

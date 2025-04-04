@@ -4,8 +4,11 @@ const db = uniCloud.database();
 const favoriteCollection = db.collection('favorites');
 
 exports.main = async (event, context) => {
+  console.log('收到添加收藏请求:', event);
+  
   // 检查参数
   if (!event.userId || !event.itemId || !event.itemType) {
+    console.error('参数不完整:', event);
     return {
       code: -1,
       message: '参数不完整'
@@ -13,6 +16,9 @@ exports.main = async (event, context) => {
   }
   
   try {
+    // 记录用户ID，用于调试
+    console.log('用户ID(userId):', event.userId);
+    
     // 检查是否已经收藏
     const existingFavorite = await favoriteCollection.where({
       userId: event.userId,
@@ -20,7 +26,10 @@ exports.main = async (event, context) => {
       itemType: event.itemType
     }).get();
     
+    console.log('查询现有收藏结果:', existingFavorite);
+    
     if (existingFavorite.data && existingFavorite.data.length > 0) {
+      console.log('该内容已被收藏:', existingFavorite.data[0]);
       return {
         code: 0,
         message: '该内容已收藏',
@@ -31,7 +40,7 @@ exports.main = async (event, context) => {
     // 添加收藏
     const now = Date.now();
     const favoriteData = {
-      userId: event.userId,
+      userId: event.userId,  // 保持一致使用userId字段
       itemId: event.itemId,
       itemType: event.itemType,
       itemTitle: event.itemTitle || '',
@@ -41,9 +50,13 @@ exports.main = async (event, context) => {
       updateTime: now
     };
     
+    console.log('准备添加收藏数据:', favoriteData);
+    
     const res = await favoriteCollection.add(favoriteData);
+    console.log('添加收藏结果:', res);
     
     if (res && res.id) {
+      console.log('收藏成功, ID:', res.id);
       return {
         code: 0,
         message: '收藏成功',
@@ -53,6 +66,7 @@ exports.main = async (event, context) => {
         }
       }
     } else {
+      console.error('收藏失败: 未返回ID');
       return {
         code: -1,
         message: '收藏失败'

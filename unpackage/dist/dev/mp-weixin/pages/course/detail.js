@@ -1,6 +1,6 @@
 (global["webpackJsonp"] = global["webpackJsonp"] || []).push([["pages/course/detail"],{
 
-/***/ 122:
+/***/ 124:
 /*!*************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/main.js?{"page":"pages%2Fcourse%2Fdetail"} ***!
   \*************************************************************************************************************/
@@ -14,7 +14,7 @@ var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/inte
 __webpack_require__(/*! uni-pages */ 38);
 __webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
-var _detail = _interopRequireDefault(__webpack_require__(/*! ./pages/course/detail.vue */ 123));
+var _detail = _interopRequireDefault(__webpack_require__(/*! ./pages/course/detail.vue */ 125));
 // @ts-ignore
 wx.__webpack_require_UNI_MP_PLUGIN__ = __webpack_require__;
 createPage(_detail.default);
@@ -22,7 +22,7 @@ createPage(_detail.default);
 
 /***/ }),
 
-/***/ 123:
+/***/ 125:
 /*!******************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/course/detail.vue ***!
   \******************************************************************************************/
@@ -31,10 +31,10 @@ createPage(_detail.default);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _detail_vue_vue_type_template_id_5652f2c8___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./detail.vue?vue&type=template&id=5652f2c8& */ 124);
-/* harmony import */ var _detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./detail.vue?vue&type=script&lang=js& */ 126);
+/* harmony import */ var _detail_vue_vue_type_template_id_5652f2c8___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./detail.vue?vue&type=template&id=5652f2c8& */ 126);
+/* harmony import */ var _detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./detail.vue?vue&type=script&lang=js& */ 128);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./detail.vue?vue&type=style&index=0&lang=scss& */ 128);
+/* harmony import */ var _detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./detail.vue?vue&type=style&index=0&lang=scss& */ 130);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 44);
 
 var renderjs
@@ -63,7 +63,7 @@ component.options.__file = "pages/course/detail.vue"
 
 /***/ }),
 
-/***/ 124:
+/***/ 126:
 /*!*************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/course/detail.vue?vue&type=template&id=5652f2c8& ***!
   \*************************************************************************************************************************/
@@ -72,7 +72,7 @@ component.options.__file = "pages/course/detail.vue"
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_template_id_5652f2c8___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./detail.vue?vue&type=template&id=5652f2c8& */ 125);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_template_id_5652f2c8___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./detail.vue?vue&type=template&id=5652f2c8& */ 127);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_template_id_5652f2c8___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_template_id_5652f2c8___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
@@ -85,7 +85,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ 125:
+/***/ 127:
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/course/detail.vue?vue&type=template&id=5652f2c8& ***!
   \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -102,7 +102,7 @@ var components
 try {
   components = {
     favoriteButton: function () {
-      return __webpack_require__.e(/*! import() | components/favorite-button/favorite-button */ "components/favorite-button/favorite-button").then(__webpack_require__.bind(null, /*! @/components/favorite-button/favorite-button.vue */ 81))
+      return __webpack_require__.e(/*! import() | components/favorite-button/favorite-button */ "components/favorite-button/favorite-button").then(__webpack_require__.bind(null, /*! @/components/favorite-button/favorite-button.vue */ 83))
     },
   }
 } catch (e) {
@@ -151,7 +151,7 @@ render._withStripped = true
 
 /***/ }),
 
-/***/ 126:
+/***/ 128:
 /*!*******************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/course/detail.vue?vue&type=script&lang=js& ***!
   \*******************************************************************************************************************/
@@ -160,14 +160,14 @@ render._withStripped = true
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./detail.vue?vue&type=script&lang=js& */ 127);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./detail.vue?vue&type=script&lang=js& */ 129);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
-/***/ 127:
+/***/ 129:
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/course/detail.vue?vue&type=script&lang=js& ***!
   \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -187,7 +187,7 @@ var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/hel
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
 var FavoriteButton = function FavoriteButton() {
   __webpack_require__.e(/*! require.ensure | components/favorite-button/favorite-button */ "components/favorite-button/favorite-button").then((function () {
-    return resolve(__webpack_require__(/*! @/components/favorite-button/favorite-button.vue */ 81));
+    return resolve(__webpack_require__(/*! @/components/favorite-button/favorite-button.vue */ 83));
   }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
 };
 var _default = {
@@ -890,40 +890,158 @@ var _default = {
                 return _context4.abrupt("return");
               case 2:
                 _context4.prev = 2;
-                if (!(_this5.courseInfo.teacherAvatar.startsWith('/static') || _this5.courseInfo.teacherAvatar.startsWith('/'))) {
+                if (!(_this5.courseInfo.teacherAvatar.startsWith('http://') || _this5.courseInfo.teacherAvatar.startsWith('https://'))) {
                   _context4.next = 8;
                   break;
                 }
-                console.log('使用本地头像图片:', _this5.courseInfo.teacherAvatar);
-                // 如果是本地路径，直接使用
+                console.log('使用云存储URL作为教师头像:', _this5.courseInfo.teacherAvatar);
                 _this5.courseInfo.teacherAvatarUrl = _this5.courseInfo.teacherAvatar;
-                _context4.next = 13;
+                _context4.next = 19;
                 break;
               case 8:
+                if (!_this5.courseInfo.teacherAvatar.startsWith('/')) {
+                  _context4.next = 14;
+                  break;
+                }
+                // 已经是本地路径，但可能不是最终需要的头像
+                console.log('临时使用本地路径作为教师头像:', _this5.courseInfo.teacherAvatar);
+                _this5.courseInfo.teacherAvatarUrl = _this5.courseInfo.teacherAvatar;
+
+                // 如果有teacherName，尝试从数据库获取正确的头像
+                if (_this5.courseInfo.teacherName) {
+                  _this5.fetchTeacherAvatarFromDB(_this5.courseInfo.teacherName);
+                } else if (_this5.courseInfo.teacherId) {
+                  _this5.fetchTeacherAvatarByID(_this5.courseInfo.teacherId);
+                }
+                _context4.next = 19;
+                break;
+              case 14:
                 // 否则从云端获取
                 console.log('从云端获取头像图片:', _this5.courseInfo.teacherAvatar);
-                _context4.next = 11;
+                _context4.next = 17;
                 return _this5.$api.file.getImage(_this5.courseInfo.teacherAvatar);
-              case 11:
+              case 17:
                 avatarResult = _context4.sent;
                 if (avatarResult && avatarResult.data && avatarResult.data.url) {
                   _this5.courseInfo.teacherAvatarUrl = avatarResult.data.url;
                 }
-              case 13:
-                _context4.next = 19;
+              case 19:
+                _context4.next = 26;
                 break;
-              case 15:
-                _context4.prev = 15;
+              case 21:
+                _context4.prev = 21;
                 _context4.t0 = _context4["catch"](2);
                 console.error('加载教师头像失败:', _context4.t0);
-                // 加载失败时使用默认头像
+                // 加载失败时使用默认头像，并尝试从数据库获取
                 _this5.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
-              case 19:
+
+                // 如果有teacherName，尝试从数据库获取正确的头像
+                if (_this5.courseInfo.teacherName) {
+                  _this5.fetchTeacherAvatarFromDB(_this5.courseInfo.teacherName);
+                } else if (_this5.courseInfo.teacherId) {
+                  _this5.fetchTeacherAvatarByID(_this5.courseInfo.teacherId);
+                }
+              case 26:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, null, [[2, 15]]);
+        }, _callee4, null, [[2, 21]]);
+      }))();
+    },
+    // 从数据库获取教师头像
+    fetchTeacherAvatarFromDB: function fetchTeacherAvatarFromDB(teacherName) {
+      var _this6 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+        var nameForSearch, result, foundTeacher;
+        return _regenerator.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                if (teacherName) {
+                  _context5.next = 2;
+                  break;
+                }
+                return _context5.abrupt("return");
+              case 2:
+                _context5.prev = 2;
+                console.log('通过名称从数据库获取教师头像:', teacherName);
+
+                // 准备查询参数，去除可能的空格
+                nameForSearch = teacherName.trim(); // 调用API获取教师信息
+                _context5.next = 7;
+                return _this6.$api.teacher.getTeacherList({
+                  name: nameForSearch
+                });
+              case 7:
+                result = _context5.sent;
+                if (result && result.code === 0 && result.data && result.data.length > 0) {
+                  // 查找精确匹配的教师
+                  foundTeacher = result.data.find(function (item) {
+                    return item.name === nameForSearch;
+                  });
+                  if (foundTeacher && foundTeacher.avatar) {
+                    console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
+                    _this6.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
+                    _this6.$forceUpdate();
+                  }
+                }
+                _context5.next = 14;
+                break;
+              case 11:
+                _context5.prev = 11;
+                _context5.t0 = _context5["catch"](2);
+                console.error('通过名称获取教师头像失败:', _context5.t0);
+              case 14:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[2, 11]]);
+      }))();
+    },
+    // 通过ID从数据库获取教师头像
+    fetchTeacherAvatarByID: function fetchTeacherAvatarByID(teacherId) {
+      var _this7 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
+        var result;
+        return _regenerator.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                if (teacherId) {
+                  _context6.next = 2;
+                  break;
+                }
+                return _context6.abrupt("return");
+              case 2:
+                _context6.prev = 2;
+                console.log('通过ID从数据库获取教师头像:', teacherId);
+
+                // 调用API获取教师详情
+                _context6.next = 6;
+                return _this7.$api.teacher.getTeacherDetail({
+                  id: teacherId
+                });
+              case 6:
+                result = _context6.sent;
+                if (result && result.code === 0 && result.data && result.data.avatar) {
+                  console.log('从数据库获取到教师头像URL:', result.data.avatar);
+                  _this7.courseInfo.teacherAvatarUrl = result.data.avatar;
+                  _this7.$forceUpdate();
+                }
+                _context6.next = 13;
+                break;
+              case 10:
+                _context6.prev = 10;
+                _context6.t0 = _context6["catch"](2);
+                console.error('通过ID获取教师头像失败:', _context6.t0);
+              case 13:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, null, [[2, 10]]);
       }))();
     },
     // 格式化课程时间
@@ -940,42 +1058,99 @@ var _default = {
     },
     // 加载用户信息
     loadUserInfo: function loadUserInfo() {
+      var _this8 = this;
       console.log('加载用户信息');
+
+      // 检查uni-id-token是否存在
+      var token = uni.getStorageSync('uni_id_token');
+      console.log('uni-id-token:', token ? '存在' : '不存在');
 
       // 调试全局用户信息
       var globalUserInfo = getApp().globalData.userInfo;
       console.log('全局用户信息:', globalUserInfo);
       var userInfoStr = uni.getStorageSync('userInfo');
-      console.log('本地存储用户信息字符串:', userInfoStr ? '存在(长度:' + userInfoStr.length + ')' : '不存在');
+      console.log('本地存储用户信息字符串:', userInfoStr ? '存在' : '不存在');
+
+      // 尝试从本地存储获取用户信息
       if (userInfoStr) {
         try {
-          this.userInfo = JSON.parse(userInfoStr);
-          console.log('当前用户信息解析成功:', this.userInfo);
+          // 判断userInfoStr的类型，如果已经是对象，则直接使用，否则尝试JSON解析
+          this.userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+          console.log('从本地存储获取用户信息成功, 类型:', (0, _typeof2.default)(this.userInfo));
 
-          // 确保userInfo包含userId
-          if (!this.userInfo.userId && this.userInfo._id) {
-            console.log('用户信息中没有userId，使用_id代替:', this.userInfo._id);
-            this.userInfo.userId = this.userInfo._id;
+          // 检查并处理ID字段
+          if (this.userInfo) {
+            // 检查各种可能的ID字段
+            var userId = this.userInfo.userId || this.userInfo.uid || this.userInfo._id || this.userInfo.userInfo && this.userInfo.userInfo._id || this.userInfo.userInfo && this.userInfo.userInfo.uid;
+
+            // 如果找到了有效的ID，将其规范化保存到userId字段
+            if (userId) {
+              this.userInfo.userId = userId;
+              console.log('规范化用户ID:', userId);
+            } else {
+              console.warn('用户信息中没有找到有效的ID字段', this.userInfo);
+              console.log('用户信息对象包含的字段:', Object.keys(this.userInfo));
+
+              // 输出子属性
+              if (this.userInfo.userInfo) {
+                console.log('userInfo子对象包含的字段:', Object.keys(this.userInfo.userInfo));
+              }
+            }
           }
-          console.log('用户ID:', this.userInfo.userId);
         } catch (e) {
-          console.error('解析用户信息失败:', e);
-          this.userInfo = null;
+          console.error('从本地存储重新解析用户信息失败:', e);
+        }
+      }
 
-          // 尝试从全局状态恢复
-          if (globalUserInfo) {
-            console.log('从全局状态恢复用户信息');
-            this.userInfo = globalUserInfo;
+      // 如果没有从userInfo中获取到有效信息，尝试从token中获取
+      if (!this.userInfo || !this.userInfo.userId) {
+        if (token) {
+          console.log('尝试通过uni-id-token获取用户信息');
+
+          // 调用云函数获取当前用户信息
+          uniCloud.callFunction({
+            name: 'getUserInfoByToken',
+            success: function success(res) {
+              console.log('通过token获取用户信息结果:', res);
+              if (res.result && res.result.code === 0 && res.result.userInfo) {
+                _this8.userInfo = res.result.userInfo;
+                _this8.userInfo.userId = res.result.userInfo._id;
+                console.log('通过token成功获取用户信息:', _this8.userInfo);
+
+                // 更新本地存储
+                uni.setStorageSync('userInfo', _this8.userInfo);
+
+                // 重新检查预约状态
+                _this8.checkBookingStatus();
+              }
+            },
+            fail: function fail(err) {
+              console.error('通过token获取用户信息失败:', err);
+            }
+          });
+        }
+      }
+
+      // 如果本地存储没有，但全局变量有，则使用全局变量
+      if (!this.userInfo && globalUserInfo) {
+        this.userInfo = globalUserInfo;
+        console.log('从全局变量获取用户信息成功');
+
+        // 同样处理全局变量中的ID
+        if (this.userInfo) {
+          var _userId = this.userInfo.userId || this.userInfo.uid || this.userInfo._id || this.userInfo.userInfo && this.userInfo.userInfo._id || this.userInfo.userInfo && this.userInfo.userInfo.uid;
+          if (_userId) {
+            this.userInfo.userId = _userId;
+            console.log('规范化全局用户ID:', _userId);
           }
         }
-      } else {
-        console.log('本地存储中没有用户信息');
-        this.userInfo = globalUserInfo || null;
       }
 
       // 最终检查
-      if (this.userInfo) {
-        console.log('最终用户信息:', this.userInfo);
+      if (this.userInfo && this.userInfo.userId) {
+        console.log('最终用户信息有效，使用ID:', this.userInfo.userId);
+      } else if (this.userInfo) {
+        console.warn('有用户信息但无法确定用户ID');
       } else {
         console.log('用户未登录');
       }
@@ -985,13 +1160,24 @@ var _default = {
     },
     // 处理登录成功事件
     handleLoginSuccess: function handleLoginSuccess(userData) {
-      var _this6 = this;
+      var _this9 = this;
       console.log('收到登录成功事件，更新用户数据:', userData);
-      this.userInfo = userData;
+      if (userData) {
+        this.userInfo = userData;
+
+        // 规范化处理用户ID
+        var userId = userData.userId || userData.uid || userData._id || userData.userInfo && userData.userInfo._id || userData.userInfo && userData.userInfo.uid;
+        if (userId) {
+          this.userInfo.userId = userId;
+          console.log('登录成功后规范化用户ID:', userId);
+        } else {
+          console.warn('登录成功但无法确定用户ID，可能导致预约失败', userData);
+        }
+      }
 
       // 登录成功后重新检查预约状态
       setTimeout(function () {
-        _this6.checkBookingStatus();
+        _this9.checkBookingStatus();
       }, 500);
     },
     // 从本地缓存加载预约状态
@@ -1034,7 +1220,7 @@ var _default = {
     },
     // 保存预约状态到本地缓存
     saveBookingStatusToCache: function saveBookingStatusToCache(status) {
-      var _this7 = this;
+      var _this10 = this;
       try {
         if (this.courseId) {
           var debugMode = false; // 控制是否输出详细日志
@@ -1044,14 +1230,14 @@ var _default = {
           // 清除所有相关的缓存键，确保状态一致性
           var clearRelatedCaches = function clearRelatedCaches() {
             // 清除可能存在的过期状态
-            if (_this7.userInfo && _this7.userInfo.userId) {
-              var userKey = "booking_".concat(_this7.userInfo.userId, "_").concat(_this7.courseId);
+            if (_this10.userInfo && _this10.userInfo.userId) {
+              var userKey = "booking_".concat(_this10.userInfo.userId, "_").concat(_this10.courseId);
               uni.removeStorageSync(userKey);
               if (debugMode) console.log('已清除用户特定缓存');
             }
 
             // 清除课程通用缓存
-            var courseKey = "booking_course_".concat(_this7.courseId);
+            var courseKey = "booking_course_".concat(_this10.courseId);
             uni.removeStorageSync(courseKey);
             if (debugMode) console.log('已清除课程通用缓存');
           };
@@ -1087,10 +1273,10 @@ var _default = {
           // 确保下一帧渲染生效
           this.$nextTick(function () {
             // 再次确认状态已更新
-            if (_this7.hasBooked !== status) {
+            if (_this10.hasBooked !== status) {
               console.warn('状态更新失败，强制再次更新');
-              _this7.hasBooked = status;
-              _this7.$forceUpdate();
+              _this10.hasBooked = status;
+              _this10.$forceUpdate();
             }
           });
         }
@@ -1100,82 +1286,82 @@ var _default = {
     },
     // 检查是否已预约
     checkBookingStatus: function checkBookingStatus() {
-      var _this8 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+      var _this11 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
         var debugMode, key, cachedStatus, res, booked, allRes, activeBookings, allCancelled, db, dbRes;
-        return _regenerator.default.wrap(function _callee5$(_context5) {
+        return _regenerator.default.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 // 简化日志输出
                 debugMode = false; // 控制是否输出详细日志
-                if (debugMode) console.log('开始检查预约状态，当前用户信息:', _this8.userInfo);
+                if (debugMode) console.log('开始检查预约状态，当前用户信息:', _this11.userInfo);
 
                 // 检查本地缓存中是否有预约状态记录
-                if (_this8.userInfo && _this8.userInfo.userId && _this8.courseId) {
-                  key = "booking_".concat(_this8.userInfo.userId, "_").concat(_this8.courseId);
+                if (_this11.userInfo && _this11.userInfo.userId && _this11.courseId) {
+                  key = "booking_".concat(_this11.userInfo.userId, "_").concat(_this11.courseId);
                   cachedStatus = uni.getStorageSync(key);
                   if (cachedStatus === 'true') {
                     if (debugMode) console.log('从本地缓存确认预约状态: 已预约');
-                    _this8.hasBooked = true;
+                    _this11.hasBooked = true;
                     // 仍然继续查询云端状态来确认
                   }
                 }
-                if (!(!_this8.userInfo || !_this8.userInfo.userId || !_this8.courseId)) {
-                  _context5.next = 7;
+                if (!(!_this11.userInfo || !_this11.userInfo.userId || !_this11.courseId)) {
+                  _context7.next = 7;
                   break;
                 }
                 if (debugMode) console.log('用户未登录或缺少必要参数，设置为未预约状态');
-                _this8.hasBooked = false;
-                return _context5.abrupt("return", Promise.resolve(false));
+                _this11.hasBooked = false;
+                return _context7.abrupt("return", Promise.resolve(false));
               case 7:
-                _context5.prev = 7;
-                if (debugMode) console.log('检查预约状态，用户ID:', _this8.userInfo.userId, '课程ID:', _this8.courseId);
+                _context7.prev = 7;
+                if (debugMode) console.log('检查预约状态，用户ID:', _this11.userInfo.userId, '课程ID:', _this11.courseId);
 
                 // 首先尝试调用getBookings云函数
-                _context5.next = 11;
+                _context7.next = 11;
                 return uniCloud.callFunction({
                   name: 'getBookings',
                   data: {
-                    userId: _this8.userInfo.userId,
-                    courseId: _this8.courseId,
+                    userId: _this11.userInfo.userId,
+                    courseId: _this11.courseId,
                     // 包括所有未取消的状态
                     status: ['pending', 'confirmed', 'confirmed_unpaid']
                   }
                 });
               case 11:
-                res = _context5.sent;
+                res = _context7.sent;
                 if (debugMode) console.log('查询预约状态结果详情:', JSON.stringify(res.result));
 
                 // 判断是否预约过
                 booked = false;
                 if (!(res.result && res.result.success && res.result.data && res.result.data.length > 0)) {
-                  _context5.next = 19;
+                  _context7.next = 19;
                   break;
                 }
                 booked = true;
                 if (debugMode) console.log('用户已预约该课程，预约记录:', res.result.data[0]);
-                _context5.next = 56;
+                _context7.next = 56;
                 break;
               case 19:
                 if (debugMode) console.log('第一次查询未找到记录，尝试不带状态参数再次查询');
 
                 // 如果没有找到记录，尝试不带状态参数再次查询
-                _context5.prev = 20;
-                _context5.next = 23;
+                _context7.prev = 20;
+                _context7.next = 23;
                 return uniCloud.callFunction({
                   name: 'getBookings',
                   data: {
-                    userId: _this8.userInfo.userId,
-                    courseId: _this8.courseId
+                    userId: _this11.userInfo.userId,
+                    courseId: _this11.courseId
                     // 不指定状态，查询所有状态的预约
                   }
                 });
               case 23:
-                allRes = _context5.sent;
+                allRes = _context7.sent;
                 if (debugMode) console.log('第二次查询结果:', JSON.stringify(allRes.result));
                 if (!(allRes.result && allRes.result.success && allRes.result.data)) {
-                  _context5.next = 51;
+                  _context7.next = 51;
                   break;
                 }
                 // 只有在找到未取消的预约记录时才设置为已预约
@@ -1186,167 +1372,148 @@ var _default = {
                   return b.status === 'cancelled' || b.status === 'cancel';
                 });
                 if (!allCancelled) {
-                  _context5.next = 33;
+                  _context7.next = 33;
                   break;
                 }
                 if (debugMode) console.log('所有预约记录均为已取消状态，设置为未预约');
                 booked = false;
-                _context5.next = 51;
+                _context7.next = 51;
                 break;
               case 33:
                 if (!(activeBookings.length > 0)) {
-                  _context5.next = 38;
+                  _context7.next = 38;
                   break;
                 }
                 booked = true;
                 if (debugMode) console.log('找到未取消的预约:', activeBookings[0]);
-                _context5.next = 51;
+                _context7.next = 51;
                 break;
               case 38:
                 if (debugMode) console.log('云端没有找到有效预约记录');
 
                 // 如果仍然没有找到记录，再尝试使用常规数据库API查询
                 db = uniCloud.database();
-                _context5.prev = 40;
-                _context5.next = 43;
+                _context7.prev = 40;
+                _context7.next = 43;
                 return db.collection('bookings').where({
-                  courseId: _this8.courseId,
-                  userId: _this8.userInfo.userId,
+                  courseId: _this11.courseId,
+                  userId: _this11.userInfo.userId,
                   status: db.command.neq('cancelled')
                 }).limit(1).get();
               case 43:
-                dbRes = _context5.sent;
+                dbRes = _context7.sent;
                 if (debugMode) console.log('数据库直接查询结果:', dbRes);
                 if (dbRes && dbRes.data && dbRes.data.length > 0) {
                   booked = true;
                   if (debugMode) console.log('通过数据库API找到有效预约:', dbRes.data[0]);
                 }
-                _context5.next = 51;
+                _context7.next = 51;
                 break;
               case 48:
-                _context5.prev = 48;
-                _context5.t0 = _context5["catch"](40);
-                console.error('数据库查询失败:', _context5.t0);
+                _context7.prev = 48;
+                _context7.t0 = _context7["catch"](40);
+                console.error('数据库查询失败:', _context7.t0);
               case 51:
-                _context5.next = 56;
+                _context7.next = 56;
                 break;
               case 53:
-                _context5.prev = 53;
-                _context5.t1 = _context5["catch"](20);
-                console.error('第二次查询失败:', _context5.t1);
+                _context7.prev = 53;
+                _context7.t1 = _context7["catch"](20);
+                console.error('第二次查询失败:', _context7.t1);
               case 56:
                 // 如果查询到所有预约都已取消，则设置为未预约状态，无论本地缓存状态如何
                 if (booked === false) {
                   if (debugMode) console.log('云端确认用户没有有效预约，覆盖本地缓存状态');
-                  _this8.hasBooked = false;
+                  _this11.hasBooked = false;
                 }
                 // 如果查询失败但本地缓存认为已预约，仅在没有确认所有预约都已取消的情况下保留已预约状态
-                else if (!booked && _this8.hasBooked) {
+                else if (!booked && _this11.hasBooked) {
                   if (debugMode) console.log('云端查询失败但本地缓存显示已预约，保留已预约状态');
                   booked = true;
                 }
 
                 // 更新预约状态
                 if (debugMode) console.log('最终预约状态:', booked);
-                _this8.hasBooked = booked;
+                _this11.hasBooked = booked;
 
                 // 更新本地缓存
-                _this8.saveBookingStatusToCache(booked);
+                _this11.saveBookingStatusToCache(booked);
 
                 // 强制刷新视图
-                _this8.$forceUpdate();
-                return _context5.abrupt("return", Promise.resolve(booked));
+                _this11.$forceUpdate();
+                return _context7.abrupt("return", Promise.resolve(booked));
               case 64:
-                _context5.prev = 64;
-                _context5.t2 = _context5["catch"](7);
-                console.error('检查预约状态失败，详细错误:', _context5.t2);
+                _context7.prev = 64;
+                _context7.t2 = _context7["catch"](7);
+                console.error('检查预约状态失败，详细错误:', _context7.t2);
                 // 出错时保持当前状态不变
-                return _context5.abrupt("return", Promise.reject(_context5.t2));
+                return _context7.abrupt("return", Promise.reject(_context7.t2));
               case 68:
               case "end":
-                return _context5.stop();
+                return _context7.stop();
             }
           }
-        }, _callee5, null, [[7, 64], [20, 53], [40, 48]]);
+        }, _callee7, null, [[7, 64], [20, 53], [40, 48]]);
       }))();
     },
     // 预约课程
     bookCourse: function bookCourse() {
-      var _this9 = this;
+      var _this12 = this;
       console.log('点击预约课程按钮');
 
-      // 再次检查用户是否登录
-      if (!this.userInfo || !this.userInfo.userId) {
-        this.userInfo = null;
-
-        // 尝试从本地和全局重新加载用户信息
-        var userInfoStr = uni.getStorageSync('userInfo');
-        if (userInfoStr) {
-          try {
-            this.userInfo = JSON.parse(userInfoStr);
-            console.log('从本地存储重新获取用户信息:', this.userInfo);
-          } catch (e) {
-            console.error('从本地存储重新解析用户信息失败:', e);
-          }
-        }
-
-        // 如果本地存储没有，尝试从全局获取
-        if (!this.userInfo) {
-          var globalUserInfo = getApp().globalData.userInfo;
-          if (globalUserInfo) {
-            this.userInfo = globalUserInfo;
-            console.log('从全局状态获取用户信息:', this.userInfo);
-          }
-        }
-      }
-
       // 如果仍然未登录
-      if (!this.userInfo || !this.userInfo.userId) {
-        console.log('用户未登录，跳转到登录页面');
-        uni.showToast({
-          title: '请先登录',
-          icon: 'none'
-        });
-        setTimeout(function () {
-          // 跳转到登录页面，并设置重定向回当前页面
-          var currentUrl = "/pages/course/detail?id=".concat(_this9.courseId);
-          console.log('设置登录后重定向地址:', currentUrl);
-          uni.navigateTo({
-            url: "/pages/login/login?redirect=".concat(encodeURIComponent(currentUrl))
-          });
-        }, 1500);
+      if (!this.userInfo) {
+        console.log('未找到用户信息对象，用户未登录');
+        this.showLoginTip();
         return;
       }
+
+      // 检查用户信息中的各种可能的ID字段
+      var userId = this.userInfo.userId || this.userInfo.uid || this.userInfo._id || this.userInfo.userInfo && this.userInfo.userInfo._id || this.userInfo.userInfo && this.userInfo.userInfo.uid;
+      if (!userId) {
+        console.log('用户信息中没有有效的ID字段，无法预约课程', this.userInfo);
+        // 输出用户信息的所有键
+        console.log('用户信息对象包含的字段:', Object.keys(this.userInfo));
+        if (this.userInfo.userInfo) {
+          console.log('userInfo子对象包含的字段:', Object.keys(this.userInfo.userInfo));
+        }
+        this.showLoginTip();
+        return;
+      }
+
+      // 找到了有效的用户ID，储存起来
+      this.userInfo.userId = userId;
+      console.log('找到有效的用户ID:', userId);
 
       // 显示确认弹窗
       uni.showModal({
         title: '确认预约',
         content: "\u60A8\u786E\u5B9A\u8981\u9884\u7EA6\"".concat(this.courseInfo.title, "\"\u8BFE\u7A0B\u5417\uFF1F"),
         success: function () {
-          var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(res) {
-            return _regenerator.default.wrap(function _callee6$(_context6) {
+          var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8(res) {
+            return _regenerator.default.wrap(function _callee8$(_context8) {
               while (1) {
-                switch (_context6.prev = _context6.next) {
+                switch (_context8.prev = _context8.next) {
                   case 0:
                     if (!res.confirm) {
-                      _context6.next = 6;
+                      _context8.next = 6;
                       break;
                     }
                     console.log('用户确认预约');
                     // 用户点击确定
-                    _context6.next = 4;
-                    return _this9.submitBooking();
+                    _context8.next = 4;
+                    return _this12.submitBooking();
                   case 4:
-                    _context6.next = 7;
+                    _context8.next = 7;
                     break;
                   case 6:
                     console.log('用户取消预约');
                   case 7:
                   case "end":
-                    return _context6.stop();
+                    return _context8.stop();
                 }
               }
-            }, _callee6);
+            }, _callee8);
           }));
           function success(_x) {
             return _success.apply(this, arguments);
@@ -1357,77 +1524,98 @@ var _default = {
     },
     // 提交预约
     submitBooking: function submitBooking() {
-      var _this10 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
-        var res;
-        return _regenerator.default.wrap(function _callee7$(_context7) {
+      var _this13 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
+        var userId, userName, phoneNumber, res;
+        return _regenerator.default.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
                 console.log('开始提交预约请求');
                 uni.showLoading({
                   title: '预约中...'
                 });
-                _context7.prev = 2;
-                console.log('提交预约数据：用户ID:', _this10.userInfo.userId, '课程ID:', _this10.courseId);
+                _context9.prev = 2;
+                // 确保有有效的用户ID
+                userId = _this13.userInfo.userId || _this13.userInfo.uid || _this13.userInfo._id || _this13.userInfo.userInfo && _this13.userInfo.userInfo._id || _this13.userInfo.userInfo && _this13.userInfo.userInfo.uid;
+                if (userId) {
+                  _context9.next = 9;
+                  break;
+                }
+                console.error('无法确定用户ID，预约失败');
+                uni.hideLoading();
+                uni.showToast({
+                  title: '用户信息不完整，请重新登录',
+                  icon: 'none'
+                });
+                return _context9.abrupt("return");
+              case 9:
+                // 获取用户名称
+                userName = _this13.userInfo.nickName || _this13.userInfo.nickname || _this13.userInfo.username || _this13.userInfo.userInfo && _this13.userInfo.userInfo.nickname || '微信用户'; // 获取手机号
+                phoneNumber = _this13.userInfo.phoneNumber || _this13.userInfo.mobile || _this13.userInfo.userInfo && _this13.userInfo.userInfo.mobile || '';
+                console.log('提交预约数据：用户ID:', userId, '课程ID:', _this13.courseId);
+                console.log('用户名称:', userName, '手机号:', phoneNumber || '(未提供)');
+
+                // 输出更详细的用户信息调试
+                console.log('用户数据详情:', JSON.stringify(_this13.userInfo));
 
                 // 调用云函数预约课程
-                _context7.next = 6;
+                _context9.next = 16;
                 return uniCloud.callFunction({
                   name: 'bookCourse',
                   data: {
-                    userId: _this10.userInfo.userId,
-                    courseId: _this10.courseId,
-                    userName: _this10.userInfo.nickName || _this10.userInfo.username || '未知用户',
-                    phoneNumber: _this10.userInfo.phoneNumber || '',
+                    userId: userId,
+                    courseId: _this13.courseId,
+                    userName: userName,
+                    phoneNumber: phoneNumber,
                     remark: ''
                   }
                 });
-              case 6:
-                res = _context7.sent;
+              case 16:
+                res = _context9.sent;
                 console.log('预约结果详情:', JSON.stringify(res.result));
                 uni.hideLoading();
                 if (res.result && res.result.success) {
                   console.log('预约成功:', res.result);
 
                   // 强制立即设置预约状态
-                  _this10.hasBooked = true;
-                  console.log('预约成功，强制设置hasBooked =', _this10.hasBooked);
+                  _this13.hasBooked = true;
+                  console.log('预约成功，强制设置hasBooked =', _this13.hasBooked);
 
                   // 立即保存到本地缓存
-                  _this10.saveBookingStatusToCache(true);
+                  _this13.saveBookingStatusToCache(true);
                   uni.showToast({
                     title: '预约成功',
                     icon: 'success'
                   });
 
                   // 更新预约人数，确保UI显示正确
-                  if (_this10.courseInfo) {
-                    _this10.courseInfo.bookingCount = (_this10.courseInfo.bookingCount || 0) + 1;
-                    console.log('更新预约人数，bookingCount:', _this10.courseInfo.bookingCount);
+                  if (_this13.courseInfo) {
+                    _this13.courseInfo.bookingCount = (_this13.courseInfo.bookingCount || 0) + 1;
+                    console.log('更新预约人数，bookingCount:', _this13.courseInfo.bookingCount);
                   }
 
                   // 发送预约成功事件，用于其他页面更新
                   uni.$emit('booking:success', {
-                    courseId: _this10.courseId,
-                    userId: _this10.userInfo.userId
+                    courseId: _this13.courseId,
+                    userId: _this13.userInfo.userId
                   });
 
                   // 确保UI立即更新
-                  _this10.$forceUpdate();
+                  _this13.$forceUpdate();
 
                   // 确保下一帧渲染时状态正确
-                  _this10.$nextTick(function () {
+                  _this13.$nextTick(function () {
                     // 再次确认hasBooked状态
-                    _this10.hasBooked = true;
+                    _this13.hasBooked = true;
                     // 检查DOM是否正确反映了状态
-                    console.log('DOM更新后再次检查状态：hasBooked =', _this10.hasBooked);
+                    console.log('DOM更新后再次检查状态：hasBooked =', _this13.hasBooked);
                   });
 
                   // 强制刷新页面以显示预约成功状态
                   setTimeout(function () {
                     // 重新加载页面（彻底解决显示问题）
-                    _this10.reloadPage();
+                    _this13.reloadPage();
                   }, 1000);
                 } else {
                   console.error('预约失败:', res.result);
@@ -1436,28 +1624,28 @@ var _default = {
                     icon: 'none'
                   });
                 }
-                _context7.next = 17;
+                _context9.next = 27;
                 break;
-              case 12:
-                _context7.prev = 12;
-                _context7.t0 = _context7["catch"](2);
+              case 22:
+                _context9.prev = 22;
+                _context9.t0 = _context9["catch"](2);
                 uni.hideLoading();
-                console.error('预约课程过程中发生异常:', _context7.t0);
+                console.error('预约课程过程中发生异常:', _context9.t0);
                 uni.showToast({
                   title: '预约失败，请稍后重试',
                   icon: 'none'
                 });
-              case 17:
+              case 27:
               case "end":
-                return _context7.stop();
+                return _context9.stop();
             }
           }
-        }, _callee7, null, [[2, 12]]);
+        }, _callee9, null, [[2, 22]]);
       }))();
     },
     // 重新加载页面
     reloadPage: function reloadPage() {
-      var _this11 = this;
+      var _this14 = this;
       console.log('重新加载页面以确保显示预约状态');
 
       // 先缓存必要数据
@@ -1484,15 +1672,15 @@ var _default = {
           uni.hideLoading();
 
           // 失败时，再次尝试强制更新状态
-          _this11.hasBooked = hasBooked;
+          _this14.hasBooked = hasBooked;
 
           // 立即更新按钮显示
-          _this11.$forceUpdate();
+          _this14.$forceUpdate();
 
           // 确保下一帧更新
-          _this11.$nextTick(function () {
-            _this11.hasBooked = hasBooked;
-            console.log('强制更新状态完成, hasBooked =', _this11.hasBooked);
+          _this14.$nextTick(function () {
+            _this14.hasBooked = hasBooked;
+            console.log('强制更新状态完成, hasBooked =', _this14.hasBooked);
           });
         }
       });
@@ -1505,7 +1693,7 @@ var _default = {
     },
     // 联系老师
     contactTeacher: function contactTeacher() {
-      var _this12 = this;
+      var _this15 = this;
       // 获取教师电话号码
       var teacherPhone = this.courseInfo.teacherPhone || '';
       console.log('尝试联系老师，电话:', teacherPhone);
@@ -1527,7 +1715,7 @@ var _default = {
           content: '电话号码格式可能不正确，是否继续拨打？',
           success: function success(res) {
             if (res.confirm) {
-              _this12.makePhoneCall(teacherPhone);
+              _this15.makePhoneCall(teacherPhone);
             }
           }
         });
@@ -1655,7 +1843,7 @@ var _default = {
     },
     // 添加强制刷新预约状态的方法
     forceRefreshStatus: function forceRefreshStatus() {
-      var _this13 = this;
+      var _this16 = this;
       console.log('手动强制刷新预约状态');
 
       // 从缓存中删除状态，强制重新检查
@@ -1685,12 +1873,12 @@ var _default = {
       this.checkBookingStatus().then(function () {
         uni.hideLoading();
         uni.showToast({
-          title: _this13.hasBooked ? '您已预约此课程' : '您未预约此课程',
+          title: _this16.hasBooked ? '您已预约此课程' : '您未预约此课程',
           icon: 'none'
         });
 
         // 强制刷新页面
-        _this13.$forceUpdate();
+        _this16.$forceUpdate();
       }).catch(function () {
         uni.hideLoading();
         uni.showToast({
@@ -1701,7 +1889,7 @@ var _default = {
     },
     // 处理预约取消事件
     handleBookingCancelled: function handleBookingCancelled(data) {
-      var _this14 = this;
+      var _this17 = this;
       console.log('收到预约取消事件:', data);
 
       // 判断是否是当前课程的预约取消
@@ -1741,10 +1929,10 @@ var _default = {
 
         // 确保下一帧状态一致
         this.$nextTick(function () {
-          if (_this14.hasBooked !== false) {
+          if (_this17.hasBooked !== false) {
             console.warn('状态未正确更新，强制再次设置为未预约');
-            _this14.hasBooked = false;
-            _this14.$forceUpdate();
+            _this17.hasBooked = false;
+            _this17.$forceUpdate();
           }
         });
         uni.showToast({
@@ -1754,7 +1942,7 @@ var _default = {
 
         // 刷新课程详情，获取最新的报名人数
         setTimeout(function () {
-          _this14.getCourseDetail();
+          _this17.getCourseDetail();
         }, 1000);
       }
     },
@@ -1791,69 +1979,69 @@ var _default = {
     },
     // 检查课程收藏状态
     checkCourseFavoriteStatus: function checkCourseFavoriteStatus() {
-      var _this15 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
+      var _this18 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10() {
         var userInfo, userData, userId, res;
-        return _regenerator.default.wrap(function _callee8$(_context8) {
+        return _regenerator.default.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
-                if (_this15.courseId) {
-                  _context8.next = 2;
+                if (_this18.courseId) {
+                  _context10.next = 2;
                   break;
                 }
-                return _context8.abrupt("return");
+                return _context10.abrupt("return");
               case 2:
-                _context8.prev = 2;
+                _context10.prev = 2;
                 userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                  _context8.next = 6;
+                  _context10.next = 6;
                   break;
                 }
-                return _context8.abrupt("return");
+                return _context10.abrupt("return");
               case 6:
                 userData = JSON.parse(userInfo);
                 userId = userData.userId || userData._id;
                 if (userId) {
-                  _context8.next = 10;
+                  _context10.next = 10;
                   break;
                 }
-                return _context8.abrupt("return");
+                return _context10.abrupt("return");
               case 10:
-                console.log('检查课程收藏状态, courseId:', _this15.courseId);
+                console.log('检查课程收藏状态, courseId:', _this18.courseId);
 
                 // 调用API检查是否已收藏
-                _context8.next = 13;
-                return _this15.$api.user.checkFavorite({
+                _context10.next = 13;
+                return _this18.$api.user.checkFavorite({
                   userId: userId,
                   itemType: 'course',
-                  itemId: _this15.courseId
+                  itemId: _this18.courseId
                 });
               case 13:
-                res = _context8.sent;
+                res = _context10.sent;
                 if (res && res.code === 0 && res.data) {
                   console.log('课程已被收藏，更新按钮状态');
 
                   // 获取收藏按钮组件实例并更新状态
-                  _this15.$nextTick(function () {
-                    var favoriteBtn = _this15.$refs.favoriteBtn;
+                  _this18.$nextTick(function () {
+                    var favoriteBtn = _this18.$refs.favoriteBtn;
                     if (favoriteBtn) {
                       favoriteBtn.updateFavoriteStatus(true, res.data._id);
                     }
                   });
                 }
-                _context8.next = 20;
+                _context10.next = 20;
                 break;
               case 17:
-                _context8.prev = 17;
-                _context8.t0 = _context8["catch"](2);
-                console.error('检查课程收藏状态失败:', _context8.t0);
+                _context10.prev = 17;
+                _context10.t0 = _context10["catch"](2);
+                console.error('检查课程收藏状态失败:', _context10.t0);
               case 20:
               case "end":
-                return _context8.stop();
+                return _context10.stop();
             }
           }
-        }, _callee8, null, [[2, 17]]);
+        }, _callee10, null, [[2, 17]]);
       }))();
     },
     // 获取状态栏高度
@@ -1960,34 +2148,34 @@ var _default = {
     },
     // 检查教师收藏状态
     checkTeacherFavoriteStatus: function checkTeacherFavoriteStatus(teacherId) {
-      var _this16 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
+      var _this19 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee11() {
         var userInfo, userData, userId, checkData, res;
-        return _regenerator.default.wrap(function _callee9$(_context9) {
+        return _regenerator.default.wrap(function _callee11$(_context11) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context11.prev = _context11.next) {
               case 0:
                 if (teacherId) {
-                  _context9.next = 2;
+                  _context11.next = 2;
                   break;
                 }
-                return _context9.abrupt("return", false);
+                return _context11.abrupt("return", false);
               case 2:
-                _context9.prev = 2;
+                _context11.prev = 2;
                 userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                  _context9.next = 6;
+                  _context11.next = 6;
                   break;
                 }
-                return _context9.abrupt("return", false);
+                return _context11.abrupt("return", false);
               case 6:
                 userData = JSON.parse(userInfo);
                 userId = userData.userId || userData._id;
                 if (userId) {
-                  _context9.next = 10;
+                  _context11.next = 10;
                   break;
                 }
-                return _context9.abrupt("return", false);
+                return _context11.abrupt("return", false);
               case 10:
                 // 构建检查参数
                 checkData = {
@@ -1995,34 +2183,51 @@ var _default = {
                   itemType: 'teacher',
                   itemId: teacherId
                 }; // 调用API检查是否已收藏
-                _context9.next = 13;
-                return _this16.$api.user.checkFavorite(checkData);
+                _context11.next = 13;
+                return _this19.$api.user.checkFavorite(checkData);
               case 13:
-                res = _context9.sent;
+                res = _context11.sent;
                 if (!(res && res.code === 0 && res.data)) {
-                  _context9.next = 19;
+                  _context11.next = 19;
                   break;
                 }
                 console.log('教师已被收藏');
-                return _context9.abrupt("return", true);
+                return _context11.abrupt("return", true);
               case 19:
                 console.log('教师未被收藏');
-                return _context9.abrupt("return", false);
+                return _context11.abrupt("return", false);
               case 21:
-                _context9.next = 27;
+                _context11.next = 27;
                 break;
               case 23:
-                _context9.prev = 23;
-                _context9.t0 = _context9["catch"](2);
-                console.error('检查教师收藏状态失败:', _context9.t0);
-                return _context9.abrupt("return", false);
+                _context11.prev = 23;
+                _context11.t0 = _context11["catch"](2);
+                console.error('检查教师收藏状态失败:', _context11.t0);
+                return _context11.abrupt("return", false);
               case 27:
               case "end":
-                return _context9.stop();
+                return _context11.stop();
             }
           }
-        }, _callee9, null, [[2, 23]]);
+        }, _callee11, null, [[2, 23]]);
       }))();
+    },
+    // 添加一个显示登录提示的方法
+    showLoginTip: function showLoginTip() {
+      var _this20 = this;
+      console.log('用户未登录，跳转到登录页面');
+      uni.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      setTimeout(function () {
+        // 跳转到登录页面，并设置重定向回当前页面
+        var currentUrl = "/pages/course/detail?id=".concat(_this20.courseId);
+        console.log('设置登录后重定向地址:', currentUrl);
+        uni.navigateTo({
+          url: "/pages/login/login?redirect=".concat(encodeURIComponent(currentUrl))
+        });
+      }, 1500);
     }
   }
 };
@@ -2031,7 +2236,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 128:
+/***/ 130:
 /*!****************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/course/detail.vue?vue&type=style&index=0&lang=scss& ***!
   \****************************************************************************************************************************/
@@ -2040,14 +2245,14 @@ exports.default = _default;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./detail.vue?vue&type=style&index=0&lang=scss& */ 129);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./detail.vue?vue&type=style&index=0&lang=scss& */ 131);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_detail_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
-/***/ 129:
+/***/ 131:
 /*!********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/course/detail.vue?vue&type=style&index=0&lang=scss& ***!
   \********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -2060,5 +2265,5 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ })
 
-},[[122,"common/runtime","common/vendor"]]]);
+},[[124,"common/runtime","common/vendor"]]]);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/course/detail.js.map
