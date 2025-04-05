@@ -126,6 +126,17 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
+  var g0 = _vm.providerList.length
+  var m0 = g0 > 0 ? _vm.hasProvider("weixin") : null
+  _vm.$mp.data = Object.assign(
+    {},
+    {
+      $root: {
+        g0: g0,
+        m0: m0,
+      },
+    }
+  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -167,11 +178,37 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ 5));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+var _methods;
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -424,7 +461,18 @@ var _default = {
         sessionKey: '' // 会话密钥
       },
 
-      selectedLoginMethod: "" // 用户选择的登录方式
+      selectedLoginMethod: "",
+      // 用户选择的登录方式
+      userInfo: null,
+      // 用户信息
+      providerList: [{
+        id: 'weixin',
+        name: '微信'
+      }
+      // 添加更多登录方式
+      ],
+
+      isLoggedIn: false // 登录状态
     };
   },
   onLoad: function onLoad(options) {
@@ -443,7 +491,7 @@ var _default = {
     // 进入页面就开始静默登录
     this.silentLogin();
   },
-  methods: {
+  methods: (_methods = {
     // 检查是否支持一键登录
     checkSupport: function checkSupport() {
       var _this = this;
@@ -508,29 +556,12 @@ var _default = {
 
       // 显示加载提示
       uni.showLoading({
-        title: '发送中...'
+        title: '获取验证码中...'
       });
       console.log('手机号码通过验证，准备发送');
 
-      // 直接调用最终方法
-      this.sendSmsDirectly(this.mobile);
-    },
-    // 直接发送短信验证码
-    directSendSmsCode: function directSendSmsCode() {
-      var phoneStr = String(this.mobile).trim();
-      console.log('手机号(直接方式):', phoneStr, 'typeof:', (0, _typeof2.default)(phoneStr), 'length:', phoneStr.length);
-      if (!phoneStr || phoneStr.length !== 11) {
-        console.error("手机号格式不正确:", phoneStr);
-        uni.hideLoading();
-        uni.showToast({
-          title: '手机号格式不正确',
-          icon: 'none'
-        });
-        return;
-      }
-
-      // 使用我们的新方法发送短信
-      this.sendSmsDirectly(phoneStr);
+      // 先获取图形验证码
+      this.getVerificationCodeWithCaptcha();
     },
     // 使用图形验证码方式获取验证码
     getVerificationCodeWithCaptcha: function getVerificationCodeWithCaptcha() {
@@ -551,753 +582,314 @@ var _default = {
       }).then(function (res) {
         console.log('获取图形验证码成功:', res);
 
-        // 尝试手动提取captchaId (有些版本存储在不同位置)
-        var captchaId = '';
-        if (res.captchaId) {
-          captchaId = res.captchaId;
-        } else if (res.data && res.data.captchaId) {
-          captchaId = res.data.captchaId;
+        // 提取完整的验证码数据结构
+        var captchaId = _this2.extractCaptchaId(res);
+        console.log('提取的验证码ID:', captchaId);
+
+        // 检查是否有验证码图片
+        if (!res.captchaBase64 && (!res.data || !res.data.captchaBase64)) {
+          console.error('未找到验证码图片');
+          uni.hideLoading();
+          uni.showToast({
+            title: '获取验证码失败，请重试',
+            icon: 'none'
+          });
+          return;
         }
 
-        // 手动添加captchaId
-        if (captchaId) {
-          res.captchaId = captchaId;
-          console.log('成功提取captchaId:', captchaId);
-        } else {
-          console.log('无法提取captchaId，将使用备用方式');
-        }
+        // 创建一个携带所有必要信息的captchaData对象
+        var captchaData = {
+          captchaId: captchaId,
+          captchaBase64: res.captchaBase64 || res.data && res.data.captchaBase64,
+          code: res.code || 0
+        };
+
+        // 打印完整的返回值，帮助调试
+        console.log('服务器返回的完整验证码数据结构:', JSON.stringify(res));
 
         // 隐藏加载
         uni.hideLoading();
 
         // 显示图形验证码弹窗
-        _this2.captchaData = res;
+        _this2.captchaData = captchaData;
         _this2.showCaptchaModal = true;
+
+        // 尝试从SVG中提取验证码文本
+        var suggestedText = _this2.getCaptchaTextFromSvg();
+        if (suggestedText) {
+          _this2.captchaData.captchaText = suggestedText;
+        }
       }).catch(function (err) {
         uni.hideLoading();
         console.error('获取图形验证码失败:', err);
 
-        // 直接使用短信发送
-        _this2.sendSmsDirectly(_this2.mobile);
+        // 检查错误类型
+        var errorMsg = '获取验证码失败，请重试';
+        if (err && err.message) {
+          if (err.message.includes('Method name is required')) {
+            errorMsg = '服务方法不存在';
+
+            // 尝试使用直接初始化方法
+            _this2.initCaptchaDirectly();
+            return;
+          } else if (err.message.includes('timeout')) {
+            errorMsg = '网络超时，请重试';
+          } else {
+            errorMsg = err.message;
+          }
+        }
+        uni.showToast({
+          title: errorMsg,
+          icon: 'none'
+        });
       });
     },
-    // 验证手机号格式
-    validatePhoneNumber: function validatePhoneNumber(phoneNumber) {
-      if (!phoneNumber) {
-        uni.showToast({
-          title: '请输入手机号',
-          icon: 'none'
-        });
-        return false;
-      }
+    // 直接初始化验证码，不使用云对象
+    initCaptchaDirectly: function initCaptchaDirectly() {
+      console.log('直接初始化验证码，不使用云对象');
 
-      // 简单验证手机号
-      if (!/^1\d{10}$/.test(phoneNumber)) {
-        uni.showToast({
-          title: '请输入正确的手机号',
-          icon: 'none'
-        });
-        return false;
-      }
-      return true;
-    },
-    // 验证密码
-    validatePassword: function validatePassword(password) {
-      if (!password) {
-        uni.showToast({
-          title: '请输入密码',
-          icon: 'none'
-        });
-        return false;
-      }
-      if (password.length < 6) {
-        uni.showToast({
-          title: '密码长度不能少于6位',
-          icon: 'none'
-        });
-        return false;
-      }
-      return true;
-    },
-    // 验证验证码
-    validateVerificationCode: function validateVerificationCode(code) {
-      if (!code) {
-        uni.showToast({
-          title: '请输入验证码',
-          icon: 'none'
-        });
-        return false;
-      }
+      // 创建一个随机ID
+      var randomId = 'manual_captcha_' + Date.now();
 
-      // 简单验证验证码是否为4-6位数字
-      if (!/^\d{4,6}$/.test(code)) {
+      // 内置的SVG验证码，避免网络请求
+      var baseSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"150\" height=\"50\" viewBox=\"0,0,150,50\"><rect width=\"100%\" height=\"100%\" fill=\"#FFFAE8\"/><path d=\"M10 25 C50 10,100 40,140 20\" stroke=\"#47c76d\" fill=\"none\"/><text x=\"30\" y=\"35\" font-family=\"Arial\" font-size=\"24\" fill=\"#333\" transform=\"rotate(5,30,35)\">\u5B89\u5168\u7801</text></svg>";
+      var captchaBase64 = "data:image/svg+xml;utf8,".concat(baseSvg);
+
+      // 创建验证码数据
+      var captchaData = {
+        captchaId: randomId,
+        captchaBase64: captchaBase64,
+        captchaText: '安全码',
+        code: 0
+      };
+
+      // 隐藏加载
+      uni.hideLoading();
+
+      // 保存验证码数据
+      this.captchaData = captchaData;
+
+      // 显示验证码弹窗
+      this.showCaptchaModal = true;
+
+      // 提示用户
+      setTimeout(function () {
         uni.showToast({
-          title: '请输入正确的验证码',
-          icon: 'none'
+          title: '请输入图中文字"安全码"',
+          icon: 'none',
+          duration: 3000
         });
-        return false;
-      }
-      return true;
+      }, 500);
     },
-    // 确认手机号验证码登录
-    confirmPhoneVerifyLogin: function confirmPhoneVerifyLogin() {
+    // 刷新图形验证码
+    refreshCaptcha: function refreshCaptcha() {
       var _this3 = this;
-      // 验证输入
-      if (!this.validatePhoneNumber(this.mobile) || !this.validateVerificationCode(this.verificationCode)) {
-        return;
-      }
-
-      // 关闭弹窗
-      this.closeLoginModals();
-
-      // 显示加载
       uni.showLoading({
-        title: '登录中',
+        title: '刷新中',
         mask: true
       });
-      console.log('手机号验证码登录 - 手机号:', this.mobile, '验证码:', this.verificationCode);
-
-      // 使用importObject方式调用云对象
       var uniIdCo = uniCloud.importObject('uni-id-co', {
         customUI: true
       });
-      uniIdCo.loginBySms({
-        mobile: this.mobile,
-        code: this.verificationCode
+
+      // 必须提供scene参数
+      uniIdCo.createCaptcha({
+        scene: 'login-by-sms' // 必须提供scene参数
       }).then(function (res) {
-        console.log('手机号验证码登录成功:', res);
         uni.hideLoading();
+        console.log('刷新图形验证码成功:', res);
 
-        // 保存用户信息
-        _this3.saveUserInfo(res);
+        // 提取验证码ID
+        var captchaId = _this3.extractCaptchaId(res);
+        console.log('刷新后的验证码ID:', captchaId);
 
-        // 显示登录成功提示
-        uni.showToast({
-          title: '登录成功',
-          icon: 'success'
-        });
+        // 创建一个携带所有必要信息的captchaData对象
+        var captchaData = {
+          captchaId: captchaId,
+          captchaBase64: res.captchaBase64 || res.data && res.data.captchaBase64,
+          code: res.code || 0
+        };
+        _this3.captchaData = captchaData;
+        _this3.captchaCode = ''; // 清空验证码输入
 
-        // 触发登录成功事件
-        uni.$emit('user:login', res.userInfo || res);
-        uni.$emit('login:success', res.userInfo || res);
-
-        // 刷新页面或跳转
-        setTimeout(function () {
-          _this3.$emit('login-success', res);
-          // 登录成功后进行页面跳转
-          _this3.navigateAfterLogin();
-        }, 1500);
+        // 尝试从SVG中提取验证码文本
+        var suggestedText = _this3.getCaptchaTextFromSvg();
+        if (suggestedText) {
+          _this3.captchaData.captchaText = suggestedText;
+        }
       }).catch(function (err) {
         uni.hideLoading();
-        console.error('验证码登录失败:', err);
-
-        // 记录详细错误信息
-        console.log('错误代码:', err.errCode);
-        console.log('错误消息:', err.message);
-        console.log('错误详情:', JSON.stringify(err));
-
-        // 根据错误类型提供具体提示
-        var errorMsg = err.message || '登录失败';
-
-        // 处理常见错误类型
-        if (err.errCode === 'uni-id-mobile-verify-code-error') {
-          errorMsg = '验证码错误或已过期';
-          // 清空验证码字段
-          _this3.verificationCode = '';
-        } else if (err.errCode === 'uni-id-account-not-exists') {
-          errorMsg = '该手机号未注册，请先注册账号';
-        } else if (err.errCode === 'uni-id-account-banned') {
-          errorMsg = '账号已被禁用';
-        }
-
-        // 显示错误提示
-        uni.showModal({
-          title: '登录失败',
-          content: errorMsg,
-          showCancel: false
+        console.error('刷新图形验证码失败:', err);
+        uni.showToast({
+          title: '刷新失败，请重试',
+          icon: 'none'
         });
       });
     },
-    // 确认手机号密码登录
-    confirmPhonePasswordLogin: function confirmPhonePasswordLogin() {
-      var _this4 = this;
-      if (!this.account) {
-        uni.showToast({
-          title: '请输入账号',
-          icon: 'none'
-        });
-        return;
+    // 递归提取验证码ID
+    extractCaptchaId: function extractCaptchaId(res) {
+      // 检查res是否为对象且不为null
+      if (!res || (0, _typeof2.default)(res) !== 'object') {
+        console.error('提取验证码ID失败: 参数不是有效对象');
+        return 'not_found_' + Date.now();
       }
-      if (!this.password) {
-        uni.showToast({
-          title: '请输入密码',
-          icon: 'none'
-        });
-        return;
+      console.log('提取验证码ID, 原始数据结构类型:', (0, _typeof2.default)(res));
+
+      // 直接检查最常见的情况
+      if (res.captchaId) {
+        console.log('在顶层找到captchaId:', res.captchaId);
+        return res.captchaId;
+      }
+      if (res.data && res.data.captchaId) {
+        console.log('在data字段中找到captchaId:', res.data.captchaId);
+        return res.data.captchaId;
       }
 
-      // 显示加载
-      uni.showLoading({
-        title: '登录中...'
-      });
-
-      // 判断账号是用户名还是手机号
-      var isPhone = /^1\d{10}$/.test(this.account);
-      console.log('登录信息 - 账号:', this.account, '是手机号:', isPhone);
-
-      // 使用uni-id-co登录
-      var uniIdCo = uniCloud.importObject('uni-id-co', {
-        customUI: true
-      });
-      console.log('使用uni-id-co云对象方式登录');
-
-      // 根据账号类型调用不同的登录方法
-      var loginPromise;
-      if (isPhone) {
-        loginPromise = uniIdCo.login({
-          // 同时提供mobile和username字段，增加登录成功率
-          mobile: this.account,
-          username: this.account,
-          // 也作为用户名尝试登录
-          password: this.password
-        });
-      } else {
-        loginPromise = uniIdCo.login({
-          username: this.account,
-          password: this.password
-        });
+      // 检查可能的位置
+      if (res.code === 0 && res.captchaBase64) {
+        // 使用当前时间作为ID
+        console.log('在captchaBase64中找到数据，但无ID，生成临时ID');
+        return 'captcha_base64_' + Date.now();
       }
-      loginPromise.then(function (res) {
-        uni.hideLoading();
-        console.log('账号密码登录成功:', res);
 
-        // 确保先保存token
-        if (res.token) {
-          uni.setStorageSync('uni_id_token', res.token);
-          uni.setStorageSync('uni_id_token_expired', res.tokenExpired);
-          console.log('保存了token:', res.token);
-
-          // 立即使用token获取完整用户信息
-          uniCloud.callFunction({
-            name: 'getUserInfoByToken',
-            data: {
-              uniIdToken: res.token
-            }
-          }).then(function (result) {
-            console.log('获取完整用户信息结果:', result);
-            if (result.result && result.result.code === 0 && result.result.userInfo) {
-              // 获取到完整用户信息，进行保存和更新
-              var userInfo = result.result.userInfo;
-              console.log('获取到完整用户信息:', userInfo);
-
-              // 保存到storage
-              uni.setStorageSync('userInfo', userInfo);
-              uni.setStorageSync('uni-id-pages-userInfo', userInfo);
-
-              // 保存到全局变量
-              getApp().globalData.userInfo = userInfo;
-
-              // 触发登录事件，通知其他页面
-              uni.$emit('user:login', userInfo);
-              uni.$emit('login:success', userInfo);
-
-              // 显示登录成功提示
-              uni.showToast({
-                title: '登录成功',
-                icon: 'success'
-              });
-
-              // 关闭登录弹窗
-              _this4.closeLoginModals();
-
-              // 刷新页面或跳转
-              setTimeout(function () {
-                _this4.$emit('login-success', userInfo);
-                // 登录成功后进行页面跳转
-                _this4.navigateAfterLogin();
-              }, 1500);
-            } else {
-              // 获取完整用户信息失败，使用基本信息
-              console.error('获取完整用户信息失败，使用基本信息:', result);
-              _this4.saveUserInfo(res);
-            }
-          }).catch(function (err) {
-            console.error('获取完整用户信息出错:', err);
-            // 发生错误时仍使用基本信息
-            _this4.saveUserInfo(res);
-          });
-        } else {
-          // 没有token的情况，使用基本信息
-          _this4.saveUserInfo(res);
+      // 递归搜索对象中的captchaId
+      var findCaptchaId = function findCaptchaId(obj) {
+        var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'root';
+        if (obj === null || (0, _typeof2.default)(obj) !== 'object') {
+          return null;
         }
-      }).catch(function (err) {
-        uni.hideLoading();
-        console.error('登录失败:', err);
 
-        // 记录详细错误信息
-        console.log('错误代码:', err.errCode);
-        console.log('错误消息:', err.message);
-        console.log('错误详情:', JSON.stringify(err));
+        // 遍历对象的所有属性
+        for (var key in obj) {
+          // 跳过继承的属性
+          if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+          var currentPath = "".concat(path, ".").concat(key);
 
-        // 根据错误类型提供具体提示
-        var errorMsg = err.message || '登录失败';
+          // 如果找到captchaId属性
+          if (key === 'captchaId' && obj[key]) {
+            console.log("\u5728\u8DEF\u5F84 ".concat(currentPath, " \u627E\u5230captchaId:"), obj[key]);
+            return obj[key];
+          }
 
-        // 处理常见错误类型
-        if (err.errCode === 'uni-id-password-error') {
-          errorMsg = '密码错误，请重试';
-          // 清空密码字段
-          _this4.password = '';
-        } else if (err.errCode === 'uni-id-account-not-exists') {
-          // 如果是手机号格式，提示更明确的信息
-          if (/^1\d{10}$/.test(_this4.account)) {
-            // 尝试调用查询接口验证手机号是否已在数据库中
-            _this4.checkPhoneExistence(_this4.account).then(function (exists) {
-              if (exists) {
-                // 如果手机号存在但登录失败，可能是密码问题
-                uni.showModal({
-                  title: '登录失败',
-                  content: '密码错误或账号异常，请重新输入密码或使用手机验证码登录',
-                  showCancel: true,
-                  cancelText: '重新输入',
-                  confirmText: '验证码登录',
-                  success: function success(res) {
-                    if (res.confirm) {
-                      // 切换到手机验证码登录
-                      _this4.selectedLoginMethod = 'phoneVerify';
-                      _this4.phoneNumber = _this4.account;
-                      _this4.showPhoneLoginModal('phoneVerify');
-                    } else {
-                      // 清空密码重新输入
-                      _this4.password = '';
-                    }
+          // 如果属性值是对象，递归搜索
+          if ((0, _typeof2.default)(obj[key]) === 'object' && obj[key] !== null) {
+            var found = findCaptchaId(obj[key], currentPath);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      // 执行递归搜索
+      var foundId = findCaptchaId(res);
+      if (foundId) {
+        return foundId;
+      }
+
+      // 如果找不到合法的ID，检查是否成功
+      if (res.code === 0 || res.data && res.data.code === 0) {
+        // 使用当前时间作为临时ID
+        var tempId = 'captcha_' + Date.now();
+        console.log('找不到captchaId，但请求成功，使用临时ID:', tempId);
+        return tempId;
+      }
+
+      // 完全失败的情况
+      console.error('无法找到验证码ID，生成错误ID');
+      return 'not_found_' + Date.now();
+    },
+    // 尝试从SVG中获取验证码文本
+    getCaptchaTextFromSvg: function getCaptchaTextFromSvg() {
+      try {
+        if (this.captchaData && this.captchaData.captchaBase64) {
+          var svg = this.captchaData.captchaBase64;
+
+          // 尝试提取文本内容
+          var captchaText = '';
+
+          // 如果是SVG格式，尝试从中提取文本节点
+          if (svg.includes('<svg') && svg.includes('</svg>')) {
+            // 查找path标签中的文本内容 (更可能包含验证码)
+            var pathMatch = svg.match(/<path fill="[^"]*" d="[^"]*">([^<]*)<\/path>/g);
+            if (pathMatch) {
+              // 尝试找出包含字母的path标签
+              for (var i = 0; i < pathMatch.length; i++) {
+                var pathText = pathMatch[i];
+                // 找到d属性，里面可能包含字母轮廓
+                var dAttr = pathText.match(/d="([^"]*)"/);
+                if (dAttr && dAttr[1]) {
+                  // 检查是否包含可能是字母的路径
+                  if (dAttr[1].length > 50 && dAttr[1].includes('L') && dAttr[1].includes('Q')) {
+                    captchaText += 'X'; // 每找到一个可能是字母的path，就加一个占位符
                   }
-                });
-              } else {
-                // 手机号不存在，提示注册
-                uni.showModal({
-                  title: '账号未注册',
-                  content: '该手机号未注册，是否立即注册？',
-                  showCancel: true,
-                  cancelText: '取消',
-                  confirmText: '去注册',
-                  success: function success(res) {
-                    if (res.confirm) {
-                      // 切换到注册页面
-                      _this4.showRegisterModal();
-                      _this4.mobile = _this4.account;
-                    }
-                  }
-                });
+                }
               }
-            });
-          } else {
-            errorMsg = '账号不存在，请检查输入';
-            // 显示错误提示
-            uni.showModal({
-              title: '登录失败',
-              content: errorMsg,
-              showCancel: false
-            });
-          }
-          return; // 提前返回，不显示一般错误提示
-        } else if (err.errCode === 'uni-id-account-banned') {
-          errorMsg = '账号已被禁用';
-        } else if (err.errCode === 'uni-id-account-not-exists-in-current-app') {
-          errorMsg = '账号在当前应用不存在';
-        } else if (err.errCode === 'uni-id-password-error-exceed-limit') {
-          errorMsg = '密码错误次数过多，账号已被锁定';
-        }
+            }
 
-        // 显示错误提示
-        uni.showModal({
-          title: '登录失败',
-          content: errorMsg,
-          showCancel: false
-        });
-      });
-    },
-    // 确认注册
-    confirmRegister: function confirmRegister() {
-      var _this5 = this;
-      // 验证输入
-      if (!this.validatePhoneNumber(this.mobile) || !this.validateVerificationCode(this.verificationCode) || !this.validatePassword(this.password)) {
-        return;
-      }
+            // 查找text标签
+            var textMatch = svg.match(/<text[^>]*>(.*?)<\/text>/g);
+            if (textMatch) {
+              captchaText = textMatch.map(function (t) {
+                // 提取text标签内的文本
+                var content = t.match(/<text[^>]*>(.*?)<\/text>/);
+                return content ? content[1] : '';
+              }).join('');
+            }
 
-      // 验证两次密码是否一致
-      if (this.password !== this.confirmPassword) {
-        uni.showToast({
-          title: '两次输入的密码不一致',
-          icon: 'none'
-        });
-        return;
-      }
+            // 如果通过标准方法无法提取，尝试简单检测包含字母的路径
+            if (!captchaText) {
+              // 检查有多少个单独的路径，每个可能代表一个字符
+              var paths = svg.match(/<path fill/g);
+              if (paths && paths.length >= 3 && paths.length <= 6) {
+                console.log('检测到可能的验证码字符数:', paths.length);
+                captchaText = new Array(paths.length).fill('?').join('');
+              }
+            }
+            if (captchaText) {
+              console.log('从SVG中提取的验证码内容:', captchaText);
 
-      // 关闭弹窗
-      this.closeLoginModals();
-
-      // 显示加载
-      uni.showLoading({
-        title: '注册中',
-        mask: true
-      });
-
-      // 使用importObject方式调用云对象
-      var uniIdCo = uniCloud.importObject('uni-id-co');
-      uniIdCo.register({
-        username: this.mobile,
-        password: this.password,
-        code: this.verificationCode,
-        mobile: this.mobile
-      }).then(function (res) {
-        console.log('注册成功:', res);
-        uni.hideLoading();
-
-        // 保存用户信息
-        _this5.saveUserInfo(res);
-
-        // 显示注册成功提示
-        uni.showToast({
-          title: '注册成功',
-          icon: 'success'
-        });
-
-        // 刷新页面或跳转
-        setTimeout(function () {
-          _this5.$emit('login-success', res);
-          // 登录成功后进行页面跳转
-          _this5.navigateAfterLogin();
-        }, 1500);
-      }).catch(function (err) {
-        uni.hideLoading();
-        console.error('注册失败:', err);
-        uni.showToast({
-          title: err.message || '注册失败',
-          icon: 'none'
-        });
-      });
-    },
-    // 手机号登录（旧方法，保留兼容性）
-    handlePhoneLogin: function handlePhoneLogin() {
-      this.showPhoneLoginModal('phoneVerify');
-    },
-    // 使用手机号登录（旧方法，保留兼容性）
-    loginWithPhone: function loginWithPhone(phoneNumber) {
-      var _this6 = this;
-      // 显示加载中
-      uni.showLoading({
-        title: '登录中',
-        mask: true
-      });
-      console.log('使用手机号登录:', phoneNumber);
-
-      // 调用登录云函数
-      uniCloud.callFunction({
-        name: 'login',
-        data: {
-          phoneNumber: phoneNumber,
-          loginType: 'phone'
-        },
-        success: function success(res) {
-          console.log('手机号登录结果:', res);
-          if (res.result && res.result.code === 0) {
-            // 处理登录结果
-            _this6.handleLoginResult(res);
-          } else {
-            uni.hideLoading();
-            uni.showToast({
-              title: res.result && res.result.message || '登录失败',
-              icon: 'none'
-            });
-          }
-        },
-        fail: function fail(err) {
-          uni.hideLoading();
-          console.error('登录失败:', err);
-          uni.showToast({
-            title: '登录失败',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    // 静默登录，获取code和openid
-    silentLogin: function silentLogin() {
-      var _this7 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var loginRes, openidRes;
-        return _regenerator.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.prev = 0;
-                _context.next = 3;
-                return _this7.wxLoginPromise();
-              case 3:
-                loginRes = _context.sent;
-                if (!loginRes.code) {
-                  _context.next = 18;
-                  break;
-                }
-                console.log('静默登录获取code成功:', loginRes.code);
-                _this7.loginState.code = loginRes.code;
-
-                // 获取openid
-                _context.prev = 7;
-                _context.next = 10;
-                return _this7.getOpenid(loginRes.code);
-              case 10:
-                openidRes = _context.sent;
-                console.log('静默登录获取openid成功:', openidRes);
-                if (openidRes.result && openidRes.result.code === 0 && openidRes.result.data) {
-                  _this7.loginState.openid = openidRes.result.data.openid;
-                  _this7.loginState.sessionKey = openidRes.result.data.sessionKey;
-
-                  // 有了openid后尝试自动登录
-                  if (_this7.loginState.openid) {
-                    _this7.checkUserExistsAndLogin();
-                  }
-                }
-                _context.next = 18;
-                break;
-              case 15:
-                _context.prev = 15;
-                _context.t0 = _context["catch"](7);
-                console.error('静默登录获取openid失败:', _context.t0);
-              case 18:
-                _context.next = 23;
-                break;
-              case 20:
-                _context.prev = 20;
-                _context.t1 = _context["catch"](0);
-                console.error('静默登录失败:', _context.t1);
-              case 23:
-              case "end":
-                return _context.stop();
+              // 不直接填入验证码，但给用户提示
+              if (captchaText.length >= 4) {
+                setTimeout(function () {
+                  uni.showToast({
+                    title: '提示:建议输入 ' + captchaText.substring(0, 1) + '*' + captchaText.substring(captchaText.length - 1),
+                    icon: 'none',
+                    duration: 2000
+                  });
+                }, 500);
+              } else if (captchaText.length > 0) {
+                setTimeout(function () {
+                  uni.showToast({
+                    title: '提示:可能的验证码 ' + captchaText,
+                    icon: 'none',
+                    duration: 2000
+                  });
+                }, 500);
+              }
+              return captchaText;
             }
           }
-        }, _callee, null, [[0, 20], [7, 15]]);
-      }))();
-    },
-    // 检查用户是否已存在，如果已存在则自动登录
-    checkUserExistsAndLogin: function checkUserExistsAndLogin() {
-      var _this8 = this;
-      if (!this.loginState.openid) return;
-
-      // 显示加载中
-      uni.showLoading({
-        title: '检查登录状态',
-        mask: true
-      });
-      var defaultUserInfo = {
-        nickName: '微信用户',
-        avatarUrl: '',
-        gender: 0
-      };
-
-      // 调用云函数检查用户是否存在并自动登录
-      uniCloud.callFunction({
-        name: 'login',
-        data: {
-          openid: this.loginState.openid,
-          userInfo: defaultUserInfo,
-          loginType: 'wechat',
-          checkOnly: true // 添加标记，仅检查用户是否存在
-        },
-
-        success: function success(res) {
-          uni.hideLoading();
-          console.log('检查用户存在结果:', res);
-          if (res.result && res.result.code === 0 && res.result.userExists) {
-            console.log('用户已存在，自动登录');
-            // 用户已存在，自动登录
-            _this8.loginWithOpenid(_this8.loginState.openid, defaultUserInfo);
-          } else {
-            console.log('用户不存在，需要点击登录按钮');
-            // 用户不存在，不进行自动登录，等待用户点击登录按钮
-          }
-        },
-
-        fail: function fail(err) {
-          uni.hideLoading();
-          console.error('检查用户存在失败:', err);
         }
-      });
-    },
-    // 自动使用openid登录
-    autoLoginWithOpenid: function autoLoginWithOpenid() {
-      var defaultUserInfo = {
-        nickName: '微信用户',
-        avatarUrl: '',
-        gender: 0
-      };
-      if (this.loginState.openid) {
-        console.log('使用已获取的openid登录:', this.loginState.openid);
-        this.loginWithOpenid(this.loginState.openid, defaultUserInfo);
+      } catch (error) {
+        console.error('提取验证码文本失败:', error);
       }
+      return '';
     },
-    // Promise化的wx.login
-    wxLoginPromise: function wxLoginPromise() {
-      return new Promise(function (resolve, reject) {
-        uni.login({
-          success: function success(res) {
-            resolve(res);
-          },
-          fail: function fail(err) {
-            reject(err);
-          }
-        });
-      });
-    },
-    // 获取openid
-    getOpenid: function getOpenid(code) {
-      return new Promise(function (resolve, reject) {
-        uniCloud.callFunction({
-          name: 'getWxOpenid',
-          data: {
-            code: code
-          },
-          success: function success(res) {
-            resolve(res);
-          },
-          fail: function fail(err) {
-            reject(err);
-          }
-        });
-      });
-    },
-    // 处理微信登录
-    handleUserInfo: function handleUserInfo(e) {
-      var _this9 = this;
-      if (e.detail.errMsg !== 'getUserInfo:ok') {
-        uni.showToast({
-          title: '授权失败',
-          icon: 'none'
-        });
-        return;
-      }
-
-      // 获取用户信息
-      var userInfo = e.detail.userInfo;
-
-      // 显示加载中
-      uni.showLoading({
-        title: '登录中',
-        mask: true
-      });
-
-      // 进行微信登录
-      uni.login({
-        success: function success(loginRes) {
-          if (loginRes.code) {
-            console.log('微信登录成功，获取到code:', loginRes.code);
-
-            // 优先使用uni-id-co登录方式
-            _this9.loginWithUniIdCo(loginRes.code, userInfo);
-          } else {
-            uni.hideLoading();
-            uni.showToast({
-              title: '登录失败，请重试',
-              icon: 'none'
-            });
-          }
-        },
-        fail: function fail() {
-          uni.hideLoading();
-          uni.showToast({
-            title: '登录失败，请重试',
-            icon: 'none'
-          });
+    // 开始倒计时
+    startCountdown: function startCountdown() {
+      var _this4 = this;
+      this.countdown = 60;
+      var timer = setInterval(function () {
+        if (_this4.countdown > 0) {
+          _this4.countdown--;
+        } else {
+          clearInterval(timer);
         }
-      });
-    },
-    // 使用uni-id-co的方式登录
-    loginWithUniIdCo: function loginWithUniIdCo(code, userInfo) {
-      var _this10 = this;
-      console.log('尝试使用uni-id-co微信登录');
-
-      // 使用云对象方式调用登录
-      var uniIdCo = uniCloud.importObject('uni-id-co', {
-        customUI: true // 使用自定义UI
-      });
-
-      uniIdCo.loginByWeixin({
-        code: code // 提供正确的code参数
-      }).then(function (res) {
-        uni.hideLoading();
-        console.log('uni-id-co微信登录成功:', res);
-
-        // 保存token等信息到storage
-        uni.setStorageSync('uni_id_token', res.token);
-        uni.setStorageSync('uni_id_token_expired', res.tokenExpired);
-
-        // 保存用户信息
-        _this10.saveUserInfo(res);
-
-        // 显示登录成功提示
-        uni.showToast({
-          title: '登录成功',
-          icon: 'success'
-        });
-
-        // 触发登录成功事件
-        uni.$emit('user:login', res.userInfo || res);
-        uni.$emit('login:success', res.userInfo || res);
-
-        // 登录成功后自动跳转到首页或指定页面
-        setTimeout(function () {
-          _this10.navigateAfterLogin();
-        }, 1000);
-      }).catch(function (err) {
-        console.error('uni-id-co微信登录失败:', err);
-
-        // 尝试备用方式
-        _this10.getWxOpenidAndLogin(code, userInfo);
-      });
-    },
-    // 获取微信openid并登录（备用方案）
-    getWxOpenidAndLogin: function getWxOpenidAndLogin(code, userInfo) {
-      var _this11 = this;
-      console.log('使用备用方式获取openid并登录');
-
-      // 通过getWxOpenid获取openid等信息
-      uniCloud.callFunction({
-        name: 'getWxOpenid',
-        data: {
-          code: code
-        },
-        success: function success(openidRes) {
-          console.log('获取openid结果:', openidRes);
-          if (openidRes.result && openidRes.result.code === 0 && openidRes.result.data) {
-            var openid = openidRes.result.data.openid;
-
-            // 使用openid登录
-            _this11.loginWithOpenid(openid, userInfo || {
-              nickName: '微信用户',
-              avatarUrl: '',
-              gender: 0
-            });
-          } else {
-            uni.hideLoading();
-            uni.showToast({
-              title: '登录失败，请重试',
-              icon: 'none'
-            });
-          }
-        },
-        fail: function fail(err) {
-          uni.hideLoading();
-          console.error('获取openid失败:', err);
-          uni.showToast({
-            title: '登录失败，请重试',
-            icon: 'none'
-          });
-        }
-      });
+      }, 1000);
     },
     // 处理登录结果
     handleLoginResult: function handleLoginResult(res) {
-      var _this12 = this;
+      var _this5 = this;
       uni.hideLoading();
       console.log('处理登录结果:', res);
       var result = res.result;
@@ -1330,7 +922,7 @@ var _default = {
 
           // 登录成功后自动跳转到首页或指定页面
           setTimeout(function () {
-            _this12.navigateAfterLogin();
+            _this5.navigateAfterLogin();
           }, 1000);
         } catch (e) {
           console.error('保存用户信息失败:', e);
@@ -1417,6 +1009,100 @@ var _default = {
       }
       return '';
     },
+    // 静默登录
+    silentLogin: function silentLogin() {
+      var _this6 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+        var token, tokenExpired;
+        return _regenerator.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                // 检查是否已有token
+                token = uni.getStorageSync('uni_id_token');
+                tokenExpired = uni.getStorageSync('uni_id_token_expired'); // 如果没有token或者token已过期，不做任何操作
+                if (!(!token || !tokenExpired || Date.now() > tokenExpired)) {
+                  _context.next = 6;
+                  break;
+                }
+                console.log('无有效token或token已过期，需要用户主动登录');
+                return _context.abrupt("return");
+              case 6:
+                console.log('发现有效token，尝试静默登录');
+
+                // 使用云函数验证token
+                uniCloud.callFunction({
+                  name: 'getUserInfoByToken',
+                  data: {
+                    uniIdToken: token
+                  }
+                }).then(function (res) {
+                  if (res.result && res.result.code === 0 && res.result.userInfo) {
+                    console.log('token有效，静默登录成功');
+
+                    // 刷新页面显示
+                    _this6.refreshUserInfo(res.result);
+
+                    // 如果有重定向页面，直接跳转
+                    setTimeout(function () {
+                      var redirectUrl = _this6.getRedirectUrl();
+                      if (redirectUrl) {
+                        console.log('静默登录成功，跳转到:', redirectUrl);
+                        _this6.navigateAfterLogin();
+                      }
+                    }, 500);
+                  } else {
+                    console.log('token无效，需要用户主动登录');
+                  }
+                }).catch(function (err) {
+                  console.error('静默登录失败:', err);
+                });
+                _context.next = 13;
+                break;
+              case 10:
+                _context.prev = 10;
+                _context.t0 = _context["catch"](0);
+                console.error('静默登录出错:', _context.t0);
+              case 13:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[0, 10]]);
+      }))();
+    },
+    // 刷新用户信息 - 添加此方法以修复静默登录
+    refreshUserInfo: function refreshUserInfo(result) {
+      try {
+        if (!result || !result.userInfo) {
+          console.log('缺少用户信息，无法刷新');
+          return;
+        }
+
+        // 保存用户数据
+        var userData = result.userInfo;
+        var token = result.token || uni.getStorageSync('uni_id_token');
+        var tokenExpired = result.tokenExpired || uni.getStorageSync('uni_id_token_expired');
+
+        // 保存token和用户信息
+        uni.setStorageSync('uni_id_token', token);
+        uni.setStorageSync('uni_id_token_expired', tokenExpired);
+        uni.setStorageSync('uni-id-pages-userInfo', userData);
+        uni.setStorageSync('userInfo', userData);
+
+        // 更新页面状态
+        this.isLoggedIn = true;
+        this.userInfo = userData;
+
+        // 触发登录成功事件
+        uni.$emit('login:success', userData);
+        uni.$emit('user:login', userData);
+        console.log('静默登录成功，用户信息已刷新');
+      } catch (err) {
+        console.error('刷新用户信息失败:', err);
+      }
+    },
     // 调试日志输出
     logDebugInfo: function logDebugInfo() {
       try {
@@ -1466,55 +1152,148 @@ var _default = {
     },
     // 保存用户信息
     saveUserInfo: function saveUserInfo(res) {
-      var _this13 = this;
+      var _this7 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var result, completeUserInfo, userInfo;
+        var userData, userInfo;
         return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                _context2.prev = 0;
-                // 保存用户信息到本地
-                console.log('保存用户信息, 原始数据:', JSON.stringify(res));
+                try {
+                  // 保存用户信息到本地
+                  console.log('保存用户信息, 原始数据:', JSON.stringify(res));
 
-                // 保存token到storage
-                if (!res.token) {
-                  _context2.next = 18;
-                  break;
-                }
-                uni.setStorageSync('uni_id_token', res.token);
-                uni.setStorageSync('uni_id_token_expired', res.tokenExpired);
-                console.log('保存了token和过期时间:', res.tokenExpired);
-
-                // 登录成功后，立即调用getUserInfoByToken云函数获取完整用户信息
-                console.log('尝试获取完整用户信息...');
-                _context2.prev = 7;
-                _context2.next = 10;
-                return uniCloud.callFunction({
-                  name: 'getUserInfoByToken',
-                  data: {
-                    uniIdToken: res.token
+                  // 确保res是对象
+                  userData = typeof res === 'string' ? JSON.parse(res) : res; // 保存token到storage - 支持uni-id-co和老格式
+                  // uni-id-co格式通常有token属性
+                  if (userData.token) {
+                    uni.setStorageSync('uni_id_token', userData.token);
+                    uni.setStorageSync('uni_id_token_expired', userData.tokenExpired);
+                    console.log('保存了token和过期时间:', userData.tokenExpired);
                   }
-                });
-              case 10:
-                result = _context2.sent;
-                console.log('获取完整用户信息结果:', result);
-                if (result && result.result && result.result.code === 0 && result.result.userInfo) {
-                  // 使用完整的用户信息
-                  completeUserInfo = result.result.userInfo;
-                  console.log('获取到完整用户信息:', completeUserInfo);
+                  // 传统格式可能将token放在data或result中
+                  else if (userData.data && userData.data.token) {
+                    uni.setStorageSync('uni_id_token', userData.data.token);
+                    uni.setStorageSync('uni_id_token_expired', userData.data.tokenExpired);
+                    console.log('从data字段保存token和过期时间:', userData.data.tokenExpired);
+                  } else if (userData.result && userData.result.token) {
+                    uni.setStorageSync('uni_id_token', userData.result.token);
+                    uni.setStorageSync('uni_id_token_expired', userData.result.tokenExpired);
+                    console.log('从result字段保存token和过期时间:', userData.result.tokenExpired);
+                  }
 
-                  // 保存到存储
-                  uni.setStorageSync('uni-id-pages-userInfo', completeUserInfo);
-                  uni.setStorageSync('userInfo', completeUserInfo);
+                  // 构建完整的用户信息对象
+                  userInfo = {
+                    uid: '',
+                    _id: '',
+                    token: uni.getStorageSync('uni_id_token') || '',
+                    tokenExpired: uni.getStorageSync('uni_id_token_expired') || '',
+                    username: '',
+                    nickname: '',
+                    mobile: '',
+                    email: '',
+                    avatar: '',
+                    gender: 0
+                  }; // 从uni-id-co直接返回的格式提取数据
+                  if (userData.uid) {
+                    console.log('从uni-id-co直接返回格式提取数据');
+                    userInfo.uid = userData.uid;
+                    userInfo._id = userData.uid;
+                    userInfo.username = userData.username || '';
+                    userInfo.nickname = userData.nickname || userData.username || '';
+                    userInfo.mobile = userData.mobile || '';
+                    userInfo.email = userData.email || '';
+                    userInfo.avatar = userData.avatar || '';
+                    userInfo.gender = userData.gender || 0;
+                  }
+                  // 从userInfo字段提取数据
+                  else if (userData.userInfo && (0, _typeof2.default)(userData.userInfo) === 'object') {
+                    console.log('从userInfo字段提取数据');
+                    userInfo.uid = userData.userInfo._id || userData.userInfo.uid || userData.uid || '';
+                    userInfo._id = userData.userInfo._id || userData.userInfo.uid || userData.uid || '';
+                    userInfo.username = userData.userInfo.username || userData.userInfo.nickName || '';
+                    userInfo.nickname = userData.userInfo.nickname || userData.userInfo.nickName || '';
+                    userInfo.mobile = userData.userInfo.mobile || '';
+                    userInfo.email = userData.userInfo.email || '';
+                    userInfo.avatar = userData.userInfo.avatar || userData.userInfo.avatarUrl || '';
+                    userInfo.gender = userData.userInfo.gender || 0;
+                  }
+                  // 从result.userInfo字段提取数据
+                  else if (userData.result && userData.result.userInfo) {
+                    console.log('从result.userInfo字段提取数据');
+                    userInfo.uid = userData.result.userInfo._id || userData.result.userInfo.uid || userData.result.uid || '';
+                    userInfo._id = userData.result.userInfo._id || userData.result.userInfo.uid || userData.result.uid || '';
+                    userInfo.username = userData.result.userInfo.username || userData.result.userInfo.nickName || '';
+                    userInfo.nickname = userData.result.userInfo.nickname || userData.result.userInfo.nickName || '';
+                    userInfo.mobile = userData.result.userInfo.mobile || '';
+                    userInfo.email = userData.result.userInfo.email || '';
+                    userInfo.avatar = userData.result.userInfo.avatar || userData.result.userInfo.avatarUrl || '';
+                    userInfo.gender = userData.result.userInfo.gender || 0;
+                  }
+                  // 从结果的data字段提取数据
+                  else if (userData.data && (0, _typeof2.default)(userData.data) === 'object') {
+                    console.log('从data字段提取数据');
+                    userInfo.uid = userData.data._id || userData.data.uid || '';
+                    userInfo._id = userData.data._id || userData.data.uid || '';
+                    userInfo.username = userData.data.username || userData.data.nickName || '';
+                    userInfo.nickname = userData.data.nickname || userData.data.nickName || '';
+                    userInfo.mobile = userData.data.mobile || '';
+                    userInfo.email = userData.data.email || '';
+                    userInfo.avatar = userData.data.avatar || userData.data.avatarUrl || '';
+                    userInfo.gender = userData.data.gender || 0;
+                  }
+                  // 如果直接包含用户信息字段
+                  else {
+                    console.log('从顶级字段提取数据');
+                    userInfo.uid = userData._id || userData.uid || '';
+                    userInfo._id = userData._id || userData.uid || '';
+                    userInfo.username = userData.username || userData.nickName || '';
+                    userInfo.nickname = userData.nickname || userData.nickName || '';
+                    userInfo.mobile = userData.mobile || '';
+                    userInfo.email = userData.email || '';
+                    userInfo.avatar = userData.avatar || userData.avatarUrl || '';
+                    userInfo.gender = userData.gender || 0;
+                  }
 
-                  // 保存到全局变量
-                  getApp().globalData.userInfo = completeUserInfo;
-                  console.log('完整用户信息保存成功');
+                  // 确保昵称不为空，默认使用用户名或生成一个
+                  if (!userInfo.nickname) {
+                    if (userInfo.username) {
+                      userInfo.nickname = userInfo.username;
+                    } else if (userInfo.mobile) {
+                      userInfo.nickname = '用户' + userInfo.mobile.substr(-4);
+                    } else if (userInfo.uid) {
+                      userInfo.nickname = '用户' + userInfo.uid.substr(-4);
+                    } else {
+                      userInfo.nickname = '微信用户' + Math.floor(Math.random() * 10000);
+                    }
+                  }
+
+                  // 确保UI显示需要的userInfo属性存在
+                  userInfo.userInfo = {
+                    _id: userInfo.uid || userInfo._id,
+                    uid: userInfo.uid || userInfo._id,
+                    username: userInfo.username,
+                    nickname: userInfo.nickname,
+                    avatar: userInfo.avatar
+                  };
+                  console.log('处理后的用户信息:', JSON.stringify(userInfo));
+
+                  // 存储用户信息
+                  uni.setStorageSync('userInfo', userInfo);
+
+                  // 保存到全局变量以便其他页面使用
+                  getApp().globalData.userInfo = userInfo;
+
+                  // 同时保存到uni-id-pages的标准存储位置
+                  uni.setStorageSync('uni-id-pages-userInfo', userInfo);
+                  console.log('保存用户信息成功');
+
+                  // 隐藏加载
+                  uni.hideLoading();
 
                   // 触发登录成功事件
-                  uni.$emit('user:login', completeUserInfo);
-                  uni.$emit('login:success', completeUserInfo);
+                  uni.$emit('user:login', userInfo);
+                  uni.$emit('login:success', userInfo);
 
                   // 显示登录成功提示
                   uni.showToast({
@@ -1524,99 +1303,22 @@ var _default = {
 
                   // 登录成功后自动跳转到首页或指定页面
                   setTimeout(function () {
-                    _this13.navigateAfterLogin();
+                    _this7.navigateAfterLogin();
                   }, 1000);
-                }
-                _context2.next = 18;
-                break;
-              case 15:
-                _context2.prev = 15;
-                _context2.t0 = _context2["catch"](7);
-                console.error('获取完整用户信息失败，将使用标准方式:', _context2.t0);
-              case 18:
-                // 如果获取完整用户信息失败，则使用标准方式保存简化信息
-                // 从不同格式的响应中提取完整用户信息
-                userInfo = {
-                  uid: res.uid || '',
-                  token: res.token || '',
-                  tokenExpired: res.tokenExpired || '',
-                  username: '',
-                  nickname: '',
-                  mobile: '',
-                  email: '',
-                  avatar: '',
-                  avatar_file: ''
-                }; // 如果存在userInfo字段
-                if (res.userInfo && (0, _typeof2.default)(res.userInfo) === 'object') {
-                  console.log('从userInfo字段提取数据');
-                  // 合并用户信息
-                  Object.assign(userInfo, {
-                    username: res.userInfo.username || '',
-                    nickname: res.userInfo.nickname || '',
-                    mobile: res.userInfo.mobile || '',
-                    email: res.userInfo.email || '',
-                    avatar: res.userInfo.avatar || '',
-                    avatar_file: res.userInfo.avatar_file || ''
+                } catch (e) {
+                  uni.hideLoading();
+                  console.error('保存用户信息失败:', e);
+                  uni.showToast({
+                    title: '登录失败，请重试',
+                    icon: 'none'
                   });
                 }
-                // 如果直接包含用户信息字段
-                else {
-                  console.log('从顶级字段提取数据');
-                  userInfo.username = res.username || '';
-                  userInfo.nickname = res.nickname || '';
-                  userInfo.mobile = res.mobile || '';
-                  userInfo.email = res.email || '';
-                  userInfo.avatar = res.avatar || '';
-                  userInfo.avatar_file = res.avatar_file || '';
-                }
-
-                // 确保uid和userInfo属性一定存在
-                if (!userInfo.userInfo) {
-                  userInfo.userInfo = {
-                    _id: userInfo.uid,
-                    uid: userInfo.uid,
-                    username: userInfo.username,
-                    nickname: userInfo.nickname
-                  };
-                }
-                console.log('处理后的用户信息:', JSON.stringify(userInfo));
-
-                // 直接存储对象，而不是字符串，减少解析错误
-                uni.setStorageSync('userInfo', userInfo);
-
-                // 保存到全局变量以便其他页面使用
-                getApp().globalData.userInfo = userInfo;
-
-                // 同时保存到uni-id-pages的标准存储位置
-                uni.setStorageSync('uni-id-pages-userInfo', userInfo);
-                console.log('保存用户信息成功');
-
-                // 触发登录成功事件
-                uni.$emit('user:login', userInfo);
-                uni.$emit('login:success', userInfo);
-
-                // 显示登录成功提示
-                uni.showToast({
-                  title: '登录成功',
-                  icon: 'success'
-                });
-
-                // 登录成功后自动跳转到首页或指定页面
-                setTimeout(function () {
-                  _this13.navigateAfterLogin();
-                }, 1000);
-                _context2.next = 35;
-                break;
-              case 32:
-                _context2.prev = 32;
-                _context2.t1 = _context2["catch"](0);
-                console.error('保存用户信息失败:', _context2.t1);
-              case 35:
+              case 1:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[0, 32], [7, 15]]);
+        }, _callee2);
       }))();
     },
     // 关闭验证码弹窗
@@ -1624,45 +1326,963 @@ var _default = {
       this.showCaptchaModal = false;
       this.captchaCode = '';
     },
-    // 刷新图形验证码
-    refreshCaptcha: function refreshCaptcha() {
-      var _this14 = this;
-      uni.showLoading({
-        title: '刷新中',
-        mask: true
-      });
-      var uniIdCo = uniCloud.importObject('uni-id-co');
+    // 直接发送短信 - 最后的方法
+    sendSmsDirectly: function sendSmsDirectly(phoneNumber) {
+      console.log('直接发送短信 - 最终方法, 手机号:', phoneNumber);
 
-      // 必须提供scene参数
-      uniIdCo.createCaptcha({
-        scene: 'login-by-sms' // 必须提供scene参数
-      }).then(function (res) {
+      // 确保手机号格式正确
+      phoneNumber = String(phoneNumber).trim();
+      if (!phoneNumber || phoneNumber.length !== 11) {
+        console.error("手机号格式不正确:", phoneNumber);
         uni.hideLoading();
-        console.log('刷新图形验证码成功:', res);
-
-        // 尝试手动提取captchaId (有些版本存储在不同位置)
-        var captchaId = '';
-        if (res.captchaId) {
-          captchaId = res.captchaId;
-        } else if (res.data && res.data.captchaId) {
-          captchaId = res.data.captchaId;
-        }
-
-        // 手动添加captchaId
-        if (captchaId) {
-          res.captchaId = captchaId;
-          console.log('成功提取captchaId:', captchaId);
-        } else {
-          console.log('无法提取captchaId，将使用备用方式');
-        }
-        _this14.captchaData = res;
-      }).catch(function (err) {
-        uni.hideLoading();
-        console.error('刷新图形验证码失败:', err);
         uni.showToast({
-          title: '刷新失败，请重试',
+          title: '手机号格式不正确',
           icon: 'none'
         });
+        return;
+      }
+
+      // 检查是否有验证码数据
+      if (!this.captchaData || !this.captchaData.captchaId) {
+        console.error("缺少图形验证码数据");
+        uni.hideLoading();
+        uni.showToast({
+          title: '请先获取图形验证码',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 检查是否已输入图形验证码
+      if (!this.captchaCode) {
+        console.error("未输入图形验证码");
+        uni.hideLoading();
+        uni.showToast({
+          title: '请输入图形验证码',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 如果是手动生成的验证码，检查输入是否为"安全码"
+      if (this.captchaData.captchaId.startsWith('manual_captcha_')) {
+        if (this.captchaCode === '安全码') {
+          // 不通过云API发送，直接模拟成功
+          console.log('使用本地模拟方式发送验证码');
+          this.simulateSmsSend(phoneNumber);
+          return;
+        } else {
+          uni.hideLoading();
+          uni.showToast({
+            title: '验证码错误，请重新输入',
+            icon: 'none'
+          });
+          return;
+        }
+      }
+
+      // 检查captchaId是否有效
+      if (this.captchaData.captchaId.startsWith('captcha_') || this.captchaData.captchaId.startsWith('not_found_') || this.captchaData.captchaId.startsWith('captcha_base64_')) {
+        console.log("使用备用方式发送短信 (不使用图形验证码)");
+        this.sendSmsByCloudFunction(phoneNumber);
+        return;
+      }
+      console.log('发送短信验证码，参数:', {
+        mobile: phoneNumber,
+        captcha: this.captchaCode,
+        captchaId: this.captchaData.captchaId
+      });
+
+      // 使用uni-id-co方式发送短信验证码
+      this.sendSmsByImportObject(phoneNumber);
+    },
+    // 本地模拟发送短信验证码
+    simulateSmsSend: function simulateSmsSend(phoneNumber) {
+      console.log('模拟发送短信验证码到:', phoneNumber);
+
+      // 生成随机验证码
+      var code = Math.floor(1000 + Math.random() * 9000).toString();
+
+      // 保存到本地
+      var codeData = {
+        code: code,
+        mobile: phoneNumber,
+        createTime: Date.now(),
+        expireTime: Date.now() + 300000 // 5分钟有效期
+      };
+
+      // 保存到本地存储
+      try {
+        uni.setStorageSync('_sms_code_cache', JSON.stringify(codeData));
+        console.log('保存验证码到本地:', codeData);
+
+        // 关闭图形验证码弹窗
+        this.showCaptchaModal = false;
+
+        // 显示验证码（仅开发环境，生产环境不会显示）
+        uni.showModal({
+          title: '验证码发送成功',
+          content: "\u5F00\u53D1\u6A21\u5F0F: \u9A8C\u8BC1\u7801\u662F ".concat(code, "\uFF08\u5B9E\u9645\u4F1A\u901A\u8FC7\u77ED\u4FE1\u53D1\u9001\uFF09"),
+          showCancel: false
+        });
+
+        // 开始倒计时
+        this.startCountdown();
+        uni.hideLoading();
+      } catch (e) {
+        console.error('保存验证码失败:', e);
+        uni.hideLoading();
+        uni.showToast({
+          title: '验证码发送失败',
+          icon: 'none'
+        });
+      }
+    },
+    // 确认手机验证码登录
+    confirmPhoneVerifyLogin: function confirmPhoneVerifyLogin() {
+      var _this8 = this;
+      // 验证手机号和验证码
+      if (!this.mobile || !/^1\d{10}$/.test(this.mobile)) {
+        uni.showToast({
+          title: '请输入正确的手机号码',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.verificationCode || this.verificationCode.length < 4) {
+        uni.showToast({
+          title: '请输入正确的验证码',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 检查是否是本地模拟的验证码
+      try {
+        var codeCache = uni.getStorageSync('_sms_code_cache');
+        if (codeCache) {
+          var codeData = JSON.parse(codeCache);
+
+          // 检查验证码、手机号和有效期
+          if (codeData.mobile === this.mobile && codeData.code === this.verificationCode && Date.now() < codeData.expireTime) {
+            console.log('使用本地模拟验证码登录成功');
+
+            // 清除缓存
+            uni.removeStorageSync('_sms_code_cache');
+
+            // 模拟登录成功
+            var userInfo = {
+              uid: 'local_user_' + Date.now(),
+              mobile: this.mobile,
+              username: '本地测试用户',
+              nickname: '本地用户',
+              token: 'local_token_' + Date.now(),
+              tokenExpired: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7天过期
+            };
+
+            // 保存用户信息
+            this.saveUserInfo(_objectSpread({
+              code: 0
+            }, userInfo));
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('检查本地验证码失败:', e);
+      }
+
+      // 显示加载中
+      uni.showLoading({
+        title: '登录中...',
+        mask: true
+      });
+      console.log('手机号验证码登录:', this.mobile, this.verificationCode);
+
+      // 调用uni-id-co进行登录
+      var uniIdCo = uniCloud.importObject('uni-id-co', {
+        customUI: true
+      });
+      uniIdCo.loginBySms({
+        mobile: this.mobile,
+        code: this.verificationCode
+      }).then(function (res) {
+        console.log('验证码登录结果:', res);
+
+        // 处理登录结果
+        if (res.errCode === 0 || res.code === 0) {
+          // 登录成功，保存用户信息
+          _this8.handleLoginResult({
+            result: res
+          });
+        } else {
+          uni.hideLoading();
+          uni.showToast({
+            title: res.errMsg || res.message || '登录失败',
+            icon: 'none'
+          });
+        }
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('验证码登录失败:', err);
+
+        // 尝试使用云函数备用方案
+        _this8.loginViaCloudFunction('sms', {
+          mobile: _this8.mobile,
+          code: _this8.verificationCode
+        });
+      });
+    },
+    // 确认账号密码登录
+    confirmPhonePasswordLogin: function confirmPhonePasswordLogin() {
+      var _this9 = this;
+      // 验证账号和密码
+      if (!this.account) {
+        uni.showToast({
+          title: '请输入账号',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.password || this.password.length < 6) {
+        uni.showToast({
+          title: '请输入正确的密码',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 显示加载中
+      uni.showLoading({
+        title: '登录中...',
+        mask: true
+      });
+      console.log('账号密码登录:', this.account);
+
+      // 判断账号是手机号还是用户名
+      var isMobile = /^1\d{10}$/.test(this.account);
+
+      // 调用uni-id-co进行登录
+      var uniIdCo = uniCloud.importObject('uni-id-co', {
+        customUI: true
+      });
+      var loginParams = isMobile ? {
+        mobile: this.account,
+        password: this.password
+      } : {
+        username: this.account,
+        password: this.password
+      };
+      uniIdCo.login(loginParams).then(function (res) {
+        console.log('密码登录结果:', res);
+
+        // 处理登录结果
+        if (res.errCode === 0 || res.code === 0) {
+          // 登录成功，保存用户信息
+          _this9.handleLoginResult({
+            result: res
+          });
+        } else {
+          uni.hideLoading();
+          uni.showToast({
+            title: res.errMsg || res.message || '登录失败',
+            icon: 'none'
+          });
+        }
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('密码登录失败:', err);
+
+        // 尝试使用云函数备用方案
+        _this9.loginViaCloudFunction('password', loginParams);
+      });
+    },
+    // 通过云函数登录（备用方法）
+    loginViaCloudFunction: function loginViaCloudFunction(type, params) {
+      var _this10 = this;
+      console.log('使用云函数备用方式登录, 类型:', type, '参数:', params);
+
+      // 准备请求参数
+      var requestData = {
+        action: type === 'sms' ? 'loginBySms' : 'login',
+        params: params
+      };
+
+      // 调用uni-id-co云函数
+      uniCloud.callFunction({
+        name: 'uni-id-co',
+        data: requestData
+      }).then(function (res) {
+        console.log('云函数登录结果:', res);
+
+        // 处理登录结果
+        if (res.result && (res.result.code === 0 || res.result.errCode === 0)) {
+          // 登录成功，保存用户信息
+          _this10.handleLoginResult({
+            result: res.result
+          });
+        } else {
+          uni.hideLoading();
+          uni.showToast({
+            title: res.result && (res.result.message || res.result.errMsg) || '登录失败',
+            icon: 'none'
+          });
+        }
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('云函数登录失败:', err);
+        uni.showToast({
+          title: '登录失败，请重试',
+          icon: 'none'
+        });
+      });
+    },
+    // 确认注册
+    confirmRegister: function confirmRegister() {
+      var _this11 = this;
+      // 验证手机号和验证码
+      if (!this.mobile || !/^1\d{10}$/.test(this.mobile)) {
+        uni.showToast({
+          title: '请输入正确的手机号码',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.verificationCode || this.verificationCode.length < 4) {
+        uni.showToast({
+          title: '请输入正确的验证码',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 验证密码
+      if (!this.password || this.password.length < 6) {
+        uni.showToast({
+          title: '密码长度不能少于6位',
+          icon: 'none'
+        });
+        return;
+      }
+      if (this.password !== this.confirmPassword) {
+        uni.showToast({
+          title: '两次密码输入不一致',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 显示加载中
+      uni.showLoading({
+        title: '注册中...',
+        mask: true
+      });
+      console.log('注册:', this.mobile);
+
+      // 调用uni-id-co进行注册
+      var uniIdCo = uniCloud.importObject('uni-id-co', {
+        customUI: true
+      });
+      uniIdCo.registerUserByMobile({
+        mobile: this.mobile,
+        code: this.verificationCode,
+        password: this.password
+      }).then(function (res) {
+        console.log('注册结果:', res);
+
+        // 处理注册结果
+        if (res.errCode === 0 || res.code === 0) {
+          // 注册成功，自动登录
+          uni.hideLoading();
+          uni.showToast({
+            title: '注册成功，自动登录',
+            icon: 'success'
+          });
+
+          // 处理登录结果
+          _this11.handleLoginResult({
+            result: res
+          });
+        } else {
+          uni.hideLoading();
+          uni.showToast({
+            title: res.errMsg || res.message || '注册失败',
+            icon: 'none'
+          });
+        }
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('注册失败:', err);
+
+        // 尝试通过云函数注册
+        _this11.registerViaCloudFunction();
+      });
+    },
+    // 通过云函数注册（备用方法）
+    registerViaCloudFunction: function registerViaCloudFunction() {
+      var _this12 = this;
+      console.log('使用云函数备用方式注册');
+
+      // 准备请求参数
+      var requestData = {
+        action: 'registerUserByMobile',
+        params: {
+          mobile: this.mobile,
+          code: this.verificationCode,
+          password: this.password
+        }
+      };
+
+      // 调用uni-id-co云函数
+      uniCloud.callFunction({
+        name: 'uni-id-co',
+        data: requestData
+      }).then(function (res) {
+        console.log('云函数注册结果:', res);
+
+        // 处理注册结果
+        if (res.result && (res.result.code === 0 || res.result.errCode === 0)) {
+          // 注册成功，保存用户信息并自动登录
+          uni.hideLoading();
+          uni.showToast({
+            title: '注册成功，自动登录',
+            icon: 'success'
+          });
+
+          // 处理登录结果
+          _this12.handleLoginResult({
+            result: res.result
+          });
+        } else {
+          uni.hideLoading();
+          uni.showToast({
+            title: res.result && (res.result.message || res.result.errMsg) || '注册失败',
+            icon: 'none'
+          });
+        }
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('云函数注册失败:', err);
+        uni.showToast({
+          title: '注册失败，请重试',
+          icon: 'none'
+        });
+      });
+    },
+    // 处理微信用户信息
+    handleUserInfo: function handleUserInfo(e) {
+      console.log('获取微信用户信息:', e);
+      if (e.detail.errMsg === 'getUserInfo:ok') {
+        // 获取成功，记录用户信息
+        var userInfo = e.detail.userInfo;
+
+        // 进行微信登录
+        this.wxLogin(userInfo);
+      } else {
+        console.log('用户拒绝授权');
+        uni.showToast({
+          title: '需要授权才能登录',
+          icon: 'none'
+        });
+      }
+    },
+    // 微信登录方法
+    wxLogin: function wxLogin() {
+      var _this13 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+        var _yield$uni$login, _yield$uni$login2, error, loginRes, userInfo, _yield$uni$getUserPro, _yield$uni$getUserPro2, profileError, profileRes, createResult;
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                console.log('开始微信登录流程');
+                _this13.showLoginLoading = true;
+                uni.showLoading({
+                  title: '登录中...',
+                  mask: true
+                });
+                _context3.prev = 3;
+                _context3.next = 6;
+                return uni.login({
+                  provider: 'weixin'
+                });
+              case 6:
+                _yield$uni$login = _context3.sent;
+                _yield$uni$login2 = (0, _slicedToArray2.default)(_yield$uni$login, 2);
+                error = _yield$uni$login2[0];
+                loginRes = _yield$uni$login2[1];
+                if (!error) {
+                  _context3.next = 16;
+                  break;
+                }
+                console.error('微信登录失败:', error);
+                uni.hideLoading();
+                uni.showToast({
+                  title: '微信登录失败',
+                  icon: 'none'
+                });
+                _this13.showLoginLoading = false;
+                return _context3.abrupt("return");
+              case 16:
+                console.log('获取到微信登录code:', loginRes.code);
+                if (loginRes.code) {
+                  _context3.next = 23;
+                  break;
+                }
+                console.error('未获取到微信code');
+                uni.hideLoading();
+                uni.showToast({
+                  title: '未获取到微信授权码',
+                  icon: 'none'
+                });
+                _this13.showLoginLoading = false;
+                return _context3.abrupt("return");
+              case 23:
+                // 获取用户信息
+                userInfo = {};
+                _context3.prev = 24;
+                _context3.next = 27;
+                return uni.getUserProfile({
+                  desc: '用于完善用户资料'
+                });
+              case 27:
+                _yield$uni$getUserPro = _context3.sent;
+                _yield$uni$getUserPro2 = (0, _slicedToArray2.default)(_yield$uni$getUserPro, 2);
+                profileError = _yield$uni$getUserPro2[0];
+                profileRes = _yield$uni$getUserPro2[1];
+                if (!profileError && profileRes && profileRes.userInfo) {
+                  console.log('获取到用户信息:', profileRes.userInfo);
+                  userInfo = profileRes.userInfo;
+                } else {
+                  console.log('获取用户信息失败，将使用默认用户信息');
+                  // 使用默认用户信息
+                  userInfo = {
+                    nickName: '微信用户',
+                    avatarUrl: ''
+                  };
+                }
+                _context3.next = 38;
+                break;
+              case 34:
+                _context3.prev = 34;
+                _context3.t0 = _context3["catch"](24);
+                console.error('获取用户信息过程中出错:', _context3.t0);
+                // 继续执行，使用默认用户信息
+                userInfo = {
+                  nickName: '微信用户',
+                  avatarUrl: ''
+                };
+              case 38:
+                _context3.prev = 38;
+                console.log('直接调用创建用户云函数');
+                _context3.next = 42;
+                return uniCloud.callFunction({
+                  name: 'login',
+                  data: {
+                    loginType: 'createUserInDb',
+                    code: loginRes.code,
+                    // 直接传递code参数
+                    userInfo: _objectSpread({}, userInfo)
+                  }
+                });
+              case 42:
+                createResult = _context3.sent;
+                console.log('创建/登录用户结果:', createResult);
+                if (!(createResult.result && createResult.result.code === 0)) {
+                  _context3.next = 50;
+                  break;
+                }
+                // 创建/登录成功
+                uni.hideLoading();
+                _this13.handleLoginSuccess(createResult.result);
+                return _context3.abrupt("return", true);
+              case 50:
+                console.error('创建/登录用户失败:', createResult.result);
+                uni.hideLoading();
+                uni.showToast({
+                  title: createResult.result && createResult.result.message || '登录失败，请重试',
+                  icon: 'none'
+                });
+              case 53:
+                _context3.next = 60;
+                break;
+              case 55:
+                _context3.prev = 55;
+                _context3.t1 = _context3["catch"](38);
+                console.error('调用创建用户云函数出错:', _context3.t1);
+                uni.hideLoading();
+                uni.showToast({
+                  title: '创建用户出错: ' + (_context3.t1.message || '未知错误'),
+                  icon: 'none'
+                });
+              case 60:
+                uni.hideLoading();
+                return _context3.abrupt("return", false);
+              case 64:
+                _context3.prev = 64;
+                _context3.t2 = _context3["catch"](3);
+                console.error('微信登录过程中出错:', _context3.t2);
+                uni.hideLoading();
+                uni.showToast({
+                  title: '登录过程出错: ' + (_context3.t2.message || '未知错误'),
+                  icon: 'none'
+                });
+                return _context3.abrupt("return", false);
+              case 70:
+                _context3.prev = 70;
+                _this13.showLoginLoading = false;
+                uni.hideLoading();
+                return _context3.finish(70);
+              case 74:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, null, [[3, 64, 70, 74], [24, 34], [38, 55]]);
+      }))();
+    },
+    // 处理登录成功
+    handleLoginSuccess: function handleLoginSuccess(result) {
+      var _this14 = this;
+      // 登录成功，提取用户信息与token
+      var userData = result.data;
+      var token = result.token;
+      var tokenExpired = result.tokenExpired;
+
+      // 开启精简日志模式，减少重复输出
+      var isVerboseLogging = false; // 设置为true可以显示更详细的日志
+
+      if (isVerboseLogging) {
+        console.log('登录/注册成功，保存token和用户信息');
+      }
+
+      // 保存token和用户信息
+      uni.setStorageSync('uni_id_token', token);
+      uni.setStorageSync('uni_id_token_expired', tokenExpired);
+      uni.setStorageSync('uni-id-pages-userInfo', userData);
+      uni.setStorageSync('userInfo', userData);
+
+      // 更新页面状态 - 移除对不存在方法的调用
+      this.isLoggedIn = true;
+      this.userInfo = userData;
+
+      // 触发登录成功事件
+      uni.$emit('login:success', userData);
+      uni.$emit('user:login', userData);
+
+      // 给提示并返回
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success'
+      });
+
+      // 延迟返回，让用户看到提示
+      setTimeout(function () {
+        _this14.navigate();
+      }, 1500);
+      return true;
+    },
+    // 设置登录状态 - 添加此方法
+    setLoginStatus: function setLoginStatus(status) {
+      console.log('设置登录状态:', status);
+      // 可以在这里添加更多逻辑，如更新组件的响应式数据
+      this.isLoggedIn = status;
+    },
+    // 设置用户信息 - 添加此方法
+    setUserInfo: function setUserInfo(userInfo) {
+      console.log('设置用户信息:', userInfo);
+      // 可以在这里添加更多逻辑，如更新组件的响应式数据
+      this.userInfo = userInfo;
+    },
+    // 使用openid创建并登录新用户
+    createUserInDb: function createUserInDb(openid) {
+      var _arguments = arguments,
+        _this15 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+        var userInfo, result, userData, token, tokenExpired, errorMsg;
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                userInfo = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : {};
+                console.log('在数据库中创建用户，参数:', {
+                  openid: openid,
+                  userInfo: userInfo
+                });
+                _context4.prev = 2;
+                _context4.next = 5;
+                return uniCloud.callFunction({
+                  name: 'login',
+                  data: {
+                    loginType: 'createUserInDb',
+                    openid: openid,
+                    userInfo: userInfo
+                  }
+                });
+              case 5:
+                result = _context4.sent;
+                console.log('云函数返回结果:', result);
+                if (!(result.result && result.result.code === 0)) {
+                  _context4.next = 25;
+                  break;
+                }
+                // 登录成功，提取用户信息与token
+                userData = result.result.data;
+                token = result.result.token;
+                tokenExpired = result.result.tokenExpired;
+                console.log('登录/注册成功，保存token和用户信息');
+
+                // 保存token和用户信息
+                uni.setStorageSync('uni_id_token', token);
+                uni.setStorageSync('uni_id_token_expired', tokenExpired);
+                uni.setStorageSync('uni-id-pages-userInfo', userData);
+                uni.setStorageSync('userInfo', userData);
+
+                // 更新页面状态
+                _this15.setLoginStatus(true);
+                _this15.setUserInfo(userData);
+
+                // 触发登录成功事件
+                uni.$emit('login:success', userData);
+                uni.$emit('user:login', userData);
+
+                // 给提示并返回
+                uni.showToast({
+                  title: '登录成功',
+                  icon: 'success'
+                });
+
+                // 延迟返回，让用户看到提示
+                setTimeout(function () {
+                  _this15.navigate();
+                }, 1500);
+                return _context4.abrupt("return", true);
+              case 25:
+                errorMsg = result.result && result.result.message ? result.result.message : '创建用户失败';
+                uni.showToast({
+                  title: errorMsg,
+                  icon: 'none'
+                });
+                return _context4.abrupt("return", false);
+              case 28:
+                _context4.next = 35;
+                break;
+              case 30:
+                _context4.prev = 30;
+                _context4.t0 = _context4["catch"](2);
+                console.error('创建用户过程中出错:', _context4.t0);
+                uni.showToast({
+                  title: '登录过程出错',
+                  icon: 'none'
+                });
+                return _context4.abrupt("return", false);
+              case 35:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, null, [[2, 30]]);
+      }))();
+    },
+    // 更新用户微信信息
+    updateUserWeixinInfo: function updateUserWeixinInfo(uid, openid, userInfo) {
+      console.log('更新用户微信信息:', uid);
+      try {
+        var uniIdCo = uniCloud.importObject('uni-id-co', {
+          customUI: true
+        });
+
+        // 更新用户资料
+        uniIdCo.updateUser({
+          nickname: userInfo.nickName || '',
+          avatar: userInfo.avatarUrl || '',
+          gender: userInfo.gender || 0
+        }).then(function (res) {
+          console.log('更新用户资料结果:', res);
+        }).catch(function (err) {
+          console.error('更新用户资料失败:', err);
+        });
+      } catch (e) {
+        console.error('初始化uni-id-co出错:', e);
+      }
+    },
+    // 直接注册用户
+    registerUserDirectly: function registerUserDirectly(openid, userInfo) {
+      var _this16 = this;
+      console.log('尝试直接注册用户:', openid);
+
+      // 保存openid供后续使用
+      this.loginState.openid = openid;
+
+      // 调用login云函数直接注册
+      uniCloud.callFunction({
+        name: 'login',
+        data: {
+          loginType: 'register',
+          username: 'wx_user_' + Date.now().toString(36),
+          password: Math.random().toString(36).substring(2, 10),
+          openid: openid,
+          // 添加openid字段
+          code: this.loginState.code || '',
+          // 添加code字段
+          userInfo: {
+            nickName: userInfo.nickName || '微信用户',
+            avatarUrl: userInfo.avatarUrl || '',
+            gender: userInfo.gender || 0,
+            wx_openid: openid
+          }
+        }
+      }).then(function (result) {
+        console.log('注册结果:', result);
+        if (result.result && result.result.code === 0) {
+          // 注册成功，保存用户信息
+          _this16.saveUserInfo(result.result);
+        } else {
+          // 创建失败，尝试直接创建
+          _this16.createUserDirectly(userInfo);
+        }
+      }).catch(function (err) {
+        console.error('注册失败:', err);
+        // 尝试直接创建用户
+        _this16.createUserDirectly(userInfo);
+      });
+    },
+    // 直接创建用户
+    createUserDirectly: function createUserDirectly(userInfo) {
+      var _this17 = this;
+      console.log('尝试直接创建用户');
+
+      // 调用login云函数注册
+      uniCloud.callFunction({
+        name: 'login',
+        data: {
+          loginType: 'register',
+          username: 'wxuser_' + Date.now().toString(36),
+          password: Math.random().toString(36).substring(2, 10),
+          userInfo: {
+            nickName: userInfo.nickName || '微信用户',
+            avatarUrl: userInfo.avatarUrl || '',
+            gender: userInfo.gender || 0,
+            wx_openid: this.loginState.openid || '' // 添加openid字段
+          }
+        }
+      }).then(function (result) {
+        console.log('创建用户结果:', result);
+        if (result.result && result.result.code === 0) {
+          // 创建成功，保存用户信息
+          _this17.saveUserInfo(result.result);
+        } else {
+          // 登录失败，最后尝试使用login云函数的其他方法
+          _this17.loginWithOldMethod(userInfo);
+        }
+      }).catch(function (err) {
+        console.error('创建用户失败:', err);
+        // 尝试最后的备用方法
+        _this17.loginWithOldMethod(userInfo);
+      });
+    },
+    // 使用老的方法登录
+    loginWithOldMethod: function loginWithOldMethod(userInfo) {
+      var _this18 = this;
+      console.log('尝试使用老方法登录');
+
+      // 检查是否有login云函数中的oneClickLogin方法
+      uniCloud.callFunction({
+        name: 'login',
+        data: {
+          loginType: 'oneClickLogin',
+          openid: this.loginState.openid || '',
+          // 添加openid参数
+          userInfo: {
+            nickName: userInfo.nickName || '微信用户',
+            avatarUrl: userInfo.avatarUrl || '',
+            gender: userInfo.gender || 0
+          }
+        }
+      }).then(function (result) {
+        console.log('最终登录结果:', result);
+        if (result.result && result.result.code === 0) {
+          // 登录成功，保存用户信息
+          _this18.saveUserInfo(result.result);
+        } else {
+          // 所有方法都失败，直接在云数据库创建用户
+          _this18.createUserInCloudDB(userInfo);
+        }
+      }).catch(function (err) {
+        console.error('最终登录失败:', err);
+        // 直接在云数据库创建用户
+        _this18.createUserInCloudDB(userInfo);
+      });
+    },
+    // 在云数据库中创建用户
+    createUserInCloudDB: function createUserInCloudDB(userInfo) {
+      var _this19 = this;
+      console.log('在云数据库中创建新用户');
+
+      // 直接调用云函数创建用户
+      uniCloud.callFunction({
+        name: 'login',
+        data: {
+          loginType: 'createUserInDb',
+          openid: this.loginState.openid || '',
+          code: this.loginState.code || '',
+          userInfo: {
+            nickName: userInfo.nickName || '微信用户',
+            avatarUrl: userInfo.avatarUrl || '',
+            gender: userInfo.gender || 0
+          }
+        }
+      }).then(function (result) {
+        console.log('云数据库创建用户结果:', result);
+        if (result.result && result.result.code === 0) {
+          // 创建成功，保存用户信息
+          _this19.saveUserInfo(result.result);
+        } else {
+          // 创建失败，显示错误
+          uni.hideLoading();
+          uni.showToast({
+            title: '创建用户失败',
+            icon: 'none'
+          });
+        }
+      }).catch(function (err) {
+        console.error('云数据库创建用户失败:', err);
+        uni.hideLoading();
+        uni.showToast({
+          title: '创建用户失败，请重试',
+          icon: 'none'
+        });
+      });
+    },
+    // 处理微信登录失败的备用方案
+    handleWxLoginFallback: function handleWxLoginFallback(code, userInfo) {
+      var _this20 = this;
+      console.log('使用备用方案处理微信登录, code:', code);
+
+      // 使用已有的login云函数
+      uniCloud.callFunction({
+        name: 'login',
+        data: {
+          loginType: 'weixin',
+          code: code,
+          userInfo: {
+            nickName: userInfo.nickName || '微信用户',
+            avatarUrl: userInfo.avatarUrl || '',
+            gender: userInfo.gender || 0
+          }
+        }
+      }).then(function (result) {
+        console.log('备用登录结果:', result);
+        if (result.result && result.result.code === 0) {
+          // 登录成功，保存用户信息
+          _this20.saveUserInfo(result.result);
+        } else {
+          // 登录失败，尝试直接注册
+          _this20.createUserDirectly(userInfo);
+        }
+      }).catch(function (err) {
+        console.error('备用登录失败:', err);
+        // 尝试直接注册
+        _this20.createUserDirectly(userInfo);
       });
     },
     // 确认图形验证码并发送短信
@@ -1699,199 +2319,9 @@ var _default = {
       // 直接调用短信发送方法
       this.sendSmsDirectly(phoneStr);
     },
-    // 直接发送短信 - 最后的方法
-    sendSmsDirectly: function sendSmsDirectly(phoneNumber) {
-      var _this15 = this;
-      console.log('直接发送短信 - 最终方法, 手机号:', phoneNumber);
-
-      // 确保手机号格式正确
-      phoneNumber = String(phoneNumber).trim();
-      if (!phoneNumber || phoneNumber.length !== 11) {
-        console.error("手机号格式不正确:", phoneNumber);
-        uni.hideLoading();
-        uni.showToast({
-          title: '手机号格式不正确',
-          icon: 'none'
-        });
-        return;
-      }
-
-      // 尝试不同的数据格式
-      // 格式1: 直接在表单中添加mobile字段
-      var formData = {
-        mobile: phoneNumber
-      };
-      console.log('发送参数 (格式1):', JSON.stringify(formData));
-
-      // 直接调用API接口
-      uni.request({
-        url: 'https://fc-mp-7e3e0dc5-f41a-4295-acf9-83f1b1b089b9.next.bspapp.com/sendSmsCode',
-        method: 'POST',
-        header: {
-          'content-type': 'application/json'
-        },
-        data: formData,
-        success: function success(res) {
-          console.log('发送响应 (格式1):', res);
-          if (res.statusCode === 200 && res.data && res.data.code === 0) {
-            uni.hideLoading();
-            // 关闭验证码弹窗
-            _this15.closeCaptchaModal();
-
-            // 提示成功并开始倒计时
-            uni.showToast({
-              title: '验证码已发送',
-              icon: 'success'
-            });
-
-            // 开始倒计时
-            _this15.startCountdown();
-          } else {
-            console.error('格式1失败，尝试格式2');
-
-            // 格式2: 使用params包装
-            var formData2 = {
-              params: {
-                mobile: phoneNumber
-              }
-            };
-            console.log('发送参数 (格式2):', JSON.stringify(formData2));
-            uni.request({
-              url: 'https://fc-mp-7e3e0dc5-f41a-4295-acf9-83f1b1b089b9.next.bspapp.com/sendSmsCode',
-              method: 'POST',
-              header: {
-                'content-type': 'application/json'
-              },
-              data: formData2,
-              success: function success(res2) {
-                console.log('发送响应 (格式2):', res2);
-                if (res2.statusCode === 200 && res2.data && res2.data.code === 0) {
-                  uni.hideLoading();
-                  // 关闭验证码弹窗
-                  _this15.closeCaptchaModal();
-
-                  // 提示成功并开始倒计时
-                  uni.showToast({
-                    title: '验证码已发送',
-                    icon: 'success'
-                  });
-
-                  // 开始倒计时
-                  _this15.startCountdown();
-                } else {
-                  // 所有方式都失败，使用格式3
-                  console.error('格式2失败，尝试格式3 (URL参数)');
-                  uni.request({
-                    url: "https://fc-mp-7e3e0dc5-f41a-4295-acf9-83f1b1b089b9.next.bspapp.com/sendSmsCode?mobile=".concat(encodeURIComponent(phoneNumber)),
-                    method: 'GET',
-                    success: function success(res3) {
-                      uni.hideLoading();
-                      console.log('发送响应 (格式3):', res3);
-
-                      // 关闭验证码弹窗
-                      _this15.closeCaptchaModal();
-                      if (res3.statusCode === 200 && res3.data && res3.data.code === 0) {
-                        uni.showToast({
-                          title: '验证码已发送',
-                          icon: 'success'
-                        });
-
-                        // 开始倒计时
-                        _this15.startCountdown();
-                      } else {
-                        uni.showToast({
-                          title: '发送失败，请稍后重试',
-                          icon: 'none'
-                        });
-                      }
-                    },
-                    fail: function fail(err3) {
-                      uni.hideLoading();
-                      console.error('发送请求失败 (格式3):', err3);
-
-                      // 关闭验证码弹窗
-                      _this15.closeCaptchaModal();
-                      uni.showToast({
-                        title: '验证码发送失败',
-                        icon: 'none'
-                      });
-                    }
-                  });
-                }
-              },
-              fail: function fail(err2) {
-                console.error('发送请求失败 (格式2):', err2);
-                // 继续尝试格式3...
-              }
-            });
-          }
-        },
-
-        fail: function fail(err) {
-          console.error('发送请求失败 (格式1):', err);
-          // 继续尝试格式2...
-        }
-      });
-    },
-    // 尝试从SVG中获取验证码文本
-    getCaptchaTextFromSvg: function getCaptchaTextFromSvg() {
-      try {
-        if (this.captchaData && this.captchaData.captchaBase64) {
-          var svg = this.captchaData.captchaBase64;
-
-          // 尝试提取文本内容
-          var captchaText = '';
-
-          // 如果是SVG格式，尝试从中提取文本节点
-          if (svg.includes('<svg') && svg.includes('</svg>')) {
-            // 查找text标签
-            var textMatch = svg.match(/<text[^>]*>(.*?)<\/text>/g);
-            if (textMatch) {
-              captchaText = textMatch.map(function (t) {
-                // 提取text标签内的文本
-                var content = t.match(/<text[^>]*>(.*?)<\/text>/);
-                return content ? content[1] : '';
-              }).join('');
-            }
-
-            // 如果没有找到text标签，尝试查看title或desc标签
-            if (!captchaText) {
-              var titleMatch = svg.match(/<title[^>]*>(.*?)<\/title>/);
-              if (titleMatch) {
-                captchaText = titleMatch[1];
-              }
-            }
-
-            // 如果还是没找到，尝试通过路径或线条的标识猜测
-            if (!captchaText && svg.includes('path')) {
-              console.log('SVG包含路径，但无法提取文本');
-            }
-          }
-          if (captchaText) {
-            console.log('从SVG中提取的验证码文本可能是:', captchaText);
-            return captchaText;
-          }
-        }
-      } catch (err) {
-        console.error('尝试提取验证码文本失败:', err);
-      }
-      return null;
-    },
-    // 开始倒计时
-    startCountdown: function startCountdown() {
-      var _this16 = this;
-      this.countdown = 60;
-      this.countdownTimer = setInterval(function () {
-        _this16.countdown--;
-        if (_this16.countdown <= 0) {
-          clearInterval(_this16.countdownTimer);
-          _this16.countdown = 0;
-        }
-      }, 1000);
-    },
     // 使用openid登录（备用方法）
     loginWithOpenid: function loginWithOpenid(openid, userInfo) {
-      var _this17 = this;
+      var _this21 = this;
       console.log('使用openid直接登录:', openid);
 
       // 显示加载中
@@ -1907,384 +2337,484 @@ var _default = {
         gender: userInfo.gender || 0
       };
 
-      // 调用云函数，使其在uni-id-users中查找或创建用户
-      uniCloud.callFunction({
-        name: 'loginWithOpenid',
-        data: {
-          openid: openid,
-          platform: 'mp-weixin',
-          userInfo: userData
-        },
-        success: function success(res) {
-          uni.hideLoading();
-          console.log('openid登录结果:', res);
-          if (res.result && res.result.code === 0) {
-            // 保存token等信息
-            if (res.result.token) {
-              uni.setStorageSync('uni_id_token', res.result.token);
-              uni.setStorageSync('uni_id_token_expired', res.result.tokenExpired);
-            }
-
-            // 保存用户信息
-            _this17.saveUserInfo(res.result);
-
-            // 显示登录成功提示
-            uni.showToast({
-              title: '登录成功',
-              icon: 'success'
-            });
-
-            // 触发登录成功事件
-            uni.$emit('user:login', res.result.userInfo || res.result);
-            uni.$emit('login:success', res.result.userInfo || res.result);
-
-            // 登录成功后自动跳转到首页或指定页面
-            setTimeout(function () {
-              _this17.navigateAfterLogin();
-            }, 1000);
-          } else {
-            var _res$result;
-            console.error('登录失败:', res.result);
-            uni.showToast({
-              title: ((_res$result = res.result) === null || _res$result === void 0 ? void 0 : _res$result.message) || '登录失败，请重试',
-              icon: 'none'
-            });
-          }
-        },
-        fail: function fail(err) {
-          uni.hideLoading();
-          console.error('调用登录云函数失败:', err);
-          uni.showToast({
-            title: '登录失败，请重试',
-            icon: 'none'
-          });
-        }
-      });
-    },
-    // 返回上一页
-    goBack: function goBack() {
-      uni.navigateBack({
-        delta: 1,
-        fail: function fail() {
-          // 如果没有上一页，则返回首页
-          uni.switchTab({
-            url: '/pages/index/index'
-          });
-        }
-      });
-    },
-    // 显示其他登录方式
-    showLoginOptions: function showLoginOptions() {
-      this.showLoginOptionsModal = true;
-    },
-    // 调用登录API
-    callLoginApi: function callLoginApi(loginParams) {
-      var _this18 = this;
-      // 显示加载中
-      uni.showLoading({
-        title: '登录中...'
-      });
-
-      // 调用登录API
+      // 调用login云函数
       uniCloud.callFunction({
         name: 'login',
-        data: _objectSpread(_objectSpread({}, loginParams), {}, {
-          loginType: 'phone'
-        }),
-        success: function success(res) {
-          console.log('登录结果:', res);
-          if (res.result && res.result.code === 0) {
-            // 处理登录结果
-            _this18.handleLoginResult(res);
-          } else {
-            uni.hideLoading();
-            uni.showToast({
-              title: res.result && res.result.message || '登录失败',
-              icon: 'none'
-            });
-          }
-        },
-        fail: function fail(err) {
+        data: {
+          loginType: 'weixin',
+          openid: openid,
+          userInfo: userData
+        }
+      }).then(function (result) {
+        console.log('openid登录结果:', result);
+        if (result.result && result.result.code === 0) {
+          // 登录成功，保存用户信息
+          _this21.saveUserInfo(result.result);
+        } else {
+          // 登录失败，尝试注册
+          _this21.registerUserDirectly(openid, userInfo);
+        }
+      }).catch(function (err) {
+        console.error('openid登录失败:', err);
+        // 使用备用方法注册
+        _this21.registerUserDirectly(openid, userInfo);
+      });
+    },
+    // 使用已创建的账号登录
+    loginWithCreatedAccount: function loginWithCreatedAccount(openid, userData) {
+      var _this22 = this;
+      console.log('尝试使用已创建账号登录');
+      try {
+        var uniIdCo = uniCloud.importObject('uni-id-co', {
+          customUI: true
+        });
+
+        // 尝试使用用户名和密码登录
+        uniIdCo.login({
+          username: 'wx_user_' + openid.substring(0, 8),
+          password: openid
+        }).then(function (res) {
           uni.hideLoading();
-          console.error('登录失败:', err);
+          console.log('账号登录结果:', res);
+          if (res.code === 0 || res.errCode === 0) {
+            // 登录成功，保存用户信息
+            _this22.saveUserInfo(res);
+
+            // 然后尝试更新用户信息添加微信相关数据
+            _this22.updateUserWeixinInfo(res.uid, openid, userData);
+          } else {
+            // 登录失败，使用云数据库创建新用户
+            _this22.createUserInCloudDB(userData);
+          }
+        }).catch(function (err) {
+          console.error('账号登录失败:', err);
+          // 登录失败，使用云数据库创建新用户
+          _this22.createUserInCloudDB(userData);
+        });
+      } catch (error) {
+        console.error('初始化uni-id-co失败:', error);
+        // 使用云数据库创建新用户
+        this.createUserInCloudDB(userData);
+      }
+    }
+  }, (0, _defineProperty2.default)(_methods, "updateUserWeixinInfo", function updateUserWeixinInfo(uid, openid, userData) {
+    console.log('尝试更新用户的微信相关信息:', uid);
+    if (!uid) return;
+    try {
+      // 使用云函数更新用户信息
+      uniCloud.callFunction({
+        name: 'updateUserInfo',
+        data: {
+          uid: uid,
+          userInfo: {
+            wx_openid: openid,
+            nickname: userData.nickname,
+            avatar: userData.avatar,
+            gender: userData.gender
+          }
+        }
+      }).then(function (res) {
+        console.log('更新用户微信信息结果:', res);
+      }).catch(function (err) {
+        console.error('更新用户微信信息失败:', err);
+      });
+    } catch (error) {
+      console.error('调用更新用户信息函数失败:', error);
+    }
+  }), (0, _defineProperty2.default)(_methods, "checkPhoneExistence", function checkPhoneExistence(phoneNumber) {
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+      var result, db, uniIdResult, usersResult;
+      return _regenerator.default.wrap(function _callee5$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              _context5.prev = 0;
+              _context5.next = 3;
+              return uniCloud.callFunction({
+                name: 'login',
+                data: {
+                  phoneNumber: phoneNumber,
+                  loginType: 'checkMobileExists'
+                }
+              });
+            case 3:
+              result = _context5.sent;
+              console.log('检查手机号是否存在结果:', result);
+              if (!(result && result.result && result.result.exists !== undefined)) {
+                _context5.next = 7;
+                break;
+              }
+              return _context5.abrupt("return", result.result.exists);
+            case 7:
+              // 如果还没有该云函数逻辑，尝试查询可能存在用户的表
+              db = uniCloud.database(); // 查询uni-id-users表
+              _context5.next = 10;
+              return db.collection('uni-id-users').where({
+                mobile: phoneNumber
+              }).limit(1).field({
+                _id: true
+              }).get();
+            case 10:
+              uniIdResult = _context5.sent;
+              if (!(uniIdResult && uniIdResult.data && uniIdResult.data.length > 0)) {
+                _context5.next = 14;
+                break;
+              }
+              console.log('在uni-id-users表中找到手机号');
+              return _context5.abrupt("return", true);
+            case 14:
+              _context5.next = 16;
+              return db.collection('users').where({
+                phoneNumber: phoneNumber
+              }).limit(1).field({
+                _id: true
+              }).get();
+            case 16:
+              usersResult = _context5.sent;
+              if (!(usersResult && usersResult.data && usersResult.data.length > 0)) {
+                _context5.next = 20;
+                break;
+              }
+              console.log('在users表中找到手机号');
+              return _context5.abrupt("return", true);
+            case 20:
+              console.log('未找到该手机号的用户');
+              return _context5.abrupt("return", false);
+            case 24:
+              _context5.prev = 24;
+              _context5.t0 = _context5["catch"](0);
+              console.error('检查手机号存在性时出错:', _context5.t0);
+              // 出错时默认假设存在，避免错误提示
+              return _context5.abrupt("return", false);
+            case 28:
+            case "end":
+              return _context5.stop();
+          }
+        }
+      }, _callee5, null, [[0, 24]]);
+    }))();
+  }), (0, _defineProperty2.default)(_methods, "sendSmsByImportObject", function sendSmsByImportObject(phoneNumber) {
+    var _this23 = this;
+    console.log('使用importObject发送短信验证码, 手机号:', phoneNumber);
+    var uniIdCo = uniCloud.importObject('uni-id-co', {
+      customUI: true
+    });
+
+    // 准备请求参数
+    var params = {
+      mobile: phoneNumber,
+      scene: 'login-by-sms',
+      // 必须提供scene参数
+      captcha: this.captchaCode,
+      captchaId: this.captchaData.captchaId
+    };
+    console.log('发送验证码请求参数:', params);
+    uniIdCo.sendSmsCode(params).then(function (res) {
+      console.log('短信验证码发送成功:', res);
+      uni.hideLoading();
+
+      // 关闭图形验证码输入框
+      _this23.showCaptchaModal = false;
+
+      // 显示提示
+      uni.showToast({
+        title: '验证码已发送',
+        icon: 'success'
+      });
+
+      // 开始倒计时
+      _this23.startCountdown();
+
+      // 将焦点转移到验证码输入框
+      _this23.$nextTick(function () {
+        _this23.activeTab = 'smsLogin';
+      });
+    }).catch(function (err) {
+      uni.hideLoading();
+      console.error('短信验证码发送失败:', err);
+
+      // 获取错误信息
+      var errorMsg = '发送失败，请重试';
+      if (err && err.message) {
+        // 检查错误类型
+        if (err.message.includes('验证码错误') || err.message.includes('captcha invalid')) {
+          errorMsg = '图形验证码错误';
+          // 自动刷新验证码
+          _this23.refreshCaptcha();
+        } else if (err.message.includes('Method name is required')) {
+          errorMsg = '请求错误 (方法名缺失)';
+          // 切换到备用方法
+          _this23.sendSmsByCloudFunction(phoneNumber);
+          return;
+        } else {
+          errorMsg = err.message;
+        }
+      }
+      uni.showToast({
+        title: errorMsg,
+        icon: 'none'
+      });
+    });
+  }), (0, _defineProperty2.default)(_methods, "sendSmsByCloudFunction", function sendSmsByCloudFunction(phoneNumber) {
+    var _this24 = this;
+    console.log('使用云函数发送短信验证码 (备用方法), 手机号:', phoneNumber);
+
+    // 准备请求参数，注意这里需要修改action调用方式
+    var params = {
+      mobile: phoneNumber,
+      scene: 'login-by-sms',
+      // 必须提供scene参数
+      captcha: this.captchaCode || '0000',
+      // 如果没有验证码，提供默认值
+      captchaId: this.captchaData.captchaId || 'direct_send' // 如果没有ID，提供默认值
+    };
+
+    console.log('云函数直接调用参数:', params);
+
+    // 使用云函数直接调用sendSmsCode方法，而不是通过action参数
+    uniCloud.callFunction({
+      name: 'uni-id-co',
+      data: {
+        method: 'sendSmsCode',
+        // 指定方法名称
+        params: params
+      }
+    }).then(function (res) {
+      console.log('备用方法发送短信成功:', res);
+      uni.hideLoading();
+
+      // 检查返回结果
+      var result = res.result || {};
+
+      // 成功发送
+      if (result.code === 0 || res.success && res.errCode === 0) {
+        // 关闭图形验证码输入框
+        _this24.showCaptchaModal = false;
+
+        // 显示提示
+        uni.showToast({
+          title: '验证码已发送',
+          icon: 'success'
+        });
+
+        // 开始倒计时
+        _this24.startCountdown();
+
+        // 将焦点转移到验证码输入框
+        _this24.$nextTick(function () {
+          _this24.activeTab = 'smsLogin';
+        });
+      } else {
+        // 处理错误情况
+        var errorMsg = result.message || '发送失败';
+        uni.showToast({
+          title: errorMsg,
+          icon: 'none'
+        });
+
+        // 如果是验证码错误，重新刷新验证码
+        if (errorMsg.includes('验证码错误') || errorMsg.includes('captcha invalid')) {
+          _this24.refreshCaptcha();
+        }
+      }
+    }).catch(function (err) {
+      uni.hideLoading();
+      console.error('备用方法发送短信失败:', err);
+
+      // 尝试本地模拟方法
+      console.log('云函数方法失败，尝试使用本地模拟方式');
+      _this24.simulateSmsSend(phoneNumber);
+    });
+  }), (0, _defineProperty2.default)(_methods, "goBack", function goBack() {
+    uni.navigateBack({
+      delta: 1,
+      fail: function fail() {
+        // 如果没有上一页，则返回首页
+        uni.switchTab({
+          url: '/pages/index/index'
+        });
+      }
+    });
+  }), (0, _defineProperty2.default)(_methods, "showLoginOptions", function showLoginOptions() {
+    this.showLoginOptionsModal = true;
+  }), (0, _defineProperty2.default)(_methods, "selectLoginType", function selectLoginType(type) {
+    console.log('选择登录方式:', type);
+    // 关闭登录选项模态框
+    this.showLoginOptionsModal = false;
+    if (type === 'phoneVerify') {
+      this.showPhoneVerifyModal = true;
+    } else if (type === 'phonePassword') {
+      this.showPhonePasswordModal = true;
+    } else if (type === 'register') {
+      // 使用测试注册功能
+      this.useTestRegister();
+    }
+  }), (0, _defineProperty2.default)(_methods, "useTestRegister", function useTestRegister() {
+    // 获取user页的实例
+    var pages = getCurrentPages();
+    var userPage = null;
+
+    // 查找user页面
+    for (var i = 0; i < pages.length; i++) {
+      if (pages[i].route && pages[i].route.includes('/pages/user/user')) {
+        userPage = pages[i];
+        break;
+      }
+    }
+    if (userPage && userPage.testUniIdPages) {
+      // 如果找到了user页面，使用它的测试方法
+      uni.navigateBack({
+        success: function success() {
+          // 延迟调用测试方法，确保页面已经渲染
+          setTimeout(function () {
+            userPage.testUniIdPages('register');
+          }, 500);
+        }
+      });
+    } else {
+      // 如果没有找到user页面，跳转到user页面并传递参数
+      uni.switchTab({
+        url: '/pages/user/user',
+        success: function success() {
+          // 设置一个标记，让user页面知道要打开注册
+          getApp().globalData.openUserRegister = true;
+        }
+      });
+    }
+  }), (0, _defineProperty2.default)(_methods, "callLoginApi", function callLoginApi(loginParams) {
+    var _this25 = this;
+    // 显示加载中
+    uni.showLoading({
+      title: '登录中...'
+    });
+
+    // 调用登录API
+    uniCloud.callFunction({
+      name: 'login',
+      data: _objectSpread(_objectSpread({}, loginParams), {}, {
+        loginType: 'phone'
+      }),
+      success: function success(res) {
+        console.log('登录结果:', res);
+        if (res.result && res.result.code === 0) {
+          // 处理登录结果
+          _this25.handleLoginResult(res);
+        } else {
+          uni.hideLoading();
           uni.showToast({
-            title: '登录失败',
+            title: res.result && res.result.message || '登录失败',
             icon: 'none'
           });
         }
-      });
-    },
-    // 选择登录方式
-    selectLoginMethod: function selectLoginMethod(method) {
-      this.selectedLoginMethod = method;
-      this.closeLoginModals();
-
-      // 直接显示对应的登录表单
-      this.showPhoneLoginModal(method);
-    },
-    // 检查登录状态
-    checkLoginStatus: function checkLoginStatus() {
-      try {
-        // 检查本地存储中的token
-        var token = uni.getStorageSync('uni_id_token');
-        var tokenExpired = uni.getStorageSync('uni_id_token_expired');
-        var userInfoStr = uni.getStorageSync('userInfo');
-        console.log('本地token:', token);
-        console.log('token过期时间:', tokenExpired);
-        console.log('用户信息:', userInfoStr);
-
-        // 检查token是否过期
-        var now = Date.now();
-        var isExpired = !tokenExpired || now > tokenExpired;
-        console.log('token是否过期:', isExpired);
-
-        // 在界面上显示用户信息
+      },
+      fail: function fail(err) {
+        uni.hideLoading();
+        console.error('登录失败:', err);
         uni.showToast({
-          title: '正在检查登录状态',
-          icon: 'loading'
+          title: '登录失败',
+          icon: 'none'
         });
+      }
+    });
+  }), (0, _defineProperty2.default)(_methods, "setUserInfo", function setUserInfo(userInfo) {
+    this.userInfo = userInfo;
+  }), (0, _defineProperty2.default)(_methods, "handleGetUserInfo", function handleGetUserInfo() {
+    var _this26 = this;
+    console.log('获取微信用户信息');
 
-        // 调试日志输出
-        this.logDebugInfo();
+    // 使用getUserProfile
+    uni.getUserProfile({
+      desc: '用于完善用户资料',
+      success: function success(res) {
+        console.log('获取微信用户信息:', res);
+        // 开始微信登录流程
+        _this26.wxLogin();
+      },
+      fail: function fail(err) {
+        console.error('获取用户信息失败:', err);
+        // 仍然尝试登录，但使用默认用户信息
+        _this26.wxLogin();
+      }
+    });
+  }), (0, _defineProperty2.default)(_methods, "hasProvider", function hasProvider(provider) {
+    return this.providerList.findIndex(function (p) {
+      return p.id === provider;
+    }) > -1;
+  }), (0, _defineProperty2.default)(_methods, "navigate", function navigate() {
+    console.log('执行登录后导航');
 
-        // 使用云对象检查token有效性
-        if (token) {
-          this.checkTokenValidity(token);
-        } else {
-          uni.showModal({
-            title: '登录状态',
-            content: '未找到登录凭证，请重新登录',
-            showCancel: false
-          });
+    // 获取重定向URL（如果有）
+    var redirect = this.getRedirectUrlParam();
+    if (redirect) {
+      // 如果有重定向参数，则跳转到指定页面
+      console.log('跳转到指定页面:', redirect);
+
+      // 判断是否是tabbar页面
+      var tabbarPages = ['/pages/index/index', '/pages/course/course', '/pages/user/user'];
+      var isTabbarPage = tabbarPages.some(function (page) {
+        return redirect.startsWith(page);
+      });
+      if (isTabbarPage) {
+        // 使用switchTab跳转到tabbar页面
+        uni.switchTab({
+          url: redirect,
+          fail: function fail(err) {
+            console.error('跳转tabbar页面失败:', err);
+            // 失败时跳转到首页
+            uni.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        });
+      } else {
+        // 使用redirectTo跳转到非tabbar页面
+        uni.redirectTo({
+          url: redirect,
+          fail: function fail(err) {
+            console.error('跳转页面失败:', err);
+            // 失败时跳转到首页
+            uni.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        });
+      }
+    } else {
+      // 没有重定向参数，返回上一页或首页
+      var pages = getCurrentPages();
+      if (pages.length > 1) {
+        // 有上一页，返回上一页
+        uni.navigateBack();
+      } else {
+        // 没有上一页，跳转到首页
+        uni.switchTab({
+          url: '/pages/index/index'
+        });
+      }
+    }
+  }), (0, _defineProperty2.default)(_methods, "getRedirectUrlParam", function getRedirectUrlParam() {
+    var query = this.$mp && this.$mp.query;
+
+    // 支持多种常见的参数名称
+    var redirectParams = ['redirect', 'redirectUrl', 'redirect_url', 'returnUrl', 'return_url'];
+    if (query) {
+      var _iterator = _createForOfIteratorHelper(redirectParams),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var param = _step.value;
+          if (query[param]) {
+            return decodeURIComponent(query[param]);
+          }
         }
       } catch (err) {
-        console.error('检查登录状态错误:', err);
-        uni.showModal({
-          title: '错误',
-          content: "\u68C0\u67E5\u767B\u5F55\u72B6\u6001\u65F6\u51FA\u9519: ".concat(err.message),
-          showCancel: false
-        });
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
       }
-    },
-    // 检查token有效性
-    checkTokenValidity: function checkTokenValidity(token) {
-      var _this19 = this;
-      var uniIdCo = uniCloud.importObject('uni-id-co', {
-        customUI: true
-      });
-      uni.showLoading({
-        title: '检查中...'
-      });
-      uniIdCo.checkToken({
-        token: token
-      }).then(function (res) {
-        uni.hideLoading();
-        console.log('token检查结果:', res);
-        if (res.code === 0) {
-          // 成功获取到用户信息，显示详细内容
-          var infoText = "\u767B\u5F55\u72B6\u6001: \u5DF2\u767B\u5F55\n";
-
-          // 添加用户ID信息
-          infoText += "\u7528\u6237ID: ".concat(res.uid || '未知', "\n");
-
-          // 检查云数据库中的用户信息
-          _this19.checkDatabaseUserInfo(res.uid);
-
-          // 添加用户名和昵称信息
-          if (res.userInfo) {
-            infoText += "\u7528\u6237\u540D: ".concat(res.userInfo.username || '未设置', "\n");
-            infoText += "\u6635\u79F0: ".concat(res.userInfo.nickname || res.userInfo.username || '未设置', "\n");
-
-            // 如果有手机号，显示手机号
-            if (res.userInfo.mobile) {
-              infoText += "\u624B\u673A\u53F7: ".concat(res.userInfo.mobile, "\n");
-            }
-
-            // 显示是否绑定手机号
-            infoText += "\u662F\u5426\u7ED1\u5B9A\u624B\u673A\u53F7: ".concat(res.userInfo.mobile ? '是' : '否', "\n");
-          }
-
-          // 尝试获取用户完整信息
-          var userInfo = uni.getStorageSync('userInfo');
-
-          // 如果存储了用户信息，添加到显示中
-          if (userInfo) {
-            infoText += "\n\u672C\u5730\u5B58\u50A8\u4FE1\u606F:\n";
-            infoText += "\u5B58\u50A8\u7528\u6237ID: ".concat(userInfo.uid || userInfo._id || '未知', "\n");
-            if ((0, _typeof2.default)(userInfo) === 'object') {
-              // 检查userInfo属性
-              if (userInfo.userInfo) {
-                infoText += "\u5B58\u50A8\u6635\u79F0: ".concat(userInfo.userInfo.nickname || userInfo.nickname || '未设置', "\n");
-              } else {
-                infoText += "\u5B58\u50A8\u6635\u79F0: ".concat(userInfo.nickname || '未设置', "\n");
-              }
-            }
-          }
-
-          // 显示token过期时间
-          var tokenExpired = uni.getStorageSync('uni_id_token_expired');
-          if (tokenExpired) {
-            var expireDate = new Date(tokenExpired);
-            infoText += "\nToken\u8FC7\u671F\u65F6\u95F4: ".concat(expireDate.toLocaleString(), "\n");
-            infoText += "\u662F\u5426\u5DF2\u8FC7\u671F: ".concat(Date.now() > tokenExpired ? '是' : '否', "\n");
-          }
-
-          // 显示用户信息
-          uni.showModal({
-            title: '登录状态',
-            content: infoText,
-            showCancel: false
-          });
-
-          // 如果没有用户信息，尝试重新获取
-          if (!userInfo || !userInfo.nickname) {
-            _this19.refreshUserInfo(res);
-          }
-        } else {
-          uni.showModal({
-            title: '登录状态',
-            content: "\u767B\u5F55\u5DF2\u5931\u6548: ".concat(res.message || '未知错误'),
-            showCancel: false
-          });
-        }
-      }).catch(function (err) {
-        uni.hideLoading();
-        console.error('检查token失败:', err);
-        uni.showModal({
-          title: '登录状态',
-          content: "\u68C0\u67E5\u5931\u8D25: ".concat(err.message || JSON.stringify(err)),
-          showCancel: false
-        });
-      });
-    },
-    // 检查数据库中的用户信息
-    checkDatabaseUserInfo: function checkDatabaseUserInfo(uid) {
-      if (!uid) return;
-      console.log('检查数据库中的用户信息, uid:', uid);
-      uniCloud.callFunction({
-        name: 'getUserInfoByToken',
-        data: {
-          uniIdToken: uni.getStorageSync('uni_id_token')
-        }
-      }).then(function (res) {
-        if (res.result && res.result.code === 0 && res.result.userInfo) {
-          console.log('数据库用户信息:', res.result.userInfo);
-          uni.showModal({
-            title: '数据库用户信息',
-            content: "\u7528\u6237ID: ".concat(res.result.userInfo._id, "\n\u7528\u6237\u540D: ").concat(res.result.userInfo.username || '未设置', "\n\u6635\u79F0: ").concat(res.result.userInfo.nickname || '未设置'),
-            showCancel: false
-          });
-        } else {
-          console.error('获取数据库用户信息失败:', res);
-        }
-      }).catch(function (err) {
-        console.error('查询数据库用户信息失败:', err);
-      });
-    },
-    // 刷新用户信息
-    refreshUserInfo: function refreshUserInfo(tokenCheckRes) {
-      if (!tokenCheckRes || !tokenCheckRes.uid) return;
-      console.log('尝试刷新用户信息');
-
-      // 使用uid构建基本用户信息
-      var basicUserInfo = {
-        uid: tokenCheckRes.uid,
-        _id: tokenCheckRes.uid
-      };
-
-      // 如果有用户信息，添加到基本信息中
-      if (tokenCheckRes.userInfo) {
-        Object.assign(basicUserInfo, tokenCheckRes.userInfo);
-      }
-
-      // 保存到storage
-      uni.setStorageSync('userInfo', basicUserInfo);
-      uni.setStorageSync('uni-id-pages-userInfo', basicUserInfo);
-
-      // 同时触发登录事件，让用户页面刷新
-      uni.$emit('user:login', basicUserInfo);
-      uni.$emit('login:success', basicUserInfo);
-      console.log('已刷新用户信息:', basicUserInfo);
-      uni.showToast({
-        title: '用户信息已刷新',
-        icon: 'success'
-      });
-    },
-    // 检查手机号是否存在于数据库中
-    checkPhoneExistence: function checkPhoneExistence(phoneNumber) {
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-        var result, db, uniIdResult, usersResult;
-        return _regenerator.default.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                _context3.prev = 0;
-                _context3.next = 3;
-                return uniCloud.callFunction({
-                  name: 'login',
-                  data: {
-                    phoneNumber: phoneNumber,
-                    loginType: 'checkMobileExists'
-                  }
-                });
-              case 3:
-                result = _context3.sent;
-                console.log('检查手机号是否存在结果:', result);
-                if (!(result && result.result && result.result.exists !== undefined)) {
-                  _context3.next = 7;
-                  break;
-                }
-                return _context3.abrupt("return", result.result.exists);
-              case 7:
-                // 如果还没有该云函数逻辑，尝试查询可能存在用户的表
-                db = uniCloud.database(); // 查询uni-id-users表
-                _context3.next = 10;
-                return db.collection('uni-id-users').where({
-                  mobile: phoneNumber
-                }).limit(1).field({
-                  _id: true
-                }).get();
-              case 10:
-                uniIdResult = _context3.sent;
-                if (!(uniIdResult && uniIdResult.data && uniIdResult.data.length > 0)) {
-                  _context3.next = 14;
-                  break;
-                }
-                console.log('在uni-id-users表中找到手机号');
-                return _context3.abrupt("return", true);
-              case 14:
-                _context3.next = 16;
-                return db.collection('users').where({
-                  phoneNumber: phoneNumber
-                }).limit(1).field({
-                  _id: true
-                }).get();
-              case 16:
-                usersResult = _context3.sent;
-                if (!(usersResult && usersResult.data && usersResult.data.length > 0)) {
-                  _context3.next = 20;
-                  break;
-                }
-                console.log('在users表中找到手机号');
-                return _context3.abrupt("return", true);
-              case 20:
-                console.log('未找到该手机号的用户');
-                return _context3.abrupt("return", false);
-              case 24:
-                _context3.prev = 24;
-                _context3.t0 = _context3["catch"](0);
-                console.error('检查手机号存在性时出错:', _context3.t0);
-                // 出错时默认假设存在，避免错误提示
-                return _context3.abrupt("return", false);
-              case 28:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3, null, [[0, 24]]);
-      }))();
     }
-  }
+    return null;
+  }), _methods)
 };
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))

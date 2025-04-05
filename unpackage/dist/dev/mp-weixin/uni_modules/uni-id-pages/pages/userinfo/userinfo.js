@@ -277,7 +277,7 @@ var _default = {
   onLoad: function onLoad(e) {
     var _this2 = this;
     return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-      var cachedUserInfo, token, tokenExpired, now, hasToken, hasExpired, hasUserInfo;
+      var cachedUserInfo, token, tokenExpired, now, hasToken, hasExpired, hasUserInfo, userInfo;
       return _regenerator.default.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
@@ -319,20 +319,45 @@ var _default = {
 
               // 有用户信息就允许访问页面，不管token是否有效
               if (hasUserInfo) {
-                _context2.next = 13;
+                _context2.next = 19;
                 break;
               }
               console.log('没有找到用户信息，可能需要登录');
+
+              // 尝试从userInfo中获取用户信息
+              userInfo = uni.getStorageSync('userInfo');
+              if (!(userInfo && (userInfo._id || userInfo.uid))) {
+                _context2.next = 17;
+                break;
+              }
+              console.log('从userInfo中找到了用户信息，尝试恢复');
+              _store.mutations.setUserInfo(userInfo, {
+                cover: true
+              });
+              // 继续加载页面
+              _context2.next = 19;
+              break;
+            case 17:
               uni.showModal({
                 title: '提示',
                 content: '无法加载用户信息，请返回首页',
                 showCancel: false,
                 success: function success() {
-                  uni.navigateBack();
+                  uni.navigateBack({
+                    fail: function fail() {
+                      // 如果返回失败，尝试跳转到首页
+                      uni.switchTab({
+                        url: '/pages/index/index',
+                        fail: function fail() {
+                          console.error('无法返回首页');
+                        }
+                      });
+                    }
+                  });
                 }
               });
               return _context2.abrupt("return");
-            case 13:
+            case 19:
               // 使用更安全的方式获取账号信息
               try {
                 // 根据token状态决定是否尝试获取账号信息
@@ -348,7 +373,7 @@ var _default = {
                 console.error('加载用户信息时出错:', e);
                 // 出错时仍继续显示页面
               }
-            case 14:
+            case 20:
             case "end":
               return _context2.stop();
           }
@@ -544,7 +569,7 @@ var _default = {
     getAccountInfoSafe: function getAccountInfoSafe() {
       var _this5 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
-        var token, res;
+        var token, timeout, res;
         return _regenerator.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
@@ -560,37 +585,66 @@ var _default = {
                 _this5.hasPassword = false; // 默认假设没有密码
                 return _context7.abrupt("return");
               case 6:
-                _context7.next = 8;
-                return uniIdCo.getAccountInfo();
-              case 8:
+                // 设置超时
+                timeout = setTimeout(function () {
+                  console.log('获取账户信息超时，使用默认设置');
+                  _this5.hasPassword = false;
+                }, 3000); // 尝试获取账户信息
+                _context7.next = 9;
+                return uniIdCo.getAccountInfo().catch(function (err) {
+                  console.error('获取账户信息API调用失败:', err);
+                  // 添加上下文信息，提高调试能力
+                  if (err.message && err.message.includes('token')) {
+                    console.log('token可能已过期，尝试刷新token');
+                    _this5.tryRefreshToken();
+                  }
+                  return {
+                    isPasswordSet: false
+                  };
+                });
+              case 9:
                 res = _context7.sent;
-                console.log('获取账户信息成功', res);
-                _this5.hasPassword = !!res.isPasswordSet;
-                _context7.next = 18;
+                // 清除超时
+                clearTimeout(timeout);
+                console.log('获取账户信息响应:', res);
+
+                // 更新用户信息和密码状态
+                if (res && !res.code) {
+                  console.log('获取账户信息成功');
+                  _this5.hasPassword = !!res.isPasswordSet;
+
+                  // 如果获取的信息比本地更新，则更新本地存储
+                  if (res.userInfo && res.userInfo._id) {
+                    _store.mutations.setUserInfo(res.userInfo, {
+                      cover: false
+                    });
+                  }
+                } else {
+                  console.log('获取账户信息返回错误码:', res ? res.code : 'unknown');
+                  _this5.hasPassword = false;
+                }
+                _context7.next = 20;
                 break;
-              case 13:
-                _context7.prev = 13;
+              case 15:
+                _context7.prev = 15;
                 _context7.t0 = _context7["catch"](0);
                 console.error('获取账户信息失败，但不影响页面使用:', _context7.t0);
 
                 // token可能已过期，但我们已经有用户信息，所以继续显示页面
                 if (_context7.t0.message && _context7.t0.message.includes('token校验未通过')) {
                   console.log('token校验未通过，使用缓存的用户信息继续显示页面');
-
                   // 尝试刷新token
-                  _this5.tryRefreshToken().catch(function (e) {
-                    console.error('刷新token失败:', e);
-                  });
+                  _this5.tryRefreshToken();
                 }
 
                 // 默认设置hasPassword为false，避免影响界面显示
                 _this5.hasPassword = false;
-              case 18:
+              case 20:
               case "end":
                 return _context7.stop();
             }
           }
-        }, _callee7, null, [[0, 13]]);
+        }, _callee7, null, [[0, 15]]);
       }))();
     },
     // 尝试刷新token

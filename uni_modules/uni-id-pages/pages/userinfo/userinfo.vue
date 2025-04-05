@@ -117,15 +117,34 @@ const uniIdCo = uniCloud.importObject("uni-id-co")
 			// 有用户信息就允许访问页面，不管token是否有效
 			if (!hasUserInfo) {
 				console.log('没有找到用户信息，可能需要登录');
-				uni.showModal({
-					title: '提示',
-					content: '无法加载用户信息，请返回首页',
-					showCancel: false,
-					success: () => {
-						uni.navigateBack();
-					}
-				});
-				return;
+				
+				// 尝试从userInfo中获取用户信息
+				const userInfo = uni.getStorageSync('userInfo');
+				if (userInfo && (userInfo._id || userInfo.uid)) {
+					console.log('从userInfo中找到了用户信息，尝试恢复');
+					mutations.setUserInfo(userInfo, {cover: true});
+					// 继续加载页面
+				} else {
+					uni.showModal({
+						title: '提示',
+						content: '无法加载用户信息，请返回首页',
+						showCancel: false,
+						success: () => {
+							uni.navigateBack({
+								fail: () => {
+									// 如果返回失败，尝试跳转到首页
+									uni.switchTab({
+										url: '/pages/index/index',
+										fail: () => {
+											console.error('无法返回首页');
+										}
+									});
+								}
+							});
+						}
+					});
+					return;
+				}
 			}
 			
 			// 使用更安全的方式获取账号信息
@@ -283,21 +302,49 @@ const uniIdCo = uniCloud.importObject("uni-id-co")
 						return;
 					}
 					
+					// 设置超时
+					const timeout = setTimeout(() => {
+						console.log('获取账户信息超时，使用默认设置');
+						this.hasPassword = false;
+					}, 3000);
+					
 					// 尝试获取账户信息
-					const res = await uniIdCo.getAccountInfo();
-					console.log('获取账户信息成功', res);
-					this.hasPassword = !!res.isPasswordSet;
+					const res = await uniIdCo.getAccountInfo().catch(err => {
+						console.error('获取账户信息API调用失败:', err);
+						// 添加上下文信息，提高调试能力
+						if (err.message && err.message.includes('token')) {
+							console.log('token可能已过期，尝试刷新token');
+							this.tryRefreshToken();
+						}
+						return { isPasswordSet: false };
+					});
+					
+					// 清除超时
+					clearTimeout(timeout);
+					
+					console.log('获取账户信息响应:', res);
+					
+					// 更新用户信息和密码状态
+					if (res && !res.code) {
+						console.log('获取账户信息成功');
+						this.hasPassword = !!res.isPasswordSet;
+						
+						// 如果获取的信息比本地更新，则更新本地存储
+						if (res.userInfo && res.userInfo._id) {
+							mutations.setUserInfo(res.userInfo, {cover: false});
+						}
+					} else {
+						console.log('获取账户信息返回错误码:', res ? res.code : 'unknown');
+						this.hasPassword = false;
+					}
 				} catch (err) {
 					console.error('获取账户信息失败，但不影响页面使用:', err);
 					
 					// token可能已过期，但我们已经有用户信息，所以继续显示页面
 					if (err.message && err.message.includes('token校验未通过')) {
 						console.log('token校验未通过，使用缓存的用户信息继续显示页面');
-						
 						// 尝试刷新token
-						this.tryRefreshToken().catch(e => {
-							console.error('刷新token失败:', e);
-						});
+						this.tryRefreshToken();
 					}
 					
 					// 默认设置hasPassword为false，避免影响界面显示

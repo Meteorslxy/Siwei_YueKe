@@ -155,7 +155,8 @@ export default {
       },
       isDev: false, // 是否为开发环境
       isAdmin: false, // 是否为管理员
-      hasContent: true // 是否存在内容
+      hasContent: false, // 是否存在内容
+      verboseLogging: false, // 是否显示详细日志
     }
   },
   onLoad() {
@@ -223,6 +224,35 @@ export default {
     setTimeout(() => {
       this.checkContent()
     }, 500)
+    
+    // 检查是否需要打开个人资料
+    if (getApp().globalData.openUserProfile) {
+      // 清除标记
+      getApp().globalData.openUserProfile = false
+      
+      // 延迟执行，确保页面已经加载完成
+      setTimeout(() => {
+        if (this.hasUserInfo) {
+          this.testUniIdPages('profile')
+        } else {
+          uni.showToast({
+            title: '请先登录',
+            icon: 'none'
+          })
+        }
+      }, 800)
+    }
+    
+    // 检查是否需要打开注册页面
+    if (getApp().globalData.openUserRegister) {
+      // 清除标记
+      getApp().globalData.openUserRegister = false
+      
+      // 延迟执行，确保页面已经加载完成
+      setTimeout(() => {
+        this.testUniIdPages('register')
+      }, 800)
+    }
   },
   mounted() {
     // 加载用户信息
@@ -469,13 +499,13 @@ export default {
     async fetchCompleteUserInfo(userId) {
       if (!userId) return;
       
-      console.log('正在从数据库获取完整用户信息, ID:', userId);
+      if (this.isDev) console.log('正在从数据库获取完整用户信息, ID:', userId);
       
       try {
         // 获取token
         const token = uni.getStorageSync('uni_id_token');
         if (!token) {
-          console.log('未找到有效token，无法获取用户信息');
+          if (this.isDev) console.log('未找到有效token，无法获取用户信息');
           return;
         }
         
@@ -489,16 +519,16 @@ export default {
           }
         });
         
-        console.log('从云函数获取用户信息结果:', result);
+        if (this.verboseLogging) console.log('从云函数获取用户信息结果:', result);
         
         if (result.result && result.result.code === 0 && result.result.userInfo) {
           const dbUserInfo = result.result.userInfo;
-          console.log('从数据库获取到完整用户信息:', dbUserInfo);
+          if (this.isDev) console.log('从数据库获取到完整用户信息:', dbUserInfo);
           
           // 根据实际服务器数据检查昵称字段
           if (dbUserInfo && (!dbUserInfo.nickname || dbUserInfo.nickname.startsWith('用户'))) {
             // 如果数据库里的昵称也是自动生成的，查询其他可用的信息
-            console.log('数据库中的昵称也是自动生成的，查看用户其他信息');
+            if (this.isDev) console.log('数据库中的昵称也是自动生成的，查看用户其他信息');
             
             // 可以在这里查询数据库中的其他用户信息字段
             // ...
@@ -506,51 +536,9 @@ export default {
             // 更新本地存储的用户信息
             this.updateUserInfoWithDBData(dbUserInfo);
           }
-        } else {
-          console.log('获取用户信息失败:', result);
-          
-          // 如果云函数调用失败，可以尝试让云函数直接查数据库
-          console.log('尝试直接查询数据库获取用户信息');
-          const dbResult = await uniCloud.callFunction({
-            name: 'getUserById',
-            data: { userId: userId }
-          }).catch(e => {
-            console.error('直接查询失败:', e);
-            return null;
-          });
-          
-          if (dbResult && dbResult.result && dbResult.result.code === 0 && dbResult.result.userInfo) {
-            console.log('直接查询到的用户信息:', dbResult.result.userInfo);
-            this.updateUserInfoWithDBData(dbResult.result.userInfo);
-          }
         }
-      } catch (error) {
-        console.error('获取完整用户信息时出错:', error);
-        
-        // 错误处理：如果获取信息失败，可以尝试其他方式
-        try {
-          // 尝试解析token获取用户ID
-          if (userId) {
-            console.log('尝试通过解析token的方式直接获取用户信息');
-            const token = uni.getStorageSync('uni_id_token');
-            
-            if (token) {
-              // 解析token payload
-              const parts = token.split('.');
-              if (parts.length === 3) {
-                // 解码payload部分
-                const base64Payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-                const payload = JSON.parse(atob(base64Payload));
-                
-                if (payload && payload.uid && payload.uid === userId) {
-                  console.log('token中的uid与提供的userId匹配，确认用户身份有效');
-                }
-              }
-            }
-          }
-        } catch (parseError) {
-          console.error('解析token出错:', parseError);
-        }
+      } catch (err) {
+        console.error('获取完整用户信息失败:', err);
       }
     },
     
@@ -841,18 +829,37 @@ export default {
     
     // 使用token获取用户信息
     async fetchUserInfoByToken() {
-      console.log('尝试使用token获取用户信息')
+      if (this.isDev) console.log('尝试使用token获取用户信息');
+      
       try {
         // 使用自定义云函数获取完整用户信息
         const token = uni.getStorageSync('uni_id_token');
         
+        if (!token) {
+          if (this.isDev) console.log('没有找到token，无法获取用户信息');
+          return false;
+        }
+        
+        // 尝试从简单格式token中解析用户ID，格式：userId_timestamp_randomPart
+        let userId = '';
+        if (token.includes('_')) {
+          const parts = token.split('_');
+          if (parts.length >= 2) {
+            userId = parts[0];
+            if (this.isDev) console.log('从token中解析出用户ID:', userId);
+          }
+        }
+        
         // 调用自定义云函数获取完整用户信息
         const result = await uniCloud.callFunction({
           name: 'getUserInfoByToken',
-          data: { uniIdToken: token }
+          data: { 
+            uniIdToken: token,
+            userId: userId // 传递解析出的用户ID作为备用
+          }
         });
         
-        console.log('获取完整用户信息结果:', result);
+        if (this.verboseLogging) console.log('获取完整用户信息结果:', result);
         
         if (result && result.result && result.result.code === 0 && result.result.userInfo) {
           // 使用完整的用户信息
@@ -863,7 +870,7 @@ export default {
             completeUserInfo.nickname = completeUserInfo.username;
           }
           
-          console.log('获取到完整用户信息:', completeUserInfo);
+          if (this.isDev) console.log('获取到完整用户信息:', completeUserInfo);
           
           // 保存到存储
           uni.setStorageSync('uni-id-pages-userInfo', completeUserInfo);
@@ -880,12 +887,47 @@ export default {
           // 获取预约数量
           this.fetchBookingCounts();
           
-          console.log('完整用户信息保存成功');
+          if (this.isDev) console.log('完整用户信息保存成功');
           return true;
+        } else if (result && result.result && result.result.code !== 0) {
+          if (this.isDev) console.warn('getUserInfoByToken返回错误:', result.result.message);
+          
+          // 如果有解析出的用户ID，尝试直接从数据库获取用户信息
+          if (userId) {
+            if (this.isDev) console.log('尝试使用解析出的用户ID直接获取用户信息');
+            try {
+              const db = uniCloud.database();
+              const userDetailRes = await db.collection('uni-id-users').doc(userId).get();
+              
+              if (userDetailRes.data && userDetailRes.data.length > 0) {
+                const userDetail = userDetailRes.data[0];
+                if (this.isDev) console.log('直接从数据库获取到用户信息:', userDetail);
+                
+                // 保存到存储
+                uni.setStorageSync('uni-id-pages-userInfo', userDetail);
+                uni.setStorageSync('userInfo', userDetail);
+                
+                // 更新当前页面状态
+                this.userInfo = this.formatUserInfo(userDetail);
+                this.hasUserInfo = true;
+                
+                // 触发事件
+                uni.$emit('user:login', userDetail);
+                
+                // 获取预约数量
+                this.fetchBookingCounts();
+                
+                if (this.isDev) console.log('直接从数据库获取用户信息成功');
+                return true;
+              }
+            } catch (dbErr) {
+              console.error('直接从数据库获取用户信息失败:', dbErr);
+            }
+          }
         }
         
         // 如果上面的方法失败，回退到原来的方法
-        console.log('无法获取完整用户信息，尝试使用uni-id-co方法');
+        if (this.isDev) console.log('无法获取完整用户信息，尝试使用uni-id-co方法');
         
         // 使用uni-id-co获取当前用户信息
         const uniIdCo = uniCloud.importObject('uni-id-co', {
@@ -1119,18 +1161,18 @@ export default {
       // 实现测试统一登录的逻辑
       console.log(`测试uni-id-pages的${type}功能`);
       
-      // 先清除当前的用户信息，以便测试登录
-      this.userInfo = {}
-      this.hasUserInfo = false
-      
-      // 同样确保清除token，避免干扰测试
-      uni.removeStorageSync('uni_id_token')
-      uni.removeStorageSync('uni_id_token_expired')
-      uni.removeStorageSync('uni-id-pages-userInfo')
-      uni.removeStorageSync('userInfo')
-      
       switch (type) {
         case 'login':
+          // 先清除当前的用户信息，以便测试登录
+          this.userInfo = {}
+          this.hasUserInfo = false
+          
+          // 同样确保清除token，避免干扰测试
+          uni.removeStorageSync('uni_id_token')
+          uni.removeStorageSync('uni_id_token_expired')
+          uni.removeStorageSync('uni-id-pages-userInfo')
+          uni.removeStorageSync('userInfo')
+          
           // 跳转到不需要密码的登录页
           console.log('比较 /uni_modules/uni-id-pages/pages/login/login-withoutpwd /pages/user/user /uni_modules/uni-id-pages/pages/login/login-withpwd');
           
@@ -1142,13 +1184,23 @@ export default {
           });
           break;
         case 'register':
+          // 先清除当前的用户信息，以便测试注册
+          this.userInfo = {}
+          this.hasUserInfo = false
+          
+          // 同样确保清除token，避免干扰测试
+          uni.removeStorageSync('uni_id_token')
+          uni.removeStorageSync('uni_id_token_expired')
+          uni.removeStorageSync('uni-id-pages-userInfo')
+          uni.removeStorageSync('userInfo')
+          
           // 跳转到注册页
           uni.navigateTo({
             url: '/uni_modules/uni-id-pages/pages/register/register'
           });
           break;
         case 'profile':
-          // 跳转到个人资料页
+          // 跳转到个人资料页而不清除用户信息
           this.toUserProfile();
           break;
         default:
@@ -1243,47 +1295,24 @@ export default {
         return;
       }
       
-      // 先同步一次用户信息，确保uni-id-pages组件可以正确显示
+      // 同步用户信息到uni-id-pages组件
       this.syncUserInfoToUniIdPages();
       
-      // 检查token状态
-      const token = uni.getStorageSync('uni_id_token');
-      const tokenExpired = uni.getStorageSync('uni_id_token_expired');
-      const now = Date.now();
-      const tokenValid = token && tokenExpired && new Date(tokenExpired).getTime() > now;
-      
-      if (!tokenValid) {
-        console.log('token已过期或无效，尝试更新token');
-        // 确保token可用，如果token过期或不存在，创建一个临时token
-        try {
-          // 使用用户ID生成一个临时token，实际项目中应调用云函数
-          const tempTokenInfo = {
-            token: `temp_token_${this.userInfo._id}_${Date.now()}`,
-            tokenExpired: now + 30 * 60 * 1000 // 30分钟有效期
-          };
-          
-          // 保存临时token
-          uni.setStorageSync('uni_id_token', tempTokenInfo.token);
-          uni.setStorageSync('uni_id_token_expired', tempTokenInfo.tokenExpired);
-          console.log('已设置临时token');
-        } catch (e) {
-          console.error('设置临时token失败:', e);
+      // 直接跳转到个人资料页
+      uni.navigateTo({
+        url: '/uni_modules/uni-id-pages/pages/userinfo/userinfo',
+        success: () => {
+          console.log('成功跳转到个人资料页');
+        },
+        fail: (err) => {
+          console.error('跳转个人资料页失败:', err);
+          // 如果跳转失败，尝试返回主页
+          uni.showToast({
+            title: '无法打开个人资料页',
+            icon: 'none'
+          });
         }
-      }
-      
-      // 跳转到uni-id-pages的个人资料页
-      setTimeout(() => {
-        uni.navigateTo({
-          url: '/uni_modules/uni-id-pages/pages/userinfo/userinfo',
-          fail: (err) => {
-            console.error('跳转个人资料页失败:', err);
-            uni.showToast({
-              title: '无法打开个人资料页',
-              icon: 'none'
-            });
-          }
-        });
-      }, 200); // 稍微延迟一下，确保数据同步完成
+      });
     },
 
     // 获取用户可兑换优惠券列表

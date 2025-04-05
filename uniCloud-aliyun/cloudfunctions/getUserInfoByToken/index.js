@@ -52,15 +52,26 @@ exports.main = async (event, context) => {
     // 尝试从token中解析uid
     let uid = '';
     try {
-      // 将token按 . 分割
-      const parts = token.split('.');
-      if (parts.length === 3) {
-        // Base64解码payload部分(第二部分)
-        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-        console.log('从token负载中解析的信息:', payload);
-        if (payload.uid) {
-          uid = payload.uid;
-          console.log('从token负载中获取到uid:', uid);
+      // 首先检查是否为简单格式token (userId_timestamp_randomPart)
+      if (token.includes('_')) {
+        const parts = token.split('_');
+        if (parts.length >= 2) {
+          uid = parts[0]; // 第一部分是userId
+          console.log('从简单格式token中获取到uid:', uid);
+        }
+      } 
+      // 如果不是简单格式，尝试JWT格式解析
+      else {
+        // 将token按 . 分割
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          // Base64解码payload部分(第二部分)
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+          console.log('从token负载中解析的信息:', payload);
+          if (payload.uid) {
+            uid = payload.uid;
+            console.log('从token负载中获取到uid:', uid);
+          }
         }
       }
     } catch (e) {
@@ -83,22 +94,27 @@ exports.main = async (event, context) => {
         console.log('检查token结果:', checkTokenRes);
         
         if (checkTokenRes.code !== 0) {
-          return {
-            code: -2,
-            message: 'token无效或已过期',
-            detail: checkTokenRes
-          };
+          // 如果token检查失败但是使用的是简单格式token，我们仍然尝试使用解析出的uid
+          if (token.includes('_') && uid) {
+            console.log('简单格式token未通过uni-id-co验证，但继续使用解析出的uid');
+          } else {
+            return {
+              code: -2,
+              message: 'token无效或已过期',
+              detail: checkTokenRes
+            };
+          }
+        } else {
+          // 获取用户id
+          uid = checkTokenRes.uid;
+          
+          // 如果uid为空，尝试从userInfo中获取
+          if (!uid && checkTokenRes.userInfo && checkTokenRes.userInfo._id) {
+            uid = checkTokenRes.userInfo._id;
+          }
+          
+          console.log('从token检查中获取到的用户ID:', uid);
         }
-        
-        // 获取用户id
-        uid = checkTokenRes.uid;
-        
-        // 如果uid为空，尝试从userInfo中获取
-        if (!uid && checkTokenRes.userInfo && checkTokenRes.userInfo._id) {
-          uid = checkTokenRes.userInfo._id;
-        }
-        
-        console.log('从token检查中获取到的用户ID:', uid);
       } catch (checkError) {
         console.error('检查token出错，将继续使用解析方式:', checkError);
         // 继续使用已经解析的uid或userId
