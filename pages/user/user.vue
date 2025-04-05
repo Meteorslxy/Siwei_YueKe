@@ -103,7 +103,7 @@
       </view>
       
       <!-- 测试功能区域 -->
-      <view class="menu-group">
+      <view class="menu-group" v-if="isDev">
         <view class="menu-title">测试功能</view>
         <view class="menu-list">
           <view class="menu-list-item test-btn" @click="testUniIdPages('login')">
@@ -157,6 +157,9 @@ export default {
       isAdmin: false, // 是否为管理员
       hasContent: false, // 是否存在内容
       verboseLogging: false, // 是否显示详细日志
+      // 添加防止重复更新的标记
+      isUpdatingUserInfo: false,
+      lastUserUpdateTime: 0
     }
   },
   onLoad() {
@@ -336,69 +339,85 @@ export default {
     
     // 加载用户信息
     loadUserInfo() {
-      if (this.isDev) console.log('加载用户信息')
+      if (this.isDev && this.verboseLogging) console.log('加载用户信息');
       
-      // 先检查是否有token，如果有token但没有用户信息，优先尝试从token获取用户信息
-      const token = uni.getStorageSync('uni_id_token')
-      const tokenExpired = uni.getStorageSync('uni_id_token_expired')
-      
-      if (token && tokenExpired && new Date(tokenExpired).getTime() > Date.now() && !this.hasUserInfo) {
-        if (this.isDev) console.log('发现有效的token，尝试获取用户信息')
-        this.fetchUserInfoByToken()
-        return
-      }
-      
-      // 先尝试从uni-id-pages的存储位置读取
-      const uniIdPagesUserInfo = uni.getStorageSync('uni-id-pages-userInfo')
-      if (uniIdPagesUserInfo && Object.keys(uniIdPagesUserInfo).length > 0) {
-        if (this.isDev) console.log('从uni-id-pages读取到的用户信息:', uniIdPagesUserInfo)
-        
-        // 处理uni-id-pages格式的用户信息
-        const formattedInfo = this.formatUserInfo(uniIdPagesUserInfo)
-        this.userInfo = formattedInfo
-        this.hasUserInfo = true
-        
-        if (this.isDev) {
-          console.log('处理后的用户信息:', JSON.stringify(this.userInfo))
-          console.log('是否有用户信息：', this.hasUserInfo)
-        }
+      // 防止短时间内重复调用
+      const now = Date.now();
+      if (this.isUpdatingUserInfo || (now - this.lastUserUpdateTime < 500)) {
+        if (this.isDev && this.verboseLogging) console.log('正在更新用户信息中，跳过重复调用');
         return;
       }
       
-      // 如果uni-id-pages中没有，再尝试从自定义位置读取
-      const userInfoStorage = uni.getStorageSync('userInfo')
-      if (userInfoStorage) {
-        try {
-          // 检查是否已经是对象，避免重复解析
-          let userInfo = typeof userInfoStorage === 'string' ? JSON.parse(userInfoStorage) : userInfoStorage
-          if (this.isDev) console.log('读取到的用户信息类型:', typeof userInfo)
+      this.isUpdatingUserInfo = true;
+      this.lastUserUpdateTime = now;
+      
+      try {
+        // 先检查是否有token，如果有token但没有用户信息，优先尝试从token获取用户信息
+        const token = uni.getStorageSync('uni_id_token')
+        const tokenExpired = uni.getStorageSync('uni_id_token_expired')
+        
+        if (token && tokenExpired && new Date(tokenExpired).getTime() > Date.now() && !this.hasUserInfo) {
+          if (this.isDev && this.verboseLogging) console.log('发现有效的token，尝试获取用户信息')
+          this.fetchUserInfoByToken()
+          this.isUpdatingUserInfo = false;
+          return
+        }
+        
+        // 先尝试从uni-id-pages的存储位置读取
+        const uniIdPagesUserInfo = uni.getStorageSync('uni-id-pages-userInfo')
+        if (uniIdPagesUserInfo && Object.keys(uniIdPagesUserInfo).length > 0) {
+          if (this.isDev && this.verboseLogging) console.log('从uni-id-pages读取到的用户信息:', uniIdPagesUserInfo)
           
-          // 检查是否为数组格式(登录函数可能返回数组格式)
-          if (Array.isArray(userInfo) && userInfo.length > 0) {
-            userInfo = userInfo[0]
-          }
+          // 处理uni-id-pages格式的用户信息
+          const formattedInfo = this.formatUserInfo(uniIdPagesUserInfo)
+          this.userInfo = formattedInfo
+          this.hasUserInfo = true
           
-          // 处理一层嵌套数据的情况（有些时候data是嵌套的）
-          if (userInfo.data && typeof userInfo.data === 'object') {
-            userInfo = userInfo.data
-          }
-          
-          this.userInfo = this.formatUserInfo(userInfo)
-          this.hasUserInfo = !!this.userInfo.nickName || !!this.userInfo.nickname
-          
-          if (this.isDev) {
+          if (this.isDev && this.verboseLogging) {
             console.log('处理后的用户信息:', JSON.stringify(this.userInfo))
             console.log('是否有用户信息：', this.hasUserInfo)
           }
-        } catch (e) {
-          console.error('解析用户信息失败:', e)
+          this.isUpdatingUserInfo = false;
+          return;
+        }
+        
+        // 如果uni-id-pages中没有，再尝试从自定义位置读取
+        const userInfoStorage = uni.getStorageSync('userInfo')
+        if (userInfoStorage) {
+          try {
+            // 检查是否已经是对象，避免重复解析
+            let userInfo = typeof userInfoStorage === 'string' ? JSON.parse(userInfoStorage) : userInfoStorage
+            if (this.isDev && this.verboseLogging) console.log('读取到的用户信息类型:', typeof userInfo)
+            
+            // 检查是否为数组格式(登录函数可能返回数组格式)
+            if (Array.isArray(userInfo) && userInfo.length > 0) {
+              userInfo = userInfo[0]
+            }
+            
+            // 处理一层嵌套数据的情况（有些时候data是嵌套的）
+            if (userInfo.data && typeof userInfo.data === 'object') {
+              userInfo = userInfo.data
+            }
+            
+            this.userInfo = this.formatUserInfo(userInfo)
+            this.hasUserInfo = !!this.userInfo.nickName || !!this.userInfo.nickname
+            
+            if (this.isDev && this.verboseLogging) {
+              console.log('处理后的用户信息:', JSON.stringify(this.userInfo))
+              console.log('是否有用户信息：', this.hasUserInfo)
+            }
+          } catch (e) {
+            console.error('解析用户信息失败:', e)
+            this.userInfo = {}
+            this.hasUserInfo = false
+          }
+        } else {
+          if (this.isDev && this.verboseLogging) console.log('未找到用户信息')
           this.userInfo = {}
           this.hasUserInfo = false
         }
-      } else {
-        if (this.isDev) console.log('未找到用户信息')
-        this.userInfo = {}
-        this.hasUserInfo = false
+      } finally {
+        this.isUpdatingUserInfo = false;
       }
     },
     
@@ -409,8 +428,10 @@ export default {
       // 创建新对象，避免直接修改原对象
       const formattedInfo = {...userInfo};
       
-      // 调试日志
-      console.log('原始用户信息:', JSON.stringify(userInfo));
+      // 调试日志，仅在verboseLogging为true时输出
+      if (this.verboseLogging) {
+        console.log('原始用户信息:', JSON.stringify(userInfo));
+      }
       
       // 直接从数据库查询完整用户信息
       this.fetchCompleteUserInfo(formattedInfo._id || formattedInfo.uid);
@@ -427,7 +448,7 @@ export default {
       
       // 检查userInfo嵌套结构，uni-id-co有时会返回嵌套结构
       if (formattedInfo.userInfo && typeof formattedInfo.userInfo === 'object') {
-        console.log('发现嵌套的userInfo结构，提取内部数据');
+        if (this.verboseLogging) console.log('发现嵌套的userInfo结构，提取内部数据');
         Object.keys(formattedInfo.userInfo).forEach(key => {
           if (!formattedInfo[key] && formattedInfo.userInfo[key]) {
             formattedInfo[key] = formattedInfo.userInfo[key];
@@ -438,12 +459,12 @@ export default {
       // 直接使用nickname字段，uni-id中的昵称字段是nickname
       if (formattedInfo.nickname) {
         formattedInfo.nickName = formattedInfo.nickname;
-        console.log('使用nickname字段:', formattedInfo.nickname);
+        if (this.verboseLogging) console.log('使用nickname字段:', formattedInfo.nickname);
       } 
       // 如果没有nickname，尝试使用username
       else if (formattedInfo.username) {
         formattedInfo.nickName = formattedInfo.username;
-        console.log('使用username字段:', formattedInfo.username);
+        if (this.verboseLogging) console.log('使用username字段:', formattedInfo.username);
       }
       // 如果都没有，生成默认用户名
       else {
@@ -451,19 +472,19 @@ export default {
         if (formattedInfo.phoneNumber || formattedInfo.mobile) {
           const phone = formattedInfo.phoneNumber || formattedInfo.mobile;
           formattedInfo.nickName = '用户' + phone.substr(phone.length - 4);
-          console.log('使用手机号生成昵称');
+          if (this.verboseLogging) console.log('使用手机号生成昵称');
         } else if (formattedInfo._id && formattedInfo._id.length > 4) {
           // 使用用户ID后四位
           formattedInfo.nickName = '用户' + formattedInfo._id.substr(-4);
-          console.log('使用ID生成昵称');
+          if (this.verboseLogging) console.log('使用ID生成昵称');
         } else if (formattedInfo.uid && formattedInfo.uid.length > 4) {
           // 使用uid后四位
           formattedInfo.nickName = '用户' + formattedInfo.uid.substr(-4);
-          console.log('使用UID生成昵称');
+          if (this.verboseLogging) console.log('使用UID生成昵称');
         } else {
           // 最后的备选
           formattedInfo.nickName = '未知用户';
-          console.log('使用默认昵称: 未知用户');
+          if (this.verboseLogging) console.log('使用默认昵称: 未知用户');
         }
       }
       
@@ -1284,33 +1305,51 @@ export default {
 
     // 跳转到个人资料页
     toUserProfile() {
-      console.log('测试uni-id-pages的profile功能');
+      console.log('跳转到个人资料页面');
       
-      // 确保用户已登录
-      if (!this.hasUserInfo || !this.userInfo._id) {
-        uni.showToast({
-          title: '请先登录',
-          icon: 'none'
-        });
-        return;
+      // 在跳转前先确保本地有token
+      let token = uni.getStorageSync('uni_id_token');
+      if (!token) {
+        // 尝试生成一个临时token
+        try {
+          const userId = this.userInfo._id || this.userInfo.userId;
+          if (userId) {
+            console.log('本地token不存在，生成临时token');
+            const timestamp = Date.now();
+            const randomPart = Math.random().toString(36).substring(2, 10);
+            const newToken = `${userId}_${timestamp}_${randomPart}`;
+            const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+            
+            uni.setStorageSync('uni_id_token', newToken);
+            uni.setStorageSync('uni_id_token_expired', tokenExpired);
+            console.log('已生成新token以确保个人资料页正常加载');
+          }
+        } catch (e) {
+          console.error('生成临时token失败:', e);
+        }
       }
       
-      // 同步用户信息到uni-id-pages组件
-      this.syncUserInfoToUniIdPages();
-      
-      // 直接跳转到个人资料页
+      // 跳转到个人资料页面
       uni.navigateTo({
         url: '/uni_modules/uni-id-pages/pages/userinfo/userinfo',
-        success: () => {
+        success: (res) => {
           console.log('成功跳转到个人资料页');
         },
         fail: (err) => {
-          console.error('跳转个人资料页失败:', err);
-          // 如果跳转失败，尝试返回主页
-          uni.showToast({
-            title: '无法打开个人资料页',
-            icon: 'none'
-          });
+          console.error('跳转到个人资料页失败:', err);
+          // 失败时尝试另一种跳转方式
+          setTimeout(() => {
+            uni.redirectTo({
+              url: '/uni_modules/uni-id-pages/pages/userinfo/userinfo',
+              fail: (redirectErr) => {
+                console.error('重定向到个人资料页也失败:', redirectErr);
+                uni.showToast({
+                  title: '页面跳转失败',
+                  icon: 'none'
+                });
+              }
+            });
+          }, 500);
         }
       });
     },

@@ -99,29 +99,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "recyclableRender", function() { return recyclableRender; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "components", function() { return components; });
 var components
-try {
-  components = {
-    uniEasyinput: function () {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput */ "uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue */ 441))
-    },
-  }
-} catch (e) {
-  if (
-    e.message.indexOf("Cannot find module") !== -1 &&
-    e.message.indexOf(".vue") !== -1
-  ) {
-    console.error(e.message)
-    console.error("1. 排查组件名称拼写是否正确")
-    console.error(
-      "2. 排查组件是否符合 easycom 规范，文档：https://uniapp.dcloud.net.cn/collocation/pages?id=easycom"
-    )
-    console.error(
-      "3. 若组件不符合 easycom 规范，需手动引入，并在 components 中注册该组件"
-    )
-  } else {
-    throw e
-  }
-}
 var render = function () {
   var _vm = this
   var _h = _vm.$createElement
@@ -285,138 +262,6 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 var _default = {
   components: {
     // 注册组件
@@ -427,32 +272,8 @@ var _default = {
       isSupport: false,
       // 是否支持一键登录
       statusBarHeight: 0,
-      mobile: '',
-      // 手机号输入
-      account: '',
-      // 账号输入（用户名或手机号）
-      password: '',
-      // 密码输入
-      confirmPassword: '',
-      // 确认密码
-      verificationCode: '',
-      // 验证码
-      countdown: 0,
-      // 验证码倒计时
       showLoginOptionsModal: false,
       // 是否显示其他登录方式弹窗
-      showPhoneVerifyModal: false,
-      // 是否显示手机号验证码登录弹窗
-      showPhonePasswordModal: false,
-      // 是否显示手机号密码登录弹窗
-      showRegisterModal: false,
-      // 是否显示注册弹窗
-      captchaData: null,
-      // 图形验证码数据
-      showCaptchaModal: false,
-      // 是否显示图形验证码弹窗
-      captchaCode: '',
-      // 图形验证码输入
       loginState: {
         code: '',
         // 微信登录code
@@ -530,16 +351,7 @@ var _default = {
     // 关闭所有登录弹窗
     closeLoginModals: function closeLoginModals() {
       this.showLoginOptionsModal = false;
-      this.showPhoneVerifyModal = false;
-      this.showPhonePasswordModal = false;
-      this.showRegisterModal = false;
-      this.showCaptchaModal = false;
-
-      // 重置输入
-      this.mobile = '';
-      this.password = '';
-      this.confirmPassword = '';
-      this.verificationCode = '';
+      // 移除所有其他弹窗状态，因为它们不再使用
     },
     // 获取验证码
     getVerificationCode: function getVerificationCode() {
@@ -2638,16 +2450,26 @@ var _default = {
   }), (0, _defineProperty2.default)(_methods, "showLoginOptions", function showLoginOptions() {
     this.showLoginOptionsModal = true;
   }), (0, _defineProperty2.default)(_methods, "selectLoginType", function selectLoginType(type) {
-    console.log('选择登录方式:', type);
-    // 关闭登录选项模态框
-    this.showLoginOptionsModal = false;
-    if (type === 'phoneVerify') {
-      this.showPhoneVerifyModal = true;
-    } else if (type === 'phonePassword') {
-      this.showPhonePasswordModal = true;
+    console.log('选择的登录方式:', type);
+    this.selectedLoginMethod = type;
+    this.closeLoginModals(); // 关闭登录选择弹窗
+
+    // 根据选择的类型进行不同处理
+    if (type === 'phonePassword') {
+      // 账号密码登录，直接跳转到账号密码登录页面
+      uni.navigateTo({
+        url: '/uni_modules/uni-id-pages/pages/login/login-withpwd'
+      });
+    } else if (type === 'phoneVerify') {
+      // 手机号验证码登录，直接跳转到手机号验证码登录页面
+      uni.navigateTo({
+        url: '/uni_modules/uni-id-pages/pages/login/login-smscode'
+      });
     } else if (type === 'register') {
-      // 使用测试注册功能
-      this.useTestRegister();
+      // 注册账号，直接跳转到注册页面
+      uni.navigateTo({
+        url: '/uni_modules/uni-id-pages/pages/register/register'
+      });
     }
   }), (0, _defineProperty2.default)(_methods, "useTestRegister", function useTestRegister() {
     // 获取user页的实例

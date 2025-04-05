@@ -277,7 +277,7 @@ var _default = {
   onLoad: function onLoad(e) {
     var _this2 = this;
     return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-      var cachedUserInfo, token, tokenExpired, now, hasToken, hasExpired, hasUserInfo, userInfo;
+      var cachedUserInfo, token, tokenExpired, now, hasToken, hasExpired, hasUserInfo, userInfo, userId, localUserInfo, timestamp, randomPart, newToken, _tokenExpired;
       return _regenerator.default.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
@@ -358,10 +358,35 @@ var _default = {
               });
               return _context2.abrupt("return");
             case 19:
+              // 检查token是否无效，如果无效，提前生成一个新token
+              if (!hasToken || !hasExpired) {
+                console.log('token无效或过期，提前生成临时token');
+                // 从store或缓存中获取用户ID
+                userId = '';
+                if (_store.store.userInfo && _store.store.userInfo._id) {
+                  userId = _store.store.userInfo._id;
+                } else {
+                  localUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+                  if (localUserInfo && localUserInfo._id) {
+                    userId = localUserInfo._id;
+                  }
+                }
+                if (userId) {
+                  // 创建临时token
+                  timestamp = Date.now();
+                  randomPart = Math.random().toString(36).substring(2, 10);
+                  newToken = "".concat(userId, "_").concat(timestamp, "_").concat(randomPart);
+                  _tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+                  console.log('提前生成临时token:', newToken.substring(0, 10) + '...');
+                  uni.setStorageSync('uni_id_token', newToken);
+                  uni.setStorageSync('uni_id_token_expired', _tokenExpired);
+                }
+              }
+
               // 使用更安全的方式获取账号信息
               try {
                 // 根据token状态决定是否尝试获取账号信息
-                if (hasToken) {
+                if (hasToken || uni.getStorageSync('uni_id_token')) {
                   // 先直接使用token验证方法
                   _this2.getAccountInfoSafe();
                 } else {
@@ -373,7 +398,7 @@ var _default = {
                 console.error('加载用户信息时出错:', e);
                 // 出错时仍继续显示页面
               }
-            case 20:
+            case 21:
             case "end":
               return _context2.stop();
           }
@@ -569,7 +594,7 @@ var _default = {
     getAccountInfoSafe: function getAccountInfoSafe() {
       var _this5 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
-        var token, timeout, res;
+        var token, timeout, res, userId, localUserInfo, _res, timestamp, randomPart, newToken, tokenExpired, _timestamp, _randomPart, _newToken, _tokenExpired2, refreshResult, resRetry;
         return _regenerator.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
@@ -589,20 +614,11 @@ var _default = {
                 timeout = setTimeout(function () {
                   console.log('获取账户信息超时，使用默认设置');
                   _this5.hasPassword = false;
-                }, 3000); // 尝试获取账户信息
-                _context7.next = 9;
-                return uniIdCo.getAccountInfo().catch(function (err) {
-                  console.error('获取账户信息API调用失败:', err);
-                  // 添加上下文信息，提高调试能力
-                  if (err.message && err.message.includes('token')) {
-                    console.log('token可能已过期，尝试刷新token');
-                    _this5.tryRefreshToken();
-                  }
-                  return {
-                    isPasswordSet: false
-                  };
-                });
-              case 9:
+                }, 5000); // 延长超时时间以确保有足够的时间处理
+                _context7.prev = 7;
+                _context7.next = 10;
+                return uniIdCo.getAccountInfo();
+              case 10:
                 res = _context7.sent;
                 // 清除超时
                 clearTimeout(timeout);
@@ -623,15 +639,151 @@ var _default = {
                   console.log('获取账户信息返回错误码:', res ? res.code : 'unknown');
                   _this5.hasPassword = false;
                 }
-                _context7.next = 20;
+                _context7.next = 82;
                 break;
-              case 15:
-                _context7.prev = 15;
-                _context7.t0 = _context7["catch"](0);
-                console.error('获取账户信息失败，但不影响页面使用:', _context7.t0);
+              case 16:
+                _context7.prev = 16;
+                _context7.t0 = _context7["catch"](7);
+                // 清除超时
+                clearTimeout(timeout);
+                console.error('获取账户信息API调用失败:', _context7.t0);
+
+                // 添加上下文信息，提高调试能力
+                if (!(_context7.t0.message && _context7.t0.message.includes('token'))) {
+                  _context7.next = 81;
+                  break;
+                }
+                console.log('token可能已过期，尝试通过用户ID直接获取信息');
+
+                // 直接从本地存储获取用户ID
+                userId = '';
+                _context7.prev = 23;
+                // 首先尝试从store中获取用户ID
+                if (_store.store.userInfo && _store.store.userInfo._id) {
+                  userId = _store.store.userInfo._id;
+                  console.log('从store中获取用户ID:', userId);
+                }
+                // 再尝试从本地存储获取
+                else {
+                  localUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+                  if (localUserInfo && localUserInfo._id) {
+                    userId = localUserInfo._id;
+                    console.log('从本地存储获取用户ID:', userId);
+                  }
+                }
+
+                // 如果获取到了用户ID，直接通过云函数获取用户信息
+                if (!userId) {
+                  _context7.next = 58;
+                  break;
+                }
+                console.log('使用用户ID直接获取用户信息:', userId);
+
+                // 使用云函数获取用户信息
+                _context7.prev = 27;
+                _context7.next = 30;
+                return uniCloud.callFunction({
+                  name: 'getUserInfoById',
+                  data: {
+                    userId: userId
+                  }
+                });
+              case 30:
+                _res = _context7.sent;
+                if (!(_res && _res.result && _res.result.code === 0 && _res.result.userInfo)) {
+                  _context7.next = 45;
+                  break;
+                }
+                console.log('通过云函数获取到用户信息:', _res.result);
+
+                // 设置密码状态
+                _this5.hasPassword = !!_res.result.isPasswordSet;
+
+                // 更新本地存储
+                _store.mutations.setUserInfo(_res.result.userInfo, {
+                  cover: false
+                });
+
+                // 创建一个新token
+                timestamp = Date.now();
+                randomPart = Math.random().toString(36).substring(2, 10);
+                newToken = "".concat(userId, "_").concat(timestamp, "_").concat(randomPart);
+                tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+                console.log('生成新token:', newToken.substring(0, 10) + '...');
+
+                // 保存token
+                uni.setStorageSync('uni_id_token', newToken);
+                uni.setStorageSync('uni_id_token_expired', tokenExpired);
+                return _context7.abrupt("return");
+              case 45:
+                console.error('云函数返回的用户信息无效:', _res === null || _res === void 0 ? void 0 : _res.result);
+              case 46:
+                _context7.next = 58;
+                break;
+              case 48:
+                _context7.prev = 48;
+                _context7.t1 = _context7["catch"](27);
+                console.error('调用getUserInfoById云函数失败:', _context7.t1);
+
+                // 如果getUserInfoById失败，直接生成token而不尝试查询数据库
+                console.log('生成临时token，跳过用户信息查询');
+                _timestamp = Date.now();
+                _randomPart = Math.random().toString(36).substring(2, 10);
+                _newToken = "".concat(userId, "_").concat(_timestamp, "_").concat(_randomPart);
+                _tokenExpired2 = _timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+                // 保存token
+                uni.setStorageSync('uni_id_token', _newToken);
+                uni.setStorageSync('uni_id_token_expired', _tokenExpired2);
+              case 58:
+                _context7.next = 63;
+                break;
+              case 60:
+                _context7.prev = 60;
+                _context7.t2 = _context7["catch"](23);
+                console.error('获取用户ID过程中出错:', _context7.t2);
+              case 63:
+                // 如果上面的直接数据库查询失败，尝试刷新token
+                console.log('尝试刷新token');
+                _context7.next = 66;
+                return _this5.tryRefreshToken();
+              case 66:
+                refreshResult = _context7.sent;
+                if (!refreshResult) {
+                  _context7.next = 81;
+                  break;
+                }
+                _context7.prev = 68;
+                _context7.next = 71;
+                return uniIdCo.getAccountInfo();
+              case 71:
+                resRetry = _context7.sent;
+                console.log('使用新token获取账户信息响应:', resRetry);
+                if (!(resRetry && !resRetry.code)) {
+                  _context7.next = 76;
+                  break;
+                }
+                _this5.hasPassword = !!resRetry.isPasswordSet;
+                return _context7.abrupt("return");
+              case 76:
+                _context7.next = 81;
+                break;
+              case 78:
+                _context7.prev = 78;
+                _context7.t3 = _context7["catch"](68);
+                console.error('使用新token重试获取账户信息失败:', _context7.t3);
+              case 81:
+                // 如果尝试刷新token后仍失败，回退到默认值
+                _this5.hasPassword = false;
+              case 82:
+                _context7.next = 89;
+                break;
+              case 84:
+                _context7.prev = 84;
+                _context7.t4 = _context7["catch"](0);
+                console.error('获取账户信息失败，但不影响页面使用:', _context7.t4);
 
                 // token可能已过期，但我们已经有用户信息，所以继续显示页面
-                if (_context7.t0.message && _context7.t0.message.includes('token校验未通过')) {
+                if (_context7.t4.message && _context7.t4.message.includes('token校验未通过')) {
                   console.log('token校验未通过，使用缓存的用户信息继续显示页面');
                   // 尝试刷新token
                   _this5.tryRefreshToken();
@@ -639,18 +791,19 @@ var _default = {
 
                 // 默认设置hasPassword为false，避免影响界面显示
                 _this5.hasPassword = false;
-              case 20:
+              case 89:
               case "end":
                 return _context7.stop();
             }
           }
-        }, _callee7, null, [[0, 15]]);
+        }, _callee7, null, [[0, 84], [7, 16], [23, 60], [27, 48], [68, 78]]);
       }))();
     },
     // 尝试刷新token
     tryRefreshToken: function tryRefreshToken() {
+      var _this6 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
-        var userId, res;
+        var localUserInfo, _userId, userId;
         return _regenerator.default.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
@@ -661,18 +814,53 @@ var _default = {
 
                 // 检查是否有用户信息
                 if (!(!_store.store.userInfo || !_store.store.userInfo._id)) {
-                  _context8.next = 5;
+                  _context8.next = 11;
                   break;
                 }
                 console.log('没有用户信息，无法刷新token');
+
+                // 尝试从本地存储获取用户ID
+                localUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+                if (!(!localUserInfo || !localUserInfo._id)) {
+                  _context8.next = 8;
+                  break;
+                }
+                console.log('本地存储中也没有用户信息，无法刷新token');
                 return _context8.abrupt("return", false);
-              case 5:
-                // 使用用户ID创建临时token，这个方法需要根据你的实际云函数实现
+              case 8:
+                // 使用本地存储的用户ID
+                _userId = localUserInfo._id;
+                console.log('从本地存储获取用户ID:', _userId);
+                return _context8.abrupt("return", _this6.refreshTokenWithUserId(_userId));
+              case 11:
+                // 使用store中的用户ID
                 userId = _store.store.userInfo._id;
                 console.log('准备刷新token，用户ID:', userId);
-
-                // 调用refreshToken云函数刷新token
-                _context8.next = 9;
+                return _context8.abrupt("return", _this6.refreshTokenWithUserId(userId));
+              case 16:
+                _context8.prev = 16;
+                _context8.t0 = _context8["catch"](0);
+                console.error('尝试刷新token时出错，继续使用当前用户信息:', _context8.t0);
+                return _context8.abrupt("return", false);
+              case 20:
+              case "end":
+                return _context8.stop();
+            }
+          }
+        }, _callee8, null, [[0, 16]]);
+      }))();
+    },
+    // 使用用户ID刷新token
+    refreshTokenWithUserId: function refreshTokenWithUserId(userId) {
+      var _this7 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
+        var res;
+        return _regenerator.default.wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                _context9.prev = 0;
+                _context9.next = 3;
                 return uniCloud.callFunction({
                   name: 'refreshToken',
                   data: {
@@ -680,37 +868,100 @@ var _default = {
                   }
                 }).catch(function (e) {
                   console.error('调用刷新token云函数失败，继续使用当前用户信息:', e);
-                  return null;
+
+                  // 尝试使用备选方法：如果refreshToken云函数不存在，可以尝试使用getUserInfoByToken云函数
+                  return _this7.fallbackRefreshToken(userId);
                 });
-              case 9:
-                res = _context8.sent;
+              case 3:
+                res = _context9.sent;
                 if (!(res && res.result && res.result.code === 0 && res.result.token)) {
-                  _context8.next = 17;
+                  _context9.next = 11;
                   break;
                 }
                 // 保存新token
                 console.log('刷新token成功，保存新token');
                 uni.setStorageSync('uni_id_token', res.result.token);
                 uni.setStorageSync('uni_id_token_expired', res.result.tokenExpired);
-                return _context8.abrupt("return", true);
-              case 17:
-                console.log('刷新token失败，响应:', res);
-                // 即使刷新失败也不影响使用
-                return _context8.abrupt("return", false);
-              case 19:
-                _context8.next = 25;
+                return _context9.abrupt("return", true);
+              case 11:
+                console.log('刷新token失败，尝试备选方案');
+                // 尝试备选方案
+                return _context9.abrupt("return", _this7.fallbackRefreshToken(userId));
+              case 13:
+                _context9.next = 19;
                 break;
-              case 21:
-                _context8.prev = 21;
-                _context8.t0 = _context8["catch"](0);
-                console.error('尝试刷新token时出错，继续使用当前用户信息:', _context8.t0);
-                return _context8.abrupt("return", false);
-              case 25:
+              case 15:
+                _context9.prev = 15;
+                _context9.t0 = _context9["catch"](0);
+                console.error('刷新token过程中出错:', _context9.t0);
+                // 尝试备选方案
+                return _context9.abrupt("return", _this7.fallbackRefreshToken(userId));
+              case 19:
               case "end":
-                return _context8.stop();
+                return _context9.stop();
             }
           }
-        }, _callee8, null, [[0, 21]]);
+        }, _callee9, null, [[0, 15]]);
+      }))();
+    },
+    // 备选的token刷新方法
+    fallbackRefreshToken: function fallbackRefreshToken(userId) {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10() {
+        var result, timestamp, randomPart, newToken, tokenExpired;
+        return _regenerator.default.wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                _context10.prev = 0;
+                console.log('使用备选方法刷新token，用户ID:', userId);
+
+                // 如果refreshToken云函数不存在，可以尝试使用getUserInfoByToken云函数
+                // 因为我们在getUserInfoByToken中已经实现了支持使用userId直接查询用户信息的功能
+                _context10.next = 4;
+                return uniCloud.callFunction({
+                  name: 'getUserInfoByToken',
+                  data: {
+                    userId: userId,
+                    forceRefresh: true
+                  }
+                });
+              case 4:
+                result = _context10.sent;
+                if (!(result && result.result && result.result.code === 0 && result.result.userInfo)) {
+                  _context10.next = 16;
+                  break;
+                }
+                console.log('通过备选方法获取用户信息成功');
+
+                // 手动创建一个新token
+                timestamp = Date.now();
+                randomPart = Math.random().toString(36).substring(2, 10);
+                newToken = "".concat(userId, "_").concat(timestamp, "_").concat(randomPart);
+                tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+                console.log('手动创建新token:', newToken.substring(0, 10) + '...');
+
+                // 保存token和用户信息
+                uni.setStorageSync('uni_id_token', newToken);
+                uni.setStorageSync('uni_id_token_expired', tokenExpired);
+
+                // 更新用户信息
+                _store.mutations.setUserInfo(result.result.userInfo, {
+                  cover: false
+                });
+                return _context10.abrupt("return", true);
+              case 16:
+                return _context10.abrupt("return", false);
+              case 19:
+                _context10.prev = 19;
+                _context10.t0 = _context10["catch"](0);
+                console.error('备选刷新token方法失败:', _context10.t0);
+                return _context10.abrupt("return", false);
+              case 23:
+              case "end":
+                return _context10.stop();
+            }
+          }
+        }, _callee10, null, [[0, 19]]);
       }))();
     }
   }

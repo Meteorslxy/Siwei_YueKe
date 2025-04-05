@@ -281,22 +281,36 @@ export const mutations = {
 			delta
 		});
 	},
-	loginSuccess(e = {}){
+	loginSuccess(e = {}) {
+		// 设置 token
 		const {
-			showToast = true, toastText = '登录成功', autoBack = true, uniIdRedirectUrl = '', passwordConfirmed
+			showToast = true, 
+			toastText = '登录成功', 
+			autoBack = true, 
+			uniIdRedirectUrl = '', 
+			passwordConfirmed = (e.password_confirm && e.password_confirm === 'true'),
+			config: paramConfig // 从参数中获取config
 		} = e;
-		// console.log({toastText,autoBack});
-		if (showToast) {
+		
+		// 确保引用的是正确的config
+		const localConfig = paramConfig || config || {}; // 优先使用传入的config，然后是导入的config
+		
+		// 确保setPasswordAfterLogin存在并检查类型
+		const needSetPassword = typeof localConfig.setPasswordAfterLogin === 'object' 
+			? !!localConfig.setPasswordAfterLogin 
+			: !!localConfig.setPasswordAfterLogin;
+
+		if (e.errMsg && e.errMsg.indexOf('token不存在') > -1) {
 			uni.showToast({
-				title: toastText,
-				icon: 'none',
-				duration: 3000
+				title: e.errMsg || '登录失败',
+				icon: 'none'
 			});
+			return
 		}
-    
-		// 确保token信息同步到storage，避免登录不完整的问题
-		if (e.token) {
-			uni.setStorageSync('uni_id_token', e.token);
+
+		//习惯问题，有的云端会返回 token 有的返回 accessToken 
+		if (e.token || e.accessToken) {
+			uni.setStorageSync('uni_id_token', e.token || e.accessToken);
 			uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
 			console.log('已保存token信息到storage');
 		}
@@ -310,18 +324,87 @@ export const mutations = {
 		// 同时触发应用自定义的登录成功事件，确保兼容性
 		uni.$emit('user:login', e.userInfo || {});
 		uni.$emit('login:success', e.userInfo || {});
-
-		if (config.setPasswordAfterLogin && !passwordConfirmed) {
-			return uni.redirectTo({
-				url: uniIdRedirectUrl ? `/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd?uniIdRedirectUrl=${uniIdRedirectUrl}&loginType=${e.loginType}`: `/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd?loginType=${e.loginType}`,
-				fail: (err) => {
-					console.log(err);
-				}
+		
+		// 显示登录成功的提示
+		if (showToast) {
+			uni.showToast({
+				title: toastText,
+				icon: 'none',
+				duration: 3000
 			});
+		}
+		
+		// 检查是否需要设置密码
+		if (needSetPassword && !passwordConfirmed) {
+			try {
+				// 确保loginType有值，避免undefined在URL中
+				const loginTypeParam = e.loginType ? `&loginType=${e.loginType}` : '';
+				const uniIdRedirectUrlParam = uniIdRedirectUrl ? 
+					`?uniIdRedirectUrl=${encodeURIComponent(uniIdRedirectUrl)}${loginTypeParam}` : 
+					(e.loginType ? `?loginType=${e.loginType}` : '');
+				
+				// 确保路径格式正确
+				const setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
+				const url = setPasswordPath + uniIdRedirectUrlParam;
+				
+				console.log('准备跳转到设置密码页面:', url);
+				
+				uni.redirectTo({
+					url: url,
+					fail: (err) => {
+						console.error('跳转到设置密码页面失败:', err);
+						// 如果路径不存在，尝试备用路径
+						if (err.errMsg && err.errMsg.includes('not found')) {
+							const fallbackUrl = '/pages/index/index';
+							console.log('尝试跳转到首页:', fallbackUrl);
+							uni.reLaunch({
+								url: fallbackUrl,
+								fail: (fallbackErr) => {
+									console.error('跳转到首页也失败:', fallbackErr);
+									uni.showToast({
+										title: '页面跳转失败',
+										icon: 'none'
+									});
+								}
+							});
+							return;
+						}
+						
+						// 跳转失败时回到首页
+						uni.showToast({
+							title: '页面跳转失败',
+							icon: 'none'
+						});
+						setTimeout(() => {
+							uni.reLaunch({
+								url: localConfig.customHomePagePath || '/pages/index/index'
+							});
+						}, 1500);
+					}
+				});
+				return; // 阻止继续执行后续代码
+			} catch (err) {
+				console.error('设置密码页面跳转出错:', err);
+			}
 		}
 
 		if (autoBack) {
 			this.loginBack({uniIdRedirectUrl});
+		} else if (!needSetPassword) {
+			// 没有自动返回且不需要设置密码时，跳转到首页
+			console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);
+			setTimeout(() => {
+				uni.reLaunch({
+					url: localConfig.customHomePagePath || '/pages/index/index',
+					fail: (err) => {
+						console.error('跳转首页失败:', err);
+						// 尝试使用switchTab
+						uni.switchTab({
+							url: '/pages/index/index'
+						});
+					}
+				});
+			}, 1500);
 		}
 	}
 }

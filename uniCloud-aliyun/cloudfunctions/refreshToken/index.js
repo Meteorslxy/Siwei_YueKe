@@ -2,72 +2,64 @@
 
 // 云函数入口
 exports.main = async (event, context) => {
-	// 获取客户端传递的userId
 	const { userId } = event;
+	const db = uniCloud.database();
 	
-	// 参数检查
+	console.log('开始刷新token，用户ID:', userId);
+	
+	// 如果没有提供userId，返回错误
 	if (!userId) {
 		return {
-			code: 1,
-			message: '缺少用户ID'
+			code: -1,
+			message: '缺少必要参数：userId'
 		};
 	}
 	
-	// 获取数据库引用
-	const db = uniCloud.database();
-	
 	try {
-		// 查询用户信息确认用户存在
-		const userInfo = await db.collection('uni-id-users').doc(userId).get();
+		// 直接查询数据库确认用户是否存在
+		const userResult = await db.collection('uni-id-users').doc(userId).get();
 		
-		if (!userInfo.data || userInfo.data.length === 0) {
+		if (!userResult.data || userResult.data.length === 0) {
 			return {
-				code: 2,
-				message: '用户不存在'
+				code: -2,
+				message: '未找到用户'
 			};
 		}
 		
-		// 获取用户数据
-		const user = userInfo.data[0];
+		// 获取用户信息
+		const userInfo = userResult.data[0] || userResult.data;
 		
-		// 创建token
-		const token = createToken(user);
+		// 生成新的token
+		// 这里使用简单格式: ${userId}_${timestamp}_${randomPart}
+		const timestamp = Date.now();
+		const randomPart = Math.random().toString(36).substring(2, 10);
+		const newToken = `${userId}_${timestamp}_${randomPart}`;
 		
-		// 设置token过期时间
-		const tokenExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天有效期
+		// 生成token过期时间，这里设置为7天后
+		const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000;
 		
-		// 返回token信息
+		console.log('生成新token:', newToken);
+		
+		// 可选：将token更新到用户信息中
+		/* 如果需要更新用户表中的token信息，取消这段代码的注释
+		await db.collection('uni-id-users').doc(userId).update({
+			token: newToken,
+			token_expired: tokenExpired
+		});
+		*/
+		
 		return {
 			code: 0,
-			message: 'token刷新成功',
-			token,
-			tokenExpired
+			message: '刷新token成功',
+			token: newToken,
+			tokenExpired: tokenExpired
 		};
 	} catch (error) {
 		console.error('刷新token失败:', error);
 		return {
-			code: 500,
-			message: '服务器内部错误',
-			error: error.message
+			code: -3,
+			message: error.message || '刷新token失败',
+			error: JSON.stringify(error)
 		};
 	}
-};
-
-// 创建一个简单的token
-function createToken(user) {
-	// 创建token的payload部分
-	const payload = {
-		uid: user._id,
-		role: user.role || [],
-		exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7天有效期
-	};
-	
-	// 将payload转为JSON，再编码为Base64
-	const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
-	
-	// 在实际应用中，这里应该添加签名，但为了简单起见，我们只返回编码后的payload
-	// 注意：这不是一个安全的token生成方法，仅用于演示
-	const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${base64Payload}.SIGNATURE`;
-	
-	return token;
-} 
+}; 

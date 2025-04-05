@@ -246,7 +246,7 @@ var _default = {
       "needCaptcha": false,
       "focusUsername": false,
       "focusPassword": false,
-      "logo": "/static/logo.png",
+      "logo": "../../../../static/images/logo.png",
       "loginErrorCount": 0,
       // 登录错误计数
       "loginLocked": false,

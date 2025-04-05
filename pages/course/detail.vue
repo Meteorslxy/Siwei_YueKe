@@ -1756,7 +1756,20 @@ export default {
         const userInfo = uni.getStorageSync('userInfo');
         if (!userInfo) return;
         
-        const userData = JSON.parse(userInfo);
+        // 修复这里的问题：检查userInfo是否已经是对象
+        let userData;
+        if (typeof userInfo === 'string') {
+          try {
+            userData = JSON.parse(userInfo);
+          } catch (e) {
+            console.error('解析用户信息字符串失败:', e);
+            return;
+          }
+        } else {
+          // 已经是对象，直接使用
+          userData = userInfo;
+        }
+        
         const userId = userData.userId || userData._id;
         if (!userId) return;
         
@@ -1902,7 +1915,20 @@ export default {
         const userInfo = uni.getStorageSync('userInfo');
         if (!userInfo) return false;
         
-        const userData = JSON.parse(userInfo);
+        // 修复这里的问题：检查userInfo是否已经是对象
+        let userData;
+        if (typeof userInfo === 'string') {
+          try {
+            userData = JSON.parse(userInfo);
+          } catch (e) {
+            console.error('解析用户信息字符串失败:', e);
+            return false;
+          }
+        } else {
+          // 已经是对象，直接使用
+          userData = userInfo;
+        }
+        
         const userId = userData.userId || userData._id;
         if (!userId) return false;
         

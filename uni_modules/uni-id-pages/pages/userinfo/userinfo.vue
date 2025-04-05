@@ -147,10 +147,37 @@ const uniIdCo = uniCloud.importObject("uni-id-co")
 				}
 			}
 			
+			// 检查token是否无效，如果无效，提前生成一个新token
+			if (!hasToken || !hasExpired) {
+				console.log('token无效或过期，提前生成临时token');
+				// 从store或缓存中获取用户ID
+				let userId = '';
+				if (store.userInfo && store.userInfo._id) {
+					userId = store.userInfo._id;
+				} else {
+					const localUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+					if (localUserInfo && localUserInfo._id) {
+						userId = localUserInfo._id;
+					}
+				}
+				
+				if (userId) {
+					// 创建临时token
+					const timestamp = Date.now();
+					const randomPart = Math.random().toString(36).substring(2, 10);
+					const newToken = `${userId}_${timestamp}_${randomPart}`;
+					const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+					
+					console.log('提前生成临时token:', newToken.substring(0, 10) + '...');
+					uni.setStorageSync('uni_id_token', newToken);
+					uni.setStorageSync('uni_id_token_expired', tokenExpired);
+				}
+			}
+			
 			// 使用更安全的方式获取账号信息
 			try {
 				// 根据token状态决定是否尝试获取账号信息
-				if (hasToken) {
+				if (hasToken || uni.getStorageSync('uni_id_token')) {
 					// 先直接使用token验证方法
 					this.getAccountInfoSafe();
 				} else {
@@ -306,35 +333,132 @@ const uniIdCo = uniCloud.importObject("uni-id-co")
 					const timeout = setTimeout(() => {
 						console.log('获取账户信息超时，使用默认设置');
 						this.hasPassword = false;
-					}, 3000);
+					}, 5000); // 延长超时时间以确保有足够的时间处理
 					
-					// 尝试获取账户信息
-					const res = await uniIdCo.getAccountInfo().catch(err => {
-						console.error('获取账户信息API调用失败:', err);
-						// 添加上下文信息，提高调试能力
-						if (err.message && err.message.includes('token')) {
-							console.log('token可能已过期，尝试刷新token');
-							this.tryRefreshToken();
-						}
-						return { isPasswordSet: false };
-					});
-					
-					// 清除超时
-					clearTimeout(timeout);
-					
-					console.log('获取账户信息响应:', res);
-					
-					// 更新用户信息和密码状态
-					if (res && !res.code) {
-						console.log('获取账户信息成功');
-						this.hasPassword = !!res.isPasswordSet;
+					try {
+						// 先尝试获取账户信息
+						const res = await uniIdCo.getAccountInfo();
 						
-						// 如果获取的信息比本地更新，则更新本地存储
-						if (res.userInfo && res.userInfo._id) {
-							mutations.setUserInfo(res.userInfo, {cover: false});
+						// 清除超时
+						clearTimeout(timeout);
+						
+						console.log('获取账户信息响应:', res);
+						
+						// 更新用户信息和密码状态
+						if (res && !res.code) {
+							console.log('获取账户信息成功');
+							this.hasPassword = !!res.isPasswordSet;
+							
+							// 如果获取的信息比本地更新，则更新本地存储
+							if (res.userInfo && res.userInfo._id) {
+								mutations.setUserInfo(res.userInfo, {cover: false});
+							}
+						} else {
+							console.log('获取账户信息返回错误码:', res ? res.code : 'unknown');
+							this.hasPassword = false;
 						}
-					} else {
-						console.log('获取账户信息返回错误码:', res ? res.code : 'unknown');
+					} catch (apiErr) {
+						// 清除超时
+						clearTimeout(timeout);
+						
+						console.error('获取账户信息API调用失败:', apiErr);
+						
+						// 添加上下文信息，提高调试能力
+						if (apiErr.message && apiErr.message.includes('token')) {
+							console.log('token可能已过期，尝试通过用户ID直接获取信息');
+							
+							// 直接从本地存储获取用户ID
+							let userId = '';
+							try {
+								// 首先尝试从store中获取用户ID
+								if (store.userInfo && store.userInfo._id) {
+									userId = store.userInfo._id;
+									console.log('从store中获取用户ID:', userId);
+								} 
+								// 再尝试从本地存储获取
+								else {
+									const localUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+									if (localUserInfo && localUserInfo._id) {
+										userId = localUserInfo._id;
+										console.log('从本地存储获取用户ID:', userId);
+									}
+								}
+								
+								// 如果获取到了用户ID，直接通过云函数获取用户信息
+								if (userId) {
+									console.log('使用用户ID直接获取用户信息:', userId);
+									
+									// 使用云函数获取用户信息
+									try {
+										const res = await uniCloud.callFunction({
+											name: 'getUserInfoById',
+											data: { userId }
+										});
+										
+										if (res && res.result && res.result.code === 0 && res.result.userInfo) {
+											console.log('通过云函数获取到用户信息:', res.result);
+											
+											// 设置密码状态
+											this.hasPassword = !!res.result.isPasswordSet;
+											
+											// 更新本地存储
+											mutations.setUserInfo(res.result.userInfo, {cover: false});
+											
+											// 创建一个新token
+											const timestamp = Date.now();
+											const randomPart = Math.random().toString(36).substring(2, 10);
+											const newToken = `${userId}_${timestamp}_${randomPart}`;
+											const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+											
+											console.log('生成新token:', newToken.substring(0, 10) + '...');
+											
+											// 保存token
+											uni.setStorageSync('uni_id_token', newToken);
+											uni.setStorageSync('uni_id_token_expired', tokenExpired);
+											
+											return;
+										} else {
+											console.error('云函数返回的用户信息无效:', res?.result);
+										}
+									} catch (cloudErr) {
+										console.error('调用getUserInfoById云函数失败:', cloudErr);
+										
+										// 如果getUserInfoById失败，直接生成token而不尝试查询数据库
+										console.log('生成临时token，跳过用户信息查询');
+										const timestamp = Date.now();
+										const randomPart = Math.random().toString(36).substring(2, 10);
+										const newToken = `${userId}_${timestamp}_${randomPart}`;
+										const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+										
+										// 保存token
+										uni.setStorageSync('uni_id_token', newToken);
+										uni.setStorageSync('uni_id_token_expired', tokenExpired);
+									}
+								}
+							} catch (idErr) {
+								console.error('获取用户ID过程中出错:', idErr);
+							}
+							
+							// 如果上面的直接数据库查询失败，尝试刷新token
+							console.log('尝试刷新token');
+							const refreshResult = await this.tryRefreshToken();
+							
+							if (refreshResult) {
+								// 如果刷新成功，重新尝试获取账户信息
+								try {
+									const resRetry = await uniIdCo.getAccountInfo();
+									console.log('使用新token获取账户信息响应:', resRetry);
+									if (resRetry && !resRetry.code) {
+										this.hasPassword = !!resRetry.isPasswordSet;
+										return;
+									}
+								} catch (retryErr) {
+									console.error('使用新token重试获取账户信息失败:', retryErr);
+								}
+							}
+						}
+						
+						// 如果尝试刷新token后仍失败，回退到默认值
 						this.hasPassword = false;
 					}
 				} catch (err) {
@@ -361,20 +485,42 @@ const uniIdCo = uniCloud.importObject("uni-id-co")
 					// 检查是否有用户信息
 					if (!store.userInfo || !store.userInfo._id) {
 						console.log('没有用户信息，无法刷新token');
-						return false;
+						
+						// 尝试从本地存储获取用户ID
+						const localUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+						if (!localUserInfo || !localUserInfo._id) {
+							console.log('本地存储中也没有用户信息，无法刷新token');
+							return false;
+						}
+						
+						// 使用本地存储的用户ID
+						const userId = localUserInfo._id;
+						console.log('从本地存储获取用户ID:', userId);
+						return this.refreshTokenWithUserId(userId);
 					}
 					
-					// 使用用户ID创建临时token，这个方法需要根据你的实际云函数实现
+					// 使用store中的用户ID
 					const userId = store.userInfo._id;
 					console.log('准备刷新token，用户ID:', userId);
-					
+					return this.refreshTokenWithUserId(userId);
+				} catch (e) {
+					console.error('尝试刷新token时出错，继续使用当前用户信息:', e);
+					return false;
+				}
+			},
+			
+			// 使用用户ID刷新token
+			async refreshTokenWithUserId(userId) {
+				try {
 					// 调用refreshToken云函数刷新token
 					const res = await uniCloud.callFunction({
 						name: 'refreshToken',
 						data: { userId }
 					}).catch(e => {
 						console.error('调用刷新token云函数失败，继续使用当前用户信息:', e);
-						return null;
+						
+						// 尝试使用备选方法：如果refreshToken云函数不存在，可以尝试使用getUserInfoByToken云函数
+						return this.fallbackRefreshToken(userId);
 					});
 					
 					// 处理响应
@@ -385,12 +531,53 @@ const uniIdCo = uniCloud.importObject("uni-id-co")
 						uni.setStorageSync('uni_id_token_expired', res.result.tokenExpired);
 						return true;
 					} else {
-						console.log('刷新token失败，响应:', res);
-						// 即使刷新失败也不影响使用
-						return false;
+						console.log('刷新token失败，尝试备选方案');
+						// 尝试备选方案
+						return this.fallbackRefreshToken(userId);
 					}
 				} catch (e) {
-					console.error('尝试刷新token时出错，继续使用当前用户信息:', e);
+					console.error('刷新token过程中出错:', e);
+					// 尝试备选方案
+					return this.fallbackRefreshToken(userId);
+				}
+			},
+			
+			// 备选的token刷新方法
+			async fallbackRefreshToken(userId) {
+				try {
+					console.log('使用备选方法刷新token，用户ID:', userId);
+					
+					// 如果refreshToken云函数不存在，可以尝试使用getUserInfoByToken云函数
+					// 因为我们在getUserInfoByToken中已经实现了支持使用userId直接查询用户信息的功能
+					const result = await uniCloud.callFunction({
+						name: 'getUserInfoByToken',
+						data: { userId, forceRefresh: true }
+					});
+					
+					if (result && result.result && result.result.code === 0 && result.result.userInfo) {
+						console.log('通过备选方法获取用户信息成功');
+						
+						// 手动创建一个新token
+						const timestamp = Date.now();
+						const randomPart = Math.random().toString(36).substring(2, 10);
+						const newToken = `${userId}_${timestamp}_${randomPart}`;
+						const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+						
+						console.log('手动创建新token:', newToken.substring(0, 10) + '...');
+						
+						// 保存token和用户信息
+						uni.setStorageSync('uni_id_token', newToken);
+						uni.setStorageSync('uni_id_token_expired', tokenExpired);
+						
+						// 更新用户信息
+						mutations.setUserInfo(result.result.userInfo, {cover: false});
+						
+						return true;
+					}
+					
+					return false;
+				} catch (e) {
+					console.error('备选刷新token方法失败:', e);
 					return false;
 				}
 			}

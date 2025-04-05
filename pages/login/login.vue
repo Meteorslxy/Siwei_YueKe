@@ -53,7 +53,7 @@
       <view class="modal-content">
         <view class="modal-title">登录方式</view>
         <view class="login-options">
-          <view class="login-option-item" @click="selectLoginType('phoneVerify')">
+          <view class="login-option-item" @click="selectLoginType('phonePassword')">
             <text class="option-icon">🔐</text>
             <text class="option-text">账号密码登录</text>
           </view>
@@ -72,157 +72,25 @@
       </view>
     </view>
     
-    <!-- 手机号验证码登录弹窗 -->
-    <view class="phone-login-modal" v-if="showPhoneVerifyModal">
-      <view class="modal-mask" @click="closeLoginModals"></view>
-      <view class="modal-content">
-        <view class="modal-title">手机号验证码登录</view>
-        <view class="input-box">
-          <uni-easyinput 
-            v-model="mobile" 
-            placeholder="请输入手机号" 
-            type="number"
-            maxlength="11"
-            focus
-          />
-        </view>
-        <view class="input-box verification-box">
-          <input 
-            type="number" 
-            maxlength="6" 
-            placeholder="请输入验证码" 
-            placeholder-class="input-placeholder"
-            v-model="verificationCode"
-          />
-          <button class="get-code-btn" :disabled="countdown > 0" @click="getVerificationCode">
-            {{countdown > 0 ? `${countdown}秒后重试` : '获取验证码'}}
-          </button>
-        </view>
-        <view class="modal-buttons">
-          <button class="modal-btn cancel-btn" @click="closeLoginModals">取消</button>
-          <button class="modal-btn confirm-btn" @click="confirmPhoneVerifyLogin">确定</button>
-        </view>
-      </view>
-    </view>
-    
-    <!-- 手机号密码登录弹窗 -->
-    <view class="phone-login-modal" v-if="showPhonePasswordModal">
-      <view class="modal-mask" @click="closeLoginModals"></view>
-      <view class="modal-content">
-        <view class="modal-title">账号密码登录</view>
-        <view class="input-box">
-          <uni-easyinput 
-            v-model="account" 
-            placeholder="请输入用户名/手机号" 
-            focus
-          />
-        </view>
-        <view class="input-box">
-          <uni-easyinput 
-            v-model="password" 
-            placeholder="请输入密码"
-            type="password"
-          />
-        </view>
-        <view class="modal-buttons">
-          <button class="modal-btn cancel-btn" @click="closeLoginModals">取消</button>
-          <button class="modal-btn confirm-btn" @click="confirmPhonePasswordLogin">确定</button>
-        </view>
-      </view>
-    </view>
-    
-    <!-- 注册弹窗 -->
-    <view class="phone-login-modal" v-if="showRegisterModal">
-      <view class="modal-mask" @click="closeLoginModals"></view>
-      <view class="modal-content">
-        <view class="modal-title">注册账号</view>
-        <view class="input-box">
-          <uni-easyinput 
-            v-model="mobile" 
-            placeholder="请输入手机号" 
-            type="number"
-            maxlength="11"
-            focus
-          />
-        </view>
-        <view class="input-box verification-box">
-          <input 
-            type="number" 
-            maxlength="6" 
-            placeholder="请输入验证码" 
-            placeholder-class="input-placeholder"
-            v-model="verificationCode"
-          />
-          <button class="get-code-btn" :disabled="countdown > 0" @click="getVerificationCode">
-            {{countdown > 0 ? `${countdown}秒后重试` : '获取验证码'}}
-          </button>
-        </view>
-        <view class="input-box">
-          <uni-easyinput 
-            v-model="password" 
-            placeholder="请设置密码"
-            type="password"
-          />
-        </view>
-        <view class="input-box">
-          <uni-easyinput 
-            v-model="confirmPassword" 
-            placeholder="请确认密码"
-            type="password"
-          />
-        </view>
-        <view class="modal-buttons">
-          <button class="modal-btn cancel-btn" @click="closeLoginModals">取消</button>
-          <button class="modal-btn confirm-btn" @click="confirmRegister">确定</button>
-        </view>
-      </view>
-    </view>
-    
-    <!-- 图形验证码弹窗 -->
-    <view class="phone-login-modal" v-if="showCaptchaModal">
-      <view class="modal-mask" @click="closeCaptchaModal"></view>
-      <view class="modal-content">
-        <view class="modal-title">请输入图形验证码</view>
-        <view class="captcha-img-box">
-          <image class="captcha-img" :src="captchaData ? captchaData.captchaBase64 : ''" mode="widthFix" @click="refreshCaptcha"></image>
-          <text class="refresh-text" @click="refreshCaptcha">刷新验证码</text>
-        </view>
-        <view class="input-box">
-          <input 
-            type="text" 
-            maxlength="4" 
-            placeholder="请输入图形验证码" 
-            placeholder-class="input-placeholder"
-            v-model="captchaCode"
-            focus 
-          />
-        </view>
-        <view class="modal-buttons">
-          <button class="modal-btn cancel-btn" @click="closeCaptchaModal">取消</button>
-          <button class="modal-btn confirm-btn" @click="confirmCaptchaAndSendSms">确定</button>
-        </view>
-      </view>
-    </view>
-    
     <!-- 三方登录 -->
     <view class="third-login" v-if="providerList.length > 0">
       <view class="third-title">
         <view class="line"></view>
         <text>第三方登录</text>
         <view class="line"></view>
-      </view>
-      
+    </view>
+    
       <view class="auth-items">
         <!-- 微信授权登录按钮 -->
         <view class="auth-item" v-if="hasProvider('weixin')" @click="handleGetUserInfo">
           <view class="icon-btn">
             <text class="iconfont icon-wechat" style="color: #07C160;"></text>
-          </view>
-          <text class="auth-name">微信登录</text>
         </view>
-        
+          <text class="auth-name">微信登录</text>
+    </view>
+    
         <!-- 其他登录方式 -->
-      </view>
+        </view>
     </view>
   </view>
 </template>
@@ -237,19 +105,7 @@ export default {
       redirectUrl: '',
       isSupport: false, // 是否支持一键登录
       statusBarHeight: 0,
-      mobile: '', // 手机号输入
-      account: '', // 账号输入（用户名或手机号）
-      password: '', // 密码输入
-      confirmPassword: '', // 确认密码
-      verificationCode: '', // 验证码
-      countdown: 0, // 验证码倒计时
       showLoginOptionsModal: false, // 是否显示其他登录方式弹窗
-      showPhoneVerifyModal: false, // 是否显示手机号验证码登录弹窗
-      showPhonePasswordModal: false, // 是否显示手机号密码登录弹窗
-      showRegisterModal: false, // 是否显示注册弹窗
-      captchaData: null, // 图形验证码数据
-      showCaptchaModal: false, // 是否显示图形验证码弹窗
-      captchaCode: '', // 图形验证码输入
       loginState: {
         code: '', // 微信登录code
         openid: '', // 用户openid
@@ -335,16 +191,7 @@ export default {
     // 关闭所有登录弹窗
     closeLoginModals() {
       this.showLoginOptionsModal = false;
-      this.showPhoneVerifyModal = false;
-      this.showPhonePasswordModal = false;
-      this.showRegisterModal = false;
-      this.showCaptchaModal = false;
-      
-      // 重置输入
-      this.mobile = '';
-      this.password = '';
-      this.confirmPassword = '';
-      this.verificationCode = '';
+      // 移除所有其他弹窗状态，因为它们不再使用
     },
     
     // 获取验证码
@@ -1696,8 +1543,8 @@ export default {
         try {
           console.log('直接调用创建用户云函数');
           const createResult = await uniCloud.callFunction({
-            name: 'login',
-            data: {
+        name: 'login',
+        data: {
               loginType: 'createUserInDb',
               code: loginRes.code,   // 直接传递code参数
               userInfo: {
@@ -2451,17 +2298,26 @@ export default {
     
     // 选择登录方式
     selectLoginType(type) {
-      console.log('选择登录方式:', type);
-      // 关闭登录选项模态框
-      this.showLoginOptionsModal = false;
+      console.log('选择的登录方式:', type);
+      this.selectedLoginMethod = type;
+      this.closeLoginModals(); // 关闭登录选择弹窗
       
-      if (type === 'phoneVerify') {
-        this.showPhoneVerifyModal = true;
-      } else if (type === 'phonePassword') {
-        this.showPhonePasswordModal = true;
+      // 根据选择的类型进行不同处理
+      if (type === 'phonePassword') {
+        // 账号密码登录，直接跳转到账号密码登录页面
+        uni.navigateTo({
+          url: '/uni_modules/uni-id-pages/pages/login/login-withpwd'
+        });
+      } else if (type === 'phoneVerify') {
+        // 手机号验证码登录，直接跳转到手机号验证码登录页面
+        uni.navigateTo({
+          url: '/uni_modules/uni-id-pages/pages/login/login-smscode'
+        });
       } else if (type === 'register') {
-        // 使用测试注册功能
-        this.useTestRegister();
+        // 注册账号，直接跳转到注册页面
+        uni.navigateTo({
+          url: '/uni_modules/uni-id-pages/pages/register/register'
+        });
       }
     },
     

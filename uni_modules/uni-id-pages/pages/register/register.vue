@@ -70,7 +70,7 @@
 				focusNickname: false,
 				focusPassword: false,
 				focusPassword2: false,
-				logo: "/static/logo.png"
+				logo: "../../../../static/images/logo.png"
 			}
 		},
 		onReady() {
@@ -113,13 +113,41 @@
 				})
 			},
 			submitForm(params) {
+				uni.showLoading({
+					title: '注册中...',
+					mask: true
+				});
+				
 				uniIdCo.registerUser(this.formData).then(e => {
-						this.loginSuccess(e)
+						console.log('注册成功，结果:', e);
+						uni.hideLoading();
+						// 显示注册成功提示
+						uni.showToast({
+							title: '注册成功',
+							icon: 'success',
+							duration: 2000
+						});
+						// 调用登录成功方法，设置autoBack为true确保跳转
+						setTimeout(() => {
+							this.loginSuccess({
+								...e,
+								autoBack: true,
+								uniIdRedirectUrl: '/pages/index/index'
+							});
+						}, 1500);
 					})
 					.catch(e => {
-						console.log(e.message);
+						uni.hideLoading();
+						console.log('注册失败:', e.message);
 						//更好的体验：登录错误，直接刷新验证码
-						this.$refs.captcha.getImageCaptcha()
+						this.$refs.captcha.getImageCaptcha();
+						
+						// 显示错误信息
+						uni.showModal({
+							title: '注册失败',
+							content: e.message || '未知错误',
+							showCancel: false
+						});
 					})
 			},
 			navigateBack() {

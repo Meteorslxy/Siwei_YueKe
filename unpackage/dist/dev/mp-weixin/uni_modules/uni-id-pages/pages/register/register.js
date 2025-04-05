@@ -192,57 +192,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _validator = _interopRequireDefault(__webpack_require__(/*! ./validator.js */ 399));
 var _loginPageMixin = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/login-page.mixin.js */ 373));
 var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
 var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 374);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var uniIdCo = uniCloud.importObject("uni-id-co");
 var _default = {
   mixins: [_loginPageMixin.default],
@@ -260,7 +216,7 @@ var _default = {
       focusNickname: false,
       focusPassword: false,
       focusPassword2: false,
-      logo: "/static/logo.png"
+      logo: "../../../../static/images/logo.png"
     };
   },
   onReady: function onReady() {
@@ -296,12 +252,38 @@ var _default = {
     },
     submitForm: function submitForm(params) {
       var _this2 = this;
+      uni.showLoading({
+        title: '注册中...',
+        mask: true
+      });
       uniIdCo.registerUser(this.formData).then(function (e) {
-        _this2.loginSuccess(e);
+        console.log('注册成功，结果:', e);
+        uni.hideLoading();
+        // 显示注册成功提示
+        uni.showToast({
+          title: '注册成功',
+          icon: 'success',
+          duration: 2000
+        });
+        // 调用登录成功方法，设置autoBack为true确保跳转
+        setTimeout(function () {
+          _this2.loginSuccess(_objectSpread(_objectSpread({}, e), {}, {
+            autoBack: true,
+            uniIdRedirectUrl: '/pages/index/index'
+          }));
+        }, 1500);
       }).catch(function (e) {
-        console.log(e.message);
+        uni.hideLoading();
+        console.log('注册失败:', e.message);
         //更好的体验：登录错误，直接刷新验证码
         _this2.$refs.captcha.getImageCaptcha();
+
+        // 显示错误信息
+        uni.showModal({
+          title: '注册失败',
+          content: e.message || '未知错误',
+          showCancel: false
+        });
       });
     },
     navigateBack: function navigateBack() {

@@ -55,7 +55,7 @@
 				"needCaptcha": false,
 				"focusUsername": false,
 				"focusPassword": false,
-				"logo": "/static/logo.png",
+				"logo": "../../../../static/images/logo.png",
 				"loginErrorCount": 0, // 登录错误计数
 				"loginLocked": false, // 登录锁定状态
 				"lockCountdown": 0, // 锁定倒计时

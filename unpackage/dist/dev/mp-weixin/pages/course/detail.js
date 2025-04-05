@@ -2000,24 +2000,43 @@ var _default = {
                 }
                 return _context10.abrupt("return");
               case 6:
+                if (!(typeof userInfo === 'string')) {
+                  _context10.next = 17;
+                  break;
+                }
+                _context10.prev = 7;
                 userData = JSON.parse(userInfo);
+                _context10.next = 15;
+                break;
+              case 11:
+                _context10.prev = 11;
+                _context10.t0 = _context10["catch"](7);
+                console.error('解析用户信息字符串失败:', _context10.t0);
+                return _context10.abrupt("return");
+              case 15:
+                _context10.next = 18;
+                break;
+              case 17:
+                // 已经是对象，直接使用
+                userData = userInfo;
+              case 18:
                 userId = userData.userId || userData._id;
                 if (userId) {
-                  _context10.next = 10;
+                  _context10.next = 21;
                   break;
                 }
                 return _context10.abrupt("return");
-              case 10:
+              case 21:
                 console.log('检查课程收藏状态, courseId:', _this18.courseId);
 
                 // 调用API检查是否已收藏
-                _context10.next = 13;
+                _context10.next = 24;
                 return _this18.$api.user.checkFavorite({
                   userId: userId,
                   itemType: 'course',
                   itemId: _this18.courseId
                 });
-              case 13:
+              case 24:
                 res = _context10.sent;
                 if (res && res.code === 0 && res.data) {
                   console.log('课程已被收藏，更新按钮状态');
@@ -2030,18 +2049,18 @@ var _default = {
                     }
                   });
                 }
-                _context10.next = 20;
+                _context10.next = 31;
                 break;
-              case 17:
-                _context10.prev = 17;
-                _context10.t0 = _context10["catch"](2);
-                console.error('检查课程收藏状态失败:', _context10.t0);
-              case 20:
+              case 28:
+                _context10.prev = 28;
+                _context10.t1 = _context10["catch"](2);
+                console.error('检查课程收藏状态失败:', _context10.t1);
+              case 31:
               case "end":
                 return _context10.stop();
             }
           }
-        }, _callee10, null, [[2, 17]]);
+        }, _callee10, null, [[2, 28], [7, 11]]);
       }))();
     },
     // 获取状态栏高度
@@ -2169,47 +2188,66 @@ var _default = {
                 }
                 return _context11.abrupt("return", false);
               case 6:
+                if (!(typeof userInfo === 'string')) {
+                  _context11.next = 17;
+                  break;
+                }
+                _context11.prev = 7;
                 userData = JSON.parse(userInfo);
+                _context11.next = 15;
+                break;
+              case 11:
+                _context11.prev = 11;
+                _context11.t0 = _context11["catch"](7);
+                console.error('解析用户信息字符串失败:', _context11.t0);
+                return _context11.abrupt("return", false);
+              case 15:
+                _context11.next = 18;
+                break;
+              case 17:
+                // 已经是对象，直接使用
+                userData = userInfo;
+              case 18:
                 userId = userData.userId || userData._id;
                 if (userId) {
-                  _context11.next = 10;
+                  _context11.next = 21;
                   break;
                 }
                 return _context11.abrupt("return", false);
-              case 10:
+              case 21:
                 // 构建检查参数
                 checkData = {
                   userId: userId,
                   itemType: 'teacher',
                   itemId: teacherId
                 }; // 调用API检查是否已收藏
-                _context11.next = 13;
+                _context11.next = 24;
                 return _this19.$api.user.checkFavorite(checkData);
-              case 13:
+              case 24:
                 res = _context11.sent;
                 if (!(res && res.code === 0 && res.data)) {
-                  _context11.next = 19;
+                  _context11.next = 30;
                   break;
                 }
                 console.log('教师已被收藏');
                 return _context11.abrupt("return", true);
-              case 19:
+              case 30:
                 console.log('教师未被收藏');
                 return _context11.abrupt("return", false);
-              case 21:
-                _context11.next = 27;
+              case 32:
+                _context11.next = 38;
                 break;
-              case 23:
-                _context11.prev = 23;
-                _context11.t0 = _context11["catch"](2);
-                console.error('检查教师收藏状态失败:', _context11.t0);
+              case 34:
+                _context11.prev = 34;
+                _context11.t1 = _context11["catch"](2);
+                console.error('检查教师收藏状态失败:', _context11.t1);
                 return _context11.abrupt("return", false);
-              case 27:
+              case 38:
               case "end":
                 return _context11.stop();
             }
           }
-        }, _callee11, null, [[2, 23]]);
+        }, _callee11, null, [[2, 34], [7, 11]]);
       }))();
     },
     // 添加一个显示登录提示的方法

@@ -86,7 +86,8 @@ const mixin = {
 		loginSuccess(e) {
 			mutations.loginSuccess({
 				...e,
-				uniIdRedirectUrl: this.uniIdRedirectUrl
+				uniIdRedirectUrl: this.uniIdRedirectUrl,
+				config: this.config
 			})
 		}
 	}

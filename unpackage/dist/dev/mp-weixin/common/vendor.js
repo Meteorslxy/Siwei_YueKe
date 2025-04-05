@@ -19186,7 +19186,8 @@ var mixin = {
   methods: {
     loginSuccess: function loginSuccess(e) {
       _store.mutations.loginSuccess(_objectSpread(_objectSpread({}, e), {}, {
-        uniIdRedirectUrl: this.uniIdRedirectUrl
+        uniIdRedirectUrl: this.uniIdRedirectUrl,
+        config: this.config
       }));
     }
   }
@@ -19213,6 +19214,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.store = exports.mutations = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
 var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 36));
@@ -19572,6 +19574,7 @@ var mutations = {
   },
   loginSuccess: function loginSuccess() {
     var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    // 设置 token
     var _e$showToast = e.showToast,
       showToast = _e$showToast === void 0 ? true : _e$showToast,
       _e$toastText = e.toastText,
@@ -19580,19 +19583,26 @@ var mutations = {
       autoBack = _e$autoBack === void 0 ? true : _e$autoBack,
       _e$uniIdRedirectUrl2 = e.uniIdRedirectUrl,
       uniIdRedirectUrl = _e$uniIdRedirectUrl2 === void 0 ? '' : _e$uniIdRedirectUrl2,
-      passwordConfirmed = e.passwordConfirmed;
-    // console.log({toastText,autoBack});
-    if (showToast) {
+      _e$passwordConfirmed = e.passwordConfirmed,
+      passwordConfirmed = _e$passwordConfirmed === void 0 ? e.password_confirm && e.password_confirm === 'true' : _e$passwordConfirmed,
+      paramConfig = e.config;
+
+    // 确保引用的是正确的config
+    var localConfig = paramConfig || _config.default || {}; // 优先使用传入的config，然后是导入的config
+
+    // 确保setPasswordAfterLogin存在并检查类型
+    var needSetPassword = (0, _typeof2.default)(localConfig.setPasswordAfterLogin) === 'object' ? !!localConfig.setPasswordAfterLogin : !!localConfig.setPasswordAfterLogin;
+    if (e.errMsg && e.errMsg.indexOf('token不存在') > -1) {
       uni.showToast({
-        title: toastText,
-        icon: 'none',
-        duration: 3000
+        title: e.errMsg || '登录失败',
+        icon: 'none'
       });
+      return;
     }
 
-    // 确保token信息同步到storage，避免登录不完整的问题
-    if (e.token) {
-      uni.setStorageSync('uni_id_token', e.token);
+    //习惯问题，有的云端会返回 token 有的返回 accessToken 
+    if (e.token || e.accessToken) {
+      uni.setStorageSync('uni_id_token', e.token || e.accessToken);
       uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
       console.log('已保存token信息到storage');
     }
@@ -19606,18 +19616,84 @@ var mutations = {
     // 同时触发应用自定义的登录成功事件，确保兼容性
     uni.$emit('user:login', e.userInfo || {});
     uni.$emit('login:success', e.userInfo || {});
-    if (_config.default.setPasswordAfterLogin && !passwordConfirmed) {
-      return uni.redirectTo({
-        url: uniIdRedirectUrl ? "/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd?uniIdRedirectUrl=".concat(uniIdRedirectUrl, "&loginType=").concat(e.loginType) : "/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd?loginType=".concat(e.loginType),
-        fail: function fail(err) {
-          console.log(err);
-        }
+
+    // 显示登录成功的提示
+    if (showToast) {
+      uni.showToast({
+        title: toastText,
+        icon: 'none',
+        duration: 3000
       });
+    }
+
+    // 检查是否需要设置密码
+    if (needSetPassword && !passwordConfirmed) {
+      try {
+        // 确保loginType有值，避免undefined在URL中
+        var loginTypeParam = e.loginType ? "&loginType=".concat(e.loginType) : '';
+        var uniIdRedirectUrlParam = uniIdRedirectUrl ? "?uniIdRedirectUrl=".concat(encodeURIComponent(uniIdRedirectUrl)).concat(loginTypeParam) : e.loginType ? "?loginType=".concat(e.loginType) : '';
+
+        // 确保路径格式正确
+        var setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
+        var url = setPasswordPath + uniIdRedirectUrlParam;
+        console.log('准备跳转到设置密码页面:', url);
+        uni.redirectTo({
+          url: url,
+          fail: function fail(err) {
+            console.error('跳转到设置密码页面失败:', err);
+            // 如果路径不存在，尝试备用路径
+            if (err.errMsg && err.errMsg.includes('not found')) {
+              var fallbackUrl = '/pages/index/index';
+              console.log('尝试跳转到首页:', fallbackUrl);
+              uni.reLaunch({
+                url: fallbackUrl,
+                fail: function fail(fallbackErr) {
+                  console.error('跳转到首页也失败:', fallbackErr);
+                  uni.showToast({
+                    title: '页面跳转失败',
+                    icon: 'none'
+                  });
+                }
+              });
+              return;
+            }
+
+            // 跳转失败时回到首页
+            uni.showToast({
+              title: '页面跳转失败',
+              icon: 'none'
+            });
+            setTimeout(function () {
+              uni.reLaunch({
+                url: localConfig.customHomePagePath || '/pages/index/index'
+              });
+            }, 1500);
+          }
+        });
+        return; // 阻止继续执行后续代码
+      } catch (err) {
+        console.error('设置密码页面跳转出错:', err);
+      }
     }
     if (autoBack) {
       this.loginBack({
         uniIdRedirectUrl: uniIdRedirectUrl
       });
+    } else if (!needSetPassword) {
+      // 没有自动返回且不需要设置密码时，跳转到首页
+      console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);
+      setTimeout(function () {
+        uni.reLaunch({
+          url: localConfig.customHomePagePath || '/pages/index/index',
+          fail: function fail(err) {
+            console.error('跳转首页失败:', err);
+            // 尝试使用switchTab
+            uni.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        });
+      }, 1500);
     }
   }
 };
