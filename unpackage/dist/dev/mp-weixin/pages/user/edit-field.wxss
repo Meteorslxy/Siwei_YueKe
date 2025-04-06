@@ -64,9 +64,24 @@
 /* 组件变量 */
 /* 导航栏 */
 /* 选项卡 */
-.upload-container {
+.edit-field-container {
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* 垂直居中 */
+  align-items: center;
+  /* 水平居中 */
+}
+.content-wrapper {
+  width: 90%;
+  background-color: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 20vh;
+  /* 稍微上移，避免完全居中看起来太低 */
+  overflow: hidden;
 }
 .header {
   height: 88rpx;
@@ -74,69 +89,71 @@
   align-items: center;
   justify-content: space-between;
   background-color: #fff;
-  padding: 0 30rpx;
-  border-bottom: 1px solid #eee;
+  padding: 20rpx 30rpx;
+  border-bottom: 1rpx solid var(--border-color);
 }
 .header .title {
   font-size: 36rpx;
   font-weight: bold;
-  color: #333;
+  color: var(--text-color);
 }
 .header .back-button, .header .save-button {
   font-size: 32rpx;
-  color: #ff6a3c;
+  color: var(--theme-color);
+  padding: 10rpx;
 }
-.upload-content {
-  padding: 40rpx;
+.edit-form {
+  background-color: #fff;
+  padding: 30rpx;
 }
-.upload-content .preview-area {
+.edit-form .form-item {
+  position: relative;
+  padding-top: 30rpx;
+}
+.edit-form .form-item .input, .edit-form .form-item .textarea {
   width: 100%;
-  height: 500rpx;
-  background-color: #f5f5f5;
+  font-size: 32rpx;
+  color: var(--text-color);
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid var(--border-color);
+  margin-top: 20rpx;
+}
+.edit-form .form-item .textarea {
+  min-height: 200rpx;
+  padding: 20rpx;
+  border: 1rpx solid var(--border-color);
   border-radius: 8rpx;
-  margin-bottom: 40rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  border: 1px dashed #ddd;
+  margin-top: 40rpx;
 }
-.upload-content .preview-area .preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.edit-form .form-item .count {
+  position: absolute;
+  right: 0;
+  bottom: 10rpx;
+  font-size: 24rpx;
+  color: var(--text-color-light);
 }
-.upload-content .preview-area .placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #999;
-}
-.upload-content .preview-area .placeholder .placeholder-text {
-  font-size: 28rpx;
-}
-.upload-content .button-group {
-  display: flex;
-  justify-content: space-between;
-}
-.upload-content .button-group .upload-btn {
-  flex: 1;
+.edit-form .form-item .gender-option {
   height: 90rpx;
   line-height: 90rpx;
-  background-color: #ff6a3c;
+  margin: 20rpx 0;
+  text-align: center;
+  border: 1rpx solid var(--border-color);
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  color: var(--text-color);
+}
+.edit-form .form-item .gender-option.selected {
+  background-color: var(--theme-color);
   color: #fff;
-  border-radius: 45rpx;
-  font-size: 32rpx;
+  border-color: var(--theme-color);
 }
-.upload-content .button-group .upload-btn.cancel-btn {
-  margin-left: 20rpx;
-  background-color: #f5f5f5;
-  color: #666;
-}
-.debug-info {
-  padding: 20rpx;
-  font-size: 24rpx;
-  color: #999;
-  word-break: break-all;
+.edit-form .form-item .date-picker {
+  height: 90rpx;
+  line-height: 90rpx;
+  border-bottom: 1rpx solid var(--border-color);
+  font-size: 30rpx;
+  color: var(--text-color);
+  text-align: center;
+  margin-top: 20rpx;
 }
 

@@ -1,228 +1,346 @@
 <template>
-  <view class="upload-page">
-    <view class="page-header">
-      <view class="header-title">图片上传示例</view>
-      <view class="header-desc">支持选择图片并上传到云端</view>
+  <view class="upload-container">
+    <view class="header">
+      <view class="back-button" @click="goBack">
+        <text>←</text>
+      </view>
+      <text class="title">{{pageTitle}}</text>
+      <view class="save-button" @click="saveImage">
+        <text>保存</text>
+      </view>
     </view>
     
-    <view class="upload-section">
-      <view class="section-title">单张图片上传</view>
-      <view class="upload-container">
-        <image-upload 
-          v-model="imageId" 
-          width="300rpx" 
-          height="300rpx"
-          @success="onUploadSuccess"
-        ></image-upload>
+    <view class="upload-content">
+      <view class="preview-area" @click="chooseImage">
+        <image 
+          v-if="tempFilePath" 
+          :src="tempFilePath" 
+          mode="aspectFill" 
+          class="preview-image"
+        ></image>
+        <view v-else class="placeholder">
+          <text class="placeholder-text">{{placeholderText}}</text>
+        </view>
       </view>
       
-      <view class="image-info" v-if="imageId">
-        <view class="info-item">
-          <text class="info-label">图片ID:</text>
-          <text class="info-value">{{imageId}}</text>
-        </view>
-        <view class="info-item" v-if="imageData">
-          <text class="info-label">文件名:</text>
-          <text class="info-value">{{imageData.fileName}}</text>
-        </view>
-        <view class="image-preview" v-if="imageBase64">
-          <image :src="imageBase64" mode="widthFix" style="width: 100%;"></image>
-        </view>
+      <view class="button-group">
+        <button class="upload-btn" @click="chooseImage">选择图片</button>
+        <button v-if="tempFilePath" class="upload-btn cancel-btn" @click="cancelUpload">取消</button>
       </view>
     </view>
-    
-    <view class="upload-section">
-      <view class="section-title">多张图片上传</view>
-      <view class="multi-upload">
-        <view class="upload-item" v-for="(item, index) in multiImages" :key="index">
-          <view class="item-container">
-            <image-upload 
-              :value="item.id" 
-              width="200rpx" 
-              height="200rpx"
-              @input="val => updateMultiImage(index, val)"
-              @success="result => onMultiUploadSuccess(result, index)"
-            ></image-upload>
-            <view class="image-preview" v-if="item.base64">
-              <image :src="item.base64" mode="aspectFill" style="width: 200rpx; height: 200rpx;"></image>
-            </view>
-          </view>
-        </view>
-        
-        <view class="upload-item add-btn" @click="addImage" v-if="multiImages.length < 9">
-          <text class="iconfont icon-add"></text>
-          <text class="add-text">添加图片</text>
-        </view>
-      </view>
-    </view>
-    
-    <view class="action-btns">
-      <button class="btn clear-btn" @click="clearImages">清空图片</button>
-      <button class="btn save-btn" @click="saveImages">保存图片</button>
+
+    <!-- 调试信息 -->
+    <view class="debug-info" v-if="isDebug">
+      <text>临时路径: {{tempFilePath || '无'}}</text>
     </view>
   </view>
 </template>
 
 <script>
-import ImageUpload from '@/components/image-upload/image-upload.vue';
-
 export default {
-  components: {
-    ImageUpload
-  },
   data() {
     return {
-      imageId: '', // 单张图片ID
-      imageData: null, // 图片详细数据
-      imageBase64: '', // 单张图片的base64数据
-      multiImages: [{ id: '', base64: '' }], // 多张图片
-      uploadResults: [] // 上传结果
+      type: 'avatar', // 默认为头像上传
+      tempFilePath: '', // 临时文件路径
+      uploadedFileId: '', // 上传成功后的文件ID
+      isUploading: false, // 是否正在上传
+      pageTitle: '上传头像',
+      placeholderText: '请选择一张头像图片',
+      isDebug: false // 是否显示调试信息
     }
   },
-  onLoad() {
-    console.log('图片上传页面加载');
-  },
-  onReady() {
-    // 页面就绪时通知App
-    setTimeout(() => {
-      uni.$emit('page-ready', this);
-      console.log('页面准备完成，已通知App');
-    }, 100);
-  },
-  watch: {
-    // 监听单张图片ID变化，获取图片数据
-    imageId(newVal) {
-      if (newVal) {
-        this.getImageById(newVal);
+  onLoad(options) {
+    // 获取上传类型
+    if (options.type) {
+      this.type = options.type;
+      
+      // 根据类型设置标题和提示文本
+      if (this.type === 'avatar') {
+        this.pageTitle = '上传头像';
+        this.placeholderText = '请选择一张头像图片';
       } else {
-        this.imageData = null;
-        this.imageBase64 = '';
+        this.pageTitle = '上传图片';
+        this.placeholderText = '请选择一张图片';
       }
     }
+    
+    // 监听裁剪完成事件
+    uni.$on('cropImage', this.handleCropDone);
+    
+    // 检查是否有临时保存的图片路径
+    const tempPath = uni.getStorageSync('temp_avatar_path');
+    if (tempPath) {
+      console.log('发现临时保存的图片路径:', tempPath);
+      this.tempFilePath = tempPath;
+    }
+  },
+  onUnload() {
+    // 页面卸载时移除事件监听
+    uni.$off('cropImage', this.handleCropDone);
   },
   methods: {
-    // 根据ID获取图片
-    async getImageById(imageId) {
-      try {
-        uni.showLoading({ title: '加载图片中...' });
-        // 使用API函数获取图片
-        const result = await this.$api.file.getImage(imageId);
-        
-        // 处理结果
-        if (result && result.success) {
-          this.imageData = result.imageData;
-          this.imageBase64 = 'data:image/' + this.imageData.fileType + ';base64,' + this.imageData.base64Data;
-        } else {
-          throw new Error(result.message || '获取图片失败');
-        }
-      } catch (error) {
-        console.error('获取图片失败:', error);
-        uni.showToast({
-          title: error.message || '获取图片失败',
-          icon: 'none'
-        });
-      } finally {
-        uni.hideLoading();
-      }
+    // 返回上一页
+    goBack() {
+      uni.removeStorageSync('temp_avatar_path');
+      uni.navigateBack();
     },
     
-    // 根据ID获取多图中某一张图片
-    async getMultiImageById(imageId, index) {
-      try {
-        // 使用API函数获取图片
-        const result = await this.$api.file.getImage(imageId);
-        
-        // 处理结果
-        if (result && result.success) {
-          const base64 = 'data:image/' + result.imageData.fileType + ';base64,' + result.imageData.base64Data;
-          this.$set(this.multiImages[index], 'base64', base64);
-        } else {
-          throw new Error(result.message || '获取图片失败');
+    // 选择图片
+    chooseImage() {
+      uni.chooseImage({
+        count: 1, // 只能选一张
+        sizeType: ['compressed'], // 使用压缩图片
+        sourceType: ['album', 'camera'], // 允许从相册和相机选择
+        success: (res) => {
+          if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+            // 获取临时文件路径
+            this.tempFilePath = res.tempFilePaths[0];
+            
+            console.log('选择的图片路径:', this.tempFilePath);
+            
+            // 保存临时路径，以防裁剪页面返回时丢失
+            uni.setStorageSync('temp_avatar_path', this.tempFilePath);
+            
+            // 如果是头像，需要裁剪
+            if (this.type === 'avatar') {
+              this.cropImage();
+            }
+          }
+        },
+        fail: (err) => {
+          console.error('选择图片失败:', err);
+          uni.showToast({
+            title: '选择图片失败',
+            icon: 'none'
+          });
         }
-      } catch (error) {
-        console.error('获取多图片失败:', error);
-      }
-    },
-    
-    // 单张图片上传成功
-    onUploadSuccess(result) {
-      console.log('图片上传成功:', result);
-      // 直接保存图片ID
-      this.imageId = result._id;
-      uni.showToast({
-        title: '上传成功',
-        icon: 'success'
       });
     },
     
-    // 多张图片上传成功
-    onMultiUploadSuccess(result, index) {
-      console.log('多图上传成功:', result, '索引:', index);
-      this.uploadResults.push(result);
-      
-      // 获取上传的图片显示
-      if (result._id) {
-        this.getMultiImageById(result._id, index);
-      }
-    },
-    
-    // 更新多图中的某一张
-    updateMultiImage(index, value) {
-      this.$set(this.multiImages[index], 'id', value);
-      
-      // 如果有ID但没有base64，尝试获取图片
-      if (value && !this.multiImages[index].base64) {
-        this.getMultiImageById(value, index);
-      }
-    },
-    
-    // 添加图片
-    addImage() {
-      if (this.multiImages.length < 9) {
-        this.multiImages.push({ id: '', base64: '' });
-      } else {
-        uni.showToast({
-          title: '最多只能上传9张图片',
-          icon: 'none'
+    // 裁剪图片
+    cropImage() {
+      try {
+        // 跳转到裁剪页面
+        const cropPagePath = '/uni_modules/uni-id-pages/pages/userinfo/cropImage/cropImage';
+        uni.navigateTo({
+          url: `${cropPagePath}?path=${this.tempFilePath}&options=${JSON.stringify({
+            width: 300,
+            height: 300
+          })}`,
+          fail: (err) => {
+            console.error('跳转裁剪页面失败，使用原图:', err);
+          }
         });
+        
+        // 不需要在success回调中使用eventChannel.onMessage
+        // 我们已经通过全局事件监听cropImage来获取结果
+      } catch (err) {
+        console.error('裁剪图片操作失败，使用原图:', err);
       }
     },
     
-    // 清空图片
-    clearImages() {
-      this.imageId = '';
-      this.imageData = null;
-      this.imageBase64 = '';
-      this.multiImages = [{ id: '', base64: '' }];
-      this.uploadResults = [];
-      uni.showToast({
-        title: '已清空所有图片',
-        icon: 'none'
-      });
+    // 处理裁剪完成事件
+    handleCropDone(data) {
+      console.log('收到裁剪完成事件:', data);
+      if (data && data.path) {
+        this.tempFilePath = data.path;
+        // 更新临时存储
+        uni.setStorageSync('temp_avatar_path', this.tempFilePath);
+        console.log('设置裁剪后图片路径:', this.tempFilePath);
+      }
     },
     
-    // 保存图片信息
-    saveImages() {
-      // 过滤掉空值
-      const validImages = this.multiImages.filter(item => item.id).map(item => item.id);
-      
-      if (!this.imageId && validImages.length === 0) {
+    // 取消上传
+    cancelUpload() {
+      this.tempFilePath = '';
+      this.uploadedFileId = '';
+      uni.removeStorageSync('temp_avatar_path');
+    },
+    
+    // 保存图片
+    saveImage() {
+      if (!this.tempFilePath) {
         uni.showToast({
-          title: '请先上传图片',
+          title: '请先选择图片',
           icon: 'none'
         });
         return;
       }
       
-      // 这里可以添加将图片保存到数据库的逻辑
-      console.log('保存的图片信息:', {
-        single: this.imageId,
-        multiple: validImages
+      if (this.isUploading) {
+        uni.showToast({
+          title: '正在上传中，请稍候',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      this.isUploading = true;
+      
+      // 显示上传中
+      uni.showLoading({
+        title: '上传中...',
+        mask: true
       });
       
-      uni.showToast({
-        title: '保存成功',
-        icon: 'success'
+      // 上传图片
+      this.uploadFile(this.tempFilePath)
+        .then(uploadResult => {
+          console.log('图片上传结果:', uploadResult);
+          
+          if (!uploadResult.fileID) {
+            throw new Error('上传失败，未获取到文件ID');
+          }
+          
+          this.uploadedFileId = uploadResult.fileID;
+          
+          // 更新用户头像
+          if (this.type === 'avatar') {
+            return this.updateUserAvatar(this.uploadedFileId);
+          }
+          
+          return Promise.resolve();
+        })
+        .then(() => {
+          uni.hideLoading();
+          uni.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+          
+          // 延迟返回
+          setTimeout(() => {
+            // 返回前清除临时数据
+            uni.removeStorageSync('temp_avatar_path');
+            
+            // 设置上传成功的结果
+            const pages = getCurrentPages();
+            const prevPage = pages[pages.length - 2];
+            if (prevPage && prevPage.$vm) {
+              prevPage.$vm.$emit('uploadSuccess', {
+                fileID: this.uploadedFileId,
+                type: this.type
+              });
+              
+              // 如果是个人资料页面，尝试直接更新头像显示
+              if (prevPage.route && prevPage.route.includes('profile')) {
+                if (typeof prevPage.$vm.refreshUserInfo === 'function') {
+                  prevPage.$vm.refreshUserInfo();
+                } else if (prevPage.$vm.userInfo) {
+                  // 直接更新上一页的用户信息中的头像
+                  prevPage.$vm.userInfo.avatar = this.uploadedFileId;
+                }
+              }
+            }
+            
+            uni.navigateBack();
+          }, 1000); // 减少延迟时间
+        })
+        .catch(error => {
+          console.error('保存图片失败:', error);
+          uni.hideLoading();
+          uni.showToast({
+            title: error.message || '上传失败，请重试',
+            icon: 'none'
+          });
+        })
+        .finally(() => {
+          this.isUploading = false;
+        });
+    },
+    
+    // 上传文件
+    uploadFile(filePath) {
+      return new Promise((resolve, reject) => {
+        // 构建云存储路径
+        const fileName = filePath.split('/').pop();
+        const cloudPath = `user_uploads/${this.type}/${Date.now()}_${Math.random().toString(36).slice(2)}_${fileName}`;
+        
+        console.log('准备上传文件:', filePath);
+        console.log('云存储路径:', cloudPath);
+        
+        // 使用uniCloud提供的上传方法
+        uniCloud.uploadFile({
+          filePath: filePath,
+          cloudPath: cloudPath,
+          success: (res) => {
+            console.log('上传成功:', res);
+            resolve({
+              fileID: res.fileID,
+              url: res.fileID
+            });
+          },
+          fail: (err) => {
+            console.error('上传失败:', err);
+            reject(new Error('文件上传失败: ' + (err.errMsg || JSON.stringify(err))));
+          }
+        });
+      });
+    },
+    
+    // 更新用户头像
+    updateUserAvatar(fileID) {
+      return new Promise((resolve, reject) => {
+        // 获取用户信息
+        const userInfoStr = uni.getStorageSync('userInfo');
+        const userInfo = userInfoStr ? (typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr) : {};
+        
+        // 获取用户ID和token
+        const userId = userInfo._id || userInfo.uid;
+        const token = uni.getStorageSync('uni_id_token');
+        
+        if (!userId) {
+          reject(new Error('用户ID不存在'));
+          return;
+        }
+        
+        console.log('准备更新用户头像:', userId, fileID);
+        
+        // 准备更新数据
+        const updateData = {
+          avatar: fileID
+        };
+        
+        // 调用云函数更新用户头像
+        uniCloud.callFunction({
+          name: 'updateUserProfile',
+          data: {
+            userId,
+            uniIdToken: token,
+            userInfo: updateData
+          },
+          success: (result) => {
+            if (result.result && result.result.code === 0) {
+              console.log('头像更新成功:', result.result.data);
+              
+              // 更新本地用户信息
+              userInfo.avatar = fileID;
+              userInfo.avatarUrl = fileID;
+              uni.setStorageSync('userInfo', userInfo);
+              
+              // 同步更新uni-id-pages的用户信息
+              const uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+              uniIdUserInfo.avatar = fileID;
+              uniIdUserInfo.avatar_file = {
+                name: 'avatar.jpg',
+                extname: 'jpg',
+                url: fileID
+              };
+              uni.setStorageSync('uni-id-pages-userInfo', uniIdUserInfo);
+              
+              // 触发用户信息更新事件
+              uni.$emit('user:updated', userInfo);
+              
+              resolve(true);
+            } else {
+              reject(new Error(result.result?.message || '头像更新失败'));
+            }
+          },
+          fail: (error) => {
+            console.error('更新用户头像失败:', error);
+            reject(error);
+          }
+        });
       });
     }
   }
@@ -230,138 +348,91 @@ export default {
 </script>
 
 <style lang="scss">
-.upload-page {
-  padding: 30rpx;
-  background-color: #f7f7f7;
+.upload-container {
   min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
+.header {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 0 30rpx;
+  border-bottom: 1px solid #eee;
   
-  .page-header {
+  .title {
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .back-button, .save-button {
+    font-size: 32rpx;
+    color: #ff6a3c;
+  }
+}
+
+.upload-content {
+  padding: 40rpx;
+  
+  .preview-area {
+    width: 100%;
+    height: 500rpx;
+    background-color: #f5f5f5;
+    border-radius: 8rpx;
     margin-bottom: 40rpx;
-    
-    .header-title {
-      font-size: 36rpx;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 10rpx;
-    }
-    
-    .header-desc {
-      font-size: 28rpx;
-      color: #666;
-    }
-  }
-  
-  .upload-section {
-    background-color: #fff;
-    border-radius: 12rpx;
-    padding: 30rpx;
-    margin-bottom: 30rpx;
-    
-    .section-title {
-      font-size: 30rpx;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 30rpx;
-      padding-left: 15rpx;
-      border-left: 6rpx solid #FF6B00;
-    }
-    
-    .upload-container {
-      display: flex;
-      justify-content: center;
-      margin: 20rpx 0;
-    }
-    
-    .image-info {
-      margin-top: 30rpx;
-      background-color: #f5f5f5;
-      padding: 20rpx;
-      border-radius: 8rpx;
-      
-      .info-item {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 10rpx;
-        
-        .info-label {
-          font-size: 26rpx;
-          color: #666;
-          margin-right: 10rpx;
-          white-space: nowrap;
-        }
-        
-        .info-value {
-          font-size: 26rpx;
-          color: #333;
-          word-break: break-all;
-          flex: 1;
-        }
-      }
-      
-      .image-preview {
-        margin-top: 10rpx;
-      }
-    }
-    
-    .multi-upload {
-      display: flex;
-      flex-wrap: wrap;
-      
-      .upload-item {
-        margin: 10rpx;
-        
-        .item-container {
-          position: relative;
-        }
-      }
-      
-      .add-btn {
-        width: 200rpx;
-        height: 200rpx;
-        background-color: #f5f5f5;
-        border: 1px dashed #ddd;
-        border-radius: 8rpx;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        
-        .iconfont {
-          font-size: 48rpx;
-          color: #999;
-          margin-bottom: 10rpx;
-        }
-        
-        .add-text {
-          font-size: 24rpx;
-          color: #999;
-        }
-      }
-    }
-  }
-  
-  .action-btns {
     display: flex;
-    margin-top: 50rpx;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 1px dashed #ddd;
     
-    .btn {
-      flex: 1;
-      margin: 0 15rpx;
-      height: 80rpx;
-      line-height: 80rpx;
-      border-radius: 40rpx;
-      font-size: 28rpx;
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #999;
       
-      &.clear-btn {
+      .placeholder-text {
+        font-size: 28rpx;
+      }
+    }
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    
+    .upload-btn {
+      flex: 1;
+      height: 90rpx;
+      line-height: 90rpx;
+      background-color: #ff6a3c;
+      color: #fff;
+      border-radius: 45rpx;
+      font-size: 32rpx;
+      
+      &.cancel-btn {
+        margin-left: 20rpx;
         background-color: #f5f5f5;
         color: #666;
       }
-      
-      &.save-btn {
-        background-color: #FF6B00;
-        color: #fff;
-      }
     }
   }
+}
+
+.debug-info {
+  padding: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+  word-break: break-all;
 }
 </style> 

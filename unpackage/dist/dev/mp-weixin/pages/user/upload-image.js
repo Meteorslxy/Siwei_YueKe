@@ -99,66 +99,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "recyclableRender", function() { return recyclableRender; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "components", function() { return components; });
 var components
-try {
-  components = {
-    imageUpload: function () {
-      return __webpack_require__.e(/*! import() | components/image-upload/image-upload */ "components/image-upload/image-upload").then(__webpack_require__.bind(null, /*! @/components/image-upload/image-upload.vue */ 448))
-    },
-  }
-} catch (e) {
-  if (
-    e.message.indexOf("Cannot find module") !== -1 &&
-    e.message.indexOf(".vue") !== -1
-  ) {
-    console.error(e.message)
-    console.error("1. 排查组件名称拼写是否正确")
-    console.error(
-      "2. 排查组件是否符合 easycom 规范，文档：https://uniapp.dcloud.net.cn/collocation/pages?id=easycom"
-    )
-    console.error(
-      "3. 若组件不符合 easycom 规范，需手动引入，并在 components 中注册该组件"
-    )
-  } else {
-    throw e
-  }
-}
 var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  var g0 = _vm.multiImages.length
-  if (!_vm._isMounted) {
-    _vm.e0 = function (val, index) {
-      var args = [],
-        len = arguments.length - 2
-      while (len-- > 0) args[len] = arguments[len + 2]
-
-      var _temp = args[args.length - 1].currentTarget.dataset,
-        _temp2 = _temp.eventParams || _temp["event-params"],
-        index = _temp2.index
-      var _temp, _temp2
-      return _vm.updateMultiImage(index, val)
-    }
-    _vm.e1 = function (result, index) {
-      var args = [],
-        len = arguments.length - 2
-      while (len-- > 0) args[len] = arguments[len + 2]
-
-      var _temp3 = args[args.length - 1].currentTarget.dataset,
-        _temp4 = _temp3.eventParams || _temp3["event-params"],
-        index = _temp4.index
-      var _temp3, _temp4
-      return _vm.onMultiUploadSuccess(result, index)
-    }
-  }
-  _vm.$mp.data = Object.assign(
-    {},
-    {
-      $root: {
-        g0: g0,
-      },
-    }
-  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -192,241 +136,349 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
 
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
-var ImageUpload = function ImageUpload() {
-  __webpack_require__.e(/*! require.ensure | components/image-upload/image-upload */ "components/image-upload/image-upload").then((function () {
-    return resolve(__webpack_require__(/*! @/components/image-upload/image-upload.vue */ 448));
-  }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
-};
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default = {
-  components: {
-    ImageUpload: ImageUpload
-  },
   data: function data() {
     return {
-      imageId: '',
-      // 单张图片ID
-      imageData: null,
-      // 图片详细数据
-      imageBase64: '',
-      // 单张图片的base64数据
-      multiImages: [{
-        id: '',
-        base64: ''
-      }],
-      // 多张图片
-      uploadResults: [] // 上传结果
+      type: 'avatar',
+      // 默认为头像上传
+      tempFilePath: '',
+      // 临时文件路径
+      uploadedFileId: '',
+      // 上传成功后的文件ID
+      isUploading: false,
+      // 是否正在上传
+      pageTitle: '上传头像',
+      placeholderText: '请选择一张头像图片',
+      isDebug: false // 是否显示调试信息
     };
   },
-  onLoad: function onLoad() {
-    console.log('图片上传页面加载');
-  },
-  onReady: function onReady() {
-    var _this = this;
-    // 页面就绪时通知App
-    setTimeout(function () {
-      uni.$emit('page-ready', _this);
-      console.log('页面准备完成，已通知App');
-    }, 100);
-  },
-  watch: {
-    // 监听单张图片ID变化，获取图片数据
-    imageId: function imageId(newVal) {
-      if (newVal) {
-        this.getImageById(newVal);
+  onLoad: function onLoad(options) {
+    // 获取上传类型
+    if (options.type) {
+      this.type = options.type;
+
+      // 根据类型设置标题和提示文本
+      if (this.type === 'avatar') {
+        this.pageTitle = '上传头像';
+        this.placeholderText = '请选择一张头像图片';
       } else {
-        this.imageData = null;
-        this.imageBase64 = '';
+        this.pageTitle = '上传图片';
+        this.placeholderText = '请选择一张图片';
       }
     }
+
+    // 监听裁剪完成事件
+    uni.$on('cropImage', this.handleCropDone);
+
+    // 检查是否有临时保存的图片路径
+    var tempPath = uni.getStorageSync('temp_avatar_path');
+    if (tempPath) {
+      console.log('发现临时保存的图片路径:', tempPath);
+      this.tempFilePath = tempPath;
+    }
+  },
+  onUnload: function onUnload() {
+    // 页面卸载时移除事件监听
+    uni.$off('cropImage', this.handleCropDone);
   },
   methods: {
-    // 根据ID获取图片
-    getImageById: function getImageById(imageId) {
+    // 返回上一页
+    goBack: function goBack() {
+      uni.removeStorageSync('temp_avatar_path');
+      uni.navigateBack();
+    },
+    // 选择图片
+    chooseImage: function chooseImage() {
+      var _this = this;
+      uni.chooseImage({
+        count: 1,
+        // 只能选一张
+        sizeType: ['compressed'],
+        // 使用压缩图片
+        sourceType: ['album', 'camera'],
+        // 允许从相册和相机选择
+        success: function success(res) {
+          if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+            // 获取临时文件路径
+            _this.tempFilePath = res.tempFilePaths[0];
+            console.log('选择的图片路径:', _this.tempFilePath);
+
+            // 保存临时路径，以防裁剪页面返回时丢失
+            uni.setStorageSync('temp_avatar_path', _this.tempFilePath);
+
+            // 如果是头像，需要裁剪
+            if (_this.type === 'avatar') {
+              _this.cropImage();
+            }
+          }
+        },
+        fail: function fail(err) {
+          console.error('选择图片失败:', err);
+          uni.showToast({
+            title: '选择图片失败',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    // 裁剪图片
+    cropImage: function cropImage() {
+      try {
+        // 跳转到裁剪页面
+        var cropPagePath = '/uni_modules/uni-id-pages/pages/userinfo/cropImage/cropImage';
+        uni.navigateTo({
+          url: "".concat(cropPagePath, "?path=").concat(this.tempFilePath, "&options=").concat(JSON.stringify({
+            width: 300,
+            height: 300
+          })),
+          fail: function fail(err) {
+            console.error('跳转裁剪页面失败，使用原图:', err);
+          }
+        });
+
+        // 不需要在success回调中使用eventChannel.onMessage
+        // 我们已经通过全局事件监听cropImage来获取结果
+      } catch (err) {
+        console.error('裁剪图片操作失败，使用原图:', err);
+      }
+    },
+    // 处理裁剪完成事件
+    handleCropDone: function handleCropDone(data) {
+      console.log('收到裁剪完成事件:', data);
+      if (data && data.path) {
+        this.tempFilePath = data.path;
+        // 更新临时存储
+        uni.setStorageSync('temp_avatar_path', this.tempFilePath);
+        console.log('设置裁剪后图片路径:', this.tempFilePath);
+      }
+    },
+    // 取消上传
+    cancelUpload: function cancelUpload() {
+      this.tempFilePath = '';
+      this.uploadedFileId = '';
+      uni.removeStorageSync('temp_avatar_path');
+    },
+    // 保存图片
+    saveImage: function saveImage() {
       var _this2 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var result;
-        return _regenerator.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.prev = 0;
-                uni.showLoading({
-                  title: '加载图片中...'
-                });
-                // 使用API函数获取图片
-                _context.next = 4;
-                return _this2.$api.file.getImage(imageId);
-              case 4:
-                result = _context.sent;
-                if (!(result && result.success)) {
-                  _context.next = 10;
-                  break;
-                }
-                _this2.imageData = result.imageData;
-                _this2.imageBase64 = 'data:image/' + _this2.imageData.fileType + ';base64,' + _this2.imageData.base64Data;
-                _context.next = 11;
-                break;
-              case 10:
-                throw new Error(result.message || '获取图片失败');
-              case 11:
-                _context.next = 17;
-                break;
-              case 13:
-                _context.prev = 13;
-                _context.t0 = _context["catch"](0);
-                console.error('获取图片失败:', _context.t0);
-                uni.showToast({
-                  title: _context.t0.message || '获取图片失败',
-                  icon: 'none'
-                });
-              case 17:
-                _context.prev = 17;
-                uni.hideLoading();
-                return _context.finish(17);
-              case 20:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, null, [[0, 13, 17, 20]]);
-      }))();
-    },
-    // 根据ID获取多图中某一张图片
-    getMultiImageById: function getMultiImageById(imageId, index) {
-      var _this3 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var result, base64;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                _context2.prev = 0;
-                _context2.next = 3;
-                return _this3.$api.file.getImage(imageId);
-              case 3:
-                result = _context2.sent;
-                if (!(result && result.success)) {
-                  _context2.next = 9;
-                  break;
-                }
-                base64 = 'data:image/' + result.imageData.fileType + ';base64,' + result.imageData.base64Data;
-                _this3.$set(_this3.multiImages[index], 'base64', base64);
-                _context2.next = 10;
-                break;
-              case 9:
-                throw new Error(result.message || '获取图片失败');
-              case 10:
-                _context2.next = 15;
-                break;
-              case 12:
-                _context2.prev = 12;
-                _context2.t0 = _context2["catch"](0);
-                console.error('获取多图片失败:', _context2.t0);
-              case 15:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, null, [[0, 12]]);
-      }))();
-    },
-    // 单张图片上传成功
-    onUploadSuccess: function onUploadSuccess(result) {
-      console.log('图片上传成功:', result);
-      // 直接保存图片ID
-      this.imageId = result._id;
-      uni.showToast({
-        title: '上传成功',
-        icon: 'success'
-      });
-    },
-    // 多张图片上传成功
-    onMultiUploadSuccess: function onMultiUploadSuccess(result, index) {
-      console.log('多图上传成功:', result, '索引:', index);
-      this.uploadResults.push(result);
-
-      // 获取上传的图片显示
-      if (result._id) {
-        this.getMultiImageById(result._id, index);
-      }
-    },
-    // 更新多图中的某一张
-    updateMultiImage: function updateMultiImage(index, value) {
-      this.$set(this.multiImages[index], 'id', value);
-
-      // 如果有ID但没有base64，尝试获取图片
-      if (value && !this.multiImages[index].base64) {
-        this.getMultiImageById(value, index);
-      }
-    },
-    // 添加图片
-    addImage: function addImage() {
-      if (this.multiImages.length < 9) {
-        this.multiImages.push({
-          id: '',
-          base64: ''
-        });
-      } else {
+      if (!this.tempFilePath) {
         uni.showToast({
-          title: '最多只能上传9张图片',
-          icon: 'none'
-        });
-      }
-    },
-    // 清空图片
-    clearImages: function clearImages() {
-      this.imageId = '';
-      this.imageData = null;
-      this.imageBase64 = '';
-      this.multiImages = [{
-        id: '',
-        base64: ''
-      }];
-      this.uploadResults = [];
-      uni.showToast({
-        title: '已清空所有图片',
-        icon: 'none'
-      });
-    },
-    // 保存图片信息
-    saveImages: function saveImages() {
-      // 过滤掉空值
-      var validImages = this.multiImages.filter(function (item) {
-        return item.id;
-      }).map(function (item) {
-        return item.id;
-      });
-      if (!this.imageId && validImages.length === 0) {
-        uni.showToast({
-          title: '请先上传图片',
+          title: '请先选择图片',
           icon: 'none'
         });
         return;
       }
+      if (this.isUploading) {
+        uni.showToast({
+          title: '正在上传中，请稍候',
+          icon: 'none'
+        });
+        return;
+      }
+      this.isUploading = true;
 
-      // 这里可以添加将图片保存到数据库的逻辑
-      console.log('保存的图片信息:', {
-        single: this.imageId,
-        multiple: validImages
+      // 显示上传中
+      uni.showLoading({
+        title: '上传中...',
+        mask: true
       });
-      uni.showToast({
-        title: '保存成功',
-        icon: 'success'
+
+      // 上传图片
+      this.uploadFile(this.tempFilePath).then(function (uploadResult) {
+        console.log('图片上传结果:', uploadResult);
+        if (!uploadResult.fileID) {
+          throw new Error('上传失败，未获取到文件ID');
+        }
+        _this2.uploadedFileId = uploadResult.fileID;
+
+        // 更新用户头像
+        if (_this2.type === 'avatar') {
+          return _this2.updateUserAvatar(_this2.uploadedFileId);
+        }
+        return Promise.resolve();
+      }).then(function () {
+        uni.hideLoading();
+        uni.showToast({
+          title: '上传成功',
+          icon: 'success'
+        });
+
+        // 延迟返回
+        setTimeout(function () {
+          // 返回前清除临时数据
+          uni.removeStorageSync('temp_avatar_path');
+
+          // 设置上传成功的结果
+          var pages = getCurrentPages();
+          var prevPage = pages[pages.length - 2];
+          if (prevPage && prevPage.$vm) {
+            prevPage.$vm.$emit('uploadSuccess', {
+              fileID: _this2.uploadedFileId,
+              type: _this2.type
+            });
+
+            // 如果是个人资料页面，尝试直接更新头像显示
+            if (prevPage.route && prevPage.route.includes('profile')) {
+              if (typeof prevPage.$vm.refreshUserInfo === 'function') {
+                prevPage.$vm.refreshUserInfo();
+              } else if (prevPage.$vm.userInfo) {
+                // 直接更新上一页的用户信息中的头像
+                prevPage.$vm.userInfo.avatar = _this2.uploadedFileId;
+              }
+            }
+          }
+          uni.navigateBack();
+        }, 1000); // 减少延迟时间
+      }).catch(function (error) {
+        console.error('保存图片失败:', error);
+        uni.hideLoading();
+        uni.showToast({
+          title: error.message || '上传失败，请重试',
+          icon: 'none'
+        });
+      }).finally(function () {
+        _this2.isUploading = false;
+      });
+    },
+    // 上传文件
+    uploadFile: function uploadFile(filePath) {
+      var _this3 = this;
+      return new Promise(function (resolve, reject) {
+        // 构建云存储路径
+        var fileName = filePath.split('/').pop();
+        var cloudPath = "user_uploads/".concat(_this3.type, "/").concat(Date.now(), "_").concat(Math.random().toString(36).slice(2), "_").concat(fileName);
+        console.log('准备上传文件:', filePath);
+        console.log('云存储路径:', cloudPath);
+
+        // 使用uniCloud提供的上传方法
+        uniCloud.uploadFile({
+          filePath: filePath,
+          cloudPath: cloudPath,
+          success: function success(res) {
+            console.log('上传成功:', res);
+            resolve({
+              fileID: res.fileID,
+              url: res.fileID
+            });
+          },
+          fail: function fail(err) {
+            console.error('上传失败:', err);
+            reject(new Error('文件上传失败: ' + (err.errMsg || JSON.stringify(err))));
+          }
+        });
+      });
+    },
+    // 更新用户头像
+    updateUserAvatar: function updateUserAvatar(fileID) {
+      return new Promise(function (resolve, reject) {
+        // 获取用户信息
+        var userInfoStr = uni.getStorageSync('userInfo');
+        var userInfo = userInfoStr ? typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr : {};
+
+        // 获取用户ID和token
+        var userId = userInfo._id || userInfo.uid;
+        var token = uni.getStorageSync('uni_id_token');
+        if (!userId) {
+          reject(new Error('用户ID不存在'));
+          return;
+        }
+        console.log('准备更新用户头像:', userId, fileID);
+
+        // 准备更新数据
+        var updateData = {
+          avatar: fileID
+        };
+
+        // 调用云函数更新用户头像
+        uniCloud.callFunction({
+          name: 'updateUserProfile',
+          data: {
+            userId: userId,
+            uniIdToken: token,
+            userInfo: updateData
+          },
+          success: function success(result) {
+            if (result.result && result.result.code === 0) {
+              console.log('头像更新成功:', result.result.data);
+
+              // 更新本地用户信息
+              userInfo.avatar = fileID;
+              userInfo.avatarUrl = fileID;
+              uni.setStorageSync('userInfo', userInfo);
+
+              // 同步更新uni-id-pages的用户信息
+              var uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+              uniIdUserInfo.avatar = fileID;
+              uniIdUserInfo.avatar_file = {
+                name: 'avatar.jpg',
+                extname: 'jpg',
+                url: fileID
+              };
+              uni.setStorageSync('uni-id-pages-userInfo', uniIdUserInfo);
+
+              // 触发用户信息更新事件
+              uni.$emit('user:updated', userInfo);
+              resolve(true);
+            } else {
+              var _result$result;
+              reject(new Error(((_result$result = result.result) === null || _result$result === void 0 ? void 0 : _result$result.message) || '头像更新失败'));
+            }
+          },
+          fail: function fail(error) {
+            console.error('更新用户头像失败:', error);
+            reject(error);
+          }
+        });
       });
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
 
 /***/ }),
 

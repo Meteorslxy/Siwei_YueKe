@@ -30,11 +30,15 @@
 				</view>
 				<view v-if="isShowPhotoBtn" @tap="uploadImage">
 					<slot name="photo" v-if="$slots.photo" />
-					<image v-else src="./images/photo.svg" />
+					<view v-else class="photo-icon">
+						<text class="icon-text">相册</text>
+					</view>
 				</view>
 				<view v-if="isShowRotateBtn" @tap="rotate">
 					<slot name="rotate" v-if="$slots.rotate" />
-					<image v-else src="./images/rotate.svg" data-type="inverse" />
+					<view v-else class="rotate-icon">
+						<text class="icon-text">旋转</text>
+					</view>
 				</view>
 				<view v-if="isShowConfirmBtn" @tap="confirm">
 					<slot name="confirm" v-if="$slots.confirm" />
@@ -817,4 +821,20 @@ export default {
 
 <style scoped>
 @import './index'
+.rotate-icon, .photo-icon {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 28rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+}
+
+.icon-text {
+  font-size: 22rpx;
+  color: #fff;
+}
 </style>

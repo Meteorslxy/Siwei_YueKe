@@ -123,4 +123,98 @@
   font-size: 24rpx;
   color: var(--text-color-light);
 }
+.popup-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+.popup-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  overflow: hidden;
+  z-index: 999;
+  padding-bottom: 50rpx;
+  /* 适配底部安全区 */
+  -webkit-animation: slideUp 0.3s ease;
+          animation: slideUp 0.3s ease;
+}
+@-webkit-keyframes slideUp {
+from {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+}
+to {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+}
+}
+@keyframes slideUp {
+from {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+}
+to {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+}
+}
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100rpx;
+  padding: 0 30rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+.popup-header .popup-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-color);
+}
+.popup-header .popup-cancel, .popup-header .popup-save {
+  font-size: 30rpx;
+  padding: 20rpx 10rpx;
+}
+.popup-header .popup-cancel {
+  color: var(--text-color-light);
+}
+.popup-header .popup-save {
+  color: var(--theme-color);
+}
+.popup-content {
+  padding: 30rpx;
+  position: relative;
+}
+.popup-content .popup-input {
+  width: 100%;
+  font-size: 32rpx;
+  color: var(--text-color);
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--border-color);
+}
+.popup-content .popup-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  font-size: 32rpx;
+  color: var(--text-color);
+  padding: 20rpx;
+  border: 1rpx solid var(--border-color);
+  border-radius: 8rpx;
+  margin-bottom: 40rpx;
+}
+.popup-content .popup-count {
+  position: absolute;
+  right: 30rpx;
+  bottom: 10rpx;
+  font-size: 24rpx;
+  color: var(--text-color-light);
+}
 

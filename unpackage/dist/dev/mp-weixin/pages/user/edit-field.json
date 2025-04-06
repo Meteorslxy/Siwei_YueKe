@@ -1,6 +1,7 @@
 {
-  "navigationBarTitleText": "图片上传",
+  "navigationBarTitleText": "编辑资料",
   "navigationBarBackgroundColor": "#EC7A49",
   "navigationBarTextStyle": "white",
+  "navigationStyle": "custom",
   "usingComponents": {}
 }

@@ -18959,6 +18959,14 @@ var _default = {
       "navigationBarTextStyle": "white"
     }
   }, {
+    "path": "pages/user/edit-field",
+    "style": {
+      "navigationBarTitleText": "编辑资料",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
     "path": "pages/user/profile/index",
     "style": {
       "navigationBarTitleText": "个人资料",

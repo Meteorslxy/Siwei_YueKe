@@ -471,38 +471,10 @@ export default {
     
     // 跳转到个人资料页面（通过测试功能）
     goToUserProfile() {
-      // 获取user页的实例
-      const pages = getCurrentPages();
-      let userPage = null;
-      
-      // 查找user页面
-      for (let i = 0; i < pages.length; i++) {
-        if (pages[i].route && pages[i].route.includes('/pages/user/user')) {
-          userPage = pages[i];
-          break;
-        }
-      }
-      
-      if (userPage && userPage.testUniIdPages) {
-        // 如果找到了user页面，使用它的测试方法
-        uni.navigateBack({
-          success: () => {
-            // 延迟调用测试方法，确保页面已经渲染
-            setTimeout(() => {
-              userPage.testUniIdPages('profile');
-            }, 500);
-          }
-        });
-      } else {
-        // 如果没有找到user页面，跳转到user页面并传递参数
-        uni.switchTab({
-          url: '/pages/user/user',
-          success: () => {
-            // 设置一个标记，让user页面知道要打开个人资料
-            getApp().globalData.openUserProfile = true;
-          }
-        });
-      }
+      // 直接跳转到自定义个人资料页面
+      uni.navigateTo({
+        url: '/pages/user/profile/index'
+      });
     }
   }
 }

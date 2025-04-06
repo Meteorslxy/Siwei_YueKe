@@ -17,12 +17,32 @@ exports.main = async (event, context) => {
 		
 		console.log('开始以管理员权限查询用户信息:', userId);
 		
+		// 定义字段选择器(对象形式)
+		const fieldSelector = {
+			_id: true,
+			username: true,
+			nickname: true,
+			mobile: true,
+			email: true,
+			avatar: true,
+			avatar_file: true,
+			gender: true,
+			birthday: true,
+			location: true,
+			introduction: true,
+			register_date: true,
+			last_login_date: true,
+			role: true,
+			status: true,
+			wx_openid: true
+		};
+		
 		// 查询用户基本信息（不包含敏感字段）
 		let userResult;
 		try {
 			userResult = await db.collection('uni-id-users')
 				.doc(userId)
-				.field('_id,username,nickname,mobile,email,avatar,avatar_file,gender,register_date,last_login_date,role,status,wx_openid')
+				.field(fieldSelector)
 				.get();
 				
 			console.log('查询结果:', JSON.stringify(userResult));
@@ -34,7 +54,7 @@ exports.main = async (event, context) => {
 				const collection = db.collection('uni-id-users');
 				userResult = await collection.doc(userId).get({
 					getOne: true,  // 明确指定获取一条记录
-					field: '_id,username,nickname,mobile,email,avatar,avatar_file,gender,register_date,last_login_date,role,status,wx_openid'
+					field: fieldSelector
 				});
 				
 				console.log('使用云函数模式查询结果:', JSON.stringify(userResult));

@@ -30,6 +30,7 @@
     "pages/user/booking-detail",
     "pages/user/about/index",
     "pages/user/setting/index",
+    "pages/user/edit-field",
     "pages/user/profile/index",
     "pages/user/phone/index",
     "pages/user/wechat/index",
