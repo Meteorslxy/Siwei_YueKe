@@ -377,21 +377,37 @@ var _default = {
       }).catch(function (err) {
         uni.hideLoading();
         // 如果绑定失败，但是在测试模式下，则尝试直接更新用户信息
-        if (_this3.code === '123456') {
+        if (_this3.code === '123456' || "development" === 'development') {
           uniIdCo.updateUserInfo({
             mobile: _this3.mobile,
             mobile_confirmed: 1
           }).then(function () {
-            uni.showToast({
-              title: '测试绑定成功',
-              icon: 'success'
+            // 绑定成功后更新本地用户信息
+            uniIdCo.getUserInfo({}).then(function (result) {
+              if (result && result.userInfo) {
+                _store.mutations.setUserInfo(result.userInfo);
+              }
+              uni.showToast({
+                title: '测试绑定成功',
+                icon: 'success'
+              });
+              setTimeout(function () {
+                return uni.navigateBack();
+              }, 1500);
+            }).catch(function (e) {
+              console.error('获取用户信息失败', e);
+              uni.showToast({
+                title: '测试绑定成功，但获取用户信息失败',
+                icon: 'none'
+              });
+              setTimeout(function () {
+                return uni.navigateBack();
+              }, 1500);
             });
-            setTimeout(function () {
-              return uni.navigateBack();
-            }, 1500);
-          }).catch(function () {
+          }).catch(function (err) {
+            console.error('测试绑定失败', err);
             uni.showToast({
-              title: '测试绑定失败',
+              title: '测试绑定失败: ' + (err.message || '未知错误'),
               icon: 'none'
             });
           });

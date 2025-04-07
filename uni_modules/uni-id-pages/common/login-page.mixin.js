@@ -2,6 +2,7 @@ import {
 	mutations
 } from '@/uni_modules/uni-id-pages/common/store.js'
 import config from '@/uni_modules/uni-id-pages/config.js'
+
 const mixin = {
 	data() {
 		return {
@@ -83,12 +84,18 @@ const mixin = {
 		}
 	},
 	methods: {
-		loginSuccess(e) {
-			mutations.loginSuccess({
+		loginSuccess(e = {}) {
+			// 设置showToast和toastText参数
+			const loginParams = {
 				...e,
+				showToast: true,
+				toastText: '登录成功',
 				uniIdRedirectUrl: this.uniIdRedirectUrl,
 				config: this.config
-			})
+			};
+			
+			// 调用store中的loginSuccess方法
+			mutations.loginSuccess(loginParams);
 		}
 	}
 }

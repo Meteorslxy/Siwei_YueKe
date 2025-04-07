@@ -63,7 +63,30 @@
 					//检查登录信息是否过期，否则通过重新登录刷新session_key
 					await this.beforeGetphonenumber()
 					uniIdCo.bindMobileByMpWeixin(e.detail).then(e => {
-						this.$emit('success')
+						// 绑定成功后，确保更新用户信息
+						return uniIdCo.getUserInfo({}).then(result => {
+							// 触发成功事件并传递用户信息
+							if (result && result.userInfo) {
+								// 确保更新 store 中的用户信息
+								uni.$emit('uni-id-pages-user-info-changed', result.userInfo);
+								this.$emit('success', result.userInfo);
+							} else {
+								this.$emit('success');
+							}
+							
+							// 显示成功提示
+							uni.showToast({
+								title: '手机号绑定成功',
+								icon: 'success'
+							});
+						});
+					}).catch(err => {
+						// 处理错误情况
+						console.error('绑定手机号失败:', err);
+						uni.showToast({
+							title: err.message || '绑定失败',
+							icon: 'none'
+						});
 					}).finally(e => {
 						this.closeMe()
 					})

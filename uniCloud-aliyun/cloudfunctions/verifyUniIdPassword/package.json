@@ -1,0 +1,8 @@
+{
+  "name": "verifyUniIdPassword",
+  "version": "1.0.0",
+  "description": "验证uni-id格式的密码",
+  "main": "index.js",
+  "author": "YueKe",
+  "license": "MIT"
+} 

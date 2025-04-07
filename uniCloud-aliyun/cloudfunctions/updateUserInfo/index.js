@@ -152,7 +152,7 @@ exports.main = async (event, context) => {
     }
     
     // 执行更新
-    const allowedFields = ['phoneNumber', 'mobile', 'nickName', 'avatarUrl', 'gender', 'province', 'city', 'country'];
+    const allowedFields = ['phoneNumber', 'mobile', 'mobile_confirmed', 'nickName', 'avatarUrl', 'gender', 'province', 'city', 'country'];
     const updateData = {};
     
     // 只更新允许的字段
@@ -171,6 +171,17 @@ exports.main = async (event, context) => {
     if (event.mobile && typeof event.mobile === 'string') {
       console.log('从event根参数中获取到mobile:', event.mobile);
       updateData.mobile = event.mobile;
+    }
+    
+    // 如果更新了手机号，自动设置mobile_confirmed为1
+    if (updateData.mobile || updateData.phoneNumber) {
+      console.log('检测到手机号更新，设置mobile_confirmed=1');
+      updateData.mobile_confirmed = 1;
+    }
+    
+    // 从event根级别获取mobile_confirmed
+    if (event.mobile_confirmed !== undefined) {
+      updateData.mobile_confirmed = event.mobile_confirmed;
     }
     
     // 如果没有要更新的字段

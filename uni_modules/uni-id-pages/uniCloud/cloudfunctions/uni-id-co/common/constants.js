@@ -16,6 +16,8 @@ const USER_IDENTIFIER = {
   username: 'username',
   mobile: 'mobile',
   email: 'email',
+  phoneNumber: 'mobile',
+  identifier: 'general-id',
   wx_unionid: 'wechat-account',
   'wx_openid.app': 'wechat-account',
   'wx_openid.mp': 'wechat-account',

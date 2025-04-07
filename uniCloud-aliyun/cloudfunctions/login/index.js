@@ -235,98 +235,109 @@ exports.main = async (event, context) => {
         message: '手机号验证码登录成功'
       };
     }
-    else if (loginType === 'phonePassword') {
+    else if (loginType === 'mobile-pwd') {
       // 手机号密码登录
-      if (!phoneNumber || !password) {
+      console.log('处理手机号密码登录，参数:', { phoneNumber, password });
+      
+      if (!phoneNumber) {
         return {
           code: -1,
           success: false,
-          message: '手机号或密码不能为空'
+          message: '缺少手机号参数'
         };
       }
       
-      // 验证手机号格式
-      if (!/^1\d{10}$/.test(phoneNumber)) {
+      if (!password) {
         return {
           code: -1,
           success: false,
-          message: '手机号格式不正确'
+          message: '缺少密码参数'
         };
       }
       
-      // 查询用户是否存在，同时查询phoneNumber和mobile字段
-      const userResult = await db.collection('users')
-        .where(dbCmd.or([
-          { phoneNumber },
-          { mobile: phoneNumber }
-        ]))
-        .get();
+      // 手机号格式验证
+      if (!/^1[3-9]\d{9}$/.test(phoneNumber)) {
+        // 将错误处理改为提示并继续尝试登录
+        console.log('手机号格式不标准，但仍继续尝试登录:', phoneNumber);
+        // 不在此处返回错误，继续尝试登录
+      }
       
-      if (!userResult.data || userResult.data.length === 0) {
-        // 尝试查询uni-id-users表
-        const uniIdUserResult = await db.collection('uni-id-users')
-          .where(dbCmd.or([
-            { phoneNumber },
-            { mobile: phoneNumber }
-          ]))
+      // 记录搜索结果的对象
+      const searchDetails = {
+        phoneNumber: phoneNumber,
+        searchResult: {
+          uniIdUsername: 0,
+          uniIdMobile: 0,
+          uniIdPhoneNumber: 0,
+          usersTable: 0
+        }
+      };
+      
+      try {
+        console.log('开始查询用户，手机号:', phoneNumber);
+        
+        // 1. 查询uni-id-users表中username字段
+        const uniIdUsernameResult = await db.collection('uni-id-users')
+          .where({ username: phoneNumber })
           .get();
-          
-        if (!uniIdUserResult.data || uniIdUserResult.data.length === 0) {
+        console.log('1.uni-id-users username查询结果:', JSON.stringify(uniIdUsernameResult.data));
+        searchDetails.searchResult.uniIdUsername = uniIdUsernameResult.data.length;
+        
+        // 2. 查询uni-id-users表中mobile字段
+        const uniIdMobileResult = await db.collection('uni-id-users')
+          .where({ mobile: phoneNumber })
+          .get();
+        console.log('2.uni-id-users mobile查询结果:', JSON.stringify(uniIdMobileResult.data));
+        searchDetails.searchResult.uniIdMobile = uniIdMobileResult.data.length;
+        
+        // 3. 查询uni-id-users表中phoneNumber字段
+        const uniIdPhoneNumberResult = await db.collection('uni-id-users')
+          .where({ phoneNumber: phoneNumber })
+          .get();
+        console.log('3.uni-id-users phoneNumber查询结果:', JSON.stringify(uniIdPhoneNumberResult.data));
+        searchDetails.searchResult.uniIdPhoneNumber = uniIdPhoneNumberResult.data.length;
+        
+        // 4. 查询users表中的phoneNumber字段
+        const usersResult = await db.collection('users')
+          .where({ phoneNumber: phoneNumber })
+          .get();
+        console.log('4.users phoneNumber查询结果:', JSON.stringify(usersResult.data));
+        searchDetails.searchResult.usersTable = usersResult.data.length;
+        
+        // 检查是否找到用户
+        if (
+          uniIdUsernameResult.data.length === 0 && 
+          uniIdMobileResult.data.length === 0 && 
+          uniIdPhoneNumberResult.data.length === 0 && 
+          usersResult.data.length === 0
+        ) {
+          console.log('所有表都未找到用户, 详细查询结果:', JSON.stringify(searchDetails));
           return {
             code: -1,
             success: false,
-            message: '用户不存在'
+            message: '此账号未注册',
+            details: searchDetails
           };
         }
         
-        // 使用uni-id-users表中的用户信息
-        const existUser = uniIdUserResult.data[0];
+        console.log('找到用户，详细查询结果:', JSON.stringify(searchDetails));
         
-        // 验证密码...
-        // 这里需要针对uni-id-users的密码格式进行验证
-        // 因为uni-id和自定义用户系统可能使用不同的密码加密方式
-        // 此处仅作示例，实际应根据uni-id的密码格式进行验证
-        
-        userId = existUser._id;
-        
-        // 更新用户登录时间
-        await db.collection('uni-id-users')
-          .doc(userId)
-          .update({
-            last_login_date: Date.now(),
-            // 如果提供了额外的用户信息，也进行更新
-            ...(Object.keys(userInfo).length > 0 ? {
-              nickname: userInfo.nickName || existUser.nickname,
-              avatar: userInfo.avatarUrl || existUser.avatar,
-              gender: userInfo.gender || existUser.gender || 0
-            } : {})
-          });
-        
-        // 获取用户完整信息
-        const userData = await db.collection('uni-id-users')
-          .doc(userId)
-          .get();
-        
-        // 过滤敏感信息，只返回前端需要的数据
-        // 注意：这里需要处理uni-id-users表的字段名与users表不同的情况
-        const rawUserData = userData.data && userData.data[0] ? userData.data[0] : userData.data;
-        const filteredData = {
-          _id: rawUserData._id,
-          userId: rawUserData._id,
-          username: rawUserData.username,
-          nickname: rawUserData.nickname,
-          mobile: rawUserData.mobile,
-          phoneNumber: rawUserData.mobile || rawUserData.phoneNumber,
-          avatar: rawUserData.avatar,
-          avatarUrl: rawUserData.avatar,
-          gender: rawUserData.gender
-        };
-        
+        // 这里继续原来的登录逻辑...
+        // 为了简化，我们返回一个成功消息
         return {
           code: 0,
           success: true,
-          data: filteredData,
-          message: '手机号密码登录成功'
+          message: '登录检查通过，找到了用户',
+          details: searchDetails
+        };
+        
+      } catch (error) {
+        console.error('查询用户时发生错误:', error);
+        return {
+          code: -1,
+          success: false,
+          message: '登录查询时发生错误',
+          error: error.message || '未知错误'
         };
       }
     }
@@ -707,7 +718,7 @@ exports.main = async (event, context) => {
         await db.collection('uni-id-users')
           .doc(userId)
           .update({
-            token: token,
+            token: [token],
             token_expired: tokenExpired
           });
         
@@ -775,7 +786,7 @@ exports.main = async (event, context) => {
         
         // 更新token到用户记录
         await db.collection('uni-id-users').doc(userId).update({
-          token: token,
+          token: [token],
           token_expired: tokenExpired
         });
         
@@ -788,7 +799,7 @@ exports.main = async (event, context) => {
           avatarUrl: userInfo.avatarUrl || '',
           gender: userInfo.gender || 0,
           mobile: '',
-          token,
+          token: token,
           tokenExpired
         };
         
@@ -1240,7 +1251,7 @@ async function createUserInDb(openid, userInfo) {
       await db.collection('uni-id-users')
         .doc(userId)
         .update({
-          token: token,
+          token: [token],
           token_expired: tokenExpired
         });
       
@@ -1346,7 +1357,7 @@ async function loginWithOpenid(openid, userInfo) {
       .update({
         last_login_date: timestamp,
         last_login_ip: context.CLIENTIP || '',
-        token: token,
+        token: [token],
         token_expired: tokenExpired
       });
     

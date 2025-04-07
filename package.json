@@ -15,15 +15,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@dcloudio/uni-app": "^2.0.2",
-    "@dcloudio/uni-app-plus": "^2.0.2",
-    "@dcloudio/uni-h5": "^2.0.2",
-    "@dcloudio/uni-mp-weixin": "^2.0.2",
+    "@dcloudio/uni-app": "^3.0.0",
+    "@dcloudio/uni-mp-weixin": "^3.0.0",
     "@dcloudio/uni-ui": "^1.4.20"
   },
   "devDependencies": {
-    "@dcloudio/uni-cli-shared": "^2.0.2",
-    "@dcloudio/vue-cli-plugin-uni": "^2.0.2"
+    "@dcloudio/uni-cli-shared": "^3.0.0",
+    "@dcloudio/vue-cli-plugin-uni": "^3.0.0"
   },
   "cloudfunction-config": {
 		"memorySize": 256,

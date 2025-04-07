@@ -1,0 +1,8 @@
+{
+  "name": "checkMobileExists",
+  "version": "1.0.0",
+  "description": "检查手机号是否已被其他用户绑定",
+  "main": "index.js",
+  "author": "YueKe",
+  "license": "MIT"
+} 

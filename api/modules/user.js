@@ -185,12 +185,14 @@ export function updatePhoneNumber(params = {}) {
       // 明确指定update对象中的mobile字段
       update: {
         mobile: params.phoneNumber,
-        phoneNumber: params.phoneNumber
+        phoneNumber: params.phoneNumber,
+        mobile_confirmed: 1
       },
       
       // 直接在根级别也提供mobile字段，以防update对象处理有问题
       mobile: params.phoneNumber,
       phoneNumber: params.phoneNumber,
+      mobile_confirmed: 1,
       
       // 用户ID参数，使用多种可能的参数名增加成功率
       uid: userId,           // uni-id标准用户ID参数

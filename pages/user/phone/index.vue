@@ -150,6 +150,73 @@ export default {
         return;
       }
       
+      // 先检查手机号是否已被其他用户绑定
+      this.checkMobileExists(this.formData.mobile);
+    },
+    
+    // 检查手机号是否已被其他账号使用
+    checkMobileExists(mobile) {
+      // 显示加载提示
+      uni.showLoading({
+        title: '正在验证...',
+        mask: true
+      });
+      
+      // 使用云函数查询该手机号是否已存在
+      uniCloud.callFunction({
+        name: 'checkMobileExists',
+        data: { 
+          mobile,
+          // 传入当前用户ID，排除自己的账号
+          userId: store.userInfo?._id || ''
+        }
+      }).then(res => {
+        uni.hideLoading();
+        
+        if (res.result && res.result.code === 0) {
+          // code为0表示不存在冲突
+          this.proceedWithBinding();
+        } else if (res.result && res.result.code === 10001) {
+          // 手机号已被其他账号使用
+          uni.showModal({
+            title: '提示',
+            content: '该手机号已被其他账号绑定，请更换手机号',
+            showCancel: false
+          });
+        } else {
+          // 其他错误
+          console.error('检查手机号失败:', res);
+          
+          // 如果是开发模式，直接继续流程
+          if (this.isDevMode) {
+            console.log('开发模式：忽略手机号检查失败，继续绑定流程');
+            this.proceedWithBinding();
+          } else {
+            uni.showToast({
+              title: '验证失败，请稍后重试',
+              icon: 'none'
+            });
+          }
+        }
+      }).catch(err => {
+        uni.hideLoading();
+        console.error('检查手机号错误:', err);
+        
+        // 如果是开发模式，直接继续流程
+        if (this.isDevMode) {
+          console.log('开发模式：忽略手机号检查错误，继续绑定流程');
+          this.proceedWithBinding();
+        } else {
+          uni.showToast({
+            title: '网络错误，请稍后重试',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    
+    // 继续执行绑定流程
+    proceedWithBinding() {
       // 显示加载提示
       uni.showLoading({
         title: '正在绑定...',

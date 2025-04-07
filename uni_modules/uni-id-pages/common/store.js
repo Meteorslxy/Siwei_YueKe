@@ -9,7 +9,11 @@ import Vue from 'vue'
 import { reactive } from 'vue'
 // #endif
 
-const uniIdCo = uniCloud.importObject("uni-id-co")
+const uniIdCo = uniCloud.importObject("uni-id-co", {
+	errorOptions: {
+		type: 'toast'
+	}
+})
 const db = uniCloud.database();
 const usersTable = db.collection('uni-id-users')
 
@@ -81,7 +85,7 @@ export const mutations = {
 				}
 				
 				// 如果token有效，尝试从服务器获取最新信息
-				if (token && tokenExpired && tokenExpired > Date.now()) {
+				if (token && typeof token === 'string' && tokenExpired && tokenExpired > Date.now()) {
 					// 不等待联网查询，立即更新用户_id确保store.userInfo中的_id是最新的
 					const userInfoFromToken = uniCloud.getCurrentUserInfo();
 					if (userInfoFromToken && userInfoFromToken.uid) {
@@ -94,10 +98,6 @@ export const mutations = {
 						
 						// 查库获取用户信息，更新store.userInfo
 						try {
-							const uniIdCo = uniCloud.importObject("uni-id-co", {
-								customUI: true
-							});
-							
 							let res = await usersTable.where("'_id' == $cloudEnv_uid")
 								.field('mobile,nickname,username,email,avatar_file')
 								.get();
@@ -154,9 +154,6 @@ export const mutations = {
 			if (loginRes.code) {
 				console.log('获取到小程序登录凭证，尝试刷新token');
 				// 调用云函数刷新token
-				const uniIdCo = uniCloud.importObject("uni-id-co", {
-					customUI: true
-				});
 				
 				// 静默登录，更新token
 				const loginResult = await uniIdCo.loginByWeixin({
@@ -195,12 +192,22 @@ export const mutations = {
 		console.log('注销前保存用户信息:', currentUserInfo);
 		
 		// 1. 已经过期就不需要调用服务端的注销接口	2.即使调用注销接口失败，不能阻塞客户端
-		if(uniCloud.getCurrentUserInfo().tokenExpired > Date.now()){
-			try{
-				await uniIdCo.logout();
-			}catch(e){
-				console.error('注销时发生错误:', e);
+		try {
+			// 获取token并检查类型和有效性
+			const token = uni.getStorageSync('uni_id_token');
+			const tokenExpired = uni.getStorageSync('uni_id_token_expired');
+			
+			if (token && typeof token === 'string' && tokenExpired && tokenExpired > Date.now()) {
+				try{
+					await uniIdCo.logout();
+				}catch(e){
+					console.error('注销时发生错误:', e);
+				}
+			} else {
+				console.log('token无效或已过期，跳过服务端注销');
 			}
+		} catch (logoutError) {
+			console.error('注销过程出错:', logoutError);
 		}
 		
 		// 清理token
@@ -310,9 +317,55 @@ export const mutations = {
 
 		//习惯问题，有的云端会返回 token 有的返回 accessToken 
 		if (e.token || e.accessToken) {
-			uni.setStorageSync('uni_id_token', e.token || e.accessToken);
-			uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
-			console.log('已保存token信息到storage');
+			let token = (e.token || e.accessToken);
+			
+			// 增强的类型检查和错误处理
+			// 1. 如果token是数组，取第一个有效的字符串token
+			if (Array.isArray(token)) {
+				console.log('收到token数组，尝试提取有效token');
+				const validTokens = token.filter(t => typeof t === 'string' && t.length > 0);
+				if (validTokens.length > 0) {
+					token = validTokens[0];
+					console.log('从数组中提取到有效token');
+				} else {
+					console.error('token数组中没有有效的token');
+					token = null;
+				}
+			} 
+			// 2. 如果token是对象但不是数组，尝试转为字符串
+			else if (typeof token === 'object' && token !== null) {
+				console.error('收到对象类型token，尝试转换为字符串', typeof token);
+				try {
+					if (token.toString && typeof token.toString === 'function' && token.toString() !== '[object Object]') {
+						token = token.toString();
+						console.log('将对象token转换为字符串');
+					} else {
+						console.error('无法将对象token转换为有效字符串');
+						token = null;
+					}
+				} catch (err) {
+					console.error('转换token对象为字符串时出错:', err);
+					token = null;
+				}
+			}
+			
+			// 3. 最后检查token是否为有效字符串
+			if (typeof token === 'string' && token.length > 0) {
+				uni.setStorageSync('uni_id_token', token);
+				uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
+				console.log('已保存token信息到storage');
+			} else {
+				console.error('token格式无效，无法保存:', typeof token);
+				// 创建临时token以便用户后续刷新
+				if (e.uid || (e.userInfo && e.userInfo._id)) {
+					const userId = e.uid || e.userInfo._id;
+					const tmpToken = `${userId}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+					const tmpExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天过期
+					console.log('创建临时token:', tmpToken.substring(0, 10) + '...');
+					uni.setStorageSync('uni_id_token', tmpToken);
+					uni.setStorageSync('uni_id_token_expired', tmpExpired);
+				}
+			}
 		}
     
 		// 异步调用（更新用户信息）防止获取头像等操作阻塞页面返回
@@ -412,6 +465,50 @@ export const mutations = {
 				});
 			}, 1500);
 		}
+	}
+}
+
+// 创建token修复函数 - 将字符串token转换为数组格式
+export const fixTokenFormat = async function(userId) {
+	if (!userId) return console.error('修复token需要用户ID');
+	
+	try {
+		console.log('尝试修复用户token格式:', userId);
+		const db = uniCloud.database();
+		
+		// 查询用户信息
+		const userResult = await db.collection('uni-id-users').doc(userId).get();
+		if (!userResult.data || userResult.data.length === 0) {
+			return console.error('找不到要修复token的用户');
+		}
+		
+		const user = userResult.data[0];
+		const token = user.token;
+		
+		// 检查token格式
+		if (typeof token === 'string') {
+			console.log('发现字符串格式token，修复为数组格式');
+			
+			// 更新为数组格式
+			await db.collection('uni-id-users').doc(userId).update({
+				token: [token]
+			});
+			
+			console.log('token格式修复完成');
+			return true;
+		} else if (Array.isArray(token)) {
+			console.log('token已经是数组格式，无需修复');
+			return false;
+		} else if (!token) {
+			console.log('用户没有token，无需修复');
+			return false;
+		} else {
+			console.error('未知token格式:', typeof token);
+			return false;
+		}
+	} catch (err) {
+		console.error('修复token格式失败:', err);
+		return false;
 	}
 }
 

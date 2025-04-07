@@ -192,23 +192,35 @@
 				}).catch(err => {
 					uni.hideLoading();
 					// 如果绑定失败，但是在测试模式下，则尝试直接更新用户信息
-					if (this.code === '123456') {
+					if (this.code === '123456' || process.env.NODE_ENV === 'development') {
 						uniIdCo.updateUserInfo({
 							mobile: this.mobile,
 							mobile_confirmed: 1
 						}).then(() => {
-							uni.showToast({ title: '测试绑定成功', icon: 'success' });
-							setTimeout(() => uni.navigateBack(), 1500);
-						}).catch(() => {
+							// 绑定成功后更新本地用户信息
+							uniIdCo.getUserInfo({}).then(result => {
+								if (result && result.userInfo) {
+									mutations.setUserInfo(result.userInfo);
+								}
+								
+								uni.showToast({ title: '测试绑定成功', icon: 'success' });
+								setTimeout(() => uni.navigateBack(), 1500);
+							}).catch(e => {
+								console.error('获取用户信息失败', e);
+								uni.showToast({ title: '测试绑定成功，但获取用户信息失败', icon: 'none' });
+								setTimeout(() => uni.navigateBack(), 1500);
+							});
+						}).catch(err => {
+							console.error('测试绑定失败', err);
 							uni.showToast({ 
-								title: '测试绑定失败', 
+								title: '测试绑定失败: ' + (err.message || '未知错误'), 
 								icon: 'none' 
 							});
 						});
 					} else {
-						uni.showToast({ 
-							title: err.message || '绑定失败', 
-							icon: 'none' 
+						uni.showToast({
+							title: err.message || '绑定失败',
+							icon: 'none'
 						});
 					}
 				});

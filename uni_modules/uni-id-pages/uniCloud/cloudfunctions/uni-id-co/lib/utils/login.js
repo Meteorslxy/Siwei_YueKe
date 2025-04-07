@@ -20,23 +20,37 @@ async function realPreLogin (params = {}) {
   const appId = this.getUniversalClientInfo().appId
   const {
     total,
-    userMatched
+    userMatched,
+    searchDetails
   } = await findUser({
     userQuery: user,
     authorizedApp: appId
   })
   if (userMatched.length === 0) {
-    if (total > 0) {
-      throw {
-        errCode: ERROR.ACCOUNT_NOT_EXISTS_IN_CURRENT_APP
-      }
+    console.log('登录失败，账号不存在，详细信息:', JSON.stringify(searchDetails));
+    
+    // 准备错误信息
+    const errorInfo = {
+      errCode: total > 0 ? ERROR.ACCOUNT_NOT_EXISTS_IN_CURRENT_APP : ERROR.ACCOUNT_NOT_EXISTS,
+      details: searchDetails
+    };
+    
+    // 添加额外信息
+    if (user.mobile) {
+      errorInfo.mobile = user.mobile;
     }
-    throw {
-      errCode: ERROR.ACCOUNT_NOT_EXISTS
+    if (user.username) {
+      errorInfo.username = user.username;
     }
+    if (user.email) {
+      errorInfo.email = user.email;
+    }
+    
+    throw errorInfo;
   } else if (userMatched.length > 1) {
     throw {
-      errCode: ERROR.ACCOUNT_CONFLICT
+      errCode: ERROR.ACCOUNT_CONFLICT,
+      details: searchDetails
     }
   }
   const userRecord = userMatched[0]
