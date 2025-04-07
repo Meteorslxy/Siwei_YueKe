@@ -121,11 +121,8 @@
   height: auto !important;
 }
 .uni-content {
-  padding: 0;
-  align-items: center;
-  justify-content: center;
   padding: 50rpx;
-  padding-top: 10px;
+  padding-top: 30rpx;
 }
 @media screen and (min-width: 690px) {
 .uni-content {
@@ -134,13 +131,37 @@
 }
 .input-box {
   width: 100%;
-  margin-top: 16px;
-  background-color: #f9f9f9;
-  border-radius: 6rpx;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  margin-bottom: 10px;
+  margin-top: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+  padding: 8rpx;
 }
-.send-btn-box {
+.code-box {
+  position: relative;
+  width: 100%;
   margin-top: 15px;
+  margin-bottom: 30px;
+}
+.send-code-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 200rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  font-size: 24rpx;
+  padding: 0;
+  background-color: #EC7A49;
+  color: #FFFFFF;
+  border-radius: 6rpx;
+  z-index: 10;
+}
+.send-code-btn[disabled] {
+  background-color: #CCCCCC;
+  color: #FFFFFF;
+}
+.uni-btn {
+  width: 100%;
+  margin-top: 20px;
+  background-color: #EC7A49;
 }

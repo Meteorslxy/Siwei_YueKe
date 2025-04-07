@@ -2,18 +2,6 @@
   <view class="profile-container">
     <view class="header">
       <text class="title">个人资料</text>
-      <view class="refresh-btn" @click="refreshUsername">
-        <text>{{isRefreshing ? '加载中...' : '刷新'}}</text>
-      </view>
-    </view>
-    
-    <!-- 添加醒目的用户名显示框 -->
-    <view class="username-box" @click="refreshUsername">
-      <view class="username-content">
-        <text class="username-label">用户名</text>
-        <text class="username-value">{{userInfo.username || '未设置'}}</text>
-      </view>
-      <text class="username-refresh">点击刷新</text>
     </view>
     
     <view class="profile-form">
@@ -25,8 +13,8 @@
         </view>
       </view>
       
-      <view class="form-item" @click="editUsername">
-        <text class="item-label">登录名</text>
+      <view class="form-item" @click="editField('username')">
+        <text class="item-label">用户名</text>
         <view class="item-content">
           <text class="item-value">{{userInfo.username || '未设置'}}</text>
           <text class="item-arrow iconfont icon-right"></text>
@@ -319,6 +307,7 @@ export default {
       this.isLoading = true;
       
       const fieldMap = {
+        username: '用户名',
         nickname: '昵称',
         gender: '性别',
         birthday: '生日',
@@ -501,7 +490,7 @@ export default {
           console.log('用户名更新成功，强制刷新显示');
           // 延迟一点执行刷新，确保云端数据已更新
           setTimeout(() => {
-            this.refreshUsername();
+            this.refreshUserInfo();
           }, 300);
         }
       }
@@ -520,11 +509,33 @@ export default {
       }
     },
     
-    // 刷新用户信息
+    // 强制刷新用户信息
     refreshUserInfo() {
-      console.log('刷新用户信息');
-      // 获取最新用户信息
-      this.fetchUserFromDatabase();
+      const userInfoStr = uni.getStorageSync('userInfo');
+      if (userInfoStr) {
+        const userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+        if (userInfo && userInfo._id) {
+          console.log('强制刷新用户信息，当前用户ID:', userInfo._id);
+          
+          // 设置刷新状态
+          this.isRefreshing = true;
+          
+          // 显示加载提示
+          uni.showToast({
+            title: '正在刷新数据',
+            icon: 'loading',
+            duration: 1000
+          });
+          
+          // 从数据库获取最新信息
+          this.fetchUserFromDatabase(userInfo._id);
+          
+          // 2秒后恢复状态
+          setTimeout(() => {
+            this.isRefreshing = false;
+          }, 2000);
+        }
+      }
     },
     
     // 添加通用的updateField方法
@@ -624,44 +635,6 @@ export default {
         this.isLoading = false;
       }
     },
-    
-    // 编辑用户名
-    editUsername() {
-      this.isLoading = true;
-      
-      // 使用弹出框编辑用户名
-      this.showEditPopup('username', '用户名');
-      this.isLoading = false;
-    },
-    
-    // 强制刷新用户信息
-    refreshUsername() {
-      const userInfoStr = uni.getStorageSync('userInfo');
-      if (userInfoStr) {
-        const userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
-        if (userInfo && userInfo._id) {
-          console.log('强制刷新用户名，当前用户ID:', userInfo._id);
-          
-          // 设置刷新状态
-          this.isRefreshing = true;
-          
-          // 显示加载提示
-          uni.showToast({
-            title: '正在刷新数据',
-            icon: 'loading',
-            duration: 1000
-          });
-          
-          // 从数据库获取最新信息
-          this.fetchUserFromDatabase(userInfo._id);
-          
-          // 2秒后恢复状态
-          setTimeout(() => {
-            this.isRefreshing = false;
-          }, 2000);
-        }
-      }
-    },
   }
 }
 </script>
@@ -684,52 +657,6 @@ export default {
     font-size: 36rpx;
     font-weight: bold;
     color: $text-color;
-  }
-  
-  .refresh-btn {
-    position: absolute;
-    right: 20rpx;
-    font-size: 28rpx;
-    color: $theme-color;
-    padding: 10rpx 20rpx;
-  }
-}
-
-// 用户名显示框样式
-.username-box {
-  margin: 20rpx;
-  background-color: #fff;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  
-  .username-content {
-    display: flex;
-    flex-direction: column;
-    
-    .username-label {
-      font-size: 28rpx;
-      color: #999;
-      margin-bottom: 8rpx;
-    }
-    
-    .username-value {
-      font-size: 34rpx;
-      font-weight: bold;
-      color: #EC7A49;
-    }
-  }
-  
-  .username-refresh {
-    font-size: 24rpx;
-    color: #fff;
-    background-color: #EC7A49;
-    padding: 8rpx 20rpx;
-    border-radius: 30rpx;
   }
 }
 

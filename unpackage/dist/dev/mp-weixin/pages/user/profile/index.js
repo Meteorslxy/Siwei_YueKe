@@ -249,18 +249,6 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 var _default = {
   data: function data() {
     return {
@@ -487,6 +475,7 @@ var _default = {
       var _this2 = this;
       this.isLoading = true;
       var fieldMap = {
+        username: '用户名',
         nickname: '昵称',
         gender: '性别',
         birthday: '生日',
@@ -702,7 +691,7 @@ var _default = {
                     console.log('用户名更新成功，强制刷新显示');
                     // 延迟一点执行刷新，确保云端数据已更新
                     setTimeout(function () {
-                      _this3.refreshUsername();
+                      _this3.refreshUserInfo();
                     }, 300);
                   }
                 }
@@ -725,29 +714,52 @@ var _default = {
         this.refreshUserInfo();
       }
     },
-    // 刷新用户信息
+    // 强制刷新用户信息
     refreshUserInfo: function refreshUserInfo() {
-      console.log('刷新用户信息');
-      // 获取最新用户信息
-      this.fetchUserFromDatabase();
+      var _this4 = this;
+      var userInfoStr = uni.getStorageSync('userInfo');
+      if (userInfoStr) {
+        var userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+        if (userInfo && userInfo._id) {
+          console.log('强制刷新用户信息，当前用户ID:', userInfo._id);
+
+          // 设置刷新状态
+          this.isRefreshing = true;
+
+          // 显示加载提示
+          uni.showToast({
+            title: '正在刷新数据',
+            icon: 'loading',
+            duration: 1000
+          });
+
+          // 从数据库获取最新信息
+          this.fetchUserFromDatabase(userInfo._id);
+
+          // 2秒后恢复状态
+          setTimeout(function () {
+            _this4.isRefreshing = false;
+          }, 2000);
+        }
+      }
     },
     // 添加通用的updateField方法
     // 更新字段
     updateField: function updateField(field, value) {
-      var _this4 = this;
+      var _this5 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
         var userInfoStr, userInfo, userId, token, updateData, result, uniIdUserInfo, _result$result2;
         return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                if (!_this4.isLoading) {
+                if (!_this5.isLoading) {
                   _context4.next = 2;
                   break;
                 }
                 return _context4.abrupt("return", false);
               case 2:
-                _this4.isLoading = true;
+                _this5.isLoading = true;
                 _context4.prev = 3;
                 // 显示加载中
                 uni.showLoading({
@@ -789,14 +801,14 @@ var _default = {
                   break;
                 }
                 // 更新本地信息
-                _this4.userInfo[field] = value;
+                _this5.userInfo[field] = value;
 
                 // 特别处理性别字段，确保界面更新
                 if (field === 'gender') {
-                  console.log('更新性别成功，旧值:', _this4.userInfo.gender, '新值:', value);
+                  console.log('更新性别成功，旧值:', _this5.userInfo.gender, '新值:', value);
                   // 确保值被转换为数字
-                  _this4.userInfo.gender = Number(value);
-                  console.log('转换后的性别值:', _this4.userInfo.gender, '显示文本:', _this4.genderText);
+                  _this5.userInfo.gender = Number(value);
+                  console.log('转换后的性别值:', _this5.userInfo.gender, '显示文本:', _this5.genderText);
                 }
 
                 // 更新本地存储
@@ -817,11 +829,11 @@ var _default = {
                 });
 
                 // 强制刷新页面显示
-                _this4.$forceUpdate();
+                _this5.$forceUpdate();
 
                 // 使用nextTick确保界面更新
-                _this4.$nextTick(function () {
-                  console.log("".concat(field, "\u5DF2\u66F4\u65B0, \u5F53\u524D\u503C:"), _this4.userInfo[field]);
+                _this5.$nextTick(function () {
+                  console.log("".concat(field, "\u5DF2\u66F4\u65B0, \u5F53\u524D\u503C:"), _this5.userInfo[field]);
                 });
                 return _context4.abrupt("return", true);
               case 34:
@@ -842,7 +854,7 @@ var _default = {
                 return _context4.abrupt("return", false);
               case 43:
                 _context4.prev = 43;
-                _this4.isLoading = false;
+                _this5.isLoading = false;
                 return _context4.finish(43);
               case 46:
               case "end":
@@ -851,43 +863,6 @@ var _default = {
           }
         }, _callee4, null, [[3, 37, 43, 46]]);
       }))();
-    },
-    // 编辑用户名
-    editUsername: function editUsername() {
-      this.isLoading = true;
-
-      // 使用弹出框编辑用户名
-      this.showEditPopup('username', '用户名');
-      this.isLoading = false;
-    },
-    // 强制刷新用户信息
-    refreshUsername: function refreshUsername() {
-      var _this5 = this;
-      var userInfoStr = uni.getStorageSync('userInfo');
-      if (userInfoStr) {
-        var userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
-        if (userInfo && userInfo._id) {
-          console.log('强制刷新用户名，当前用户ID:', userInfo._id);
-
-          // 设置刷新状态
-          this.isRefreshing = true;
-
-          // 显示加载提示
-          uni.showToast({
-            title: '正在刷新数据',
-            icon: 'loading',
-            duration: 1000
-          });
-
-          // 从数据库获取最新信息
-          this.fetchUserFromDatabase(userInfo._id);
-
-          // 2秒后恢复状态
-          setTimeout(function () {
-            _this5.isRefreshing = false;
-          }, 2000);
-        }
-      }
     }
   }
 };

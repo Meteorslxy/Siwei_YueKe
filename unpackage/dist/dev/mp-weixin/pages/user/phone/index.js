@@ -183,6 +183,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 114);
+var _user = __webpack_require__(/*! @/api/modules/user.js */ 333);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var _default = {
@@ -292,6 +293,15 @@ var _default = {
 
           // 更新全局状态
           _store.mutations.updateUserInfo();
+
+          // 调用API来确保手机号被更新到数据库
+          (0, _user.updatePhoneNumber)({
+            phoneNumber: _this2.formData.mobile
+          }).then(function (result) {
+            console.log('测试模式：手机号更新到数据库成功:', result);
+          }).catch(function (updateErr) {
+            console.error('测试模式：手机号更新到数据库失败:', updateErr);
+          });
           uni.showToast({
             title: '测试模式：绑定成功',
             icon: 'success'
@@ -312,6 +322,15 @@ var _default = {
 
         // 更新用户信息
         _store.mutations.updateUserInfo();
+
+        // 调用API来确保手机号被更新到数据库
+        (0, _user.updatePhoneNumber)({
+          phoneNumber: _this2.formData.mobile
+        }).then(function (result) {
+          console.log('手机号更新到数据库成功:', result);
+        }).catch(function (updateErr) {
+          console.error('手机号更新到数据库失败:', updateErr);
+        });
         uni.showToast({
           title: '绑定成功',
           icon: 'success'
@@ -341,6 +360,15 @@ var _default = {
 
             // 更新全局状态
             _store.mutations.updateUserInfo();
+
+            // 调用API来确保手机号被更新到数据库
+            (0, _user.updatePhoneNumber)({
+              phoneNumber: _this2.formData.mobile
+            }).then(function (result) {
+              console.log('测试模式：手机号更新到数据库成功:', result);
+            }).catch(function (updateErr) {
+              console.error('测试模式：手机号更新到数据库失败:', updateErr);
+            });
             uni.showToast({
               title: '测试模式：绑定成功',
               icon: 'success'

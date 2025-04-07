@@ -61,6 +61,7 @@
 
 <script>
 import { store, mutations } from '@/uni_modules/uni-id-pages/common/store.js'
+import { updatePhoneNumber } from '@/api/modules/user.js';
 
 export default {
   data() {
@@ -173,6 +174,15 @@ export default {
           // 更新全局状态
           mutations.updateUserInfo();
           
+          // 调用API来确保手机号被更新到数据库
+          updatePhoneNumber({ phoneNumber: this.formData.mobile })
+            .then(result => {
+              console.log('测试模式：手机号更新到数据库成功:', result);
+            })
+            .catch(updateErr => {
+              console.error('测试模式：手机号更新到数据库失败:', updateErr);
+            });
+          
           uni.showToast({
             title: '测试模式：绑定成功',
             icon: 'success'
@@ -193,6 +203,15 @@ export default {
         
         // 更新用户信息
         mutations.updateUserInfo();
+        
+        // 调用API来确保手机号被更新到数据库
+        updatePhoneNumber({ phoneNumber: this.formData.mobile })
+          .then(result => {
+            console.log('手机号更新到数据库成功:', result);
+          })
+          .catch(updateErr => {
+            console.error('手机号更新到数据库失败:', updateErr);
+          });
         
         uni.showToast({
           title: '绑定成功',
@@ -224,6 +243,15 @@ export default {
             
             // 更新全局状态
             mutations.updateUserInfo();
+            
+            // 调用API来确保手机号被更新到数据库
+            updatePhoneNumber({ phoneNumber: this.formData.mobile })
+              .then(result => {
+                console.log('测试模式：手机号更新到数据库成功:', result);
+              })
+              .catch(updateErr => {
+                console.error('测试模式：手机号更新到数据库失败:', updateErr);
+              });
             
             uni.showToast({
               title: '测试模式：绑定成功',

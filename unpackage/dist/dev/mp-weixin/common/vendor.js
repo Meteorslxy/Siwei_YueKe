@@ -20292,18 +20292,18 @@ var _default = {
     privacyUrl: 'https://example.com/privacy',
     scope: ['register', 'login']
   },
+  "mp-weixin": {
+    "oauth": {
+      "weixin": {
+        "appid": "wx64b3a851f619fc04",
+        "appsecret": "c5c9c4047bf0c292e28f5019a950b18d"
+      }
+    }
+  },
   appid: {
     weixin: {
       h5: 'wx64b3a851f619fc04',
-      web: 'wx64b3a851f619fc04',
-      'mp-weixin': {
-        oauth: {
-          weixin: {
-            appid: 'wx64b3a851f619fc04',
-            appsecret: 'c5c9c4047bf0c292e28f5019a950b18d'
-          }
-        }
-      }
+      web: 'wx64b3a851f619fc04'
     }
   },
   passwordStrength: 'medium',

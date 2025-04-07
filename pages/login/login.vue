@@ -45,7 +45,7 @@
       
       <!-- 登录按钮 -->
       <view class="auth-buttons">
-        <button class="auth-btn wechat-btn" open-type="getUserInfo" @getuserinfo="handleUserInfo">
+        <button class="auth-btn wechat-btn" @click="handleGetUserInfo">
           <image src="../../static/images/wechat.png" mode="aspectFit" class="btn-icon"></image>
           微信登录
         </button>
