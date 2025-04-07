@@ -1,13 +1,6 @@
 <!-- 账号密码登录页 -->
 <template>
 	<view class="uni-content">
-		<!-- 添加返回按钮 -->
-		<view class="back-button" @click="goBack">
-			<text>←</text>
-		</view>
-		<view class="login-logo">
-			<image :src="logo"></image>
-		</view>
 		<!-- 顶部文字 -->
 		<text class="title title-box">账号密码登录</text>
 		<uni-forms>
@@ -98,18 +91,6 @@
 			this.clearCountdown();
 		},
 		methods: {
-			// 添加返回方法
-			goBack() {
-				uni.navigateBack({
-					delta: 1,
-					fail: () => {
-						// 如果没有上一页，则返回首页
-						uni.switchTab({
-							url: '/pages/index/index'
-						})
-					}
-				})
-			},
 			// 开始倒计时
 			startCountdown() {
 				// 先清除可能存在的定时器
@@ -311,27 +292,6 @@
 
 	.link {
 		font-size: 12px;
-	}
-
-	/* 返回按钮样式 */
-	.back-button {
-		position: absolute;
-		top: 80rpx;
-		left: 30rpx;
-		width: 60rpx;
-		height: 60rpx;
-		background-color: rgba(255, 255, 255, 0.3);
-		border-radius: 50%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 10;
-		
-		text {
-			color: #333;
-			font-size: 36rpx;
-			font-weight: bold;
-		}
 	}
 
 	.title-box {

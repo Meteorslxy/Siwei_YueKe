@@ -2,13 +2,33 @@
   <view class="profile-container">
     <view class="header">
       <text class="title">个人资料</text>
+      <view class="refresh-btn" @click="refreshUsername">
+        <text>{{isRefreshing ? '加载中...' : '刷新'}}</text>
+      </view>
+    </view>
+    
+    <!-- 添加醒目的用户名显示框 -->
+    <view class="username-box" @click="refreshUsername">
+      <view class="username-content">
+        <text class="username-label">用户名</text>
+        <text class="username-value">{{userInfo.username || '未设置'}}</text>
+      </view>
+      <text class="username-refresh">点击刷新</text>
     </view>
     
     <view class="profile-form">
       <view class="form-item" @click="changeAvatar">
         <text class="item-label">头像</text>
         <view class="item-content">
-          <image class="avatar" :src="userInfo.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+          <image class="avatar" :src="userInfo.avatar || '/static/images/avatar.png'" mode="aspectFill"></image>
+          <text class="item-arrow iconfont icon-right"></text>
+        </view>
+      </view>
+      
+      <view class="form-item" @click="editUsername">
+        <text class="item-label">登录名</text>
+        <view class="item-content">
+          <text class="item-value">{{userInfo.username || '未设置'}}</text>
           <text class="item-arrow iconfont icon-right"></text>
         </view>
       </view>
@@ -88,7 +108,10 @@ export default {
         gender: 0, // 0:未设置, 1:男, 2:女
         birthday: '',
         location: '',
-        introduction: ''
+        introduction: '',
+        username: '', // 确保username在初始状态就存在
+        email: '',
+        mobile: ''
       },
       isLoading: false,
       
@@ -98,7 +121,8 @@ export default {
       editTitle: '',
       editType: 'text',
       tempFieldValue: '',
-      maxLength: 20
+      maxLength: 20,
+      isRefreshing: false
     }
   },
   computed: {
@@ -116,6 +140,43 @@ export default {
       const text = genderMap[gender] || '未设置';
       console.log('性别显示文本:', text);
       return text;
+    }
+  },
+  watch: {
+    'userInfo.username': {
+      handler(newVal, oldVal) {
+        console.log('监测到username变化:', oldVal, '->', newVal);
+      },
+      immediate: true
+    },
+    userInfo: {
+      handler(newVal) {
+        console.log('userInfo对象变化，username=', newVal.username);
+      },
+      deep: true
+    }
+  },
+  created() {
+    // 添加调试日志
+    console.log('组件创建时检查用户信息');
+    try {
+      const userInfoStorage = uni.getStorageSync('userInfo');
+      if (userInfoStorage) {
+        const userInfo = typeof userInfoStorage === 'string' ? JSON.parse(userInfoStorage) : userInfoStorage;
+        console.log('本地存储的完整用户信息:', JSON.stringify(userInfo));
+        console.log('本地存储的用户名:', userInfo.username);
+      } else {
+        console.log('本地没有存储用户信息');
+      }
+      
+      // 检查uni-id-pages的用户信息
+      const uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+      if (uniIdUserInfo) {
+        console.log('uni-id-pages存储的用户信息:', JSON.stringify(uniIdUserInfo));
+        console.log('uni-id-pages存储的用户名:', uniIdUserInfo.username);
+      }
+    } catch (e) {
+      console.error('检查用户信息失败:', e);
     }
   },
   onLoad() {
@@ -143,6 +204,10 @@ export default {
           const userInfo = typeof userInfoStorage === 'string' ? JSON.parse(userInfoStorage) : userInfoStorage;
           // 将获取到的用户信息合并到当前对象
           Object.assign(this.userInfo, userInfo);
+          
+          // 调试日志
+          console.log('loadUserInfo - 用户名:', this.userInfo.username);
+          console.log('loadUserInfo - 加载的用户信息:', JSON.stringify(userInfo));
           
           // 如果用户已登录，尝试从云数据库获取最新信息
           if (userInfo._id || userInfo.uid) {
@@ -175,9 +240,14 @@ export default {
         if (result.result && result.result.code === 0 && result.result.userInfo) {
           const dbUserInfo = result.result.userInfo;
           console.log('从数据库获取的用户信息:', dbUserInfo);
+          console.log('数据库中的用户名:', dbUserInfo.username);
           
-          // 更新本地信息
-          Object.assign(this.userInfo, {
+          // 临时保存用户名
+          const username = dbUserInfo.username || '';
+          console.log('设置用户名变量:', username);
+          
+          // 先设置一个临时的userInfo对象
+          const tempUserInfo = {
             nickname: dbUserInfo.nickname || '',
             gender: dbUserInfo.gender || 0,
             birthday: dbUserInfo.birthday || '',
@@ -185,8 +255,22 @@ export default {
             introduction: dbUserInfo.introduction || '',
             avatar: dbUserInfo.avatar || '',
             email: dbUserInfo.email || '',
-            mobile: dbUserInfo.mobile || ''
-          });
+            mobile: dbUserInfo.mobile || '',
+            username: username  // 确保username被正确设置
+          };
+          
+          // 打印临时对象内容
+          console.log('设置的临时对象:', JSON.stringify(tempUserInfo));
+          
+          // 直接替换整个对象而不是合并属性
+          this.userInfo = Object.assign({}, tempUserInfo);
+          
+          // 特别处理用户名 - 直接赋值
+          this.userInfo.username = username;
+          this.$set(this.userInfo, 'username', username);
+          
+          // 打印更新后的userInfo对象
+          console.log('更新后的userInfo对象:', JSON.stringify(this.userInfo));
           
           // 更新本地存储
           const storedUserInfo = uni.getStorageSync('userInfo') || {};
@@ -195,6 +279,21 @@ export default {
             ...this.userInfo
           };
           uni.setStorageSync('userInfo', updatedUserInfo);
+          
+          console.log('更新后的用户名:', this.userInfo.username);
+          
+          // 强制刷新界面
+          this.$forceUpdate();
+          
+          // 延迟检查刷新
+          setTimeout(() => {
+            console.log('延迟检查 - 用户名现在是:', this.userInfo.username);
+            if(this.userInfo.username !== username) {
+              console.log('用户名未正确更新，再次尝试设置');
+              this.userInfo.username = username;
+              this.$forceUpdate();
+            }
+          }, 100);
         }
       } catch (err) {
         console.error('获取数据库用户信息失败:', err);
@@ -296,7 +395,7 @@ export default {
                 this.$nextTick(() => {
                   console.log('性别已更新, 当前值:', this.userInfo.gender, '性别文本:', this.genderText);
                   // 强制刷新界面
-                  this.$forceUpdate();
+                  this.fetchUserFromDatabase(userId);
                 });
                 
                 // 关闭ActionSheet
@@ -383,14 +482,31 @@ export default {
         return;
       }
       
-      // 使用已有的updateField方法更新字段
+      // 显示加载中
+      uni.showLoading({
+        title: '保存中...',
+        mask: true
+      });
+      
+      // 调用更新方法
       const success = await this.updateField(this.currentEditField, this.tempFieldValue);
       
       if (success) {
-        // 关闭弹出框
+        // 隐藏弹窗
         this.showPopup = false;
         this.tempFieldValue = '';
+        
+        // 如果是更新用户名，特别处理一下
+        if (this.currentEditField === 'username') {
+          console.log('用户名更新成功，强制刷新显示');
+          // 延迟一点执行刷新，确保云端数据已更新
+          setTimeout(() => {
+            this.refreshUsername();
+          }, 300);
+        }
       }
+      
+      uni.hideLoading();
     },
     
     // 处理上传成功事件
@@ -508,6 +624,44 @@ export default {
         this.isLoading = false;
       }
     },
+    
+    // 编辑用户名
+    editUsername() {
+      this.isLoading = true;
+      
+      // 使用弹出框编辑用户名
+      this.showEditPopup('username', '用户名');
+      this.isLoading = false;
+    },
+    
+    // 强制刷新用户信息
+    refreshUsername() {
+      const userInfoStr = uni.getStorageSync('userInfo');
+      if (userInfoStr) {
+        const userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+        if (userInfo && userInfo._id) {
+          console.log('强制刷新用户名，当前用户ID:', userInfo._id);
+          
+          // 设置刷新状态
+          this.isRefreshing = true;
+          
+          // 显示加载提示
+          uni.showToast({
+            title: '正在刷新数据',
+            icon: 'loading',
+            duration: 1000
+          });
+          
+          // 从数据库获取最新信息
+          this.fetchUserFromDatabase(userInfo._id);
+          
+          // 2秒后恢复状态
+          setTimeout(() => {
+            this.isRefreshing = false;
+          }, 2000);
+        }
+      }
+    },
   }
 }
 </script>
@@ -530,6 +684,52 @@ export default {
     font-size: 36rpx;
     font-weight: bold;
     color: $text-color;
+  }
+  
+  .refresh-btn {
+    position: absolute;
+    right: 20rpx;
+    font-size: 28rpx;
+    color: $theme-color;
+    padding: 10rpx 20rpx;
+  }
+}
+
+// 用户名显示框样式
+.username-box {
+  margin: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  
+  .username-content {
+    display: flex;
+    flex-direction: column;
+    
+    .username-label {
+      font-size: 28rpx;
+      color: #999;
+      margin-bottom: 8rpx;
+    }
+    
+    .username-value {
+      font-size: 34rpx;
+      font-weight: bold;
+      color: #EC7A49;
+    }
+  }
+  
+  .username-refresh {
+    font-size: 24rpx;
+    color: #fff;
+    background-color: #EC7A49;
+    padding: 8rpx 20rpx;
+    border-radius: 30rpx;
   }
 }
 
@@ -673,6 +873,56 @@ export default {
     bottom: 10rpx;
     font-size: 24rpx;
     color: $text-color-light;
+  }
+  
+  // 调试信息样式
+  .debug-info {
+    background-color: #f8f8f8;
+    font-size: 24rpx;
+    
+    .debug-text {
+      color: #999;
+    }
+  }
+}
+
+// 用户名显示样式
+.username-display {
+  border-bottom: 1rpx solid $border-color !important;
+  background-color: #fafafa;
+  
+  .item-label {
+    color: #EC7A49;
+  }
+  
+  .item-value {
+    color: #333 !important;
+    font-weight: bold;
+  }
+  
+  .item-refresh {
+    color: #EC7A49;
+    font-size: 24rpx;
+    margin-left: 10rpx;
+  }
+}
+
+// 添加非常醒目的用户名显示
+.username-box {
+  background-color: #ff0000;
+  color: #fff;
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  
+  .username-label {
+    font-size: 32rpx;
+    font-weight: bold;
+  }
+  
+  .username-value {
+    font-size: 32rpx;
+    font-weight: bold;
   }
 }
 </style> 

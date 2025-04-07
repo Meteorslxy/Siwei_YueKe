@@ -97,7 +97,7 @@
       <!-- 相关讲座 -->
       <view v-if="currentTab === 2" class="related-container">
         <view v-if="lecture.recommendLectures && lecture.recommendLectures.length > 0" class="related-list">
-          <view class="related-item" v-for="(item, index) in lecture.recommendLectures" :key="item._id || index" @click="goToLecture(item)">
+          <view class="related-item" v-for="(item, index) in lecture.recommendLectures" :key="index" @click="goToLecture(item)">
             <image class="related-image" :src="item.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
             <view class="related-info">
               <view class="related-title">{{item.title}}</view>
@@ -109,11 +109,12 @@
       </view>
     </view>
     
-    <view class="action-bar">
+    <!-- 暂时隐藏报名按钮 -->
+    <!-- <view class="action-bar">
       <button class="action-button" :disabled="isEnded(lecture)" @click="registerLecture">
         {{isEnded(lecture) ? '已结束' : '立即报名'}}
       </button>
-    </view>
+    </view> -->
   </view>
 </template>
 
@@ -570,32 +571,6 @@ export default {
             color: #999;
           }
         }
-      }
-    }
-  }
-  
-  .action-bar {
-    height: 100rpx;
-    background-color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 30rpx;
-    box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-    
-    .action-button {
-      flex: 1;
-      height: 80rpx;
-      line-height: 80rpx;
-      background-color: #FF6B00;
-      color: #fff;
-      font-size: 28rpx;
-      font-weight: bold;
-      border-radius: 40rpx;
-      
-      &[disabled] {
-        background-color: #ccc;
-        color: #fff;
       }
     }
   }

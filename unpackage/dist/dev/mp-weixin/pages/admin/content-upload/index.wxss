@@ -103,7 +103,7 @@
   font-weight: bold;
 }
 .admin-upload-page .main-content .tab-header .tab-item.active:after {
-  content: '';
+  content: "";
   position: absolute;
   left: 30rpx;
   right: 30rpx;
@@ -175,4 +175,3 @@
   background-color: #FF6B00;
   color: #fff;
 }
-

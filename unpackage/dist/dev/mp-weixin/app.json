@@ -34,7 +34,8 @@
     "pages/user/profile/index",
     "pages/user/phone/index",
     "pages/user/wechat/index",
-    "pages/common/input-page"
+    "pages/common/input-page",
+    "pages/common/markdown"
   ],
   "subPackages": [
     {
@@ -48,7 +49,8 @@
         "common/webview/webview",
         "userinfo/userinfo",
         "userinfo/bind-mobile/bind-mobile",
-        "userinfo/cropImage/cropImage"
+        "userinfo/cropImage/cropImage",
+        "userinfo/set-pwd/set-pwd"
       ]
     }
   ],

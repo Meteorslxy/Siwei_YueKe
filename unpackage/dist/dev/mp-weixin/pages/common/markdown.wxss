@@ -1,0 +1,168 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.markdown-container {
+  min-height: 100vh;
+  background-color: #fff;
+  padding-bottom: 30rpx;
+}
+.header {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+  position: relative;
+}
+.header .back-button {
+  width: 80rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.header .back-button .back-icon {
+  font-size: 40rpx;
+  color: #333;
+}
+.header .title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 80rpx;
+  /* 平衡左侧按钮宽度 */
+}
+.content {
+  padding: 30rpx;
+  /* Markdown样式 */
+}
+.content :deep(._h1) {
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+  color: #333;
+}
+.content :deep(._h2) {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin: 24rpx 0;
+  color: #333;
+}
+.content :deep(._h3) {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin: 20rpx 0;
+  color: #333;
+}
+.content :deep(._p) {
+  font-size: 30rpx;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+  color: #666;
+}
+.content :deep(._ul), .content :deep(._ol) {
+  padding-left: 40rpx;
+  margin-bottom: 20rpx;
+}
+.content :deep(._li) {
+  font-size: 30rpx;
+  line-height: 1.6;
+  margin-bottom: 10rpx;
+  color: #666;
+}
+.content :deep(._a) {
+  color: #007AFF;
+  text-decoration: none;
+}
+.content :deep(._strong) {
+  font-weight: bold;
+}
+.content :deep(._em) {
+  font-style: italic;
+}
+.content :deep(._code) {
+  background-color: #f3f3f3;
+  padding: 4rpx 10rpx;
+  border-radius: 6rpx;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 28rpx;
+}
+.content :deep(._pre) {
+  background-color: #f3f3f3;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  overflow-x: auto;
+  margin-bottom: 20rpx;
+}
+.content :deep(._blockquote) {
+  border-left: 8rpx solid #ddd;
+  padding: 10rpx 20rpx;
+  margin: 20rpx 0;
+  color: #666;
+  background-color: #f9f9f9;
+}

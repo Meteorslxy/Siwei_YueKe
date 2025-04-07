@@ -1,0 +1,1 @@
+<view class="markdown-container"><view class="header"><view data-event-opts="{{[['tap',[['goBack',['$event']]]]]}}" class="back-button" bindtap="__e"><text class="back-icon">←</text></view><text class="title">{{title}}</text></view><view class="content"><rich-text nodes="{{markdownHtml}}"></rich-text></view></view>

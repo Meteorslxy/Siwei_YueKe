@@ -104,7 +104,8 @@
   margin-right: 10rpx;
 }
 .section .setting-list .setting-item .item-action .item-arrow {
-  font-size: 24rpx;
-  color: var(--text-color-light);
+  font-size: 36rpx;
+  color: #999;
+  font-weight: bold;
+  margin-left: 10rpx;
 }
-

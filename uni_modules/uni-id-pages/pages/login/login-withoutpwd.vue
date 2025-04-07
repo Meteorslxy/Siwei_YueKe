@@ -1,11 +1,8 @@
 <!-- 免密登录页 -->
 <template>
 	<view class="uni-content">
-		<!-- 添加返回按钮 -->
-		<view class="back-button" @click="goBack">
-			<text>←</text>
-		</view>
-		<view class="login-logo">
+		<!-- 删除返回按钮 -->
+		<view class="login-logo" v-if="showLogo">
 			<image :src="logo"></image>
 		</view>
 		<!-- 顶部文字 -->
@@ -72,6 +69,18 @@
 					huaweiMobile: '/uni_modules/uni-id-pages/static/login/huawei-mobile.png',
 				}
 				return images[this.type]
+			},
+			showLogo() {
+				try {
+					// 检查全局变量
+					const app = getApp();
+					if (app && app.globalData && app.globalData.hideUniIdPagesLogo) {
+						return false;
+					}
+				} catch (e) {
+					console.error('获取全局变量失败', e);
+				}
+				return true;
 			}
 		},
 		async onLoad(e) {
@@ -189,18 +198,6 @@
 					duration: 3000
 				});
 			},
-			// 添加返回方法
-			goBack() {
-				uni.navigateBack({
-					delta: 1,
-					fail: () => {
-						// 如果没有上一页，则返回首页
-						uni.switchTab({
-							url: '/pages/index/index'
-						})
-					}
-				})
-			},
 		}
 	}
 </script>
@@ -300,26 +297,7 @@
 		}
 	}
 
-	/* 返回按钮样式 */
-	.back-button {
-		position: absolute;
-		top: 80rpx;
-		left: 30rpx;
-		width: 60rpx;
-		height: 60rpx;
-		background-color: rgba(255, 255, 255, 0.3);
-		border-radius: 50%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 10;
-		
-		text {
-			color: #333;
-			font-size: 36rpx;
-			font-weight: bold;
-		}
-	}
+	/* 删除返回按钮样式 */
 
 	.uni-btn {
 		margin-top: 30px;

@@ -231,13 +231,16 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _default = {
   globalData: {
     userInfo: null,
     systemInfo: null,
     $spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29',
     // UniCloud阿里云空间ID
-    currentPage: null // 当前页面对象引用
+    currentPage: null,
+    // 当前页面对象引用
+    hideUniIdPagesLogo: true // 隐藏uni-id-pages模块中的logo，避免找不到图片资源的错误
   },
 
   onLaunch: function onLaunch() {
@@ -285,8 +288,36 @@ var _default = {
       try {
         var userInfo = uni.getStorageSync('userInfo');
         if (userInfo) {
-          this.globalData.userInfo = JSON.parse(userInfo);
+          // 检查userInfo是否已经是对象
+          if ((0, _typeof2.default)(userInfo) === 'object') {
+            this.globalData.userInfo = userInfo;
+          } else {
+            // 尝试解析字符串
+            try {
+              this.globalData.userInfo = JSON.parse(userInfo);
+            } catch (parseError) {
+              console.error('解析userInfo失败:', parseError);
+              // 解析失败时，使用原始值
+              this.globalData.userInfo = userInfo;
+            }
+          }
         }
+
+        // 检查uni-id-pages的用户信息
+        var uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+        if (uniIdUserInfo) {
+          console.log('发现uni-id用户信息');
+          // 如果没有基本用户信息但有uni-id用户信息，则使用uni-id用户信息
+          if (!this.globalData.userInfo && uniIdUserInfo._id) {
+            this.globalData.userInfo = uniIdUserInfo;
+          }
+        }
+
+        // 记录登录状态
+        console.log('登录状态检查完成:', {
+          hasUserInfo: !!this.globalData.userInfo,
+          hasUniIdUserInfo: !!uniIdUserInfo
+        });
       } catch (e) {
         console.error('检查登录状态失败:', e);
       }

@@ -117,4 +117,3 @@
   color: var(--text-color-light);
   line-height: 1.6;
 }
-

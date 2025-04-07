@@ -1,7 +1,7 @@
 <!-- 短信验证码登录页 -->
 <template>
 	<view class="uni-content">
-		<view class="login-logo">
+		<view class="login-logo" v-if="showLogo">
 			<image :src="logo"></image>
 		</view>
 		<!-- 顶部文字 -->
@@ -24,13 +24,25 @@
 				"code": "",
 				"phone": "",
 				"captcha": "",
-				"logo": "/static/logo.png"
+				"logo": "/static/images/logo.png"
 			}
 		},
 		computed: {
 			tipText() {
 				return '验证码已通过短信发送至' + this.phone;
 			},
+			showLogo() {
+				try {
+					// 检查全局变量
+					const app = getApp();
+					if (app && app.globalData && app.globalData.hideUniIdPagesLogo) {
+						return false;
+					}
+				} catch (e) {
+					console.error('获取全局变量失败', e);
+				}
+				return true;
+			}
 		},
 		onLoad({
 			phoneNumber

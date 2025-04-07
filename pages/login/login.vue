@@ -14,7 +14,30 @@
       </view>
     </view>
     
-    <view class="content">
+    <!-- 嵌入式手机号验证码登录界面 -->
+    <view class="embedded-phone-login" v-if="showEmbeddedPhoneLogin">
+      <view class="login-content">
+        <text class="login-title">请选择登录方式</text>
+        <text class="login-subtitle">未注册的账号验证通过后将自动注册</text>
+        
+        <view class="phone-input-box">
+          <text class="area-code">+86</text>
+          <input type="number" v-model="phone" maxlength="11" placeholder="请输入手机号" class="phone-input" />
+        </view>
+        
+        <view class="agreement-box">
+          <checkbox v-model="agreed" color="#EC7A49" style="transform:scale(0.7)" />
+          <text class="agreement-text">同意</text>
+          <text class="agreement-link" @click="showAgreement('user')">《用户服务协议》</text>
+          <text class="agreement-text">和</text>
+          <text class="agreement-link" @click="showAgreement('privacy')">《隐私政策条款》</text>
+        </view>
+        
+        <button class="get-code-btn" type="primary" @click="getVerificationCode">获取验证码</button>
+      </view>
+    </view>
+    
+    <view class="content" v-else>
       <!-- Logo -->
       <view class="header">
         <image class="logo" src="../../static/images/logo.png" mode="aspectFit"></image>
@@ -29,10 +52,7 @@
         <button class="auth-btn other-login-btn" @click="showLoginOptions">
           其他登录方式
         </button>
-        <!-- 调试按钮，仅在开发环境显示 -->
-        <button class="auth-btn debug-btn" @click="checkLoginStatus">
-          检查登录状态
-        </button>
+        <!-- 调试按钮已隐藏 -->
       </view>
       
       <!-- 用户协议 -->
@@ -106,6 +126,14 @@ export default {
       isSupport: false, // 是否支持一键登录
       statusBarHeight: 0,
       showLoginOptionsModal: false, // 是否显示其他登录方式弹窗
+      // 账号密码登录相关
+      account: '', // 用于账号密码登录
+      password: '',
+      confirmPassword: '',
+      // 嵌入式手机号验证码登录相关
+      showEmbeddedPhoneLogin: false,
+      phone: '',
+      agreed: false,
       loginState: {
         code: '', // 微信登录code
         openid: '', // 用户openid
@@ -170,24 +198,6 @@ export default {
       // #endif
     },
     
-    // 显示手机号登录弹窗
-    showPhoneLoginModal(type) {
-      // 重置输入
-      this.mobile = '';
-      this.password = '';
-      this.confirmPassword = '';
-      this.verificationCode = '';
-      
-      // 根据类型显示不同弹窗
-      if (type === 'phoneVerify') {
-        this.showPhoneVerifyModal = true;
-      } else if (type === 'phonePassword') {
-        this.showPhonePasswordModal = true;
-      } else if (type === 'register') {
-        this.showRegisterModal = true;
-      }
-    },
-    
     // 关闭所有登录弹窗
     closeLoginModals() {
       this.showLoginOptionsModal = false;
@@ -196,10 +206,7 @@ export default {
     
     // 获取验证码
     getVerificationCode() {
-      console.log('获取验证码');
-      
-      // 手机号码验证
-      if (!this.mobile || !/^1\d{10}$/.test(this.mobile)) {
+      if (!this.phone || !/^1\d{10}$/.test(this.phone)) {
         uni.showToast({
           title: '请输入正确的手机号码',
           icon: 'none'
@@ -207,15 +214,33 @@ export default {
         return;
       }
       
-      // 显示加载提示
-      uni.showLoading({
-        title: '获取验证码中...'
+      if (!this.agreed) {
+        uni.showToast({
+          title: '请先同意用户协议和隐私政策',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 直接跳转到验证码输入页面
+      uni.navigateTo({
+        url: '/uni_modules/uni-id-pages/pages/login/login-smscode?phoneNumber=' + this.phone,
+        fail: (err) => {
+          console.error('跳转验证码页面失败:', err);
+          uni.showToast({
+            title: '系统繁忙，请稍后再试',
+            icon: 'none'
+          });
+        }
       });
-      
-      console.log('手机号码通过验证，准备发送');
-      
-      // 先获取图形验证码
-      this.getVerificationCodeWithCaptcha();
+    },
+    
+    // 显示协议
+    showAgreement(type) {
+      const url = type === 'user' ? '/pages/common/agreement' : '/pages/common/privacy';
+      uni.navigateTo({
+        url
+      });
     },
     
     // 使用图形验证码方式获取验证码
@@ -807,15 +832,17 @@ export default {
     
     // 显示隐私政策
     showPrivacyPolicy() {
+      // 使用本地MD文件
       uni.navigateTo({
-        url: '/pages/common/webview?title=隐私政策&url=' + encodeURIComponent('https://example.com/privacy')
+        url: '/pages/common/markdown?title=隐私政策&path=privacypolicy.md'
       });
     },
     
     // 显示用户协议
     showUserAgreement() {
+      // 使用本地MD文件
       uni.navigateTo({
-        url: '/pages/common/webview?title=用户协议&url=' + encodeURIComponent('https://example.com/agreement')
+        url: '/pages/common/markdown?title=用户协议&path=UserAgreement.md'
       });
     },
     
@@ -973,7 +1000,7 @@ export default {
         // 登录成功后自动跳转到首页或指定页面
         setTimeout(() => {
           this.navigateAfterLogin();
-        }, 1000);
+        }, 1500);
       } catch (e) {
         uni.hideLoading();
         console.error('保存用户信息失败:', e);
@@ -1106,108 +1133,6 @@ export default {
           icon: 'none'
         });
       }
-    },
-    
-    // 确认手机验证码登录
-    confirmPhoneVerifyLogin() {
-      // 验证手机号和验证码
-      if (!this.mobile || !/^1\d{10}$/.test(this.mobile)) {
-        uni.showToast({
-          title: '请输入正确的手机号码',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      if (!this.verificationCode || this.verificationCode.length < 4) {
-            uni.showToast({
-          title: '请输入正确的验证码',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      // 检查是否是本地模拟的验证码
-      try {
-        const codeCache = uni.getStorageSync('_sms_code_cache');
-        if (codeCache) {
-          const codeData = JSON.parse(codeCache);
-          
-          // 检查验证码、手机号和有效期
-          if (codeData.mobile === this.mobile && 
-              codeData.code === this.verificationCode && 
-              Date.now() < codeData.expireTime) {
-            
-            console.log('使用本地模拟验证码登录成功');
-            
-            // 清除缓存
-            uni.removeStorageSync('_sms_code_cache');
-            
-            // 模拟登录成功
-            const userInfo = {
-              uid: 'local_user_' + Date.now(),
-              mobile: this.mobile,
-              username: '本地测试用户',
-              nickname: '本地用户',
-              token: 'local_token_' + Date.now(),
-              tokenExpired: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7天过期
-            };
-            
-            // 保存用户信息
-            this.saveUserInfo({
-              code: 0,
-              ...userInfo
-            });
-            
-            return;
-          }
-        }
-      } catch (e) {
-        console.error('检查本地验证码失败:', e);
-      }
-      
-      // 显示加载中
-      uni.showLoading({
-        title: '登录中...',
-        mask: true
-      });
-      
-      console.log('手机号验证码登录:', this.mobile, this.verificationCode);
-      
-      // 调用uni-id-co进行登录
-      const uniIdCo = uniCloud.importObject('uni-id-co', {
-        customUI: true
-      });
-      
-      uniIdCo.loginBySms({
-        mobile: this.mobile,
-        code: this.verificationCode
-      })
-        .then(res => {
-          console.log('验证码登录结果:', res);
-          
-          // 处理登录结果
-          if (res.errCode === 0 || res.code === 0) {
-            // 登录成功，保存用户信息
-            this.handleLoginResult({result: res});
-                      } else {
-          uni.hideLoading();
-                        uni.showToast({
-              title: res.errMsg || res.message || '登录失败',
-                          icon: 'none'
-                        });
-                      }
-        })
-        .catch(err => {
-                      uni.hideLoading();
-          console.error('验证码登录失败:', err);
-          
-          // 尝试使用云函数备用方案
-          this.loginViaCloudFunction('sms', {
-            mobile: this.mobile,
-            code: this.verificationCode
-          });
-        });
     },
     
     // 确认账号密码登录
@@ -2293,28 +2218,68 @@ export default {
     
     // 显示其他登录方式
     showLoginOptions() {
-      this.showLoginOptionsModal = true;
+      // 直接跳转到账号密码登录页面，不显示选项弹窗
+      // 设置全局变量，确保一定会隐藏logo
+      try {
+        getApp().globalData = getApp().globalData || {};
+        getApp().globalData.hideUniIdPagesLogo = true;
+      } catch (e) {
+        console.error('设置全局变量失败', e);
+      }
+      
+      // 直接跳转到账号密码登录页面
+      uni.navigateTo({
+        url: '/uni_modules/uni-id-pages/pages/login/login-withpwd',
+        success: (res) => {
+          console.log('跳转成功:', res);
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err);
+        }
+      });
     },
     
     // 选择登录方式
     selectLoginType(type) {
       console.log('选择的登录方式:', type);
-      this.selectedLoginMethod = type;
-      this.closeLoginModals(); // 关闭登录选择弹窗
+      this.closeLoginModals();
       
-      // 根据选择的类型进行不同处理
-      if (type === 'phonePassword') {
-        // 账号密码登录，直接跳转到账号密码登录页面
+      // 设置全局变量，确保一定会隐藏logo
+      try {
+        getApp().globalData = getApp().globalData || {};
+        getApp().globalData.hideUniIdPagesLogo = true;
+      } catch (e) {
+        console.error('设置全局变量失败', e);
+      }
+      
+      if (type === 'phoneVerify') {
+        // 先跳转到输入手机号的页面，使用标准的phone-code登录方式
+        console.log('准备跳转到输入手机号页面');
+        uni.navigateTo({
+          url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd',
+          success: (res) => {
+            console.log('跳转成功:', res);
+          },
+          fail: (err) => {
+            console.error('跳转失败:', err);
+            // 如果发现路径不存在，检查其他可能的路径
+            uni.navigateTo({
+              url: '/uni_modules/uni-id-pages/pages/retrieve/retrieve-by-sms',
+              fail: (err2) => {
+                console.error('备用路径也跳转失败:', err2);
+                // 所有路径都失败，才使用嵌入式登录
+                this.showEmbeddedPhoneLogin = true;
+              }
+            });
+          }
+        });
+      } else if (type === 'phonePassword') {
+        // 直接跳转到uni-id-pages的账号密码登录页面
         uni.navigateTo({
           url: '/uni_modules/uni-id-pages/pages/login/login-withpwd'
         });
-      } else if (type === 'phoneVerify') {
-        // 手机号验证码登录，直接跳转到手机号验证码登录页面
-        uni.navigateTo({
-          url: '/uni_modules/uni-id-pages/pages/login/login-smscode'
-        });
       } else if (type === 'register') {
-        // 注册账号，直接跳转到注册页面
+        // 直接跳转到uni-id-pages的注册页面
         uni.navigateTo({
           url: '/uni_modules/uni-id-pages/pages/register/register'
         });
@@ -2825,4 +2790,92 @@ export default {
 }
 
 /* 移除了选择登录方式按钮的样式 */
+
+/* 嵌入式手机号验证码登录界面样式 */
+.embedded-phone-login {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 100;
+}
+
+.login-content {
+  width: 80%;
+  padding: 30rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.login-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.login-subtitle {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+.phone-input-box {
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 8rpx;
+  height: 90rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 20rpx;
+  margin-bottom: 30rpx;
+  background-color: #f8f8f8;
+}
+
+.area-code {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+  color: #333;
+}
+
+.phone-input {
+  flex: 1;
+  height: 100%;
+  font-size: 28rpx;
+}
+
+.agreement-box {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.agreement-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.agreement-link {
+  font-size: 24rpx;
+  color: #EC7A49;
+}
+
+.get-code-btn {
+  width: 100%;
+  height: 90rpx;
+  line-height: 90rpx;
+  background-color: #EC7A49;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 8rpx;
+}
 </style> 

@@ -287,6 +287,15 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white"
             }
+        },
+        {
+            "path": "pages/common/markdown",
+            "style": {
+                "navigationBarTitleText": "文档",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white",
+                "navigationStyle": "custom"
+            }
         }
     ],
     "globalStyle": {
@@ -377,6 +386,12 @@
                     "path": "userinfo/cropImage/cropImage",
                     "style": {
                         "navigationBarTitleText": ""
+                    }
+                },
+                {
+                    "path": "userinfo/set-pwd/set-pwd",
+                    "style": {
+                        "navigationBarTitleText": "设置密码"
                     }
                 }
             ]

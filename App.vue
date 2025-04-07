@@ -5,6 +5,7 @@ export default {
     systemInfo: null,
     $spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29', // UniCloud阿里云空间ID
     currentPage: null, // 当前页面对象引用
+    hideUniIdPagesLogo: true, // 隐藏uni-id-pages模块中的logo，避免找不到图片资源的错误
   },
   onLaunch: function() {
     console.log('App Launch')
@@ -51,8 +52,36 @@ export default {
       try {
         const userInfo = uni.getStorageSync('userInfo')
         if (userInfo) {
-          this.globalData.userInfo = JSON.parse(userInfo)
+          // 检查userInfo是否已经是对象
+          if (typeof userInfo === 'object') {
+            this.globalData.userInfo = userInfo
+          } else {
+            // 尝试解析字符串
+            try {
+              this.globalData.userInfo = JSON.parse(userInfo)
+            } catch (parseError) {
+              console.error('解析userInfo失败:', parseError)
+              // 解析失败时，使用原始值
+              this.globalData.userInfo = userInfo
+            }
+          }
         }
+        
+        // 检查uni-id-pages的用户信息
+        const uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo')
+        if (uniIdUserInfo) {
+          console.log('发现uni-id用户信息')
+          // 如果没有基本用户信息但有uni-id用户信息，则使用uni-id用户信息
+          if (!this.globalData.userInfo && uniIdUserInfo._id) {
+            this.globalData.userInfo = uniIdUserInfo
+          }
+        }
+        
+        // 记录登录状态
+        console.log('登录状态检查完成:', {
+          hasUserInfo: !!this.globalData.userInfo,
+          hasUniIdUserInfo: !!uniIdUserInfo
+        })
       } catch (e) {
         console.error('检查登录状态失败:', e)
       }

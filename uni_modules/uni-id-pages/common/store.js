@@ -336,55 +336,61 @@ export const mutations = {
 		
 		// 检查是否需要设置密码
 		if (needSetPassword && !passwordConfirmed) {
-			try {
-				// 确保loginType有值，避免undefined在URL中
-				const loginTypeParam = e.loginType ? `&loginType=${e.loginType}` : '';
-				const uniIdRedirectUrlParam = uniIdRedirectUrl ? 
-					`?uniIdRedirectUrl=${encodeURIComponent(uniIdRedirectUrl)}${loginTypeParam}` : 
-					(e.loginType ? `?loginType=${e.loginType}` : '');
-				
-				// 确保路径格式正确
-				const setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
-				const url = setPasswordPath + uniIdRedirectUrlParam;
-				
-				console.log('准备跳转到设置密码页面:', url);
-				
-				uni.redirectTo({
-					url: url,
-					fail: (err) => {
-						console.error('跳转到设置密码页面失败:', err);
-						// 如果路径不存在，尝试备用路径
-						if (err.errMsg && err.errMsg.includes('not found')) {
-							const fallbackUrl = '/pages/index/index';
-							console.log('尝试跳转到首页:', fallbackUrl);
-							uni.reLaunch({
-								url: fallbackUrl,
-								fail: (fallbackErr) => {
-									console.error('跳转到首页也失败:', fallbackErr);
-									uni.showToast({
-										title: '页面跳转失败',
-										icon: 'none'
-									});
-								}
+			// 账号密码登录方式不需要跳转到设置密码页面
+			if (e.loginType === 'username' || e.type === 'password' || e.type === 'account') {
+				console.log('账号密码登录方式，跳过设置密码步骤');
+				// 不执行跳转到设置密码页面的逻辑，继续后续操作
+			} else {
+				try {
+					// 确保loginType有值，避免undefined在URL中
+					const loginTypeParam = e.loginType ? `&loginType=${e.loginType}` : '';
+					const uniIdRedirectUrlParam = uniIdRedirectUrl ? 
+						`?uniIdRedirectUrl=${encodeURIComponent(uniIdRedirectUrl)}${loginTypeParam}` : 
+						(e.loginType ? `?loginType=${e.loginType}` : '');
+					
+					// 确保路径格式正确
+					const setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
+					const url = setPasswordPath + uniIdRedirectUrlParam;
+					
+					console.log('准备跳转到设置密码页面:', url);
+					
+					uni.redirectTo({
+						url: url,
+						fail: (err) => {
+							console.error('跳转到设置密码页面失败:', err);
+							// 如果路径不存在，尝试备用路径
+							if (err.errMsg && err.errMsg.includes('not found')) {
+								const fallbackUrl = '/pages/index/index';
+								console.log('尝试跳转到首页:', fallbackUrl);
+								uni.reLaunch({
+									url: fallbackUrl,
+									fail: (fallbackErr) => {
+										console.error('跳转到首页也失败:', fallbackErr);
+										uni.showToast({
+											title: '页面跳转失败',
+											icon: 'none'
+										});
+									}
+								});
+								return;
+							}
+							
+							// 跳转失败时回到首页
+							uni.showToast({
+								title: '页面跳转失败',
+								icon: 'none'
 							});
-							return;
+							setTimeout(() => {
+								uni.reLaunch({
+									url: localConfig.customHomePagePath || '/pages/index/index'
+								});
+							}, 1500);
 						}
-						
-						// 跳转失败时回到首页
-						uni.showToast({
-							title: '页面跳转失败',
-							icon: 'none'
-						});
-						setTimeout(() => {
-							uni.reLaunch({
-								url: localConfig.customHomePagePath || '/pages/index/index'
-							});
-						}, 1500);
-					}
-				});
-				return; // 阻止继续执行后续代码
-			} catch (err) {
-				console.error('设置密码页面跳转出错:', err);
+					});
+					return; // 阻止继续执行后续代码
+				} catch (err) {
+					console.error('设置密码页面跳转出错:', err);
+				}
 			}
 		}
 

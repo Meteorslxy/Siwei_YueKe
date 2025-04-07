@@ -93,6 +93,516 @@ module.exports = _defineProperty, module.exports.__esModule = true, module.expor
 
 /***/ }),
 
+/***/ 114:
+/*!***********************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/store.js ***!
+  \***********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.store = exports.mutations = void 0;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 36));
+var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
+var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var uniIdCo = uniCloud.importObject("uni-id-co");
+var db = uniCloud.database();
+var usersTable = db.collection('uni-id-users');
+var hostUserInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+var data = {
+  userInfo: hostUserInfo,
+  hasLogin: Object.keys(hostUserInfo).length != 0
+};
+
+// 创建响应式store对象
+var store;
+
+// 通过Vue.observable创建一个可响应的对象
+exports.store = store;
+exports.store = store = _vue.default.observable(data);
+
+// 定义 mutations, 修改属性
+var mutations = {
+  // data不为空，表示传递要更新的值(注意不是覆盖是合并),什么也不传时，直接查库获取更新
+  updateUserInfo: function updateUserInfo() {
+    var _arguments = arguments,
+      _this = this;
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+      var data, storedUserInfo, hasStoredUserInfo, token, tokenExpired, userInfoFromToken, _id, _uniIdCo, res, realNameRes, newUserInfo;
+      return _regenerator.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              data = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : false;
+              if (!data) {
+                _context.next = 5;
+                break;
+              }
+              usersTable.where('_id==$env.uid').update(data).then(function (e) {
+                // console.log(e);
+                if (e.result.updated) {
+                  uni.showToast({
+                    title: "更新成功",
+                    icon: 'none',
+                    duration: 3000
+                  });
+                  _this.setUserInfo(data);
+                } else {
+                  uni.showToast({
+                    title: "没有改变",
+                    icon: 'none',
+                    duration: 3000
+                  });
+                }
+              });
+              _context.next = 49;
+              break;
+            case 5:
+              _context.prev = 5;
+              // 先检查本地存储的用户信息是否存在
+              storedUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+              hasStoredUserInfo = storedUserInfo && storedUserInfo._id; // 再检查token是否存在和有效
+              token = uni.getStorageSync('uni_id_token');
+              tokenExpired = uni.getStorageSync('uni_id_token_expired');
+              console.log('更新用户信息检查:', {
+                hasToken: !!token,
+                hasExpired: !!tokenExpired,
+                tokenValid: tokenExpired > Date.now(),
+                hasStoredInfo: !!hasStoredUserInfo
+              });
+
+              // 优先使用本地存储的用户信息，确保至少有基本数据
+              if (hasStoredUserInfo) {
+                console.log('先加载本地缓存的用户信息');
+                // 确保store中有用户信息，但不完全覆盖，保留可能存在的其他信息
+                if (!store.userInfo || !store.userInfo._id) {
+                  _this.setUserInfo(storedUserInfo, {
+                    cover: true
+                  });
+                }
+              }
+
+              // 如果token有效，尝试从服务器获取最新信息
+              if (!(token && tokenExpired && tokenExpired > Date.now())) {
+                _context.next = 43;
+                break;
+              }
+              // 不等待联网查询，立即更新用户_id确保store.userInfo中的_id是最新的
+              userInfoFromToken = uniCloud.getCurrentUserInfo();
+              if (!(userInfoFromToken && userInfoFromToken.uid)) {
+                _context.next = 41;
+                break;
+              }
+              _id = userInfoFromToken.uid; // 如果store中的_id和token中的不一致，更新它
+              if (!store.userInfo || store.userInfo._id !== _id) {
+                _this.setUserInfo({
+                  _id: _id
+                }, {
+                  cover: false
+                }); // 不覆盖，只更新_id
+              }
+
+              // 查库获取用户信息，更新store.userInfo
+              _context.prev = 17;
+              _uniIdCo = uniCloud.importObject("uni-id-co", {
+                customUI: true
+              });
+              _context.next = 21;
+              return usersTable.where("'_id' == $cloudEnv_uid").field('mobile,nickname,username,email,avatar_file').get();
+            case 21:
+              res = _context.sent;
+              if (!(res.result && res.result.data && res.result.data.length > 0)) {
+                _context.next = 36;
+                break;
+              }
+              _context.prev = 23;
+              _context.next = 26;
+              return _uniIdCo.getRealNameInfo();
+            case 26:
+              realNameRes = _context.sent;
+              _context.next = 33;
+              break;
+            case 29:
+              _context.prev = 29;
+              _context.t0 = _context["catch"](23);
+              console.error('获取实名信息失败:', _context.t0);
+              realNameRes = null;
+            case 33:
+              // 更新用户信息，但不覆盖已有信息
+              newUserInfo = _objectSpread(_objectSpread({}, res.result.data[0]), {}, {
+                realNameAuth: realNameRes || {}
+              });
+              console.log('从服务器获取到新的用户信息', newUserInfo);
+              _this.setUserInfo(newUserInfo, {
+                cover: false
+              });
+            case 36:
+              _context.next = 41;
+              break;
+            case 38:
+              _context.prev = 38;
+              _context.t1 = _context["catch"](17);
+              console.error('获取用户信息失败:', _context.t1);
+              // 这里不再清除token和用户信息，保持现有状态
+            case 41:
+              _context.next = 44;
+              break;
+            case 43:
+              if (token && !hasStoredUserInfo) {
+                // token无效且没有缓存用户信息，才清理token
+                console.log('token无效，清除token但不清除用户状态');
+                uni.removeStorageSync('uni_id_token');
+                uni.removeStorageSync('uni_id_token_expired');
+              }
+            case 44:
+              _context.next = 49;
+              break;
+            case 46:
+              _context.prev = 46;
+              _context.t2 = _context["catch"](5);
+              console.error('updateUserInfo外层错误:', _context.t2);
+              // 即使出错也不清除用户信息，保持最后一个可用状态
+            case 49:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[5, 46], [17, 38], [23, 29]]);
+    }))();
+  },
+  // 静默更新token的方法（小程序环境）
+  silentUpdateToken: function silentUpdateToken() {
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+      var loginRes, _uniIdCo2, loginResult;
+      return _regenerator.default.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.prev = 0;
+              _context2.next = 3;
+              return new Promise(function (resolve, reject) {
+                uni.login({
+                  provider: 'weixin',
+                  success: resolve,
+                  fail: reject
+                });
+              });
+            case 3:
+              loginRes = _context2.sent;
+              if (!loginRes.code) {
+                _context2.next = 15;
+                break;
+              }
+              console.log('获取到小程序登录凭证，尝试刷新token');
+              // 调用云函数刷新token
+              _uniIdCo2 = uniCloud.importObject("uni-id-co", {
+                customUI: true
+              }); // 静默登录，更新token
+              _context2.next = 9;
+              return _uniIdCo2.loginByWeixin({
+                code: loginRes.code,
+                autoUpdate: true // 该参数表示静默更新，不创建新用户
+              }).catch(function (err) {
+                console.error('静默登录失败:', err);
+                return null;
+              });
+            case 9:
+              loginResult = _context2.sent;
+              if (!(loginResult && loginResult.token)) {
+                _context2.next = 15;
+                break;
+              }
+              console.log('成功刷新token');
+              uni.setStorageSync('uni_id_token', loginResult.token);
+              uni.setStorageSync('uni_id_token_expired', loginResult.tokenExpired);
+              return _context2.abrupt("return", true);
+            case 15:
+              _context2.next = 20;
+              break;
+            case 17:
+              _context2.prev = 17;
+              _context2.t0 = _context2["catch"](0);
+              console.error('静默更新token失败:', _context2.t0);
+            case 20:
+              return _context2.abrupt("return", false);
+            case 21:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, null, [[0, 17]]);
+    }))();
+  },
+  setUserInfo: function setUserInfo(data) {
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+        cover: false
+      },
+      cover = _ref.cover;
+    // console.log('set-userInfo', data);
+    var userInfo = cover ? data : Object.assign(store.userInfo, data);
+    store.userInfo = Object.assign({}, userInfo);
+    store.hasLogin = Object.keys(store.userInfo).length != 0;
+    // console.log('store.userInfo', store.userInfo);
+    uni.setStorageSync('uni-id-pages-userInfo', store.userInfo);
+    return data;
+  },
+  logout: function logout() {
+    var _this2 = this;
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+      var currentUserInfo, tabbarPages, firstTabPage;
+      return _regenerator.default.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              // 先保存当前用户信息，以便后续恢复
+              currentUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+              console.log('注销前保存用户信息:', currentUserInfo);
+
+              // 1. 已经过期就不需要调用服务端的注销接口	2.即使调用注销接口失败，不能阻塞客户端
+              if (!(uniCloud.getCurrentUserInfo().tokenExpired > Date.now())) {
+                _context3.next = 11;
+                break;
+              }
+              _context3.prev = 3;
+              _context3.next = 6;
+              return uniIdCo.logout();
+            case 6:
+              _context3.next = 11;
+              break;
+            case 8:
+              _context3.prev = 8;
+              _context3.t0 = _context3["catch"](3);
+              console.error('注销时发生错误:', _context3.t0);
+            case 11:
+              // 清理token
+              uni.removeStorageSync('uni_id_token');
+              uni.setStorageSync('uni_id_token_expired', 0);
+
+              // 清空store中的用户信息
+              _this2.setUserInfo({}, {
+                cover: true
+              });
+
+              // 通知其他组件登录状态改变
+              uni.$emit('uni-id-pages-logout');
+
+              // 跳转到首页而不是登录页，避免找不到页面的问题
+              try {
+                // 尝试返回到上一页
+                uni.navigateBack({
+                  fail: function fail() {
+                    // 如果返回失败，跳转到首页
+                    var homePage = _pages.default.pages[0].path;
+                    console.log('跳转到首页:', homePage);
+                    uni.reLaunch({
+                      url: "/".concat(homePage)
+                    });
+                  }
+                });
+              } catch (e) {
+                console.error('跳转失败:', e);
+                // 最后防线：尝试跳转到tabBar页面
+                tabbarPages = _pages.default.tabBar ? _pages.default.tabBar.list : [];
+                if (tabbarPages && tabbarPages.length > 0) {
+                  firstTabPage = tabbarPages[0].pagePath;
+                  console.log('尝试跳转到tabBar页面:', firstTabPage);
+                  uni.switchTab({
+                    url: "/".concat(firstTabPage)
+                  });
+                }
+              }
+            case 16:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3, null, [[3, 8]]);
+    }))();
+  },
+  loginBack: function loginBack() {
+    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var _e$uniIdRedirectUrl = e.uniIdRedirectUrl,
+      uniIdRedirectUrl = _e$uniIdRedirectUrl === void 0 ? '' : _e$uniIdRedirectUrl;
+    var delta = 0; //判断需要返回几层
+    var pages = getCurrentPages();
+    // console.log(pages);
+    pages.forEach(function (page, index) {
+      if (pages[pages.length - index - 1].route.split('/')[3] == 'login') {
+        delta++;
+      }
+    });
+    // console.log('判断需要返回几层:', delta);
+    if (uniIdRedirectUrl) {
+      return uni.redirectTo({
+        url: uniIdRedirectUrl,
+        fail: function fail(err1) {
+          uni.switchTab({
+            url: uniIdRedirectUrl,
+            fail: function fail(err2) {
+              console.log(err1, err2);
+            }
+          });
+        }
+      });
+    }
+    if (delta) {
+      var page = _pages.default.pages[0];
+      return uni.reLaunch({
+        url: "/".concat(page.path)
+      });
+    }
+    uni.navigateBack({
+      delta: delta
+    });
+  },
+  loginSuccess: function loginSuccess() {
+    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    // 设置 token
+    var _e$showToast = e.showToast,
+      showToast = _e$showToast === void 0 ? true : _e$showToast,
+      _e$toastText = e.toastText,
+      toastText = _e$toastText === void 0 ? '登录成功' : _e$toastText,
+      _e$autoBack = e.autoBack,
+      autoBack = _e$autoBack === void 0 ? true : _e$autoBack,
+      _e$uniIdRedirectUrl2 = e.uniIdRedirectUrl,
+      uniIdRedirectUrl = _e$uniIdRedirectUrl2 === void 0 ? '' : _e$uniIdRedirectUrl2,
+      _e$passwordConfirmed = e.passwordConfirmed,
+      passwordConfirmed = _e$passwordConfirmed === void 0 ? e.password_confirm && e.password_confirm === 'true' : _e$passwordConfirmed,
+      paramConfig = e.config;
+
+    // 确保引用的是正确的config
+    var localConfig = paramConfig || _config.default || {}; // 优先使用传入的config，然后是导入的config
+
+    // 确保setPasswordAfterLogin存在并检查类型
+    var needSetPassword = (0, _typeof2.default)(localConfig.setPasswordAfterLogin) === 'object' ? !!localConfig.setPasswordAfterLogin : !!localConfig.setPasswordAfterLogin;
+    if (e.errMsg && e.errMsg.indexOf('token不存在') > -1) {
+      uni.showToast({
+        title: e.errMsg || '登录失败',
+        icon: 'none'
+      });
+      return;
+    }
+
+    //习惯问题，有的云端会返回 token 有的返回 accessToken 
+    if (e.token || e.accessToken) {
+      uni.setStorageSync('uni_id_token', e.token || e.accessToken);
+      uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
+      console.log('已保存token信息到storage');
+    }
+
+    // 异步调用（更新用户信息）防止获取头像等操作阻塞页面返回
+    this.updateUserInfo();
+
+    // 触发uni-id-pages的登录成功事件
+    uni.$emit('uni-id-pages-login-success');
+
+    // 同时触发应用自定义的登录成功事件，确保兼容性
+    uni.$emit('user:login', e.userInfo || {});
+    uni.$emit('login:success', e.userInfo || {});
+
+    // 显示登录成功的提示
+    if (showToast) {
+      uni.showToast({
+        title: toastText,
+        icon: 'none',
+        duration: 3000
+      });
+    }
+
+    // 检查是否需要设置密码
+    if (needSetPassword && !passwordConfirmed) {
+      // 账号密码登录方式不需要跳转到设置密码页面
+      if (e.loginType === 'username' || e.type === 'password' || e.type === 'account') {
+        console.log('账号密码登录方式，跳过设置密码步骤');
+        // 不执行跳转到设置密码页面的逻辑，继续后续操作
+      } else {
+        try {
+          // 确保loginType有值，避免undefined在URL中
+          var loginTypeParam = e.loginType ? "&loginType=".concat(e.loginType) : '';
+          var uniIdRedirectUrlParam = uniIdRedirectUrl ? "?uniIdRedirectUrl=".concat(encodeURIComponent(uniIdRedirectUrl)).concat(loginTypeParam) : e.loginType ? "?loginType=".concat(e.loginType) : '';
+
+          // 确保路径格式正确
+          var setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
+          var url = setPasswordPath + uniIdRedirectUrlParam;
+          console.log('准备跳转到设置密码页面:', url);
+          uni.redirectTo({
+            url: url,
+            fail: function fail(err) {
+              console.error('跳转到设置密码页面失败:', err);
+              // 如果路径不存在，尝试备用路径
+              if (err.errMsg && err.errMsg.includes('not found')) {
+                var fallbackUrl = '/pages/index/index';
+                console.log('尝试跳转到首页:', fallbackUrl);
+                uni.reLaunch({
+                  url: fallbackUrl,
+                  fail: function fail(fallbackErr) {
+                    console.error('跳转到首页也失败:', fallbackErr);
+                    uni.showToast({
+                      title: '页面跳转失败',
+                      icon: 'none'
+                    });
+                  }
+                });
+                return;
+              }
+
+              // 跳转失败时回到首页
+              uni.showToast({
+                title: '页面跳转失败',
+                icon: 'none'
+              });
+              setTimeout(function () {
+                uni.reLaunch({
+                  url: localConfig.customHomePagePath || '/pages/index/index'
+                });
+              }, 1500);
+            }
+          });
+          return; // 阻止继续执行后续代码
+        } catch (err) {
+          console.error('设置密码页面跳转出错:', err);
+        }
+      }
+    }
+    if (autoBack) {
+      this.loginBack({
+        uniIdRedirectUrl: uniIdRedirectUrl
+      });
+    } else if (!needSetPassword) {
+      // 没有自动返回且不需要设置密码时，跳转到首页
+      console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);
+      setTimeout(function () {
+        uni.reLaunch({
+          url: localConfig.customHomePagePath || '/pages/index/index',
+          fail: function fail(err) {
+            console.error('跳转首页失败:', err);
+            // 尝试使用switchTab
+            uni.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        });
+      }, 1500);
+    }
+  }
+};
+exports.mutations = mutations;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
 /***/ 12:
 /*!**************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/toPropertyKey.js ***!
@@ -209,7 +719,7 @@ module.exports = _isNativeReflectConstruct, module.exports.__esModule = true, mo
 
 /***/ }),
 
-/***/ 178:
+/***/ 179:
 /*!**************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/static/data/filter-options.json ***!
   \**************************************************************************************************/
@@ -220,7 +730,25 @@ module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选�
 
 /***/ }),
 
-/***/ 179:
+/***/ 18:
+/*!******************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/toConsumableArray.js ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayWithoutHoles = __webpack_require__(/*! ./arrayWithoutHoles.js */ 19);
+var iterableToArray = __webpack_require__(/*! ./iterableToArray.js */ 20);
+var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ 8);
+var nonIterableSpread = __webpack_require__(/*! ./nonIterableSpread.js */ 21);
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 180:
 /*!***************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/utils/filters.js ***!
   \***************************************************************************************/
@@ -246,7 +774,7 @@ exports.getSchoolOptions = getSchoolOptions;
 exports.getSubjectLabelByValue = getSubjectLabelByValue;
 exports.getSubjectOptions = getSubjectOptions;
 exports.isValidFilterValue = isValidFilterValue;
-var _filterOptions = _interopRequireDefault(__webpack_require__(/*! @/static/data/filter-options.json */ 178));
+var _filterOptions = _interopRequireDefault(__webpack_require__(/*! @/static/data/filter-options.json */ 179));
 /**
  * 筛选选项工具类
  * 用于统一管理和获取筛选选项数据
@@ -358,24 +886,6 @@ var _default = {
   isValidFilterValue: isValidFilterValue
 };
 exports.default = _default;
-
-/***/ }),
-
-/***/ 18:
-/*!******************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/toConsumableArray.js ***!
-  \******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayWithoutHoles = __webpack_require__(/*! ./arrayWithoutHoles.js */ 19);
-var iterableToArray = __webpack_require__(/*! ./iterableToArray.js */ 20);
-var unsupportedIterableToArray = __webpack_require__(/*! ./unsupportedIterableToArray.js */ 8);
-var nonIterableSpread = __webpack_require__(/*! ./nonIterableSpread.js */ 21);
-function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
-}
-module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
 
@@ -18425,7 +18935,7 @@ module.exports = _getPrototypeOf, module.exports.__esModule = true, module.expor
 
 /***/ }),
 
-/***/ 332:
+/***/ 333:
 /*!**************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/modules/user.js ***!
   \**************************************************************************************/
@@ -18994,6 +19504,14 @@ var _default = {
       "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
+  }, {
+    "path": "pages/common/markdown",
+    "style": {
+      "navigationBarTitleText": "文档",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
   }],
   "globalStyle": {
     "navigationBarTextStyle": "black",
@@ -19071,6 +19589,11 @@ var _default = {
       "style": {
         "navigationBarTitleText": ""
       }
+    }, {
+      "path": "userinfo/set-pwd/set-pwd",
+      "style": {
+        "navigationBarTitleText": "设置密码"
+      }
     }]
   }]
 };
@@ -19099,7 +19622,87 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 373:
+/***/ 38:
+/*!*****************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json ***!
+  \*****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+
+/***/ }),
+
+/***/ 382:
+/*!*********************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/common/utils/marked.min.js ***!
+  \*********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+/**
+ * Simplified marked - a markdown parser
+ * Copyright (c) 2023, Claude
+ * All rights reserved.
+ * License: MIT
+ */
+
+// 简化版的Markdown解析器
+function marked(src) {
+  // 基本的markdown转HTML
+  var html = src
+  // 标题转换
+  .replace(/^# (.*$)/gm, '<h1>$1</h1>').replace(/^## (.*$)/gm, '<h2>$1</h2>').replace(/^### (.*$)/gm, '<h3>$1</h3>').replace(/^#### (.*$)/gm, '<h4>$1</h4>')
+
+  // 列表转换
+  .replace(/^\* (.*$)/gm, '<ul><li>$1</li></ul>').replace(/^- (.*$)/gm, '<ul><li>$1</li></ul>').replace(/^[0-9]+\. (.*$)/gm, '<ol><li>$1</li></ol>')
+
+  // 段落转换 - 连续的两个换行符表示段落
+  .replace(/\n\n/g, '</p><p>')
+
+  // 强调和加粗
+  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+
+  // 链接
+  .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+
+  // 代码块
+  .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+
+  // 行内代码
+  .replace(/`(.*?)`/g, '<code>$1</code>')
+
+  // 水平线
+  .replace(/^\-\-\-$/gm, '<hr>')
+
+  // 引用
+  .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+
+  // 修复列表标签问题
+  html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+
+  // 确保整个内容被包裹在<p>标签内
+  if (!html.startsWith('<')) {
+    html = '<p>' + html;
+  }
+  if (!html.endsWith('>')) {
+    html += '</p>';
+  }
+  return html;
+}
+var _default = marked;
+exports.default = _default;
+
+/***/ }),
+
+/***/ 391:
 /*!**********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
   \**********************************************************************************************************************/
@@ -19115,7 +19718,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 374);
+var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 114);
 var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -19206,522 +19809,23 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 374:
-/*!***********************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/store.js ***!
-  \***********************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.store = exports.mutations = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
-var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
-var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 36));
-var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
-var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-var uniIdCo = uniCloud.importObject("uni-id-co");
-var db = uniCloud.database();
-var usersTable = db.collection('uni-id-users');
-var hostUserInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
-var data = {
-  userInfo: hostUserInfo,
-  hasLogin: Object.keys(hostUserInfo).length != 0
-};
-
-// 创建响应式store对象
-var store;
-
-// 通过Vue.observable创建一个可响应的对象
-exports.store = store;
-exports.store = store = _vue.default.observable(data);
-
-// 定义 mutations, 修改属性
-var mutations = {
-  // data不为空，表示传递要更新的值(注意不是覆盖是合并),什么也不传时，直接查库获取更新
-  updateUserInfo: function updateUserInfo() {
-    var _arguments = arguments,
-      _this = this;
-    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-      var data, storedUserInfo, hasStoredUserInfo, token, tokenExpired, userInfoFromToken, _id, _uniIdCo, res, realNameRes, newUserInfo;
-      return _regenerator.default.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              data = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : false;
-              if (!data) {
-                _context.next = 5;
-                break;
-              }
-              usersTable.where('_id==$env.uid').update(data).then(function (e) {
-                // console.log(e);
-                if (e.result.updated) {
-                  uni.showToast({
-                    title: "更新成功",
-                    icon: 'none',
-                    duration: 3000
-                  });
-                  _this.setUserInfo(data);
-                } else {
-                  uni.showToast({
-                    title: "没有改变",
-                    icon: 'none',
-                    duration: 3000
-                  });
-                }
-              });
-              _context.next = 49;
-              break;
-            case 5:
-              _context.prev = 5;
-              // 先检查本地存储的用户信息是否存在
-              storedUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
-              hasStoredUserInfo = storedUserInfo && storedUserInfo._id; // 再检查token是否存在和有效
-              token = uni.getStorageSync('uni_id_token');
-              tokenExpired = uni.getStorageSync('uni_id_token_expired');
-              console.log('更新用户信息检查:', {
-                hasToken: !!token,
-                hasExpired: !!tokenExpired,
-                tokenValid: tokenExpired > Date.now(),
-                hasStoredInfo: !!hasStoredUserInfo
-              });
-
-              // 优先使用本地存储的用户信息，确保至少有基本数据
-              if (hasStoredUserInfo) {
-                console.log('先加载本地缓存的用户信息');
-                // 确保store中有用户信息，但不完全覆盖，保留可能存在的其他信息
-                if (!store.userInfo || !store.userInfo._id) {
-                  _this.setUserInfo(storedUserInfo, {
-                    cover: true
-                  });
-                }
-              }
-
-              // 如果token有效，尝试从服务器获取最新信息
-              if (!(token && tokenExpired && tokenExpired > Date.now())) {
-                _context.next = 43;
-                break;
-              }
-              // 不等待联网查询，立即更新用户_id确保store.userInfo中的_id是最新的
-              userInfoFromToken = uniCloud.getCurrentUserInfo();
-              if (!(userInfoFromToken && userInfoFromToken.uid)) {
-                _context.next = 41;
-                break;
-              }
-              _id = userInfoFromToken.uid; // 如果store中的_id和token中的不一致，更新它
-              if (!store.userInfo || store.userInfo._id !== _id) {
-                _this.setUserInfo({
-                  _id: _id
-                }, {
-                  cover: false
-                }); // 不覆盖，只更新_id
-              }
-
-              // 查库获取用户信息，更新store.userInfo
-              _context.prev = 17;
-              _uniIdCo = uniCloud.importObject("uni-id-co", {
-                customUI: true
-              });
-              _context.next = 21;
-              return usersTable.where("'_id' == $cloudEnv_uid").field('mobile,nickname,username,email,avatar_file').get();
-            case 21:
-              res = _context.sent;
-              if (!(res.result && res.result.data && res.result.data.length > 0)) {
-                _context.next = 36;
-                break;
-              }
-              _context.prev = 23;
-              _context.next = 26;
-              return _uniIdCo.getRealNameInfo();
-            case 26:
-              realNameRes = _context.sent;
-              _context.next = 33;
-              break;
-            case 29:
-              _context.prev = 29;
-              _context.t0 = _context["catch"](23);
-              console.error('获取实名信息失败:', _context.t0);
-              realNameRes = null;
-            case 33:
-              // 更新用户信息，但不覆盖已有信息
-              newUserInfo = _objectSpread(_objectSpread({}, res.result.data[0]), {}, {
-                realNameAuth: realNameRes || {}
-              });
-              console.log('从服务器获取到新的用户信息', newUserInfo);
-              _this.setUserInfo(newUserInfo, {
-                cover: false
-              });
-            case 36:
-              _context.next = 41;
-              break;
-            case 38:
-              _context.prev = 38;
-              _context.t1 = _context["catch"](17);
-              console.error('获取用户信息失败:', _context.t1);
-              // 这里不再清除token和用户信息，保持现有状态
-            case 41:
-              _context.next = 44;
-              break;
-            case 43:
-              if (token && !hasStoredUserInfo) {
-                // token无效且没有缓存用户信息，才清理token
-                console.log('token无效，清除token但不清除用户状态');
-                uni.removeStorageSync('uni_id_token');
-                uni.removeStorageSync('uni_id_token_expired');
-              }
-            case 44:
-              _context.next = 49;
-              break;
-            case 46:
-              _context.prev = 46;
-              _context.t2 = _context["catch"](5);
-              console.error('updateUserInfo外层错误:', _context.t2);
-              // 即使出错也不清除用户信息，保持最后一个可用状态
-            case 49:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee, null, [[5, 46], [17, 38], [23, 29]]);
-    }))();
-  },
-  // 静默更新token的方法（小程序环境）
-  silentUpdateToken: function silentUpdateToken() {
-    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-      var loginRes, _uniIdCo2, loginResult;
-      return _regenerator.default.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              _context2.prev = 0;
-              _context2.next = 3;
-              return new Promise(function (resolve, reject) {
-                uni.login({
-                  provider: 'weixin',
-                  success: resolve,
-                  fail: reject
-                });
-              });
-            case 3:
-              loginRes = _context2.sent;
-              if (!loginRes.code) {
-                _context2.next = 15;
-                break;
-              }
-              console.log('获取到小程序登录凭证，尝试刷新token');
-              // 调用云函数刷新token
-              _uniIdCo2 = uniCloud.importObject("uni-id-co", {
-                customUI: true
-              }); // 静默登录，更新token
-              _context2.next = 9;
-              return _uniIdCo2.loginByWeixin({
-                code: loginRes.code,
-                autoUpdate: true // 该参数表示静默更新，不创建新用户
-              }).catch(function (err) {
-                console.error('静默登录失败:', err);
-                return null;
-              });
-            case 9:
-              loginResult = _context2.sent;
-              if (!(loginResult && loginResult.token)) {
-                _context2.next = 15;
-                break;
-              }
-              console.log('成功刷新token');
-              uni.setStorageSync('uni_id_token', loginResult.token);
-              uni.setStorageSync('uni_id_token_expired', loginResult.tokenExpired);
-              return _context2.abrupt("return", true);
-            case 15:
-              _context2.next = 20;
-              break;
-            case 17:
-              _context2.prev = 17;
-              _context2.t0 = _context2["catch"](0);
-              console.error('静默更新token失败:', _context2.t0);
-            case 20:
-              return _context2.abrupt("return", false);
-            case 21:
-            case "end":
-              return _context2.stop();
-          }
-        }
-      }, _callee2, null, [[0, 17]]);
-    }))();
-  },
-  setUserInfo: function setUserInfo(data) {
-    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
-        cover: false
-      },
-      cover = _ref.cover;
-    // console.log('set-userInfo', data);
-    var userInfo = cover ? data : Object.assign(store.userInfo, data);
-    store.userInfo = Object.assign({}, userInfo);
-    store.hasLogin = Object.keys(store.userInfo).length != 0;
-    // console.log('store.userInfo', store.userInfo);
-    uni.setStorageSync('uni-id-pages-userInfo', store.userInfo);
-    return data;
-  },
-  logout: function logout() {
-    var _this2 = this;
-    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-      var currentUserInfo, tabbarPages, firstTabPage;
-      return _regenerator.default.wrap(function _callee3$(_context3) {
-        while (1) {
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              // 先保存当前用户信息，以便后续恢复
-              currentUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
-              console.log('注销前保存用户信息:', currentUserInfo);
-
-              // 1. 已经过期就不需要调用服务端的注销接口	2.即使调用注销接口失败，不能阻塞客户端
-              if (!(uniCloud.getCurrentUserInfo().tokenExpired > Date.now())) {
-                _context3.next = 11;
-                break;
-              }
-              _context3.prev = 3;
-              _context3.next = 6;
-              return uniIdCo.logout();
-            case 6:
-              _context3.next = 11;
-              break;
-            case 8:
-              _context3.prev = 8;
-              _context3.t0 = _context3["catch"](3);
-              console.error('注销时发生错误:', _context3.t0);
-            case 11:
-              // 清理token
-              uni.removeStorageSync('uni_id_token');
-              uni.setStorageSync('uni_id_token_expired', 0);
-
-              // 清空store中的用户信息
-              _this2.setUserInfo({}, {
-                cover: true
-              });
-
-              // 通知其他组件登录状态改变
-              uni.$emit('uni-id-pages-logout');
-
-              // 跳转到首页而不是登录页，避免找不到页面的问题
-              try {
-                // 尝试返回到上一页
-                uni.navigateBack({
-                  fail: function fail() {
-                    // 如果返回失败，跳转到首页
-                    var homePage = _pages.default.pages[0].path;
-                    console.log('跳转到首页:', homePage);
-                    uni.reLaunch({
-                      url: "/".concat(homePage)
-                    });
-                  }
-                });
-              } catch (e) {
-                console.error('跳转失败:', e);
-                // 最后防线：尝试跳转到tabBar页面
-                tabbarPages = _pages.default.tabBar ? _pages.default.tabBar.list : [];
-                if (tabbarPages && tabbarPages.length > 0) {
-                  firstTabPage = tabbarPages[0].pagePath;
-                  console.log('尝试跳转到tabBar页面:', firstTabPage);
-                  uni.switchTab({
-                    url: "/".concat(firstTabPage)
-                  });
-                }
-              }
-            case 16:
-            case "end":
-              return _context3.stop();
-          }
-        }
-      }, _callee3, null, [[3, 8]]);
-    }))();
-  },
-  loginBack: function loginBack() {
-    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var _e$uniIdRedirectUrl = e.uniIdRedirectUrl,
-      uniIdRedirectUrl = _e$uniIdRedirectUrl === void 0 ? '' : _e$uniIdRedirectUrl;
-    var delta = 0; //判断需要返回几层
-    var pages = getCurrentPages();
-    // console.log(pages);
-    pages.forEach(function (page, index) {
-      if (pages[pages.length - index - 1].route.split('/')[3] == 'login') {
-        delta++;
-      }
-    });
-    // console.log('判断需要返回几层:', delta);
-    if (uniIdRedirectUrl) {
-      return uni.redirectTo({
-        url: uniIdRedirectUrl,
-        fail: function fail(err1) {
-          uni.switchTab({
-            url: uniIdRedirectUrl,
-            fail: function fail(err2) {
-              console.log(err1, err2);
-            }
-          });
-        }
-      });
-    }
-    if (delta) {
-      var page = _pages.default.pages[0];
-      return uni.reLaunch({
-        url: "/".concat(page.path)
-      });
-    }
-    uni.navigateBack({
-      delta: delta
-    });
-  },
-  loginSuccess: function loginSuccess() {
-    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    // 设置 token
-    var _e$showToast = e.showToast,
-      showToast = _e$showToast === void 0 ? true : _e$showToast,
-      _e$toastText = e.toastText,
-      toastText = _e$toastText === void 0 ? '登录成功' : _e$toastText,
-      _e$autoBack = e.autoBack,
-      autoBack = _e$autoBack === void 0 ? true : _e$autoBack,
-      _e$uniIdRedirectUrl2 = e.uniIdRedirectUrl,
-      uniIdRedirectUrl = _e$uniIdRedirectUrl2 === void 0 ? '' : _e$uniIdRedirectUrl2,
-      _e$passwordConfirmed = e.passwordConfirmed,
-      passwordConfirmed = _e$passwordConfirmed === void 0 ? e.password_confirm && e.password_confirm === 'true' : _e$passwordConfirmed,
-      paramConfig = e.config;
-
-    // 确保引用的是正确的config
-    var localConfig = paramConfig || _config.default || {}; // 优先使用传入的config，然后是导入的config
-
-    // 确保setPasswordAfterLogin存在并检查类型
-    var needSetPassword = (0, _typeof2.default)(localConfig.setPasswordAfterLogin) === 'object' ? !!localConfig.setPasswordAfterLogin : !!localConfig.setPasswordAfterLogin;
-    if (e.errMsg && e.errMsg.indexOf('token不存在') > -1) {
-      uni.showToast({
-        title: e.errMsg || '登录失败',
-        icon: 'none'
-      });
-      return;
-    }
-
-    //习惯问题，有的云端会返回 token 有的返回 accessToken 
-    if (e.token || e.accessToken) {
-      uni.setStorageSync('uni_id_token', e.token || e.accessToken);
-      uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
-      console.log('已保存token信息到storage');
-    }
-
-    // 异步调用（更新用户信息）防止获取头像等操作阻塞页面返回
-    this.updateUserInfo();
-
-    // 触发uni-id-pages的登录成功事件
-    uni.$emit('uni-id-pages-login-success');
-
-    // 同时触发应用自定义的登录成功事件，确保兼容性
-    uni.$emit('user:login', e.userInfo || {});
-    uni.$emit('login:success', e.userInfo || {});
-
-    // 显示登录成功的提示
-    if (showToast) {
-      uni.showToast({
-        title: toastText,
-        icon: 'none',
-        duration: 3000
-      });
-    }
-
-    // 检查是否需要设置密码
-    if (needSetPassword && !passwordConfirmed) {
-      try {
-        // 确保loginType有值，避免undefined在URL中
-        var loginTypeParam = e.loginType ? "&loginType=".concat(e.loginType) : '';
-        var uniIdRedirectUrlParam = uniIdRedirectUrl ? "?uniIdRedirectUrl=".concat(encodeURIComponent(uniIdRedirectUrl)).concat(loginTypeParam) : e.loginType ? "?loginType=".concat(e.loginType) : '';
-
-        // 确保路径格式正确
-        var setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
-        var url = setPasswordPath + uniIdRedirectUrlParam;
-        console.log('准备跳转到设置密码页面:', url);
-        uni.redirectTo({
-          url: url,
-          fail: function fail(err) {
-            console.error('跳转到设置密码页面失败:', err);
-            // 如果路径不存在，尝试备用路径
-            if (err.errMsg && err.errMsg.includes('not found')) {
-              var fallbackUrl = '/pages/index/index';
-              console.log('尝试跳转到首页:', fallbackUrl);
-              uni.reLaunch({
-                url: fallbackUrl,
-                fail: function fail(fallbackErr) {
-                  console.error('跳转到首页也失败:', fallbackErr);
-                  uni.showToast({
-                    title: '页面跳转失败',
-                    icon: 'none'
-                  });
-                }
-              });
-              return;
-            }
-
-            // 跳转失败时回到首页
-            uni.showToast({
-              title: '页面跳转失败',
-              icon: 'none'
-            });
-            setTimeout(function () {
-              uni.reLaunch({
-                url: localConfig.customHomePagePath || '/pages/index/index'
-              });
-            }, 1500);
-          }
-        });
-        return; // 阻止继续执行后续代码
-      } catch (err) {
-        console.error('设置密码页面跳转出错:', err);
-      }
-    }
-    if (autoBack) {
-      this.loginBack({
-        uniIdRedirectUrl: uniIdRedirectUrl
-      });
-    } else if (!needSetPassword) {
-      // 没有自动返回且不需要设置密码时，跳转到首页
-      console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);
-      setTimeout(function () {
-        uni.reLaunch({
-          url: localConfig.customHomePagePath || '/pages/index/index',
-          fail: function fail(err) {
-            console.error('跳转首页失败:', err);
-            // 尝试使用switchTab
-            uni.switchTab({
-              url: '/pages/index/index'
-            });
-          }
-        });
-      }, 1500);
-    }
-  }
-};
-exports.mutations = mutations;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
-/***/ 38:
-/*!*****************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json ***!
-  \*****************************************************************************/
+/***/ 4:
+/*!**********************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
 
-/***/ 399:
+/***/ 416:
 /*!***********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/pages/register/validator.js ***!
   \***********************************************************************************************************************/
@@ -19737,7 +19841,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 400));
+var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 417));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var _default = _objectSpread({
@@ -19797,23 +19901,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 4:
-/*!**********************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
-  \**********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
-  };
-}
-module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 400:
+/***/ 417:
 /*!**************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/password.js ***!
   \**************************************************************************************************************/
@@ -20194,142 +20282,34 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  // 调试模式
   debug: true,
-  /*
-  登录类型 未列举到的或运行环境不支持的，将被自动隐藏。
-  如果需要在不同平台有不同的配置，直接用条件编译即可
-  */
   isAdmin: false,
-  // 区分管理端与用户端
-
-  // 自定义登录页面路径
   customLoginPagePath: "/pages/login/login",
-  // 自定义首页路径
   customHomePagePath: "/pages/index/index",
-  loginTypes: ['weixin', 'username', 'smsCode'],
-  // 政策协议
+  loginTypes: ['univerify', 'weixin', 'username', 'smsCode'],
   agreements: {
     serviceUrl: 'https://example.com/agreement',
-    // 用户服务协议链接
     privacyUrl: 'https://example.com/privacy',
-    // 隐私政策条款链接
-    // 哪些场景下显示，1.注册（包括登录并注册，如：微信登录、苹果登录、短信验证码登录）、2.登录（如：用户名密码登录）
     scope: ['register', 'login']
   },
-  // 提供各类服务接入（如微信登录服务）的应用id
   appid: {
     weixin: {
-      // 微信公众号的appid，来源:登录微信公众号（https://mp.weixin.qq.com）-> 设置与开发 -> 基本配置 -> 公众号开发信息 -> AppID
       h5: 'wx64b3a851f619fc04',
-      // 微信开放平台的appid，来源:登录微信开放平台（https://open.weixin.qq.com） -> 管理中心 -> 网站应用 -> 选择对应的应用名称，点击查看 -> AppID
-      web: 'wx64b3a851f619fc04'
-    }
-  },
-  /**
-  * 密码强度
-  * super（超强：密码必须包含大小写字母、数字和特殊符号，长度范围：8-16位之间）
-  * strong（强: 密密码必须包含字母、数字和特殊符号，长度范围：8-16位之间）
-  * medium (中：密码必须为字母、数字和特殊符号任意两种的组合，长度范围：8-16位之间)
-  * weak（弱：密码必须包含字母和数字，长度范围：6-16位之间）
-  * 为空或false则不验证密码强度
-  */
-  passwordStrength: 'medium',
-  /**
-  * 登录后允许用户设置密码（只针对未设置密码得用户）
-  * 开启此功能将 setPasswordAfterLogin 设置为 true 即可
-  * "setPasswordAfterLogin": false
-  *
-  * 如果允许用户跳过设置密码 将 allowSkip 设置为 true
-  * "setPasswordAfterLogin": {
-  *   "allowSkip": true
-  * }
-  * */
-  setPasswordAfterLogin: {
-    allowSkip: true
-  }
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 467:
-/*!**********************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/popup.js ***!
-  \**********************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  data: function data() {
-    return {};
-  },
-  created: function created() {
-    this.popup = this.getParent();
-  },
-  methods: {
-    /**
-     * 获取父元素实例
-     */
-    getParent: function getParent() {
-      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'uniPopup';
-      var parent = this.$parent;
-      var parentName = parent.$options.name;
-      while (parentName !== name) {
-        parent = parent.$parent;
-        if (!parent) return false;
-        parentName = parent.$options.name;
+      web: 'wx64b3a851f619fc04',
+      'mp-weixin': {
+        oauth: {
+          weixin: {
+            appid: 'wx64b3a851f619fc04',
+            appsecret: 'c5c9c4047bf0c292e28f5019a950b18d'
+          }
+        }
       }
-      return parent;
     }
-  }
+  },
+  passwordStrength: 'medium',
+  setPasswordAfterLogin: false
 };
 exports.default = _default;
-
-/***/ }),
-
-/***/ 468:
-/*!***************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
-  \***************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 469));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 470));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 471));
-var _default = {
-  en: _en.default,
-  'zh-Hans': _zhHans.default,
-  'zh-Hant': _zhHant.default
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 469:
-/*!**************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
-  \**************************************************************************************************************************/
-/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\"ok\",\"uni-popup.placeholder\":\"pleace enter\",\"uni-popup.title\":\"Hint\",\"uni-popup.shareTitle\":\"Share to\"}");
 
 /***/ }),
 
@@ -20377,7 +20357,87 @@ _vue.default.component('favorite-button', _favoriteButton.default);
 
 /***/ }),
 
-/***/ 470:
+/***/ 485:
+/*!**********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/popup.js ***!
+  \**********************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  data: function data() {
+    return {};
+  },
+  created: function created() {
+    this.popup = this.getParent();
+  },
+  methods: {
+    /**
+     * 获取父元素实例
+     */
+    getParent: function getParent() {
+      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'uniPopup';
+      var parent = this.$parent;
+      var parentName = parent.$options.name;
+      while (parentName !== name) {
+        parent = parent.$parent;
+        if (!parent) return false;
+        parentName = parent.$options.name;
+      }
+      return parent;
+    }
+  }
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 486:
+/*!***************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
+  \***************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 487));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 488));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 489));
+var _default = {
+  en: _en.default,
+  'zh-Hans': _zhHans.default,
+  'zh-Hant': _zhHant.default
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 487:
+/*!**************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
+  \**************************************************************************************************************************/
+/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\"ok\",\"uni-popup.placeholder\":\"pleace enter\",\"uni-popup.title\":\"Hint\",\"uni-popup.shareTitle\":\"Share to\"}");
+
+/***/ }),
+
+/***/ 488:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
   \*******************************************************************************************************************************/
@@ -20388,7 +20448,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 471:
+/***/ 489:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
   \*******************************************************************************************************************************/
@@ -20399,7 +20459,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 493:
+/***/ 497:
 /*!*************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/validate.js ***!
   \*************************************************************************************************************************/
@@ -21091,7 +21151,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 494:
+/***/ 498:
 /*!**********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/utils.js ***!
   \**********************************************************************************************************************/
@@ -21445,7 +21505,7 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 
 /***/ }),
 
-/***/ 558:
+/***/ 583:
 /*!*****************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
   \*****************************************************************************************************************************************/
@@ -21701,7 +21761,142 @@ function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
 
 /***/ }),
 
-/***/ 566:
+/***/ 591:
+/*!******************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
+  \******************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createAnimation = createAnimation;
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+// const defaultOption = {
+// 	duration: 300,
+// 	timingFunction: 'linear',
+// 	delay: 0,
+// 	transformOrigin: '50% 50% 0'
+// }
+var MPAnimation = /*#__PURE__*/function () {
+  function MPAnimation(options, _this) {
+    (0, _classCallCheck2.default)(this, MPAnimation);
+    this.options = options;
+    // 在iOS10+QQ小程序平台下，传给原生的对象一定是个普通对象而不是Proxy对象，否则会报parameter should be Object instead of ProxyObject的错误
+    this.animation = uni.createAnimation(_objectSpread({}, options));
+    this.currentStepAnimates = {};
+    this.next = 0;
+    this.$ = _this;
+  }
+  (0, _createClass2.default)(MPAnimation, [{
+    key: "_nvuePushAnimates",
+    value: function _nvuePushAnimates(type, args) {
+      var aniObj = this.currentStepAnimates[this.next];
+      var styles = {};
+      if (!aniObj) {
+        styles = {
+          styles: {},
+          config: {}
+        };
+      } else {
+        styles = aniObj;
+      }
+      if (animateTypes1.includes(type)) {
+        if (!styles.styles.transform) {
+          styles.styles.transform = '';
+        }
+        var unit = '';
+        if (type === 'rotate') {
+          unit = 'deg';
+        }
+        styles.styles.transform += "".concat(type, "(").concat(args + unit, ") ");
+      } else {
+        styles.styles[type] = "".concat(args);
+      }
+      this.currentStepAnimates[this.next] = styles;
+    }
+  }, {
+    key: "_animateRun",
+    value: function _animateRun() {
+      var styles = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var ref = this.$.$refs['ani'].ref;
+      if (!ref) return;
+      return new Promise(function (resolve, reject) {
+        nvueAnimation.transition(ref, _objectSpread({
+          styles: styles
+        }, config), function (res) {
+          resolve();
+        });
+      });
+    }
+  }, {
+    key: "_nvueNextAnimate",
+    value: function _nvueNextAnimate(animates) {
+      var _this2 = this;
+      var step = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var fn = arguments.length > 2 ? arguments[2] : undefined;
+      var obj = animates[step];
+      if (obj) {
+        var styles = obj.styles,
+          config = obj.config;
+        this._animateRun(styles, config).then(function () {
+          step += 1;
+          _this2._nvueNextAnimate(animates, step, fn);
+        });
+      } else {
+        this.currentStepAnimates = {};
+        typeof fn === 'function' && fn();
+        this.isEnd = true;
+      }
+    }
+  }, {
+    key: "step",
+    value: function step() {
+      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      this.animation.step(config);
+      return this;
+    }
+  }, {
+    key: "run",
+    value: function run(fn) {
+      this.$.animationData = this.animation.export();
+      this.$.timer = setTimeout(function () {
+        typeof fn === 'function' && fn();
+      }, this.$.durationTime);
+    }
+  }]);
+  return MPAnimation;
+}();
+var animateTypes1 = ['matrix', 'matrix3d', 'rotate', 'rotate3d', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scale3d', 'scaleX', 'scaleY', 'scaleZ', 'skew', 'skewX', 'skewY', 'translate', 'translate3d', 'translateX', 'translateY', 'translateZ'];
+var animateTypes2 = ['opacity', 'backgroundColor'];
+var animateTypes3 = ['width', 'height', 'left', 'right', 'top', 'bottom'];
+animateTypes1.concat(animateTypes2, animateTypes3).forEach(function (type) {
+  MPAnimation.prototype[type] = function () {
+    var _this$animation;
+    (_this$animation = this.animation)[type].apply(_this$animation, arguments);
+    return this;
+  };
+});
+function createAnimation(option, _this) {
+  if (!_this) return;
+  clearTimeout(_this.timer);
+  return new MPAnimation(option, _this);
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
+/***/ 597:
 /*!**********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
   \**********************************************************************************************************************************/
@@ -22202,141 +22397,6 @@ var fontData = [{
 
 // export const fontData = JSON.parse<IconsDataItem>(fontDataJson)
 exports.fontData = fontData;
-
-/***/ }),
-
-/***/ 574:
-/*!******************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
-  \******************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createAnimation = createAnimation;
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
-var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-// const defaultOption = {
-// 	duration: 300,
-// 	timingFunction: 'linear',
-// 	delay: 0,
-// 	transformOrigin: '50% 50% 0'
-// }
-var MPAnimation = /*#__PURE__*/function () {
-  function MPAnimation(options, _this) {
-    (0, _classCallCheck2.default)(this, MPAnimation);
-    this.options = options;
-    // 在iOS10+QQ小程序平台下，传给原生的对象一定是个普通对象而不是Proxy对象，否则会报parameter should be Object instead of ProxyObject的错误
-    this.animation = uni.createAnimation(_objectSpread({}, options));
-    this.currentStepAnimates = {};
-    this.next = 0;
-    this.$ = _this;
-  }
-  (0, _createClass2.default)(MPAnimation, [{
-    key: "_nvuePushAnimates",
-    value: function _nvuePushAnimates(type, args) {
-      var aniObj = this.currentStepAnimates[this.next];
-      var styles = {};
-      if (!aniObj) {
-        styles = {
-          styles: {},
-          config: {}
-        };
-      } else {
-        styles = aniObj;
-      }
-      if (animateTypes1.includes(type)) {
-        if (!styles.styles.transform) {
-          styles.styles.transform = '';
-        }
-        var unit = '';
-        if (type === 'rotate') {
-          unit = 'deg';
-        }
-        styles.styles.transform += "".concat(type, "(").concat(args + unit, ") ");
-      } else {
-        styles.styles[type] = "".concat(args);
-      }
-      this.currentStepAnimates[this.next] = styles;
-    }
-  }, {
-    key: "_animateRun",
-    value: function _animateRun() {
-      var styles = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var ref = this.$.$refs['ani'].ref;
-      if (!ref) return;
-      return new Promise(function (resolve, reject) {
-        nvueAnimation.transition(ref, _objectSpread({
-          styles: styles
-        }, config), function (res) {
-          resolve();
-        });
-      });
-    }
-  }, {
-    key: "_nvueNextAnimate",
-    value: function _nvueNextAnimate(animates) {
-      var _this2 = this;
-      var step = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      var fn = arguments.length > 2 ? arguments[2] : undefined;
-      var obj = animates[step];
-      if (obj) {
-        var styles = obj.styles,
-          config = obj.config;
-        this._animateRun(styles, config).then(function () {
-          step += 1;
-          _this2._nvueNextAnimate(animates, step, fn);
-        });
-      } else {
-        this.currentStepAnimates = {};
-        typeof fn === 'function' && fn();
-        this.isEnd = true;
-      }
-    }
-  }, {
-    key: "step",
-    value: function step() {
-      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      this.animation.step(config);
-      return this;
-    }
-  }, {
-    key: "run",
-    value: function run(fn) {
-      this.$.animationData = this.animation.export();
-      this.$.timer = setTimeout(function () {
-        typeof fn === 'function' && fn();
-      }, this.$.durationTime);
-    }
-  }]);
-  return MPAnimation;
-}();
-var animateTypes1 = ['matrix', 'matrix3d', 'rotate', 'rotate3d', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scale3d', 'scaleX', 'scaleY', 'scaleZ', 'skew', 'skewX', 'skewY', 'translate', 'translate3d', 'translateX', 'translateY', 'translateZ'];
-var animateTypes2 = ['opacity', 'backgroundColor'];
-var animateTypes3 = ['width', 'height', 'left', 'right', 'top', 'bottom'];
-animateTypes1.concat(animateTypes2, animateTypes3).forEach(function (type) {
-  MPAnimation.prototype[type] = function () {
-    var _this$animation;
-    (_this$animation = this.animation)[type].apply(_this$animation, arguments);
-    return this;
-  };
-});
-function createAnimation(option, _this) {
-  if (!_this) return;
-  clearTimeout(_this.timer);
-  return new MPAnimation(option, _this);
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 

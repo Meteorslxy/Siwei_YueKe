@@ -81,6 +81,45 @@
   font-weight: bold;
   color: var(--text-color);
 }
+.header .refresh-btn {
+  position: absolute;
+  right: 20rpx;
+  font-size: 28rpx;
+  color: var(--theme-color);
+  padding: 10rpx 20rpx;
+}
+.username-box {
+  margin: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.username-box .username-content {
+  display: flex;
+  flex-direction: column;
+}
+.username-box .username-content .username-label {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+.username-box .username-content .username-value {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #EC7A49;
+}
+.username-box .username-refresh {
+  font-size: 24rpx;
+  color: #fff;
+  background-color: #EC7A49;
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+}
 .profile-form {
   margin-top: 20rpx;
   background-color: #fff;
@@ -217,4 +256,41 @@ to {
   font-size: 24rpx;
   color: var(--text-color-light);
 }
-
+.popup-content .debug-info {
+  background-color: #f8f8f8;
+  font-size: 24rpx;
+}
+.popup-content .debug-info .debug-text {
+  color: #999;
+}
+.username-display {
+  border-bottom: 1rpx solid var(--border-color) !important;
+  background-color: #fafafa;
+}
+.username-display .item-label {
+  color: #EC7A49;
+}
+.username-display .item-value {
+  color: #333 !important;
+  font-weight: bold;
+}
+.username-display .item-refresh {
+  color: #EC7A49;
+  font-size: 24rpx;
+  margin-left: 10rpx;
+}
+.username-box {
+  background-color: #ff0000;
+  color: #fff;
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+}
+.username-box .username-label {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+.username-box .username-value {
+  font-size: 32rpx;
+  font-weight: bold;
+}

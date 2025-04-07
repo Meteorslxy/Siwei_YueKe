@@ -18,7 +18,7 @@
       <view 
         class="booking-item" 
         v-for="(item, index) in filteredBookingList" 
-        :key="item._id || index"
+        :key="index"
         @click="viewDetail(item, $event)"
         :data-booking-id="item._id"
         :data-course-id="item.courseId">

@@ -136,7 +136,7 @@
 				const uniIdCo = uniCloud.importObject("uni-id-co", {
 					customUI: true
 				})
-				console.log('sendSmsCode',{
+				console.log('发送短信验证码参数:', {
 					"mobile": this.phone,
 					"scene": this.type,
 					"captcha": this.captcha
@@ -162,6 +162,14 @@
 							duration: 3000
 						});
 						console.warn(e.message);
+					} else if (e.code == "uni-id-captcha-required") {
+						// 如果需要验证码但没有提供，重新获取验证码
+						this.getImageCaptcha(true);
+						uni.showToast({
+							title: '请重新获取并输入图形验证码',
+							icon: 'none',
+							duration: 3000
+						});
 					} else {
 						this.getImageCaptcha()
 						this.captcha = ""

@@ -83,65 +83,41 @@
   font-weight: bold;
   color: var(--text-color);
 }
-.phone-form {
+.form-container {
   margin-top: 30rpx;
   background-color: #fff;
   border-radius: 12rpx;
-  padding: 0 20rpx;
+  padding: 20rpx;
 }
-.phone-form .form-item {
+.code-box {
   display: flex;
   align-items: center;
-  padding: 30rpx 0;
-  border-bottom: 1rpx solid var(--border-color);
-}
-.phone-form .form-item:last-child {
-  border-bottom: none;
-}
-.phone-form .form-item .item-label {
-  font-size: 30rpx;
-  color: var(--text-color);
-  width: 120rpx;
-}
-.phone-form .form-item .input {
-  flex: 1;
-  height: 60rpx;
-  font-size: 28rpx;
-}
-.phone-form .form-item .verify-btn {
-  width: 200rpx;
-  height: 60rpx;
-  line-height: 60rpx;
-  font-size: 24rpx;
-  color: #fff;
-  background-color: var(--theme-color);
-  border-radius: 30rpx;
-  padding: 0;
-  margin: 0;
-}
-.phone-form .form-item .verify-btn[disabled] {
-  background-color: #ccc;
 }
 .submit-btn {
   width: 100%;
   height: 88rpx;
   line-height: 88rpx;
-  font-size: 32rpx;
-  color: #fff;
+  margin-top: 60rpx;
   background-color: var(--theme-color);
+  color: #fff;
+  font-size: 32rpx;
   border-radius: 44rpx;
-  margin-top: 50rpx;
-}
-.submit-btn[disabled] {
-  background-color: #ccc;
 }
 .tips {
   margin-top: 30rpx;
   padding: 0 20rpx;
 }
 .tips .tips-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: var(--text-color-light);
-  line-height: 1.6;
+  line-height: 1.5;
 }
-
+.test-mode-indicator {
+  margin-top: 20rpx;
+  padding: 10rpx 20rpx;
+  background-color: #ffd700;
+  color: #333;
+  font-size: 24rpx;
+  border-radius: 8rpx;
+  text-align: center;
+}

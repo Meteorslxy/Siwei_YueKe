@@ -96,8 +96,9 @@
         <text class="btn-icon iconfont icon-contact"></text>
         <text>联系主讲人</text>
       </view>
-      <button class="enroll-btn" v-if="!hasEnrolled" @click="enrollLecture">立即报名</button>
-      <button class="enroll-btn enrolled" v-else @click="navigateToEnrollmentList">查看报名</button>
+      <!-- 暂时隐藏报名按钮 -->
+      <!-- <button class="enroll-btn" v-if="!hasEnrolled" @click="enrollLecture">立即报名</button>
+      <button class="enroll-btn enrolled" v-else @click="navigateToEnrollmentList">查看报名</button> -->
     </view>
   </view>
 </template>
@@ -744,21 +745,22 @@ export default {
   z-index: 100;
   
   .contact-btn {
+    /* 由于隐藏了报名按钮，修改联系按钮样式以适应整个宽度 */
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    width: 120rpx;
-    border-right: 1rpx solid #eee;
+    width: 100%;
     
     .btn-icon {
       font-size: 36rpx;
-      color: #999;
+      color: #666;
+      margin-right: 10rpx;
     }
     
     text {
-      font-size: 22rpx;
-      color: #999;
+      font-size: 28rpx;
+      color: #666;
     }
   }
   

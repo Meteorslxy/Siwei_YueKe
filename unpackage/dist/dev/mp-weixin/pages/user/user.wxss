@@ -251,8 +251,9 @@
   color: var(--text-color);
 }
 .menu-section .menu-group .menu-list .menu-list-item .list-arrow {
-  font-size: 24rpx;
+  font-size: 32rpx;
   color: var(--text-color-light);
+  font-weight: normal;
 }
 .menu-section .menu-group .menu-list .menu-list-item.test-btn {
   background-color: #f8f8f8;
@@ -324,4 +325,3 @@
   height: 80rpx;
   line-height: 80rpx;
 }
-

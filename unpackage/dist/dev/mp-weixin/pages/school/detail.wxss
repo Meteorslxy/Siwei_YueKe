@@ -204,4 +204,3 @@
 .school-picker .picker-content .picker-options .picker-option:last-child {
   border-bottom: none;
 }
-

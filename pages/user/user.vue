@@ -70,34 +70,34 @@
           <view class="menu-list-item" @click="navigateTo('/pages/user/favorite/index')">
             <text class="list-icon iconfont icon-favorite"></text>
             <text class="list-text">我的收藏</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item" @click="openFeedback">
             <text class="list-icon iconfont icon-feedback"></text>
             <text class="list-text">意见反馈</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item" @click="navigateTo('/pages/user/about/index')">
             <text class="list-icon iconfont icon-about"></text>
             <text class="list-text">关于我们</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item" @click="navigateTo('/pages/user/setting/index')">
             <text class="list-icon iconfont icon-setting"></text>
             <text class="list-text">设置</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
           <!-- 图片上传 -->
           <!-- <view class="menu-list-item" @click="navigateTo('/pages/user/upload-image')">
             <text class="list-icon iconfont icon-upload"></text>
             <text class="list-text">图片上传</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view> -->
           <!-- 管理员工具入口 - 开发环境可见 -->
           <view v-if="isDev" class="menu-list-item" @click="navigateTo('/pages/admin/import-data')">
             <text class="list-icon iconfont icon-setting"></text>
             <text class="list-text">云数据库导入工具</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
         </view>
       </view>
@@ -109,17 +109,17 @@
           <view class="menu-list-item test-btn" @click="testUniIdPages('login')">
             <text class="list-icon iconfont icon-user"></text>
             <text class="list-text">测试统一登录</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item test-btn" @click="testUniIdPages('register')">
             <text class="list-icon iconfont icon-user"></text>
             <text class="list-text">测试统一注册</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item test-btn" @click="testUniIdPages('profile')">
             <text class="list-icon iconfont icon-user"></text>
             <text class="list-text">测试个人资料</text>
-            <text class="list-arrow iconfont icon-right"></text>
+            <text class="list-arrow">></text>
           </view>
         </view>
       </view>
@@ -986,16 +986,36 @@ export default {
               if (token) {
                 console.log('使用uni_id_token获取用户详情');
                 // 验证token并获取uid
-                const checkTokenRes = await uniIdCo.checkToken({
-                  token
-                });
-                
-                console.log('检查token结果:', checkTokenRes);
-                
-                if (checkTokenRes.code === 0 && checkTokenRes.uid) {
-                  // 使用uid查询完整的用户信息
-                  const uid = checkTokenRes.uid;
-                  console.log('获取到有效用户ID:', uid);
+                try {
+                  // 从res中获取用户ID，如果响应中没有就尝试从token中获取
+                  let uid = res.uid || '';
+                  if (!uid && res.userInfo && res.userInfo._id) {
+                    uid = res.userInfo._id;
+                  }
+                  
+                  // 如果还是没有获取到uid，尝试从token中解析
+                  if (!uid) {
+                    try {
+                      // 尝试解析token，获取uid
+                      const tokenParts = token.split('.');
+                      if (tokenParts.length === 3) {
+                        const base64Payload = tokenParts[1];
+                        const payload = JSON.parse(atob(base64Payload));
+                        console.log('token payload:', payload);
+                        
+                        if (payload && payload.uid) {
+                          uid = payload.uid;
+                          console.log('从token payload中获取到用户ID:', uid);
+                        }
+                      }
+                    } catch (e) {
+                      console.error('解析token失败:', e);
+                    }
+                  }
+                  
+                  // 如果成功获取到uid，直接查询用户数据
+                  if (uid) {
+                    console.log('获取到有效用户ID:', uid);
                   
                   // 查询用户信息
                   const userDetailRes = await db.collection('uni-id-users').doc(uid).get();
@@ -1016,6 +1036,9 @@ export default {
                     
                     console.log('从数据库获取的详细用户信息:', userInfo);
                   }
+                  }
+                } catch (checkTokenError) {
+                  console.error('处理token获取用户信息失败:', checkTokenError);
                 }
               }
             } catch (detailError) {
@@ -1685,8 +1708,9 @@ export default {
         }
         
         .list-arrow {
-          font-size: 24rpx;
+          font-size: 32rpx;
           color: $text-color-light;
+          font-weight: normal;
         }
         
         &.test-btn {

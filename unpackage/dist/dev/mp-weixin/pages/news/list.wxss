@@ -227,4 +227,3 @@
   -webkit-transform: translateY(2rpx);
           transform: translateY(2rpx);
 }
-

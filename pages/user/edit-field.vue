@@ -109,6 +109,10 @@ export default {
           this.fieldType = 'text';
           this.fieldMaxLength = 20;
           break;
+        case 'username':
+          this.fieldType = 'text';
+          this.fieldMaxLength = 20;
+          break;
         case 'gender':
           this.fieldType = 'gender';
           this.fieldValue = parseInt(this.fieldValue) || 0;

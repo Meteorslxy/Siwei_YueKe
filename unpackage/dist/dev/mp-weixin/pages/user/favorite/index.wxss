@@ -93,7 +93,7 @@
   font-weight: bold;
 }
 .filter-bar .filter-item.active:after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -185,4 +185,3 @@
 .favorite-list .favorite-item .item-action .delete-btn .iconfont, .favorite-list .favorite-item .item-action .delete-btn .delete-text {
   color: #FF3B30;
 }
-

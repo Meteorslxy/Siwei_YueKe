@@ -138,25 +138,6 @@
 .link.data-v-9dec0b32 {
   font-size: 12px;
 }
-/* 返回按钮样式 */
-.back-button.data-v-9dec0b32 {
-  position: absolute;
-  top: 80rpx;
-  left: 30rpx;
-  width: 60rpx;
-  height: 60rpx;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-.back-button text.data-v-9dec0b32 {
-  color: #333;
-  font-size: 36rpx;
-  font-weight: bold;
-}
 .title-box.data-v-9dec0b32 {
   margin-top: 20px;
   margin-bottom: 40px;
@@ -169,4 +150,3 @@
 .input-box.data-v-9dec0b32 {
   margin-bottom: 15px;
 }
-
