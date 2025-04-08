@@ -103,6 +103,15 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
+  var m0 = _vm.getMapImage(_vm.selectedSchool)
+  _vm.$mp.data = Object.assign(
+    {},
+    {
+      $root: {
+        m0: m0,
+      },
+    }
+  )
 }
 var recyclableRender = false
 var staticRenderFns = []
@@ -138,10 +147,18 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 /* WEBPACK VAR INJECTION */(function(uni) {
 
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+//
+//
+//
+//
+//
 //
 //
 //
@@ -203,71 +220,21 @@ var _default = {
       statusBarHeight: 0,
       showPicker: false,
       selectedSchool: {
-        id: 'jnwd',
-        name: '江宁万达校区',
-        address: '南京市江宁区万达广场XX号',
-        introduction: '于2020年建设，主要面向江宁区学生，提供全面的教学服务。',
-        mapImage: '/static/images/school/jnwd.png'
+        _id: '',
+        name: '正在加载...',
+        address: '',
+        intro: '',
+        latitude: 0,
+        longitude: 0
       },
-      schoolList: [{
-        id: 'jnwd',
-        name: '江宁万达校区',
-        address: '南京市江宁区万达广场XX号',
-        introduction: '于2020年建设，主要面向江宁区学生，提供全面的教学服务。',
-        mapImage: '/static/images/school/jnwd.png'
-      }, {
-        id: 'jnhjhy',
-        name: '江宁黄金海岸',
-        address: '南京市江宁区黄金海岸XX街区XX号',
-        introduction: '于2019年建设，环境优雅，设施完善，是学习的理想场所。',
-        mapImage: '/static/images/school/jnhjhy.png'
-      }, {
-        id: 'dxg',
-        name: '大行宫校区',
-        address: '南京市秦淮区大行宫XX路XX号',
-        introduction: '于2018年建设，位于市中心，交通便利，师资力量雄厚。',
-        mapImage: '/static/images/school/dxg.png'
-      }, {
-        id: 'xjk',
-        name: '新街口校区',
-        address: '南京市玄武区新街口XX街XX号',
-        introduction: '于2017年建设，我校最早成立的校区之一，拥有丰富的教学经验。',
-        mapImage: '/static/images/school/xjk.png'
-      }, {
-        id: 'yh',
-        name: '雨花校区',
-        address: '南京市雨花台区XX路XX号',
-        introduction: '于2020年建设，环境幽静，适合专注学习，课程设置丰富。',
-        mapImage: '/static/images/school/yh.png'
-      }, {
-        id: 'qb',
-        name: '桥北校区',
-        address: '南京市桥北区XX街XX号',
-        introduction: '于2021年建设，新兴校区，设施先进，师资优良。',
-        mapImage: '/static/images/school/qb.png'
-      }, {
-        id: 'at',
-        name: '奥体校区',
-        address: '南京市建邺区奥体中心附近XX路XX号',
-        introduction: '于2019年建设，位于奥体中心附近，环境优美，交通便利。',
-        mapImage: '/static/images/school/at.png'
-      }, {
-        id: 'lj',
-        name: '龙江校区',
-        address: '南京市鼓楼区龙江XX路XX号',
-        introduction: '于2020年建设，位于龙江地区，社区氛围浓厚，适合学生发展。',
-        mapImage: '/static/images/school/lj.png'
-      }, {
-        id: 'lh',
-        name: '六合校区',
-        address: '南京市六合区XX广场XX号',
-        introduction: '于2021年建设，我校最新校区之一，设施完善，师资力量强大。',
-        mapImage: '/static/images/school/lh.png'
-      }]
+      schoolList: [],
+      loading: true
     };
   },
   onLoad: function onLoad() {
     this.getStatusBarHeight();
+    // 加载校区列表
+    this.getLocationList();
   },
   methods: {
     // 获取状态栏高度
@@ -279,6 +246,57 @@ var _default = {
         console.error('获取状态栏高度失败:', e);
         this.statusBarHeight = 20;
       }
+    },
+    // 获取校区列表
+    getLocationList: function getLocationList() {
+      var _this = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+        var result;
+        return _regenerator.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                uni.showLoading({
+                  title: '加载中...'
+                });
+                _context.next = 4;
+                return _this.$api.location.getLocationList();
+              case 4:
+                result = _context.sent;
+                console.log('获取校区列表结果:', result);
+                if (result && result.data && result.data.length > 0) {
+                  _this.schoolList = result.data;
+                  // 默认选择第一个校区
+                  _this.selectSchool(_this.schoolList[0]);
+                } else {
+                  uni.showToast({
+                    title: '暂无校区数据',
+                    icon: 'none'
+                  });
+                }
+                _context.next = 13;
+                break;
+              case 9:
+                _context.prev = 9;
+                _context.t0 = _context["catch"](0);
+                console.error('获取校区列表失败:', _context.t0);
+                uni.showToast({
+                  title: '获取校区列表失败',
+                  icon: 'none'
+                });
+              case 13:
+                _context.prev = 13;
+                uni.hideLoading();
+                _this.loading = false;
+                return _context.finish(13);
+              case 17:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[0, 9, 13, 17]]);
+      }))();
     },
     // 显示校区选择器
     showSchoolPicker: function showSchoolPicker() {
@@ -292,6 +310,28 @@ var _default = {
     selectSchool: function selectSchool(school) {
       this.selectedSchool = school;
       this.hidePicker();
+    },
+    // 获取地图图片
+    getMapImage: function getMapImage(school) {
+      // 如果有image字段直接使用
+      if (school.image) {
+        return school.image;
+      }
+
+      // 如果有code字段则使用code获取图片
+      if (school.code) {
+        return "/static/images/school/".concat(school.code, ".png");
+      }
+
+      // 如果有_id则尝试使用_id前6位
+      if (school._id) {
+        // 如果_id长度大于6，取前6位，否则直接使用_id
+        var id = school._id.length > 6 ? school._id.substring(0, 6) : school._id;
+        return "/static/images/school/".concat(id, ".png");
+      }
+
+      // 默认图片
+      return '/static/images/school/default.png';
     }
   }
 };

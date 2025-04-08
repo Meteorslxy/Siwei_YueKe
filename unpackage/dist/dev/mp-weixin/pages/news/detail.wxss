@@ -139,14 +139,6 @@
 .detail-content .article-header .article-info .article-source {
   color: var(--theme-color);
 }
-.detail-content .article-cover {
-  margin-bottom: 40rpx;
-}
-.detail-content .article-cover .cover-image {
-  width: 100%;
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
-}
 .detail-content .article-content {
   font-size: 30rpx;
   color: var(--text-color);

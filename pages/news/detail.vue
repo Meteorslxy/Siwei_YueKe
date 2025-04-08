@@ -21,11 +21,6 @@
         </view>
       </view>
       
-      <!-- 显示coverImage -->
-      <view class="article-cover" v-if="newsInfo.coverImage">
-        <image class="cover-image" :src="getImageUrl(newsInfo.coverImage)" mode="widthFix"></image>
-      </view>
-      
       <view class="article-content">
         <!-- 1. 当content存在时，以富文本形式显示content -->
         <rich-text v-if="newsInfo.content" :nodes="formatContent(newsInfo.content)"></rich-text>
@@ -45,8 +40,8 @@
         <!-- 4. 都不存在时显示暂无内容 -->
         <view class="no-content" v-else>暂无内容</view>
         
-        <!-- 如果有image字段且与coverImage不同，则在内容下方显示image -->
-        <view class="article-image" v-if="newsInfo.image && newsInfo.image !== newsInfo.coverImage">
+        <!-- 显示image字段 -->
+        <view class="article-image" v-if="newsInfo.image">
           <image class="content-image" :src="getImageUrl(newsInfo.image)" mode="widthFix"></image>
         </view>
       </view>
@@ -121,23 +116,9 @@ export default {
         if (result && result.data) {
           this.newsInfo = result.data;
           
-          // 处理图片URL
-          if (this.newsInfo.coverImage) {
-            this.newsInfo.coverImage = this.getImageUrl(this.newsInfo.coverImage);
-          }
-          
+          // 只处理image字段，不处理coverImage字段
           if (this.newsInfo.image) {
             this.newsInfo.image = this.getImageUrl(this.newsInfo.image);
-          }
-          
-          // 检查两个图片是否一样，避免重复显示
-          if (this.newsInfo.coverImage && this.newsInfo.image && 
-              this.newsInfo.coverImage === this.newsInfo.image) {
-            console.log('图片路径相同，只显示一张');
-          } else if (this.newsInfo.coverImage && this.newsInfo.image) {
-            console.log('包含两个不同的图片:');
-            console.log('- 封面图:', this.newsInfo.coverImage);
-            console.log('- 内容图:', this.newsInfo.image);
           }
           
           // 打印详细的数据结构，方便调试
@@ -145,9 +126,7 @@ export default {
             title: this.newsInfo.title,
             content: this.newsInfo.content ? '有内容' : '无内容',
             summary: this.newsInfo.summary ? '有摘要' : '无摘要',
-            coverImage: this.newsInfo.coverImage ? '有封面图' : '无封面图',
             image: this.newsInfo.image ? '有图片' : '无图片',
-            coverImageUrl: this.newsInfo.coverImage,  // 添加具体的图片URL
             imageUrl: this.newsInfo.image,            // 添加具体的图片URL
             publishTime: this.newsInfo.publishTime,
             createTime: this.newsInfo.createTime,
@@ -356,16 +335,6 @@ export default {
       .article-source {
         color: $theme-color;
       }
-    }
-  }
-  
-  .article-cover {
-    margin-bottom: 40rpx;
-    
-    .cover-image {
-      width: 100%;
-      border-radius: 16rpx;
-      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
     }
   }
   

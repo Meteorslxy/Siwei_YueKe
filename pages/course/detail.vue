@@ -7,7 +7,7 @@
         :itemId="courseId" 
         itemType="course" 
         :itemTitle="courseInfo.title" 
-        :itemCover="courseInfo.coverImage || '/static/images/course-default.jpg'"
+        :itemCover="courseInfo.image || courseInfo.coverImage || '/static/images/course-default.jpg'"
         @favorite-change="onFavoriteChange"
         @statusBarHeight="onStatusBarHeight"
       ></favorite-button>
@@ -15,7 +15,7 @@
     
     <!-- 课程封面 -->
     <view class="course-header">
-      <image class="course-cover" :src="courseInfo.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
+      <image class="course-cover" :src="courseInfo.image || courseInfo.coverImage || '/static/images/course-default.jpg'" mode="aspectFill"></image>
       <view class="course-overlay"></view>
       <view class="course-title">{{courseInfo.title}}</view>
     </view>

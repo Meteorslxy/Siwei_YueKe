@@ -9,6 +9,27 @@ const debugAPI = (name, result) => {
   return result;
 }
 
+// 校区相关API
+const locationApi = {
+  // 获取校区列表
+  getLocationList() {
+    console.log('调用getLocationList');
+    return request({
+      name: 'getLocationList',
+      data: {}
+    }).then(res => debugAPI('getLocationList返回', res));
+  },
+  
+  // 获取校区详情
+  getLocationDetail(id) {
+    console.log('调用getLocationDetail，ID:', id);
+    return request({
+      name: 'getLocationDetail',
+      data: { locationId: id }
+    }).then(res => debugAPI('getLocationDetail返回', res));
+  }
+}
+
 // 课程相关API
 const courseApi = {
   // 获取课程列表
@@ -492,5 +513,6 @@ export default {
   teacher: teacherApi,
   lecture: lectureApi,
   file: fileApi,
-  admin: adminApi
+  admin: adminApi,
+  location: locationApi
 } 

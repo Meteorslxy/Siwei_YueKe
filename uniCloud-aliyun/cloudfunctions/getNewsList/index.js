@@ -9,6 +9,7 @@ exports.main = async (event, context) => {
     const countResult = await collection.count();
     const total = countResult.total;
     
+    // 确保按照date字段由近到远排序
     const list = await collection
       .orderBy('date', 'desc')
       .skip((page - 1) * pageSize)

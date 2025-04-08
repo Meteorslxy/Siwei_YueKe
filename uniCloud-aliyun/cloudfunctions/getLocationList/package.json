@@ -1,0 +1,11 @@
+{
+  "name": "getLocationList",
+  "version": "1.0.0",
+  "description": "获取校区列表",
+  "main": "index.js",
+  "dependencies": {},
+  "cloudfunction-config": {
+    "memorySize": 256,
+    "timeout": 5
+  }
+} 

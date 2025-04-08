@@ -230,33 +230,6 @@ var _default = {
       schoolOptions: [{
         label: '全部校区',
         value: 'all'
-      }, {
-        label: '江宁万达',
-        value: '江宁万达'
-      }, {
-        label: '江宁黄金海岸',
-        value: '江宁黄金海岸'
-      }, {
-        label: '大行宫',
-        value: '大行宫'
-      }, {
-        label: '新街口',
-        value: '新街口'
-      }, {
-        label: '雨花',
-        value: '雨花'
-      }, {
-        label: '桥北',
-        value: '桥北'
-      }, {
-        label: '奥体',
-        value: '奥体'
-      }, {
-        label: '龙江',
-        value: '龙江'
-      }, {
-        label: '六合',
-        value: '六合'
       }],
       // 学科筛选相关
       selectedSubject: 'all',
@@ -307,6 +280,8 @@ var _default = {
   },
   onLoad: function onLoad() {
     this.getStatusBarHeight();
+    // 加载校区数据
+    this.getLocationList();
     this.loadCourseList();
   },
   onPullDownRefresh: function onPullDownRefresh() {
@@ -558,6 +533,55 @@ var _default = {
       uni.navigateTo({
         url: url
       });
+    },
+    // 获取校区列表
+    getLocationList: function getLocationList() {
+      var _this4 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var result, locations;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                _context2.next = 3;
+                return _this4.$api.location.getLocationList();
+              case 3:
+                result = _context2.sent;
+                console.log('获取校区列表结果:', result);
+                if (result && result.data && result.data.length > 0) {
+                  // 将校区数据转换为下拉选项格式
+                  locations = result.data.map(function (item) {
+                    return {
+                      label: item.name,
+                      value: item.name
+                    };
+                  }); // 将全部校区选项和后端获取的校区选项合并
+                  _this4.schoolOptions = [{
+                    label: '全部校区',
+                    value: 'all'
+                  }].concat((0, _toConsumableArray2.default)(locations));
+                  console.log('更新后的校区选项:', _this4.schoolOptions);
+                } else {
+                  console.warn('未获取到校区数据，使用默认值');
+                }
+                _context2.next = 12;
+                break;
+              case 8:
+                _context2.prev = 8;
+                _context2.t0 = _context2["catch"](0);
+                console.error('获取校区列表失败:', _context2.t0);
+                uni.showToast({
+                  title: '获取校区列表失败',
+                  icon: 'none'
+                });
+              case 12:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 8]]);
+      }))();
     }
   }
 };

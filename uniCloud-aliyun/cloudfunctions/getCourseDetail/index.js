@@ -31,6 +31,11 @@ exports.main = async (event, context) => {
     
     const course = courseResult.data;
     
+    // 确保image字段存在，如果不存在则使用coverImage的值
+    if (!course.image && course.coverImage) {
+      course.image = course.coverImage;
+    }
+    
     // 查询教师详情（如果课程中包含教师ID）
     if (course.teacherId) {
       try {

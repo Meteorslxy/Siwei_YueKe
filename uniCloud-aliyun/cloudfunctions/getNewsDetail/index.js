@@ -28,24 +28,9 @@ exports.main = async (event, context) => {
     
     const newsDetail = newsResult.data[0] || newsResult.data;
     
-    // 保留原始图片URL，避免没有必要的字段合并
-    const originalCoverImage = newsDetail.coverImage;
-    const originalImage = newsDetail.image;
-    
-    // 确保图片路径格式正确
-    if (newsDetail.coverImage && !newsDetail.coverImage.startsWith('/') && !newsDetail.coverImage.startsWith('http')) {
-      newsDetail.coverImage = '/static/images/news/' + newsDetail.coverImage;
-    }
-    
+    // 只处理image路径，不合并coverImage和image
     if (newsDetail.image && !newsDetail.image.startsWith('/') && !newsDetail.image.startsWith('http')) {
       newsDetail.image = '/static/images/news/' + newsDetail.image;
-    }
-    
-    // 只在其中一个为空时才进行字段填充
-    if (!originalCoverImage && originalImage) {
-      newsDetail.coverImage = newsDetail.image;
-    } else if (!originalImage && originalCoverImage) {
-      newsDetail.image = newsDetail.coverImage;
     }
     
     // 更新阅读量

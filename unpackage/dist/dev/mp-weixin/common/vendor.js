@@ -23932,6 +23932,32 @@ var debugAPI = function debugAPI(name, result) {
   return result;
 };
 
+// 校区相关API
+var locationApi = {
+  // 获取校区列表
+  getLocationList: function getLocationList() {
+    console.log('调用getLocationList');
+    return (0, _request.default)({
+      name: 'getLocationList',
+      data: {}
+    }).then(function (res) {
+      return debugAPI('getLocationList返回', res);
+    });
+  },
+  // 获取校区详情
+  getLocationDetail: function getLocationDetail(id) {
+    console.log('调用getLocationDetail，ID:', id);
+    return (0, _request.default)({
+      name: 'getLocationDetail',
+      data: {
+        locationId: id
+      }
+    }).then(function (res) {
+      return debugAPI('getLocationDetail返回', res);
+    });
+  }
+};
+
 // 课程相关API
 var courseApi = {
   // 获取课程列表
@@ -24425,7 +24451,8 @@ var _default = {
   teacher: teacherApi,
   lecture: lectureApi,
   file: fileApi,
-  admin: adminApi
+  admin: adminApi,
+  location: locationApi
 };
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
