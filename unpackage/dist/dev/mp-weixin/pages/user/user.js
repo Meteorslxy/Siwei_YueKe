@@ -249,6 +249,22 @@ var _default = {
       _this2.checkContent();
     }, 500);
 
+    // 延迟检查用户手机绑定状态，确保在用户信息完全加载后
+    setTimeout(function () {
+      if (_this2.hasUserInfo && _this2.userInfo && _this2.userInfo._id) {
+        console.log('页面显示时检查手机绑定状态');
+        // 获取App实例，调用其checkMobileBindingStatus方法
+        var app = getApp();
+        if (app && app.checkMobileBindingStatus) {
+          app.checkMobileBindingStatus(_this2.userInfo);
+        } else {
+          console.error('无法获取App实例或checkMobileBindingStatus方法不存在');
+        }
+      } else {
+        console.log('用户未登录，无需检查手机绑定状态');
+      }
+    }, 1000);
+
     // 检查是否需要打开个人资料
     if (getApp().globalData.openUserProfile) {
       // 清除标记
@@ -677,6 +693,20 @@ var _default = {
         console.error('同步用户信息到uni-id-pages失败:', error);
       }
       console.log('用户信息已更新');
+
+      // 获取预约数量
+      this.fetchBookingCounts();
+      if (this.isDev) console.log('完整用户信息保存成功');
+
+      // 延迟检查用户手机绑定状态
+      setTimeout(function () {
+        // 获取App实例调用检查方法
+        var app = getApp();
+        if (app && app.checkMobileBindingStatus) {
+          console.log('检查用户手机绑定状态');
+          app.checkMobileBindingStatus(mergedInfo);
+        }
+      }, 1000);
     },
     // 获取预约数量
     getBookingCount: function getBookingCount() {
@@ -961,7 +991,7 @@ var _default = {
                 result = _context5.sent;
                 if (_this6.verboseLogging) console.log('获取完整用户信息结果:', result);
                 if (!(result && result.result && result.result.code === 0 && result.result.userInfo)) {
-                  _context5.next = 27;
+                  _context5.next = 28;
                   break;
                 }
                 // 使用完整的用户信息
@@ -986,28 +1016,38 @@ var _default = {
                 // 获取预约数量
                 _this6.fetchBookingCounts();
                 if (_this6.isDev) console.log('完整用户信息保存成功');
+
+                // 延迟检查用户手机绑定状态
+                setTimeout(function () {
+                  // 获取App实例调用检查方法
+                  var app = getApp();
+                  if (app && app.checkMobileBindingStatus) {
+                    console.log('检查用户手机绑定状态');
+                    app.checkMobileBindingStatus(completeUserInfo);
+                  }
+                }, 1000);
                 return _context5.abrupt("return", true);
-              case 27:
+              case 28:
                 if (!(result && result.result && result.result.code !== 0)) {
-                  _context5.next = 52;
+                  _context5.next = 53;
                   break;
                 }
                 if (_this6.isDev) console.warn('getUserInfoByToken返回错误:', result.result.message);
 
                 // 如果有解析出的用户ID，尝试直接从数据库获取用户信息
                 if (!userId) {
-                  _context5.next = 52;
+                  _context5.next = 53;
                   break;
                 }
                 if (_this6.isDev) console.log('尝试使用解析出的用户ID直接获取用户信息');
-                _context5.prev = 31;
+                _context5.prev = 32;
                 db = uniCloud.database();
-                _context5.next = 35;
+                _context5.next = 36;
                 return db.collection('uni-id-users').doc(userId).get();
-              case 35:
+              case 36:
                 userDetailRes = _context5.sent;
                 if (!(userDetailRes.data && userDetailRes.data.length > 0)) {
-                  _context5.next = 47;
+                  _context5.next = 48;
                   break;
                 }
                 userDetail = userDetailRes.data[0];
@@ -1028,14 +1068,14 @@ var _default = {
                 _this6.fetchBookingCounts();
                 if (_this6.isDev) console.log('直接从数据库获取用户信息成功');
                 return _context5.abrupt("return", true);
-              case 47:
-                _context5.next = 52;
+              case 48:
+                _context5.next = 53;
                 break;
-              case 49:
-                _context5.prev = 49;
-                _context5.t0 = _context5["catch"](31);
+              case 50:
+                _context5.prev = 50;
+                _context5.t0 = _context5["catch"](32);
                 console.error('直接从数据库获取用户信息失败:', _context5.t0);
-              case 52:
+              case 53:
                 // 如果上面的方法失败，回退到原来的方法
                 if (_this6.isDev) console.log('无法获取完整用户信息，尝试使用uni-id-co方法');
 
@@ -1043,13 +1083,13 @@ var _default = {
                 uniIdCo = uniCloud.importObject('uni-id-co', {
                   customUI: true
                 }); // 调用getAccountInfo方法
-                _context5.next = 56;
+                _context5.next = 57;
                 return uniIdCo.getAccountInfo();
-              case 56:
+              case 57:
                 res = _context5.sent;
                 console.log('获取到的用户信息:', res);
                 if (!res) {
-                  _context5.next = 114;
+                  _context5.next = 116;
                   break;
                 }
                 // 构建用户信息对象，从API响应中正确提取用户信息
@@ -1063,24 +1103,24 @@ var _default = {
                   avatar_file: ''
                 }; // 检查完整的响应结构，对不同格式进行处理
                 if (!(res.errCode === 0)) {
-                  _context5.next = 90;
+                  _context5.next = 91;
                   break;
                 }
                 console.log('API调用成功，提取用户信息');
 
                 // 获取完整的用户基本信息，而不仅仅是标志信息
-                _context5.prev = 62;
+                _context5.prev = 63;
                 console.log('尝试获取完整的用户详细信息');
                 // 创建云对象获取用户详细信息
                 _db = uniCloud.database(); // 获取当前登录用户的uid
                 _token = uni.getStorageSync('uni_id_token');
                 if (!_token) {
-                  _context5.next = 84;
+                  _context5.next = 85;
                   break;
                 }
                 console.log('使用uni_id_token获取用户详情');
                 // 验证token并获取uid
-                _context5.prev = 68;
+                _context5.prev = 69;
                 // 从res中获取用户ID，如果响应中没有就尝试从token中获取
                 uid = res.uid || '';
                 if (!uid && res.userInfo && res.userInfo._id) {
@@ -1108,15 +1148,15 @@ var _default = {
 
                 // 如果成功获取到uid，直接查询用户数据
                 if (!uid) {
-                  _context5.next = 79;
+                  _context5.next = 80;
                   break;
                 }
                 console.log('获取到有效用户ID:', uid);
 
                 // 查询用户信息
-                _context5.next = 76;
+                _context5.next = 77;
                 return _db.collection('uni-id-users').doc(uid).get();
-              case 76:
+              case 77:
                 _userDetailRes = _context5.sent;
                 console.log('用户详情查询结果:', _userDetailRes);
                 if (_userDetailRes.data && _userDetailRes.data.length > 0) {
@@ -1133,21 +1173,21 @@ var _default = {
                   userInfo.avatar_file = _userDetail.avatar || _userDetail.avatar_file || '';
                   console.log('从数据库获取的详细用户信息:', userInfo);
                 }
-              case 79:
-                _context5.next = 84;
+              case 80:
+                _context5.next = 85;
                 break;
-              case 81:
-                _context5.prev = 81;
-                _context5.t1 = _context5["catch"](68);
+              case 82:
+                _context5.prev = 82;
+                _context5.t1 = _context5["catch"](69);
                 console.error('处理token获取用户信息失败:', _context5.t1);
-              case 84:
-                _context5.next = 89;
+              case 85:
+                _context5.next = 90;
                 break;
-              case 86:
-                _context5.prev = 86;
-                _context5.t2 = _context5["catch"](62);
+              case 87:
+                _context5.prev = 87;
+                _context5.t2 = _context5["catch"](63);
                 console.error('获取用户详情失败:', _context5.t2);
-              case 89:
+              case 90:
                 // 如果上述方法没有获取到数据，再尝试从res中提取
                 if (!userInfo._id && !userInfo.uid) {
                   console.log('从API响应中提取用户信息');
@@ -1181,32 +1221,32 @@ var _default = {
                     userInfo.avatar_file = res.avatar || res.avatarUrl || res.avatar_file || '';
                   }
                 }
-              case 90:
+              case 91:
                 if (!(!userInfo.uid && !userInfo._id && (0, _typeof2.default)(res) === 'object')) {
-                  _context5.next = 102;
+                  _context5.next = 103;
                   break;
                 }
                 console.log('尝试从原始响应中直接提取用户ID');
                 // 尝试遍历所有字段查找可能的用户ID
                 _context5.t3 = _regenerator.default.keys(res);
-              case 93:
+              case 94:
                 if ((_context5.t4 = _context5.t3()).done) {
-                  _context5.next = 102;
+                  _context5.next = 103;
                   break;
                 }
                 key = _context5.t4.value;
                 if (!((key === 'uid' || key === '_id') && res[key])) {
-                  _context5.next = 100;
+                  _context5.next = 101;
                   break;
                 }
                 userInfo._id = res[key];
                 userInfo.uid = res[key];
                 console.log('找到用户ID:', res[key]);
-                return _context5.abrupt("break", 102);
-              case 100:
-                _context5.next = 93;
+                return _context5.abrupt("break", 103);
+              case 101:
+                _context5.next = 94;
                 break;
-              case 102:
+              case 103:
                 // 最后尝试从token中获取用户ID
                 if (!userInfo.uid && !userInfo._id) {
                   try {
@@ -1261,20 +1301,30 @@ var _default = {
                 // 获取预约数量
                 _this6.fetchBookingCounts();
                 console.log('token获取用户信息成功，已更新状态');
+
+                // 延迟检查用户手机绑定状态
+                setTimeout(function () {
+                  // 获取App实例调用检查方法
+                  var app = getApp();
+                  if (app && app.checkMobileBindingStatus) {
+                    console.log('检查用户手机绑定状态');
+                    app.checkMobileBindingStatus(userInfo);
+                  }
+                }, 1000);
                 return _context5.abrupt("return", true);
-              case 114:
+              case 116:
                 return _context5.abrupt("return", false);
-              case 117:
-                _context5.prev = 117;
+              case 119:
+                _context5.prev = 119;
                 _context5.t5 = _context5["catch"](1);
                 console.error('获取用户信息失败:', _context5.t5);
                 return _context5.abrupt("return", false);
-              case 121:
+              case 123:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, null, [[1, 117], [31, 49], [62, 86], [68, 81]]);
+        }, _callee5, null, [[1, 119], [32, 50], [63, 87], [69, 82]]);
       }))();
     },
     // 退出登录

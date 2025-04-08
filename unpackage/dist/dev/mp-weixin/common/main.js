@@ -222,7 +222,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni, wx, uniCloud) {
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud, wx) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -265,12 +265,36 @@ var _default = {
         console.error('无效的页面实例:', pageVm);
       }
     });
+
+    // 监听登录成功事件，检查用户是否绑定手机号
+    // 使用箭头函数保证this指向当前实例
+    uni.$on('login:success', function (userInfo) {
+      console.log('App.vue 收到 login:success 事件，用户信息:', JSON.stringify(userInfo));
+      _this.checkMobileBindingStatus(userInfo);
+    });
+    uni.$on('user:login', function (userInfo) {
+      console.log('App.vue 收到 user:login 事件，用户信息:', JSON.stringify(userInfo));
+      _this.checkMobileBindingStatus(userInfo);
+    });
+    uni.$on('uni-id-pages-login-success', function (userInfo) {
+      console.log('App.vue 收到 uni-id-pages-login-success 事件，用户信息:', JSON.stringify(userInfo));
+      _this.checkMobileBindingStatus(userInfo);
+    });
   },
   onShow: function onShow() {
     console.log('App Show');
   },
   onHide: function onHide() {
     console.log('App Hide');
+  },
+  // 应用被销毁时清理事件监听
+  onUnload: function onUnload() {
+    console.log('App Unload - 清理事件监听');
+    // 清理登录成功相关的事件监听
+    uni.$off('login:success');
+    uni.$off('user:login');
+    uni.$off('uni-id-pages-login-success');
+    uni.$off('page-ready');
   },
   methods: {
     // 获取系统信息
@@ -285,6 +309,7 @@ var _default = {
     },
     // 检查登录状态
     checkLoginStatus: function checkLoginStatus() {
+      var _this2 = this;
       try {
         var userInfo = uni.getStorageSync('userInfo');
         if (userInfo) {
@@ -318,19 +343,177 @@ var _default = {
           hasUserInfo: !!this.globalData.userInfo,
           hasUniIdUserInfo: !!uniIdUserInfo
         });
+
+        // 如果已登录，检查手机绑定状态
+        if (this.globalData.userInfo || uniIdUserInfo) {
+          console.log('用户已登录，直接检查手机绑定状态');
+          // 获取合并后的用户信息对象
+          var mergedUserInfo = this.globalData.userInfo || uniIdUserInfo;
+          console.log('用于检查手机绑定的用户信息:', JSON.stringify({
+            _id: mergedUserInfo._id,
+            mobile: mergedUserInfo.mobile
+          }));
+
+          // 延迟执行检查，确保页面已完全加载
+          setTimeout(function () {
+            _this2.checkMobileBindingStatus(mergedUserInfo, true);
+          }, 1500);
+        }
       } catch (e) {
         console.error('检查登录状态失败:', e);
       }
     },
-    // 测试云函数连接
-    testCloudConnection: function testCloudConnection() {
+    // 检查用户是否绑定手机号
+    checkMobileBindingStatus: function checkMobileBindingStatus(userInfo) {
+      var _arguments = arguments,
+        _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var result;
+        var forceCheck, hasShownMobileBindingTip, currentUserInfo, token, result, cloudUserInfo;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.prev = 0;
+                forceCheck = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : false;
+                console.log('检查用户手机绑定状态', forceCheck ? '(强制检查)' : '', '调用堆栈:', new Error().stack);
+
+                // 检查是否已经显示过提示
+                hasShownMobileBindingTip = uni.getStorageSync('hasShownMobileBindingTip');
+                if (!(hasShownMobileBindingTip && !forceCheck)) {
+                  _context.next = 6;
+                  break;
+                }
+                console.log('已经显示过手机绑定提示，不再重复显示');
+                return _context.abrupt("return");
+              case 6:
+                _context.prev = 6;
+                // 获取当前用户信息
+                currentUserInfo = userInfo; // 如果没有传入用户信息，则从存储中获取
+                if (currentUserInfo) {
+                  _context.next = 13;
+                  break;
+                }
+                currentUserInfo = _this3.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
+                if (currentUserInfo) {
+                  _context.next = 13;
+                  break;
+                }
+                console.log('没有找到用户信息，无需检查手机绑定状态');
+                return _context.abrupt("return");
+              case 13:
+                console.log('准备检查用户手机绑定状态，用户信息:', JSON.stringify({
+                  _id: currentUserInfo._id,
+                  mobile: currentUserInfo.mobile || '未绑定',
+                  type: (0, _typeof2.default)(currentUserInfo.mobile),
+                  isEmpty: currentUserInfo.mobile === '',
+                  isNull: currentUserInfo.mobile === null,
+                  isUndefined: currentUserInfo.mobile === undefined
+                }));
+
+                // 修改检查逻辑：确保mobile不为空且不是空字符串
+                if (!(currentUserInfo.mobile && currentUserInfo.mobile.trim() !== '' && !forceCheck)) {
+                  _context.next = 17;
+                  break;
+                }
+                console.log('用户已绑定手机号:', currentUserInfo.mobile);
+                return _context.abrupt("return");
+              case 17:
+                // 再次从云端验证
+                token = uni.getStorageSync('uni_id_token');
+                if (token) {
+                  _context.next = 21;
+                  break;
+                }
+                console.log('用户未登录或token不存在');
+                return _context.abrupt("return");
+              case 21:
+                // 调用云函数检查用户信息
+                console.log('调用云函数获取最新用户信息');
+                _context.next = 24;
+                return uniCloud.callFunction({
+                  name: 'getUserInfoByToken',
+                  data: {
+                    uniIdToken: token
+                  }
+                });
+              case 24:
+                result = _context.sent;
+                console.log('云函数返回用户信息:', result);
+                if (result.result && result.result.code === 0 && result.result.userInfo) {
+                  cloudUserInfo = result.result.userInfo; // 更新本地用户信息
+                  if (cloudUserInfo._id) {
+                    _this3.globalData.userInfo = cloudUserInfo;
+                    uni.setStorageSync('uni-id-pages-userInfo', cloudUserInfo);
+                    uni.setStorageSync('userInfo', cloudUserInfo);
+                  }
+
+                  // 修改检查逻辑：确保mobile不为空且不是空字符串
+                  if (!cloudUserInfo.mobile || cloudUserInfo.mobile.trim() === '' || forceCheck) {
+                    console.log('用户未绑定手机号或需要强制检查，显示提示');
+
+                    // 设置已经显示过提示的标记
+                    uni.setStorageSync('hasShownMobileBindingTip', true);
+
+                    // 显示确认框
+                    uni.showModal({
+                      title: '绑定手机号',
+                      content: '为了提供更好的服务，请绑定您的手机号',
+                      confirmText: '去绑定',
+                      cancelText: '稍后再说',
+                      success: function success(res) {
+                        if (res.confirm) {
+                          console.log('用户点击确认，跳转到手机绑定页面');
+
+                          // 延迟执行，避免页面跳转冲突
+                          setTimeout(function () {
+                            // 跳转到"我的"页面中的设置
+                            uni.navigateTo({
+                              url: '/pages/user/phone/index',
+                              fail: function fail(err) {
+                                console.error('跳转到手机绑定页面失败:', err);
+                                // 如果失败，尝试跳转到用户页面
+                                uni.switchTab({
+                                  url: '/pages/user/user',
+                                  fail: function fail(err2) {
+                                    console.error('跳转到用户页面也失败:', err2);
+                                  }
+                                });
+                              }
+                            });
+                          }, 500);
+                        } else {
+                          console.log('用户点击取消');
+                        }
+                      }
+                    });
+                  } else {
+                    console.log('云端验证用户已绑定手机号:', cloudUserInfo.mobile);
+                  }
+                }
+                _context.next = 32;
+                break;
+              case 29:
+                _context.prev = 29;
+                _context.t0 = _context["catch"](6);
+                console.error('检查手机绑定状态失败:', _context.t0);
+              case 32:
+                console.log('手机绑定状态检查完成');
+              case 33:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[6, 29]]);
+      }))();
+    },
+    // 测试云函数连接
+    testCloudConnection: function testCloudConnection() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var result;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
                 console.log('检查云服务状态...');
 
                 // 如果在微信小程序环境中，确保wx.cloud被禁用
@@ -342,15 +525,15 @@ var _default = {
 
                 // 检查uniCloud是否可用
                 if (!(typeof uniCloud === 'undefined')) {
-                  _context.next = 6;
+                  _context2.next = 6;
                   break;
                 }
                 console.error('uniCloud对象不存在，可能是平台不支持');
-                return _context.abrupt("return", false);
+                return _context2.abrupt("return", false);
               case 6:
                 // 直接使用uniCloud调用云函数
                 console.log('正在测试云函数连接...');
-                _context.next = 9;
+                _context2.next = 9;
                 return uniCloud.callFunction({
                   name: 'yuekeCloudTest',
                   data: {
@@ -358,50 +541,37 @@ var _default = {
                   }
                 });
               case 9:
-                result = _context.sent;
+                result = _context2.sent;
                 console.log('云函数测试结果:', result);
                 if (!(result && result.result && result.result.code === 0)) {
-                  _context.next = 16;
+                  _context2.next = 16;
                   break;
                 }
                 console.log('云函数连接成功');
-                return _context.abrupt("return", true);
+                return _context2.abrupt("return", true);
               case 16:
                 console.warn('云函数测试返回异常结果');
-                return _context.abrupt("return", false);
+                return _context2.abrupt("return", false);
               case 18:
-                _context.next = 24;
+                _context2.next = 24;
                 break;
               case 20:
-                _context.prev = 20;
-                _context.t0 = _context["catch"](0);
-                console.error('云函数连接测试失败:', _context.t0);
-                return _context.abrupt("return", false);
+                _context2.prev = 20;
+                _context2.t0 = _context2["catch"](0);
+                console.error('云函数连接测试失败:', _context2.t0);
+                return _context2.abrupt("return", false);
               case 24:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, null, [[0, 20]]);
+        }, _callee2, null, [[0, 20]]);
       }))();
-    },
-    onReady: function onReady() {
-      var _this2 = this;
-      // 页面就绪时通知App
-      setTimeout(function () {
-        if (_this2) {
-          // 确保this是有效的
-          uni.$emit('page-ready', _this2);
-          console.log('页面准备完成，已通知App');
-        } else {
-          console.error('当前页面实例无效');
-        }
-      }, 100);
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
 /* 42 */

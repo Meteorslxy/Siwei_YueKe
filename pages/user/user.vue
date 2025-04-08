@@ -228,6 +228,22 @@ export default {
       this.checkContent()
     }, 500)
     
+    // 延迟检查用户手机绑定状态，确保在用户信息完全加载后
+    setTimeout(() => {
+      if (this.hasUserInfo && this.userInfo && this.userInfo._id) {
+        console.log('页面显示时检查手机绑定状态');
+        // 获取App实例，调用其checkMobileBindingStatus方法
+        const app = getApp();
+        if (app && app.checkMobileBindingStatus) {
+          app.checkMobileBindingStatus(this.userInfo);
+        } else {
+          console.error('无法获取App实例或checkMobileBindingStatus方法不存在');
+        }
+      } else {
+        console.log('用户未登录，无需检查手机绑定状态');
+      }
+    }, 1000);
+    
     // 检查是否需要打开个人资料
     if (getApp().globalData.openUserProfile) {
       // 清除标记
@@ -650,6 +666,21 @@ export default {
       }
       
       console.log('用户信息已更新');
+      
+      // 获取预约数量
+      this.fetchBookingCounts();
+      
+      if (this.isDev) console.log('完整用户信息保存成功');
+      
+      // 延迟检查用户手机绑定状态
+      setTimeout(() => {
+        // 获取App实例调用检查方法
+        const app = getApp();
+        if (app && app.checkMobileBindingStatus) {
+          console.log('检查用户手机绑定状态');
+          app.checkMobileBindingStatus(mergedInfo);
+        }
+      }, 1000);
     },
     
     // 获取预约数量
@@ -909,6 +940,17 @@ export default {
           this.fetchBookingCounts();
           
           if (this.isDev) console.log('完整用户信息保存成功');
+          
+          // 延迟检查用户手机绑定状态
+          setTimeout(() => {
+            // 获取App实例调用检查方法
+            const app = getApp();
+            if (app && app.checkMobileBindingStatus) {
+              console.log('检查用户手机绑定状态');
+              app.checkMobileBindingStatus(completeUserInfo);
+            }
+          }, 1000);
+          
           return true;
         } else if (result && result.result && result.result.code !== 0) {
           if (this.isDev) console.warn('getUserInfoByToken返回错误:', result.result.message);
@@ -1152,6 +1194,17 @@ export default {
           this.fetchBookingCounts()
           
           console.log('token获取用户信息成功，已更新状态')
+          
+          // 延迟检查用户手机绑定状态
+          setTimeout(() => {
+            // 获取App实例调用检查方法
+            const app = getApp();
+            if (app && app.checkMobileBindingStatus) {
+              console.log('检查用户手机绑定状态');
+              app.checkMobileBindingStatus(userInfo);
+            }
+          }, 1000);
+          
           return true;
         }
         return false;

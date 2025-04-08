@@ -28,6 +28,23 @@ export default {
         console.error('无效的页面实例:', pageVm);
       }
     });
+    
+    // 监听登录成功事件，检查用户是否绑定手机号
+    // 使用箭头函数保证this指向当前实例
+    uni.$on('login:success', (userInfo) => {
+      console.log('App.vue 收到 login:success 事件，用户信息:', JSON.stringify(userInfo));
+      this.checkMobileBindingStatus(userInfo);
+    });
+    
+    uni.$on('user:login', (userInfo) => {
+      console.log('App.vue 收到 user:login 事件，用户信息:', JSON.stringify(userInfo));
+      this.checkMobileBindingStatus(userInfo);
+    });
+    
+    uni.$on('uni-id-pages-login-success', (userInfo) => {
+      console.log('App.vue 收到 uni-id-pages-login-success 事件，用户信息:', JSON.stringify(userInfo));
+      this.checkMobileBindingStatus(userInfo);
+    });
   },
   onShow: function() {
     console.log('App Show')
@@ -35,6 +52,17 @@ export default {
   onHide: function() {
     console.log('App Hide')
   },
+  
+  // 应用被销毁时清理事件监听
+  onUnload: function() {
+    console.log('App Unload - 清理事件监听')
+    // 清理登录成功相关的事件监听
+    uni.$off('login:success')
+    uni.$off('user:login')
+    uni.$off('uni-id-pages-login-success')
+    uni.$off('page-ready')
+  },
+  
   methods: {  
     // 获取系统信息
     getSystemInfo() {
@@ -82,9 +110,140 @@ export default {
           hasUserInfo: !!this.globalData.userInfo,
           hasUniIdUserInfo: !!uniIdUserInfo
         })
+        
+        // 如果已登录，检查手机绑定状态
+        if (this.globalData.userInfo || uniIdUserInfo) {
+          console.log('用户已登录，直接检查手机绑定状态');
+          // 获取合并后的用户信息对象
+          const mergedUserInfo = this.globalData.userInfo || uniIdUserInfo;
+          console.log('用于检查手机绑定的用户信息:', JSON.stringify({
+            _id: mergedUserInfo._id,
+            mobile: mergedUserInfo.mobile
+          }));
+          
+          // 延迟执行检查，确保页面已完全加载
+          setTimeout(() => {
+            this.checkMobileBindingStatus(mergedUserInfo, true);
+          }, 1500);
+        }
       } catch (e) {
         console.error('检查登录状态失败:', e)
       }
+    },
+    
+    // 检查用户是否绑定手机号
+    async checkMobileBindingStatus(userInfo, forceCheck = false) {
+      console.log('检查用户手机绑定状态', forceCheck ? '(强制检查)' : '', '调用堆栈:', new Error().stack);
+      
+      // 检查是否已经显示过提示
+      const hasShownMobileBindingTip = uni.getStorageSync('hasShownMobileBindingTip');
+      if (hasShownMobileBindingTip && !forceCheck) {
+        console.log('已经显示过手机绑定提示，不再重复显示');
+        return;
+      }
+      
+      try {
+        // 获取当前用户信息
+        let currentUserInfo = userInfo;
+        
+        // 如果没有传入用户信息，则从存储中获取
+        if (!currentUserInfo) {
+          currentUserInfo = this.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
+          if (!currentUserInfo) {
+            console.log('没有找到用户信息，无需检查手机绑定状态');
+            return;
+          }
+        }
+        
+        console.log('准备检查用户手机绑定状态，用户信息:', JSON.stringify({
+          _id: currentUserInfo._id,
+          mobile: currentUserInfo.mobile || '未绑定',
+          type: typeof currentUserInfo.mobile,
+          isEmpty: currentUserInfo.mobile === '',
+          isNull: currentUserInfo.mobile === null,
+          isUndefined: currentUserInfo.mobile === undefined
+        }));
+        
+        // 修改检查逻辑：确保mobile不为空且不是空字符串
+        if (currentUserInfo.mobile && currentUserInfo.mobile.trim() !== '' && !forceCheck) {
+          console.log('用户已绑定手机号:', currentUserInfo.mobile);
+          return;
+        }
+        
+        // 再次从云端验证
+        const token = uni.getStorageSync('uni_id_token');
+        if (!token) {
+          console.log('用户未登录或token不存在');
+          return;
+        }
+        
+        // 调用云函数检查用户信息
+        console.log('调用云函数获取最新用户信息');
+        const result = await uniCloud.callFunction({
+          name: 'getUserInfoByToken',
+          data: { uniIdToken: token }
+        });
+        
+        console.log('云函数返回用户信息:', result);
+        
+        if (result.result && result.result.code === 0 && result.result.userInfo) {
+          const cloudUserInfo = result.result.userInfo;
+          
+          // 更新本地用户信息
+          if (cloudUserInfo._id) {
+            this.globalData.userInfo = cloudUserInfo;
+            uni.setStorageSync('uni-id-pages-userInfo', cloudUserInfo);
+            uni.setStorageSync('userInfo', cloudUserInfo);
+          }
+          
+          // 修改检查逻辑：确保mobile不为空且不是空字符串
+          if (!cloudUserInfo.mobile || cloudUserInfo.mobile.trim() === '' || forceCheck) {
+            console.log('用户未绑定手机号或需要强制检查，显示提示');
+            
+            // 设置已经显示过提示的标记
+            uni.setStorageSync('hasShownMobileBindingTip', true);
+            
+            // 显示确认框
+            uni.showModal({
+              title: '绑定手机号',
+              content: '为了提供更好的服务，请绑定您的手机号',
+              confirmText: '去绑定',
+              cancelText: '稍后再说',
+              success: (res) => {
+                if (res.confirm) {
+                  console.log('用户点击确认，跳转到手机绑定页面');
+                  
+                  // 延迟执行，避免页面跳转冲突
+                  setTimeout(() => {
+                    // 跳转到"我的"页面中的设置
+                    uni.navigateTo({
+                      url: '/pages/user/phone/index',
+                      fail: (err) => {
+                        console.error('跳转到手机绑定页面失败:', err);
+                        // 如果失败，尝试跳转到用户页面
+                        uni.switchTab({
+                          url: '/pages/user/user',
+                          fail: (err2) => {
+                            console.error('跳转到用户页面也失败:', err2);
+                          }
+                        });
+                      }
+                    });
+                  }, 500);
+                } else {
+                  console.log('用户点击取消');
+                }
+              }
+            });
+          } else {
+            console.log('云端验证用户已绑定手机号:', cloudUserInfo.mobile);
+          }
+        }
+      } catch (error) {
+        console.error('检查手机绑定状态失败:', error);
+      }
+      
+      console.log('手机绑定状态检查完成');
     },
 
     // 测试云函数连接
@@ -127,18 +286,6 @@ export default {
         console.error('云函数连接测试失败:', error);
         return false;
       }
-    },
-
-    onReady() {
-      // 页面就绪时通知App
-      setTimeout(() => {
-        if (this) { // 确保this是有效的
-          uni.$emit('page-ready', this);
-          console.log('页面准备完成，已通知App');
-        } else {
-          console.error('当前页面实例无效');
-        }
-      }, 100);
     }
   }
 }
