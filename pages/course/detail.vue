@@ -35,7 +35,7 @@
     <view class="info-card">
       <view class="info-price">
         <text class="price-value">¥{{courseInfo.price}}.00</text>
-        <text class="price-label">/全期课程</text>
+        <text class="price-label">/{{courseInfo.courseCount}}课时</text>
       </view>
       
       <view class="info-item">
@@ -60,7 +60,7 @@
       <view class="info-item">
         <text class="item-icon iconfont icon-student"></text>
         <text class="item-label">招生人数：</text>
-        <text class="item-value">{{courseInfo.courseCount || courseInfo.capacity || 20}}人 (已报名{{courseInfo.bookingCount || 0}}人，剩余{{calculateRemainingSeats()}}人)</text>
+        <text class="item-value">{{courseInfo.courseCapacity || courseInfo.courseCount || courseInfo.capacity || 20}}人 (已报名{{courseInfo.bookingCount || 0}}人，剩余{{calculateRemainingSeats()}}人)</text>
       </view>
     </view>
     
@@ -115,7 +115,11 @@
         <text class="btn-icon iconfont icon-contact"></text>
         <text>联系老师</text>
       </view>
-      <button class="book-btn" v-if="!hasBooked" @click="bookCourse">立即预约</button>
+      <button class="book-btn" 
+        v-if="!hasBooked" 
+        :class="{'disabled': isCourseFulled}"
+        :disabled="isCourseFulled"
+        @click="bookCourse">{{isCourseFulled ? '已约满' : '立即预约'}}</button>
       <button class="book-btn booked" v-else @click="navigateToBookingList">查看预约</button>
     </view>
   </view>
@@ -136,6 +140,14 @@ export default {
       hasBooked: false,
       userInfo: null,
       statusBarHeight: 90 // 默认状态栏高度（rpx单位）
+    }
+  },
+  computed: {
+    // 添加计算属性：判断课程是否已满
+    isCourseFulled() {
+      const total = this.courseInfo.courseCapacity || this.courseInfo.courseCount || this.courseInfo.capacity || 20;
+      const enrolled = this.courseInfo.bookingCount || 0;
+      return enrolled >= total;
     }
   },
   mounted() {
@@ -297,6 +309,9 @@ export default {
             console.log('主动获取教师详情，teacherId:', this.courseInfo.teacherId);
             this.fetchTeacherDescription(this.courseInfo.teacherId);
           }
+          
+          // 主动更新课程报名人数
+          this.updateCourseBookingCount();
         } else if (result && result.code === -1 && retryCount < 3) {
           // 如果是超时错误且重试次数小于3次，尝试重试
           console.log(`获取课程详情失败，准备第${retryCount + 1}次重试...`);
@@ -354,7 +369,8 @@ export default {
         endTime: '',
         description: '抱歉，无法加载课程详情，请返回后重试或联系客服。',
         coverImage: '/static/images/course/default.jpg',
-        courseCount: 20,
+        courseCapacity: 20,
+        courseCount: 20, // 保留兼容性
         bookingCount: 0
       };
       
@@ -389,8 +405,8 @@ export default {
       this.courseInfo.location = this.courseInfo.location || '未指定';
       
       // 处理课程容量和报名人数
-      this.courseInfo.courseCount = this.courseInfo.courseCount || 20; // 优先使用courseCount
-      this.courseInfo.capacity = this.courseInfo.capacity || this.courseInfo.courseCount || 20;
+      this.courseInfo.courseCapacity = this.courseInfo.courseCapacity || this.courseInfo.courseCount || 20; // 优先使用courseCapacity
+      this.courseInfo.capacity = this.courseInfo.capacity || this.courseInfo.courseCapacity || this.courseInfo.courseCount || 20;
       this.courseInfo.bookingCount = this.courseInfo.bookingCount || 0;
       
       // 处理日期和时间
@@ -517,7 +533,7 @@ export default {
       }
       
       // 预加载教师头像
-      if (this.courseInfo.teacherAvatar) {
+      if (this.courseInfo.teacherName || this.courseInfo.teacherId) {
         this.preloadTeacherAvatar();
       }
       
@@ -736,51 +752,55 @@ export default {
     
     // 预加载教师头像
     async preloadTeacherAvatar() {
-      if (!this.courseInfo.teacherAvatar) return;
+      if (!this.courseInfo.teacherName) return;
       
       try {
-        // 检查是否为完整URL（以http或https开头）
-        if (this.courseInfo.teacherAvatar.startsWith('http://') || this.courseInfo.teacherAvatar.startsWith('https://')) {
-          console.log('使用云存储URL作为教师头像:', this.courseInfo.teacherAvatar);
-          this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
-        } 
-        // 检查是否为本地路径（以/开头）
-        else if (this.courseInfo.teacherAvatar.startsWith('/')) {
-          // 已经是本地路径，但可能不是最终需要的头像
-          console.log('临时使用本地路径作为教师头像:', this.courseInfo.teacherAvatar);
-          this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
-          
-          // 如果有teacherName，尝试从数据库获取正确的头像
-          if (this.courseInfo.teacherName) {
-            this.fetchTeacherAvatarFromDB(this.courseInfo.teacherName);
-          } else if (this.courseInfo.teacherId) {
-            this.fetchTeacherAvatarByID(this.courseInfo.teacherId);
+        console.log('根据教师名称主动查询教师头像:', this.courseInfo.teacherName);
+        // 首先尝试从数据库获取教师头像
+        if (this.courseInfo.teacherName) {
+          await this.fetchTeacherAvatarFromDB(this.courseInfo.teacherName);
+        } else if (this.courseInfo.teacherId) {
+          await this.fetchTeacherAvatarByID(this.courseInfo.teacherId);
+        }
+        
+        // 如果数据库查询失败，仍然没有获得头像URL，则使用本地头像作为备选
+        if (!this.courseInfo.teacherAvatarUrl && this.courseInfo.teacherAvatar) {
+          // 检查是否为完整URL（以http或https开头）
+          if (this.courseInfo.teacherAvatar.startsWith('http://') || this.courseInfo.teacherAvatar.startsWith('https://')) {
+            console.log('使用云存储URL作为教师头像备选:', this.courseInfo.teacherAvatar);
+            this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
+          } 
+          // 检查是否为本地路径（以/开头）
+          else if (this.courseInfo.teacherAvatar.startsWith('/')) {
+            // 已经是本地路径
+            console.log('使用本地路径作为教师头像备选:', this.courseInfo.teacherAvatar);
+            this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
+          } else {
+            // 否则从云端获取
+            console.log('从云端获取头像图片作为备选:', this.courseInfo.teacherAvatar);
+            const avatarResult = await this.$api.file.getImage(this.courseInfo.teacherAvatar);
+            if (avatarResult && avatarResult.data && avatarResult.data.url) {
+              this.courseInfo.teacherAvatarUrl = avatarResult.data.url;
+            }
           }
-        } else {
-          // 否则从云端获取
-          console.log('从云端获取头像图片:', this.courseInfo.teacherAvatar);
-          const avatarResult = await this.$api.file.getImage(this.courseInfo.teacherAvatar);
-          if (avatarResult && avatarResult.data && avatarResult.data.url) {
-            this.courseInfo.teacherAvatarUrl = avatarResult.data.url;
-          }
+        }
+        
+        // 如果仍然没有获得头像URL，使用默认头像
+        if (!this.courseInfo.teacherAvatarUrl) {
+          this.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
+          console.log('使用默认头像');
         }
       } catch (error) {
         console.error('加载教师头像失败:', error);
-        // 加载失败时使用默认头像，并尝试从数据库获取
+        // 加载失败时使用默认头像
         this.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
-        
-        // 如果有teacherName，尝试从数据库获取正确的头像
-        if (this.courseInfo.teacherName) {
-          this.fetchTeacherAvatarFromDB(this.courseInfo.teacherName);
-        } else if (this.courseInfo.teacherId) {
-          this.fetchTeacherAvatarByID(this.courseInfo.teacherId);
-        }
+        console.log('由于错误使用默认头像');
       }
     },
     
     // 从数据库获取教师头像
     async fetchTeacherAvatarFromDB(teacherName) {
-      if (!teacherName) return;
+      if (!teacherName) return false;
       
       try {
         console.log('通过名称从数据库获取教师头像:', teacherName);
@@ -799,16 +819,20 @@ export default {
             console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
             this.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
             this.$forceUpdate();
+            return true;
           }
         }
+        
+        return false;
       } catch (error) {
         console.error('通过名称获取教师头像失败:', error);
+        return false;
       }
     },
     
     // 通过ID从数据库获取教师头像
     async fetchTeacherAvatarByID(teacherId) {
-      if (!teacherId) return;
+      if (!teacherId) return false;
       
       try {
         console.log('通过ID从数据库获取教师头像:', teacherId);
@@ -820,9 +844,13 @@ export default {
           console.log('从数据库获取到教师头像URL:', result.data.avatar);
           this.courseInfo.teacherAvatarUrl = result.data.avatar;
           this.$forceUpdate();
+          return true;
         }
+        
+        return false;
       } catch (error) {
         console.error('通过ID获取教师头像失败:', error);
+        return false;
       }
     },
     
@@ -1232,6 +1260,15 @@ export default {
     bookCourse() {
       console.log('点击预约课程按钮');
       
+      // 检查课程是否已满
+      if (this.isCourseFulled) {
+        uni.showToast({
+          title: '该课程已约满',
+          icon: 'none'
+        });
+        return;
+      }
+      
       // 如果仍然未登录
       if (!this.userInfo) {
         console.log('未找到用户信息对象，用户未登录');
@@ -1595,7 +1632,7 @@ export default {
     
     // 计算剩余名额
     calculateRemainingSeats() {
-      const total = this.courseInfo.courseCount || this.courseInfo.capacity || 20;
+      const total = this.courseInfo.courseCapacity || this.courseInfo.courseCount || this.courseInfo.capacity || 20;
       const enrolled = this.courseInfo.bookingCount || 0;
       const remaining = Math.max(0, total - enrolled);
       return remaining;
@@ -1971,6 +2008,29 @@ export default {
           url: `/pages/login/login?redirect=${encodeURIComponent(currentUrl)}`
         });
       }, 1500);
+    },
+    
+    // 更新课程报名人数
+    async updateCourseBookingCount() {
+      try {
+        console.log('主动更新课程报名人数:', this.courseId);
+        // 使用API更新课程报名人数
+        const result = await this.$api.course.updateCourseBookingCount(this.courseId);
+        
+        console.log('更新课程报名人数结果:', result);
+        
+        // 如果更新成功并返回了最新的报名人数，更新本地数据
+        if (result && result.success && result.data) {
+          const bookingCount = result.data.bookingCount;
+          console.log('获取到最新报名人数:', bookingCount);
+          
+          // 更新本地courseInfo中的bookingCount
+          this.courseInfo.bookingCount = bookingCount;
+          this.$forceUpdate();
+        }
+      } catch (error) {
+        console.error('更新课程报名人数失败:', error);
+      }
     }
   }
 }

@@ -24116,6 +24116,19 @@ var courseApi = {
       name: 'bookCourse',
       data: data
     });
+  },
+  // 更新课程报名人数
+  updateCourseBookingCount: function updateCourseBookingCount(courseId) {
+    console.log('调用updateCourseBookingCount，ID:', courseId);
+    return (0, _request.default)({
+      name: 'updateCourseBookingCount',
+      data: {
+        courseId: courseId
+      },
+      showLoading: false // 不显示加载提示
+    }).then(function (res) {
+      return debugAPI('updateCourseBookingCount返回', res);
+    });
   }
 };
 

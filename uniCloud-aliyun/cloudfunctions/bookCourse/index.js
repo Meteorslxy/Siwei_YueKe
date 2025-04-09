@@ -187,11 +187,17 @@ exports.main = async (event, context) => {
       };
     }
     
-    // 更新课程报名人数
-    console.log('更新课程报名人数');
-    await db.collection('courses').doc(courseId).update({
-      bookingCount: dbCmd.inc(1) // 只更新bookingCount字段
-    });
+    // 使用updateCourseBookingCount云函数更新报名人数
+    try {
+      console.log('调用updateCourseBookingCount更新课程报名人数');
+      await uniCloud.callFunction({
+        name: 'updateCourseBookingCount',
+        data: { courseId: courseId }
+      });
+    } catch (error) {
+      console.error('更新课程报名人数失败:', error);
+      // 继续执行，不影响下面的流程
+    }
     
     // 创建短格式的预约ID
     const shortBookingId = `B${bookingResult.id.slice(-10).toUpperCase()}`;

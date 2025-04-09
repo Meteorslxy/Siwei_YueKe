@@ -360,7 +360,7 @@ var _default = {
     loadCourseList: function loadCourseList() {
       var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var _result$data, params, result, filteredData;
+        var _result$data, params, result, processedData;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -405,70 +405,39 @@ var _default = {
                 console.log('云函数返回结果:', result, '数据条数:', (result === null || result === void 0 ? void 0 : (_result$data = result.data) === null || _result$data === void 0 ? void 0 : _result$data.length) || 0);
 
                 // 处理返回结果
-                if (result && result.data) {
-                  filteredData = (0, _toConsumableArray2.default)(result.data); // 处理每个课程的时间字段，避免NaN问题
-                  filteredData = filteredData.map(function (course) {
-                    // 处理日期和时间
-                    if (!course.startDate && course.startTime) {
-                      if (course.startTime.includes(' ')) {
-                        var parts = course.startTime.split(' ');
-                        course.startDate = parts[0];
-                        course.startTime = parts[1];
-                      } else if (course.startTime.includes('T')) {
-                        try {
-                          var date = new Date(course.startTime);
-                          if (!isNaN(date.getTime())) {
-                            course.startDate = date.toISOString().split('T')[0];
-                            course.startTime = "".concat(date.getHours().toString().padStart(2, '0'), ":").concat(date.getMinutes().toString().padStart(2, '0'));
-                          }
-                        } catch (e) {
-                          console.error('解析startTime失败:', e, course.startTime);
-                        }
-                      }
-                    }
-                    if (!course.endDate && course.endTime) {
-                      if (course.endTime.includes(' ')) {
-                        var _parts = course.endTime.split(' ');
-                        course.endDate = _parts[0];
-                        course.endTime = _parts[1];
-                      } else if (course.endTime.includes('T')) {
-                        try {
-                          var _date = new Date(course.endTime);
-                          if (!isNaN(_date.getTime())) {
-                            course.endDate = _date.toISOString().split('T')[0];
-                            course.endTime = "".concat(_date.getHours().toString().padStart(2, '0'), ":").concat(_date.getMinutes().toString().padStart(2, '0'));
-                          }
-                        } catch (e) {
-                          console.error('解析endTime失败:', e, course.endTime);
-                        }
-                      }
-                    }
-                    return course;
-                  });
-                  console.log('前端过滤后的数据:', filteredData);
-                  if (_this3.page === 1) {
-                    _this3.courseList = filteredData;
-                  } else {
-                    _this3.courseList = [].concat((0, _toConsumableArray2.default)(_this3.courseList), (0, _toConsumableArray2.default)(filteredData));
-                  }
-                  _this3.total = filteredData.length;
-
-                  // 更新加载状态
-                  if (_this3.courseList.length >= _this3.total) {
-                    _this3.loadMoreStatus = 'noMore';
-                  } else {
-                    _this3.loadMoreStatus = 'more';
-                  }
-                } else {
-                  if (_this3.page === 1) {
-                    _this3.courseList = [];
-                  }
-                  _this3.loadMoreStatus = 'noMore';
+                if (!(result && result.data && result.data.length > 0)) {
+                  _context.next = 24;
+                  break;
                 }
-                _context.next = 23;
-                break;
+                _context.next = 18;
+                return _this3.processTeacherAvatars(result.data);
               case 18:
-                _context.prev = 18;
+                processedData = _context.sent;
+                if (_this3.page === 1) {
+                  _this3.courseList = processedData;
+                } else {
+                  _this3.courseList = [].concat((0, _toConsumableArray2.default)(_this3.courseList), (0, _toConsumableArray2.default)(processedData));
+                }
+                _this3.total = result.total || processedData.length;
+
+                // 更新加载状态
+                if (_this3.courseList.length >= _this3.total) {
+                  _this3.loadMoreStatus = 'noMore';
+                } else {
+                  _this3.loadMoreStatus = 'more';
+                }
+                _context.next = 26;
+                break;
+              case 24:
+                if (_this3.page === 1) {
+                  _this3.courseList = [];
+                }
+                _this3.loadMoreStatus = 'noMore';
+              case 26:
+                _context.next = 33;
+                break;
+              case 28:
+                _context.prev = 28;
                 _context.t0 = _context["catch"](5);
                 console.error('获取课程列表失败:', _context.t0);
                 uni.showToast({
@@ -476,16 +445,94 @@ var _default = {
                   icon: 'none'
                 });
                 _this3.loadMoreStatus = 'more';
-              case 23:
-                _context.prev = 23;
+              case 33:
+                _context.prev = 33;
                 _this3.isLoading = false;
-                return _context.finish(23);
-              case 26:
+                return _context.finish(33);
+              case 36:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[5, 18, 23, 26]]);
+        }, _callee, null, [[5, 28, 33, 36]]);
+      }))();
+    },
+    // 处理教师头像数据
+    processTeacherAvatars: function processTeacherAvatars(courses) {
+      var _this4 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var needTeacherInfoCourses, teacherNames, teacherResult, teachers, teacherAvatarMap;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (!(!courses || courses.length === 0)) {
+                  _context2.next = 2;
+                  break;
+                }
+                return _context2.abrupt("return", courses);
+              case 2:
+                // 获取所有需要查询教师信息的课程
+                needTeacherInfoCourses = courses.filter(function (course) {
+                  return course.teacherName && (!course.teacherAvatarUrl || !course.teacherAvatar);
+                });
+                if (!(needTeacherInfoCourses.length === 0)) {
+                  _context2.next = 5;
+                  break;
+                }
+                return _context2.abrupt("return", courses);
+              case 5:
+                console.log('需要查询教师头像的课程数:', needTeacherInfoCourses.length);
+
+                // 获取所有需要查询的教师名称
+                teacherNames = needTeacherInfoCourses.map(function (course) {
+                  return course.teacherName;
+                }).filter(function (name, index, self) {
+                  return self.indexOf(name) === index;
+                }); // 去重
+                _context2.prev = 7;
+                _context2.next = 10;
+                return _this4.$api.teacher.getTeacherList();
+              case 10:
+                teacherResult = _context2.sent;
+                if (!(teacherResult && teacherResult.code === 0 && teacherResult.data)) {
+                  _context2.next = 17;
+                  break;
+                }
+                teachers = teacherResult.data;
+                console.log('获取到教师数据:', teachers.length);
+
+                // 创建教师名称到头像的映射
+                teacherAvatarMap = {};
+                teachers.forEach(function (teacher) {
+                  if (teacher.name && teacher.avatar) {
+                    teacherAvatarMap[teacher.name] = teacher.avatar;
+                  }
+                });
+
+                // 为每个课程添加教师头像URL
+                return _context2.abrupt("return", courses.map(function (course) {
+                  if (course.teacherName && teacherAvatarMap[course.teacherName]) {
+                    course.teacherAvatarUrl = teacherAvatarMap[course.teacherName];
+                    console.log("\u4E3A\u8BFE\u7A0B ".concat(course.title, " \u8BBE\u7F6E\u6559\u5E08\u5934\u50CF:"), course.teacherAvatarUrl);
+                  }
+                  return course;
+                }));
+              case 17:
+                _context2.next = 22;
+                break;
+              case 19:
+                _context2.prev = 19;
+                _context2.t0 = _context2["catch"](7);
+                console.error('获取教师头像信息失败:', _context2.t0);
+              case 22:
+                return _context2.abrupt("return", courses);
+              case 23:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[7, 19]]);
       }))();
     },
     // 格式化课程时间
@@ -536,18 +583,18 @@ var _default = {
     },
     // 获取校区列表
     getLocationList: function getLocationList() {
-      var _this4 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+      var _this5 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
         var result, locations;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
+        return _regenerator.default.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                _context2.prev = 0;
-                _context2.next = 3;
-                return _this4.$api.location.getLocationList();
+                _context3.prev = 0;
+                _context3.next = 3;
+                return _this5.$api.location.getLocationList();
               case 3:
-                result = _context2.sent;
+                result = _context3.sent;
                 console.log('获取校区列表结果:', result);
                 if (result && result.data && result.data.length > 0) {
                   // 将校区数据转换为下拉选项格式
@@ -557,30 +604,30 @@ var _default = {
                       value: item.name
                     };
                   }); // 将全部校区选项和后端获取的校区选项合并
-                  _this4.schoolOptions = [{
+                  _this5.schoolOptions = [{
                     label: '全部校区',
                     value: 'all'
                   }].concat((0, _toConsumableArray2.default)(locations));
-                  console.log('更新后的校区选项:', _this4.schoolOptions);
+                  console.log('更新后的校区选项:', _this5.schoolOptions);
                 } else {
                   console.warn('未获取到校区数据，使用默认值');
                 }
-                _context2.next = 12;
+                _context3.next = 12;
                 break;
               case 8:
-                _context2.prev = 8;
-                _context2.t0 = _context2["catch"](0);
-                console.error('获取校区列表失败:', _context2.t0);
+                _context3.prev = 8;
+                _context3.t0 = _context3["catch"](0);
+                console.error('获取校区列表失败:', _context3.t0);
                 uni.showToast({
                   title: '获取校区列表失败',
                   icon: 'none'
                 });
               case 12:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, null, [[0, 8]]);
+        }, _callee3, null, [[0, 8]]);
       }))();
     }
   }

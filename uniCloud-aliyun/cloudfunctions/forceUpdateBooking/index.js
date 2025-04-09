@@ -40,6 +40,16 @@ exports.main = async (event, context) => {
       
       console.log(`当前课程报名人数:`, currentBookingCount);
       
+      // 记录课程容量，优先使用courseCapacity，如果不存在则使用courseCount
+      let courseCapacity = 20; // 默认值
+      if (courseInfo.hasOwnProperty('courseCapacity') && typeof courseInfo.courseCapacity === 'number') {
+        courseCapacity = courseInfo.courseCapacity;
+      } else if (courseInfo.hasOwnProperty('courseCount') && typeof courseInfo.courseCount === 'number') {
+        courseCapacity = courseInfo.courseCount;
+      }
+      
+      console.log(`课程容量: ${courseCapacity}`);
+      
       // 如果是减少且当前报名人数大于0，或者是增加
       if ((decreaseBookingCount && currentBookingCount > 0) || !decreaseBookingCount) {
         let updateSuccess = false;
@@ -127,7 +137,8 @@ exports.main = async (event, context) => {
             currentCount: currentBookingCount,
             newCount: decreaseBookingCount ? 
               Math.max(0, currentBookingCount - 1) : 
-              currentBookingCount + 1
+              currentBookingCount + 1,
+            courseCapacity: courseCapacity // 返回课程容量信息
           }
         };
       } else if (decreaseBookingCount && currentBookingCount <= 0) {
@@ -139,7 +150,8 @@ exports.main = async (event, context) => {
           data: {
             courseId: courseId,
             updated: false,
-            currentCount: 0
+            currentCount: 0,
+            courseCapacity: courseCapacity // 返回课程容量信息
           }
         };
       }
@@ -259,120 +271,19 @@ exports.main = async (event, context) => {
         
         console.log('处理后的课程ID:', courseId);
         
-        // 先查询课程当前的报名人数
-        let currentCount = 0;
-        let courseInfo = null;
+        // 调用updateCourseBookingCount云函数
+        const updateResult = await uniCloud.callFunction({
+          name: 'updateCourseBookingCount',
+          data: { courseId: courseId }
+        });
         
-        try {
-          const courseResult = await db.collection('courses').doc(courseId).get();
-          if (courseResult && courseResult.data) {
-            courseInfo = courseResult.data;
-            currentCount = courseInfo.bookingCount || 0;
-            console.log('当前课程报名人数:', currentCount, '课程信息:', courseInfo.title);
-          } else {
-            console.error('未找到课程信息:', courseId);
-          }
-        } catch (e) {
-          console.error('获取课程当前报名人数失败:', e);
-        }
+        console.log('updateCourseBookingCount结果:', JSON.stringify(updateResult.result));
         
-        // 方法1: 使用dbCmd.inc(-1)
-        try {
-          console.log('尝试方法1: 使用dbCmd.inc(-1)更新报名人数');
-          const courseUpdateResult = await db.collection('courses')
-            .doc(courseId)
-            .update({
-              bookingCount: dbCmd.inc(-1) // 减少bookingCount
-            });
-          
-          console.log('方法1 - 课程报名人数更新结果:', courseUpdateResult);
-          
-          if (courseUpdateResult && courseUpdateResult.updated > 0) {
-            courseUpdateSuccess = true;
-            console.log(`方法1 - 课程报名人数已成功减1: ${currentCount} -> ${currentCount - 1}, 课程:[${courseInfo?.title || courseId}]`);
-          } else {
-            console.warn('方法1 - 课程报名人数更新可能失败，尝试方法2');
-          }
-        } catch (updateErr) {
-          console.error('方法1 - 更新课程报名人数失败:', updateErr);
-        }
-        
-        // 方法2: 如果方法1失败且当前报名人数大于0，直接设置新值
-        if (!courseUpdateSuccess && currentCount > 0) {
-          try {
-            const newCount = Math.max(0, currentCount - 1);
-            console.log(`方法2 - 尝试直接设置新报名人数: ${currentCount} -> ${newCount}`);
-            
-            const directResult = await db.collection('courses')
-              .doc(courseId)
-              .update({
-                bookingCount: newCount
-              });
-              
-            console.log('方法2 - 更新结果:', directResult);
-            
-            if (directResult && directResult.updated > 0) {
-              courseUpdateSuccess = true;
-              console.log(`方法2 - 课程报名人数已成功设置为 ${newCount}, 课程:[${courseInfo?.title || courseId}]`);
-            } else {
-              console.warn('方法2 - 更新失败，尝试方法3');
-            }
-          } catch (err2) {
-            console.error('方法2 - 更新失败:', err2);
-          }
-        }
-        
-        // 方法3: 使用事务更新
-        if (!courseUpdateSuccess && currentCount > 0) {
-          try {
-            console.log('方法3 - 尝试使用事务更新');
-            const transaction = await db.startTransaction();
-            const coursesCollection = transaction.collection('courses');
-            
-            const newCount = Math.max(0, currentCount - 1);
-            const txResult = await coursesCollection
-              .doc(courseId)
-              .update({
-                bookingCount: newCount
-              });
-              
-            await transaction.commit();
-            
-            console.log('方法3 - 事务结果:', txResult);
-            
-            if (txResult && txResult.updated > 0) {
-              courseUpdateSuccess = true;
-              console.log(`方法3 - 事务成功，报名人数已更新为 ${newCount}, 课程:[${courseInfo?.title || courseId}]`);
-            } else {
-              console.error('方法3 - 事务未能更新课程，可能是权限问题');
-            }
-          } catch (err3) {
-            console.error('方法3 - 事务更新失败:', err3);
-          }
-        } else if (currentCount <= 0) {
-          console.log(`课程 [${courseInfo?.title || courseId}] 报名人数已为0或无法获取，无需减少`);
-          courseUpdateSuccess = true; // 标记为成功，因为无需更新
-        }
-        
-        // 更新后再次查询课程报名人数验证
-        try {
-          const verifyResult = await db.collection('courses').doc(courseId).get();
-          if (verifyResult && verifyResult.data) {
-            const newBookingCount = verifyResult.data.bookingCount || 0;
-            console.log(`验证更新后的课程报名人数: ${currentCount} -> ${newBookingCount}, 差值: ${currentCount - newBookingCount}`);
-            
-            if (currentCount - newBookingCount !== 1 && currentCount > 0) {
-              console.warn('课程报名人数可能未正确更新，检查权限和数据库规则');
-            }
-          }
-        } catch (verifyErr) {
-          console.error('验证课程报名人数失败:', verifyErr);
-        }
-        
-        if (courseUpdateSuccess) {
-          console.log('✅ 课程报名人数已成功更新');
+        if (updateResult.result && updateResult.result.success) {
+          console.log('✅ 课程报名人数更新成功:', courseId);
+          courseUpdateSuccess = true;
         } else {
-          console.error('❌ 所有方法都失败，课程报名人数可能未减少');
+          console.warn('⚠️ 更新课程报名人数可能失败:', courseId);
         }
       } catch (courseErr) {
         console.error('更新课程报名人数失败:', courseErr);

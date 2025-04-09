@@ -136,7 +136,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud, wx) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -144,6 +144,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
 var _user = __webpack_require__(/*! @/api/modules/user.js */ 333);
 //
@@ -256,6 +257,13 @@ var _default = {
     this.checkLoginStatus();
     // 从数据库获取最新用户信息
     this.fetchUserFromDatabase();
+
+    // 监听微信绑定状态变更
+    uni.$on('wechat:binding:status', this.handleWechatBindingStatus);
+  },
+  onUnload: function onUnload() {
+    // 移除事件监听
+    uni.$off('wechat:binding:status', this.handleWechatBindingStatus);
   },
   methods: {
     // 加载用户信息
@@ -282,6 +290,9 @@ var _default = {
           } else {
             this.phoneNumber = '';
           }
+
+          // 检查微信绑定状态
+          this.checkWechatBindStatus(userInfo);
         }
       } catch (e) {
         console.error('加载用户信息失败:', e);
@@ -458,6 +469,9 @@ var _default = {
                     _this2.phoneNumber = '';
                   }
 
+                  // 检查微信绑定状态
+                  _this2.checkWechatBindStatus(dbUserInfo);
+
                   // 强制更新视图
                   _this2.$forceUpdate();
                 }
@@ -474,11 +488,181 @@ var _default = {
           }
         }, _callee, null, [[0, 18]]);
       }))();
+    },
+    // 检查微信绑定状态
+    checkWechatBindStatus: function checkWechatBindStatus(userInfo) {
+      if (!userInfo) return;
+
+      // 判断wx_openid是否存在且不为空
+      if (userInfo.wx_openid) {
+        if ((0, _typeof2.default)(userInfo.wx_openid) === 'object') {
+          // 如果是对象，检查是否有任何属性值
+          this.isWechatBound = Object.keys(userInfo.wx_openid).length > 0;
+        } else if (typeof userInfo.wx_openid === 'string') {
+          // 如果是字符串，检查是否非空
+          this.isWechatBound = !!userInfo.wx_openid;
+        }
+      } else if (userInfo.wx_unionid) {
+        // 或者通过unionid判断
+        this.isWechatBound = !!userInfo.wx_unionid;
+      } else {
+        this.isWechatBound = false;
+      }
+      console.log('微信绑定状态:', this.isWechatBound);
+    },
+    // 处理微信账号点击
+    handleWechatAccount: function handleWechatAccount() {
+      var _this3 = this;
+      if (this.isWechatBound) {
+        // 如果已绑定，跳转到微信账号管理页面
+        uni.navigateTo({
+          url: '/pages/user/wechat/index',
+          fail: function fail(err) {
+            console.error('微信账号页面跳转失败:', err);
+            _this3.showFeatureInDevelopment('微信账号管理');
+          }
+        });
+      } else {
+        // 如果未绑定，显示绑定提示
+        uni.showModal({
+          title: '绑定微信',
+          content: '绑定微信账号可以使用微信快捷登录，是否立即绑定？',
+          confirmText: '立即绑定',
+          success: function success(res) {
+            if (res.confirm) {
+              _this3.bindWechatAccount();
+            }
+          }
+        });
+      }
+    },
+    // 绑定微信账号
+    bindWechatAccount: function bindWechatAccount() {
+      var _this4 = this;
+      uni.showLoading({
+        title: '加载中'
+      });
+
+      // 此处调用微信登录API获取code
+
+      wx.login({
+        success: function success(res) {
+          if (res.code) {
+            // 获取到微信code，调用云函数绑定微信账号
+            _this4.callBindWechatFunction(res.code);
+          } else {
+            uni.hideLoading();
+            uni.showToast({
+              title: '微信登录失败',
+              icon: 'none'
+            });
+          }
+        },
+        fail: function fail(err) {
+          uni.hideLoading();
+          console.error('获取微信code失败:', err);
+          uni.showToast({
+            title: '微信登录失败',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    // 调用云函数绑定微信账号
+    callBindWechatFunction: function callBindWechatFunction(code) {
+      var _this5 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var token, result, _result$result;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                token = uni.getStorageSync('uni_id_token');
+                if (token) {
+                  _context2.next = 4;
+                  break;
+                }
+                throw new Error('用户未登录');
+              case 4:
+                _context2.next = 6;
+                return uniCloud.callFunction({
+                  name: 'uni-id-co',
+                  data: {
+                    action: 'bindWeixin',
+                    params: {
+                      code: code
+                    }
+                  }
+                });
+              case 6:
+                result = _context2.sent;
+                uni.hideLoading();
+                if (result.result && result.result.code === 0) {
+                  // 绑定成功
+                  _this5.isWechatBound = true;
+
+                  // 更新本地存储的用户信息
+                  _this5.fetchUserFromDatabase();
+                  uni.showToast({
+                    title: '微信绑定成功',
+                    icon: 'success'
+                  });
+
+                  // 触发绑定状态变更事件
+                  uni.$emit('wechat:binding:changed', {
+                    isBound: true
+                  });
+                } else {
+                  // 绑定失败
+                  uni.showToast({
+                    title: ((_result$result = result.result) === null || _result$result === void 0 ? void 0 : _result$result.message) || '绑定失败',
+                    icon: 'none'
+                  });
+                }
+                _context2.next = 16;
+                break;
+              case 11:
+                _context2.prev = 11;
+                _context2.t0 = _context2["catch"](0);
+                uni.hideLoading();
+                console.error('绑定微信失败:', _context2.t0);
+                uni.showToast({
+                  title: '绑定失败，请稍后再试',
+                  icon: 'none'
+                });
+              case 16:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 11]]);
+      }))();
+    },
+    // 处理微信绑定状态变更
+    handleWechatBindingStatus: function handleWechatBindingStatus(data) {
+      console.log('接收到微信绑定状态:', data);
+      if (data && typeof data.isBound !== 'undefined') {
+        this.isWechatBound = data.isBound;
+      }
+    },
+    // 解绑微信，在微信账号页面完成后回调
+    handleWechatUnbindCallback: function handleWechatUnbindCallback() {
+      // 更新本地绑定状态
+      this.isWechatBound = false;
+
+      // 重新获取用户信息
+      this.fetchUserFromDatabase();
+
+      // 触发绑定状态变更事件
+      uni.$emit('wechat:binding:changed', {
+        isBound: false
+      });
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
 

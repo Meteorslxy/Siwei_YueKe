@@ -36,6 +36,15 @@ exports.main = async (event, context) => {
       course.image = course.coverImage;
     }
     
+    // 确保courseCapacity字段存在，优先使用courseCapacity，如果不存在则使用courseCount
+    if (!course.courseCapacity && course.courseCount) {
+      course.courseCapacity = course.courseCount;
+      console.log('将旧的courseCount值复制到新的courseCapacity字段:', course.courseCapacity);
+    } else if (!course.courseCapacity) {
+      course.courseCapacity = 20; // 默认值
+      console.log('设置默认的courseCapacity值为:', course.courseCapacity);
+    }
+    
     // 查询教师详情（如果课程中包含教师ID）
     if (course.teacherId) {
       try {

@@ -214,17 +214,56 @@ var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js 
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
       mobile: "",
       code: "",
+      imageCaptcha: "",
+      secondImageCaptcha: "",
       focusMobile: true,
       logo: "/static/logo.png",
       isSending: false,
       countdown: 60,
       timer: null,
-      sendCodeText: "获取验证码"
+      sendCodeText: "获取短信验证码",
+      isTestMode: true
     };
   },
   onLoad: function onLoad() {
@@ -274,13 +313,27 @@ var _default = {
       uni.showLoading({
         title: '发送中'
       });
+
+      // 验证图形验证码
+      if (!this.imageCaptcha && !this.secondImageCaptcha) {
+        uni.showToast({
+          title: '请先输入图形验证码',
+          icon: 'none'
+        });
+        this.isSending = false;
+        uni.hideLoading();
+        return;
+      }
+
+      // 优先使用第一个验证码，如果为空则使用第二个
+      var captchaToUse = this.imageCaptcha || this.secondImageCaptcha || "0000";
       var uniIdCo = uniCloud.importObject("uni-id-co", {
         customUI: true
       });
       uniIdCo.sendSmsCode({
         mobile: this.mobile,
         scene: "bind-mobile-by-sms",
-        captcha: "0000"
+        captcha: captchaToUse
       }).then(function () {
         uni.hideLoading();
         uni.showToast({
@@ -358,13 +411,17 @@ var _default = {
       var uniIdCo = uniCloud.importObject("uni-id-co");
       uniIdCo.bindMobileBySms({
         mobile: this.mobile,
-        code: this.code
+        code: this.code,
+        mobile_confirmed: 1
       }).then(function () {
         // 绑定成功后更新用户信息
         return uniIdCo.getUserInfo({}).then(function (result) {
           if (result && result.userInfo) {
             _store.mutations.setUserInfo(result.userInfo);
           }
+
+          // 额外直接更新数据库，确保mobile_confirmed字段设置成功
+          _this3.updateMobileConfirmedField(_this3.mobile);
           uni.hideLoading();
           uni.showToast({
             title: '绑定成功',
@@ -378,6 +435,7 @@ var _default = {
         uni.hideLoading();
         // 如果绑定失败，但是在测试模式下，则尝试直接更新用户信息
         if (_this3.code === '123456' || "development" === 'development') {
+          // 在测试模式下也确保设置mobile_confirmed为1
           uniIdCo.updateUserInfo({
             mobile: _this3.mobile,
             mobile_confirmed: 1
@@ -387,6 +445,9 @@ var _default = {
               if (result && result.userInfo) {
                 _store.mutations.setUserInfo(result.userInfo);
               }
+
+              // 额外直接更新数据库，确保mobile_confirmed字段设置成功
+              _this3.updateMobileConfirmedField(_this3.mobile);
               uni.showToast({
                 title: '测试绑定成功',
                 icon: 'success'
@@ -396,6 +457,9 @@ var _default = {
               }, 1500);
             }).catch(function (e) {
               console.error('获取用户信息失败', e);
+
+              // 即使获取信息失败，仍然尝试直接更新mobile_confirmed字段
+              _this3.updateMobileConfirmedField(_this3.mobile);
               uni.showToast({
                 title: '测试绑定成功，但获取用户信息失败',
                 icon: 'none'
@@ -417,6 +481,28 @@ var _default = {
             icon: 'none'
           });
         }
+      });
+    },
+    // 直接更新mobile_confirmed字段
+    updateMobileConfirmedField: function updateMobileConfirmedField(mobile) {
+      console.log('直接更新mobile_confirmed字段为1');
+
+      // 调用云函数直接更新mobile_confirmed字段
+      uniCloud.callFunction({
+        name: 'updateUserInfo',
+        data: {
+          mobile: mobile,
+          mobile_confirmed: 1,
+          // 提供明确的update对象
+          update: {
+            mobile: mobile,
+            mobile_confirmed: 1
+          }
+        }
+      }).then(function (res) {
+        console.log('mobile_confirmed字段更新成功:', res);
+      }).catch(function (err) {
+        console.error('mobile_confirmed字段更新失败:', err);
       });
     }
   }

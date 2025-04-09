@@ -29,21 +29,30 @@ export default {
       }
     });
     
-    // 监听登录成功事件，检查用户是否绑定手机号
-    // 使用箭头函数保证this指向当前实例
+    // 监听登录成功事件，只保留一个监听器
+    // 合并所有登录事件，避免多次触发
     uni.$on('login:success', (userInfo) => {
-      console.log('App.vue 收到 login:success 事件，用户信息:', JSON.stringify(userInfo));
-      this.checkMobileBindingStatus(userInfo);
+      console.log('登录成功事件触发:', JSON.stringify(userInfo));
+      
+      // 先更新用户信息，确保登录页面能正常跳转
+      uni.$emit('user:updated', userInfo);
+      
+      // 延迟检查手机绑定状态，确保先跳转到首页/用户页面后再提示
+      setTimeout(() => {
+        this.checkMobileBindingStatus(userInfo);
+      }, 1000);
+      
+      // 延迟检查微信绑定状态
+      setTimeout(() => {
+        this.checkWechatBindStatus(userInfo);
+      }, 1500);
     });
     
-    uni.$on('user:login', (userInfo) => {
-      console.log('App.vue 收到 user:login 事件，用户信息:', JSON.stringify(userInfo));
-      this.checkMobileBindingStatus(userInfo);
-    });
-    
-    uni.$on('uni-id-pages-login-success', (userInfo) => {
-      console.log('App.vue 收到 uni-id-pages-login-success 事件，用户信息:', JSON.stringify(userInfo));
-      this.checkMobileBindingStatus(userInfo);
+    // 添加微信绑定状态变更的事件监听
+    uni.$on('wechat:binding:changed', (data) => {
+      console.log('微信绑定状态变更:', data);
+      // 重新检查微信绑定状态
+      this.checkWechatBindStatus(null, false);
     });
   },
   onShow: function() {
@@ -58,9 +67,14 @@ export default {
     console.log('App Unload - 清理事件监听')
     // 清理登录成功相关的事件监听
     uni.$off('login:success')
+    uni.$off('page-ready')
+    
+    // 移除多余的监听器
     uni.$off('user:login')
     uni.$off('uni-id-pages-login-success')
-    uni.$off('page-ready')
+    
+    // 移除微信绑定状态变更监听
+    uni.$off('wechat:binding:changed')
   },
   
   methods: {  
@@ -124,6 +138,8 @@ export default {
           // 延迟执行检查，确保页面已完全加载
           setTimeout(() => {
             this.checkMobileBindingStatus(mergedUserInfo, true);
+            // 同时检查微信绑定状态
+            this.checkWechatBindStatus(mergedUserInfo, false);
           }, 1500);
         }
       } catch (e) {
@@ -133,16 +149,21 @@ export default {
     
     // 检查用户是否绑定手机号
     async checkMobileBindingStatus(userInfo, forceCheck = false) {
-      console.log('检查用户手机绑定状态', forceCheck ? '(强制检查)' : '', '调用堆栈:', new Error().stack);
-      
-      // 检查是否已经显示过提示
-      const hasShownMobileBindingTip = uni.getStorageSync('hasShownMobileBindingTip');
-      if (hasShownMobileBindingTip && !forceCheck) {
-        console.log('已经显示过手机绑定提示，不再重复显示');
+      // 使用一个正在检查的标志，避免重复检查
+      if (this._isCheckingMobileBinding) {
+        console.log('手机绑定状态检查正在进行中，跳过重复检查');
         return;
       }
       
+      this._isCheckingMobileBinding = true;
+      
       try {
+        // 获取当前页面路径
+        const pages = getCurrentPages();
+        const currentPage = pages[pages.length - 1];
+        const currentPageRoute = currentPage ? currentPage.route : '';
+        console.log('当前页面路径:', currentPageRoute);
+        
         // 获取当前用户信息
         let currentUserInfo = userInfo;
         
@@ -151,22 +172,28 @@ export default {
           currentUserInfo = this.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
           if (!currentUserInfo) {
             console.log('没有找到用户信息，无需检查手机绑定状态');
+            this._isCheckingMobileBinding = false;
             return;
           }
         }
         
         console.log('准备检查用户手机绑定状态，用户信息:', JSON.stringify({
           _id: currentUserInfo._id,
-          mobile: currentUserInfo.mobile || '未绑定',
-          type: typeof currentUserInfo.mobile,
-          isEmpty: currentUserInfo.mobile === '',
-          isNull: currentUserInfo.mobile === null,
-          isUndefined: currentUserInfo.mobile === undefined
+          mobile: currentUserInfo.mobile || '未绑定'
         }));
         
-        // 修改检查逻辑：确保mobile不为空且不是空字符串
-        if (currentUserInfo.mobile && currentUserInfo.mobile.trim() !== '' && !forceCheck) {
-          console.log('用户已绑定手机号:', currentUserInfo.mobile);
+        // 如果本地用户信息中已有手机号且不是强制检查，则直接返回
+        if (currentUserInfo.mobile && currentUserInfo.mobile.trim() !== '') {
+          console.log('本地信息显示用户已绑定手机号:', currentUserInfo.mobile);
+          this._isCheckingMobileBinding = false;
+          return;
+        }
+        
+        // 检查是否已经显示过提示且不是强制检查
+        const hasShownMobileBindingTip = uni.getStorageSync('hasShownMobileBindingTip');
+        if (hasShownMobileBindingTip && !forceCheck) {
+          console.log('已经显示过手机绑定提示，不再重复显示');
+          this._isCheckingMobileBinding = false;
           return;
         }
         
@@ -174,6 +201,7 @@ export default {
         const token = uni.getStorageSync('uni_id_token');
         if (!token) {
           console.log('用户未登录或token不存在');
+          this._isCheckingMobileBinding = false;
           return;
         }
         
@@ -184,7 +212,7 @@ export default {
           data: { uniIdToken: token }
         });
         
-        console.log('云函数返回用户信息:', result);
+        console.log('云函数返回用户信息状态:', result.result?.code);
         
         if (result.result && result.result.code === 0 && result.result.userInfo) {
           const cloudUserInfo = result.result.userInfo;
@@ -196,54 +224,163 @@ export default {
             uni.setStorageSync('userInfo', cloudUserInfo);
           }
           
-          // 修改检查逻辑：确保mobile不为空且不是空字符串
+          // 检查是否需要绑定手机号
           if (!cloudUserInfo.mobile || cloudUserInfo.mobile.trim() === '' || forceCheck) {
             console.log('用户未绑定手机号或需要强制检查，显示提示');
             
             // 设置已经显示过提示的标记
             uni.setStorageSync('hasShownMobileBindingTip', true);
             
-            // 显示确认框
-            uni.showModal({
-              title: '绑定手机号',
-              content: '为了提供更好的服务，请绑定您的手机号',
-              confirmText: '去绑定',
-              cancelText: '稍后再说',
-              success: (res) => {
-                if (res.confirm) {
-                  console.log('用户点击确认，跳转到手机绑定页面');
-                  
-                  // 延迟执行，避免页面跳转冲突
-                  setTimeout(() => {
-                    // 跳转到"我的"页面中的设置
-                    uni.navigateTo({
-                      url: '/pages/user/phone/index',
-                      fail: (err) => {
-                        console.error('跳转到手机绑定页面失败:', err);
-                        // 如果失败，尝试跳转到用户页面
-                        uni.switchTab({
-                          url: '/pages/user/user',
-                          fail: (err2) => {
-                            console.error('跳转到用户页面也失败:', err2);
-                          }
-                        });
-                      }
-                    });
-                  }, 500);
-                } else {
-                  console.log('用户点击取消');
+            // 增加延迟，确保页面已完全加载
+            setTimeout(() => {
+              // 显示确认框
+              uni.showModal({
+                title: '绑定手机号',
+                content: '为了提供更好的服务，请绑定您的手机号',
+                confirmText: '去绑定',
+                cancelText: '稍后再说',
+                success: (res) => {
+                  if (res.confirm) {
+                    console.log('用户点击确认，跳转到手机绑定页面');
+                    
+                    // 延迟执行，避免页面跳转冲突
+                    setTimeout(() => {
+                      // 直接跳转到自定义手机绑定页面，避免使用可能不存在的uni-id-pages页面
+                      uni.navigateTo({
+                        url: '/pages/user/phone/index',
+                        success: () => {
+                          console.log('成功跳转到手机绑定页面');
+                        },
+                        fail: (err) => {
+                          console.error('跳转到手机绑定页面失败:', err);
+                          
+                          // 如果失败，尝试跳转到用户页面
+                          uni.switchTab({
+                            url: '/pages/user/user',
+                            success: () => {
+                              console.log('成功跳转到用户页面');
+                            },
+                            fail: (err2) => {
+                              console.error('跳转到用户页面也失败:', err2);
+                            }
+                          });
+                        }
+                      });
+                    }, 500);
+                  } else {
+                    console.log('用户点击取消');
+                  }
                 }
-              }
-            });
+              });
+            }, 1000); // 增加到1秒的延迟，确保页面加载完成
           } else {
             console.log('云端验证用户已绑定手机号:', cloudUserInfo.mobile);
           }
         }
       } catch (error) {
         console.error('检查手机绑定状态失败:', error);
+      } finally {
+        // 无论成功或失败，都重置检查标志
+        this._isCheckingMobileBinding = false;
+        console.log('手机绑定状态检查完成');
+      }
+    },
+
+    // 检查用户是否绑定微信账号
+    async checkWechatBindStatus(userInfo, forceCheck = false) {
+      // 使用一个正在检查的标志，避免重复检查
+      if (this._isCheckingWechatBinding) {
+        console.log('微信绑定状态检查正在进行中，跳过重复检查');
+        return;
       }
       
-      console.log('手机绑定状态检查完成');
+      this._isCheckingWechatBinding = true;
+      
+      try {
+        // 获取当前页面路径
+        const pages = getCurrentPages();
+        const currentPage = pages[pages.length - 1];
+        const currentPageRoute = currentPage ? currentPage.route : '';
+        console.log('检查微信绑定状态 - 当前页面路径:', currentPageRoute);
+        
+        // 如果当前页面是登录相关页面，延迟检查
+        if (currentPageRoute && (
+            currentPageRoute.includes('login') || 
+            currentPageRoute.includes('register') || 
+            currentPageRoute.includes('auth')
+          )) {
+          console.log('当前在登录相关页面，将在页面跳转后再检查微信绑定状态');
+          setTimeout(() => {
+            this._isCheckingWechatBinding = false;
+            this.checkWechatBindStatus(userInfo, forceCheck);
+          }, 1500);
+          return;
+        }
+        
+        // 获取当前用户信息
+        let currentUserInfo = userInfo;
+        
+        // 如果没有传入用户信息，则从存储中获取
+        if (!currentUserInfo) {
+          currentUserInfo = this.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
+          if (!currentUserInfo) {
+            console.log('没有找到用户信息，无需检查微信绑定状态');
+            this._isCheckingWechatBinding = false;
+            return;
+          }
+        }
+        
+        // 检查微信绑定状态
+        let isWechatBound = false;
+        
+        // 判断wx_openid是否存在且不为空
+        if (currentUserInfo.wx_openid) {
+          if (typeof currentUserInfo.wx_openid === 'object') {
+            // 如果是对象，检查是否有任何属性值
+            isWechatBound = Object.keys(currentUserInfo.wx_openid).length > 0;
+          } else if (typeof currentUserInfo.wx_openid === 'string') {
+            // 如果是字符串，检查是否非空
+            isWechatBound = !!currentUserInfo.wx_openid;
+          }
+        } else if (currentUserInfo.wx_unionid) {
+          // 或者通过unionid判断
+          isWechatBound = !!currentUserInfo.wx_unionid;
+        }
+        
+        console.log('用户微信绑定状态:', isWechatBound);
+        
+        // 发送绑定状态事件，设置页面可以监听此事件更新绑定状态显示
+        uni.$emit('wechat:binding:status', { 
+          isBound: isWechatBound,
+          userInfo: currentUserInfo
+        });
+        
+        // 如果用户需要绑定微信并且设置了强制检查，则可以在这里显示提示
+        if (!isWechatBound && forceCheck) {
+          uni.showModal({
+            title: '绑定微信',
+            content: '绑定微信账号可以使用微信快捷登录，是否立即绑定？',
+            confirmText: '去绑定',
+            cancelText: '稍后再说',
+            success: (res) => {
+              if (res.confirm) {
+                // 跳转到微信绑定页面
+                uni.navigateTo({
+                  url: '/pages/user/setting/index'
+                });
+              }
+            }
+          });
+        }
+        
+        return isWechatBound;
+      } catch (error) {
+        console.error('检查微信绑定状态失败:', error);
+        return false;
+      } finally {
+        // 无论成功或失败，都重置检查标志
+        this._isCheckingWechatBinding = false;
+      }
     },
 
     // 测试云函数连接

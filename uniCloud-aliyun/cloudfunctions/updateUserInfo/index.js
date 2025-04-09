@@ -181,6 +181,7 @@ exports.main = async (event, context) => {
     
     // 从event根级别获取mobile_confirmed
     if (event.mobile_confirmed !== undefined) {
+      console.log('从event根参数中获取到mobile_confirmed:', event.mobile_confirmed);
       updateData.mobile_confirmed = event.mobile_confirmed;
     }
     
@@ -192,54 +193,77 @@ exports.main = async (event, context) => {
       };
     }
     
-    // 添加更新时间
+    // 添加updateTime字段
     updateData.updateTime = Date.now();
+    
+    // 强制设置mobile_confirmed为1，确保这个字段一定被更新
+    if (updateData.mobile || updateData.phoneNumber) {
+      updateData.mobile_confirmed = 1;
+      console.log('再次确认mobile_confirmed设置为1');
+    }
     
     console.log('更新用户数据:', {userId, updateData});
     
     try {
-      // 直接使用set方法而不是update，确保字段被更新
+      // 首先尝试使用update方法更新
       const updateResult = await db.collection('uni-id-users')
         .doc(userId)
         .update(updateData);
       
       console.log('数据库更新结果:', updateResult);
       
+      // 进行二次更新，确保mobile_confirmed字段被设置
+      if (updateData.mobile || updateData.phoneNumber) {
+        console.log('执行二次更新，确保mobile_confirmed字段被设置');
+        await db.collection('uni-id-users')
+          .doc(userId)
+          .update({
+            mobile_confirmed: 1
+          });
+      }
+      
       // 更新后再次查询验证
       const verifyUpdate = await db.collection('uni-id-users')
         .doc(userId)
         .get();
       
-      console.log('更新后的用户数据:', verifyUpdate.data);
+      console.log('更新后的用户数据:', JSON.stringify(verifyUpdate.data));
       
-      // 检查mobile字段是否存在
+      // 检查mobile字段和mobile_confirmed字段是否正确更新
       const userAfterUpdate = verifyUpdate.data && verifyUpdate.data[0];
-      if (userAfterUpdate && !userAfterUpdate.mobile && update.phoneNumber) {
-        console.log('mobile字段更新失败，尝试单独更新mobile字段');
+      let needFurtherUpdate = false;
+      
+      // 创建最终更新对象
+      const finalUpdate = {};
+      
+      if (userAfterUpdate) {
+        // 检查mobile字段
+        if (!userAfterUpdate.mobile && (updateData.mobile || updateData.phoneNumber)) {
+          console.log('mobile字段更新失败，将在最终更新中添加');
+          finalUpdate.mobile = updateData.mobile || updateData.phoneNumber;
+          needFurtherUpdate = true;
+        }
         
-        // 尝试单独更新mobile字段
-        await db.collection('uni-id-users')
-          .doc(userId)
-          .update({
-            mobile: update.phoneNumber
-          });
+        // 检查mobile_confirmed字段
+        if (userAfterUpdate.mobile_confirmed !== 1 && (updateData.mobile || updateData.phoneNumber)) {
+          console.log('mobile_confirmed字段未设置为1，将在最终更新中添加');
+          finalUpdate.mobile_confirmed = 1;
+          needFurtherUpdate = true;
+        }
         
-        console.log('mobile字段单独更新完成');
-        
-        // 尝试使用set方法强制更新
-        try {
-          console.log('尝试使用set方法更新mobile字段');
-          // 获取当前用户所有字段
-          const currentUser = userAfterUpdate;
-          // 添加mobile字段
-          currentUser.mobile = update.phoneNumber;
-          // 使用set方法替换整个文档
+        // 如果需要进一步更新
+        if (needFurtherUpdate) {
+          console.log('执行最终更新:', finalUpdate);
           await db.collection('uni-id-users')
             .doc(userId)
-            .set(currentUser);
-          console.log('set方法更新完成');
-        } catch (setErr) {
-          console.error('set方法更新失败:', setErr);
+            .update(finalUpdate);
+          
+          // 再次验证更新
+          const finalVerify = await db.collection('uni-id-users')
+            .doc(userId)
+            .get();
+          
+          console.log('最终更新后的用户数据:', JSON.stringify(finalVerify.data));
         }
       }
       
@@ -247,7 +271,8 @@ exports.main = async (event, context) => {
         code: 0,
         message: '更新成功',
         data: {
-          updated: updateData
+          updated: updateData,
+          finalUpdate: needFurtherUpdate ? finalUpdate : null
         }
       };
     } catch (updateErr) {

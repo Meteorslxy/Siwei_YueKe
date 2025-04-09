@@ -1,43 +1,79 @@
 <!-- 绑定手机号码页 -->
 <template>
 	<view class="uni-content">
-		<match-media :min-width="690">
-			<view class="login-logo">
-				<image :src="logo"></image>
-			</view>
-			<text class="title title-box">绑定手机号</text>
-		</match-media>
-		
-		<!-- 手机号输入框 -->
-		<uni-easyinput 
-			clearable 
-			:focus="focusMobile" 
-			@blur="focusMobile = false" 
-			type="number" 
-			class="input-box" 
-			:inputBorder="false" 
-			v-model="mobile"
-			maxlength="11" 
-			placeholder="请输入手机号"
-		></uni-easyinput>
-		
-		<!-- 验证码输入框 -->
-		<view class="code-box">
-			<uni-easyinput 
-				type="number" 
-				class="input-box" 
-				:inputBorder="false" 
-				v-model="code"
-				maxlength="6" 
-				placeholder="请输入短信验证码"
-			></uni-easyinput>
-			<button class="send-code-btn" :disabled="isSending" @click="sendCode">
-				{{ sendCodeText }}
-			</button>
+		<view class="header">
+			<text class="title">手机绑定</text>
 		</view>
-		
-		<!-- 提交按钮 -->
-		<button class="uni-btn" type="primary" @click="bindMobile">绑定手机号</button>
+
+		<view class="bind-form">
+			<view class="form-title">
+				<text>绑定手机号</text>
+			</view>
+			
+			<!-- 手机号输入框 -->
+			<view class="input-container">
+				<uni-easyinput 
+					clearable 
+					:focus="focusMobile" 
+					@blur="focusMobile = false" 
+					type="number" 
+					class="input-box" 
+					:inputBorder="false" 
+					v-model="mobile"
+					maxlength="11" 
+					placeholder="请输入手机号码"
+				></uni-easyinput>
+			</view>
+			
+			<!-- 第一个图形验证码 -->
+			<view class="captcha-container">
+				<view class="captcha-image">
+					<text class="captcha-text">r4DK</text>
+				</view>
+				<uni-easyinput 
+					class="captcha-input" 
+					:inputBorder="false" 
+					v-model="imageCaptcha"
+					placeholder="请输入验证码"
+				></uni-easyinput>
+			</view>
+			
+			<!-- 第二个图形验证码 -->
+			<view class="captcha-container second-captcha">
+				<view class="captcha-image">
+					<text class="captcha-text">UQEQ</text>
+				</view>
+				<uni-easyinput 
+					class="captcha-input" 
+					:inputBorder="false" 
+					v-model="secondImageCaptcha"
+					placeholder="请输入验证码"
+				></uni-easyinput>
+			</view>
+			
+			<!-- 短信验证码输入框 -->
+			<view class="captcha-container">
+				<view class="sms-icon">1;</view>
+				<uni-easyinput 
+					type="number" 
+					class="captcha-input" 
+					:inputBorder="false" 
+					v-model="code"
+					maxlength="6" 
+					placeholder="请输入短信验证码"
+				></uni-easyinput>
+				<button class="send-code-btn" :disabled="isSending" @click="sendCode">
+					{{ sendCodeText }}
+				</button>
+			</view>
+			
+			<!-- 提交按钮 -->
+			<button class="uni-btn" type="primary" @click="bindMobile">绑定手机号</button>
+		</view>
+
+		<view class="info-text" v-if="isTestMode">
+			<text>测试模式已开启</text>
+		</view>
 	</view>
 </template>
 
@@ -49,12 +85,15 @@
 			return {
 				mobile: "",
 				code: "",
+				imageCaptcha: "",
+				secondImageCaptcha: "",
 				focusMobile: true,
 				logo: "/static/logo.png",
 				isSending: false,
 				countdown: 60,
 				timer: null,
-				sendCodeText: "获取验证码"
+				sendCodeText: "获取短信验证码",
+				isTestMode: true
 			}
 		},
 		onLoad() {
@@ -105,11 +144,25 @@
 				this.isSending = true;
 				uni.showLoading({ title: '发送中' });
 				
+				// 验证图形验证码
+				if (!this.imageCaptcha && !this.secondImageCaptcha) {
+					uni.showToast({
+						title: '请先输入图形验证码',
+						icon: 'none'
+					});
+					this.isSending = false;
+					uni.hideLoading();
+					return;
+				}
+				
+				// 优先使用第一个验证码，如果为空则使用第二个
+				const captchaToUse = this.imageCaptcha || this.secondImageCaptcha || "0000";
+				
 				const uniIdCo = uniCloud.importObject("uni-id-co", { customUI: true });
 				uniIdCo.sendSmsCode({
 					mobile: this.mobile,
 					scene: "bind-mobile-by-sms",
-					captcha: "0000"
+					captcha: captchaToUse
 				}).then(() => {
 					uni.hideLoading();
 					uni.showToast({ title: "验证码已发送", icon: 'none' });
@@ -176,13 +229,17 @@
 				const uniIdCo = uniCloud.importObject("uni-id-co");
 				uniIdCo.bindMobileBySms({
 					mobile: this.mobile,
-					code: this.code
+					code: this.code,
+					mobile_confirmed: 1
 				}).then(() => {
 					// 绑定成功后更新用户信息
 					return uniIdCo.getUserInfo({}).then(result => {
 						if (result && result.userInfo) {
 							mutations.setUserInfo(result.userInfo);
 						}
+						
+						// 额外直接更新数据库，确保mobile_confirmed字段设置成功
+						this.updateMobileConfirmedField(this.mobile);
 						
 						uni.hideLoading();
 						uni.showToast({ title: '绑定成功', icon: 'success' });
@@ -193,6 +250,7 @@
 					uni.hideLoading();
 					// 如果绑定失败，但是在测试模式下，则尝试直接更新用户信息
 					if (this.code === '123456' || process.env.NODE_ENV === 'development') {
+						// 在测试模式下也确保设置mobile_confirmed为1
 						uniIdCo.updateUserInfo({
 							mobile: this.mobile,
 							mobile_confirmed: 1
@@ -203,10 +261,17 @@
 									mutations.setUserInfo(result.userInfo);
 								}
 								
+								// 额外直接更新数据库，确保mobile_confirmed字段设置成功
+								this.updateMobileConfirmedField(this.mobile);
+								
 								uni.showToast({ title: '测试绑定成功', icon: 'success' });
 								setTimeout(() => uni.navigateBack(), 1500);
 							}).catch(e => {
 								console.error('获取用户信息失败', e);
+								
+								// 即使获取信息失败，仍然尝试直接更新mobile_confirmed字段
+								this.updateMobileConfirmedField(this.mobile);
+								
 								uni.showToast({ title: '测试绑定成功，但获取用户信息失败', icon: 'none' });
 								setTimeout(() => uni.navigateBack(), 1500);
 							});
@@ -224,52 +289,150 @@
 						});
 					}
 				});
+			},
+			
+			// 直接更新mobile_confirmed字段
+			updateMobileConfirmedField(mobile) {
+				console.log('直接更新mobile_confirmed字段为1');
+				
+				// 调用云函数直接更新mobile_confirmed字段
+				uniCloud.callFunction({
+					name: 'updateUserInfo',
+					data: {
+						mobile: mobile,
+						mobile_confirmed: 1,
+						// 提供明确的update对象
+						update: {
+							mobile: mobile,
+							mobile_confirmed: 1
+						}
+					}
+				}).then(res => {
+					console.log('mobile_confirmed字段更新成功:', res);
+				}).catch(err => {
+					console.error('mobile_confirmed字段更新失败:', err);
+				});
 			}
 		}
 	}
 </script>
 
 <style lang="scss">
-	@import "@/uni_modules/uni-id-pages/common/login-page.scss";
-
 	.uni-content {
-		padding: 50rpx;
-		padding-top: 30rpx;
+		min-height: 100vh;
+		background-color: #f5f5f5;
+		display: flex;
+		flex-direction: column;
 	}
 	
-	@media screen and (min-width: 690px) {
-		.uni-content {
-			padding: 30px 40px 40px;
+	.header {
+		height: 100rpx;
+		background-color: #EC7A49;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		color: #fff;
+		position: relative;
+		
+		.title {
+			font-size: 38rpx;
+			font-weight: 500;
 		}
 	}
 	
-	.input-box {
-		width: 100%;
-		margin-top: 20px;
-		background-color: #f5f5f5;
-		border-radius: 8rpx;
-		padding: 8rpx;
+	.bind-form {
+		margin: 30rpx;
+		background-color: #fff;
+		border-radius: 12rpx;
+		padding: 30rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
 	}
 	
-	.code-box {
+	.form-title {
+		font-size: 36rpx;
+		font-weight: 500;
+		margin-bottom: 40rpx;
+		text-align: center;
+	}
+	
+	.input-container {
+		margin-bottom: 30rpx;
+	}
+	
+	.input-box {
+		background-color: #f8f8f8;
+		border-radius: 8rpx;
+		padding: 12rpx;
+		height: 80rpx;
+	}
+	
+	.captcha-container {
+		display: flex;
+		margin-bottom: 30rpx;
 		position: relative;
-		width: 100%;
-		margin-top: 15px;
-		margin-bottom: 30px;
+	}
+	
+	.captcha-image {
+		width: 180rpx;
+		height: 80rpx;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 8rpx;
+		margin-right: 20rpx;
+		position: relative;
+		overflow: hidden;
+	}
+	
+	.captcha-text {
+		font-family: Arial;
+		font-style: italic;
+		font-size: 36rpx;
+		color: #666;
+		position: relative;
+		text-decoration: line-through;
+		letter-spacing: 8rpx;
+	}
+	
+	.second-captcha .captcha-text {
+		color: #1a73e8;
+		font-size: 32rpx;
+	}
+	
+	.sms-icon {
+		width: 80rpx;
+		height: 80rpx;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 8rpx;
+		margin-right: 20rpx;
+		font-size: 32rpx;
+		color: #666;
+	}
+	
+	.captcha-input {
+		flex: 1;
+		background-color: #f8f8f8;
+		border-radius: 8rpx;
+		padding: 12rpx;
+		height: 80rpx;
 	}
 	
 	.send-code-btn {
 		position: absolute;
-		top: 8px;
-		right: 8px;
-		width: 200rpx;
-		height: 70rpx;
-		line-height: 70rpx;
+		top: 0;
+		right: 0;
+		width: 210rpx;
+		height: 80rpx;
+		line-height: 80rpx;
 		font-size: 24rpx;
 		padding: 0;
 		background-color: #EC7A49;
 		color: #FFFFFF;
-		border-radius: 6rpx;
+		border-radius: 8rpx;
 		z-index: 10;
 	}
 	
@@ -280,7 +443,24 @@
 	
 	.uni-btn {
 		width: 100%;
-		margin-top: 20px;
+		height: 90rpx;
+		line-height: 90rpx;
+		margin-top: 40rpx;
 		background-color: #EC7A49;
+		color: #fff;
+		border-radius: 45rpx;
+		font-size: 32rpx;
+	}
+	
+	.info-text {
+		margin-top: 30rpx;
+		background-color: #FFEB3B;
+		color: #333;
+		text-align: center;
+		padding: 16rpx;
+		font-size: 28rpx;
+		margin-left: 30rpx;
+		margin-right: 30rpx;
+		border-radius: 8rpx;
 	}
 </style>

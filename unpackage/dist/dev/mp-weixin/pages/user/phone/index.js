@@ -113,9 +113,6 @@ try {
     uniCaptcha: function () {
       return __webpack_require__.e(/*! import() | uni_modules/uni-captcha/components/uni-captcha/uni-captcha */ "uni_modules/uni-captcha/components/uni-captcha/uni-captcha").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-captcha/components/uni-captcha/uni-captcha.vue */ 516))
     },
-    uniIdPagesSmsForm: function () {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-id-pages/components/uni-id-pages-sms-form/uni-id-pages-sms-form */ "uni_modules/uni-id-pages/components/uni-id-pages-sms-form/uni-id-pages-sms-form").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-id-pages/components/uni-id-pages-sms-form/uni-id-pages-sms-form.vue */ 523))
-    },
     uniPopupCaptcha: function () {
       return __webpack_require__.e(/*! import() | uni_modules/uni-captcha/components/uni-popup-captcha/uni-popup-captcha */ "uni_modules/uni-captcha/components/uni-popup-captcha/uni-popup-captcha").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-captcha/components/uni-popup-captcha/uni-popup-captcha.vue */ 530))
     },
@@ -194,7 +191,13 @@ var _default = {
         code: '',
         captcha: ''
       },
-      isDevMode: true
+      isDevMode: true,
+      isSending: false,
+      countdown: 60,
+      sendCodeText: '获取验证码',
+      timer: null,
+      mobileError: false,
+      mobileErrorText: ''
     };
   },
   computed: {
@@ -213,9 +216,72 @@ var _default = {
     }
   },
   methods: {
+    // 监听手机号输入变化
+    onMobileChange: function onMobileChange(value) {
+      // 清除可能的错误提示
+      this.mobileError = false;
+      this.mobileErrorText = '';
+
+      // 当输入满11位时，自动检查是否已存在
+      if (value && value.length === 11) {
+        // 检查是否是已知重复手机号
+        var knownDuplicates = uni.getStorageSync('duplicate_mobiles') || [];
+        if (knownDuplicates.includes(value)) {
+          // 如果是已知重复的手机号，直接提示用户
+          this.showMobileError('该手机号已被其他账号绑定');
+          return;
+        }
+
+        // 如果不是已知重复，且输入完成，静默验证
+        this.quietlyCheckMobileExists(value);
+      }
+    },
+    // 显示手机号错误提示
+    showMobileError: function showMobileError(message) {
+      this.mobileError = true;
+      this.mobileErrorText = message;
+      uni.showToast({
+        title: message,
+        icon: 'none'
+      });
+    },
+    // 静默检查手机号是否已被其他账号使用（不显示loading）
+    quietlyCheckMobileExists: function quietlyCheckMobileExists(mobile) {
+      var _store$userInfo,
+        _this = this;
+      // 不显示loading，静默验证
+      uniCloud.callFunction({
+        name: 'checkMobileExists',
+        data: {
+          mobile: mobile,
+          userId: ((_store$userInfo = _store.store.userInfo) === null || _store$userInfo === void 0 ? void 0 : _store$userInfo._id) || ''
+        }
+      }).then(function (res) {
+        if (res.result && res.result.code === 10001) {
+          // 手机号已被其他账号使用
+          // 缓存这个重复的手机号
+          var duplicates = uni.getStorageSync('duplicate_mobiles') || [];
+          if (!duplicates.includes(mobile)) {
+            duplicates.push(mobile);
+            uni.setStorageSync('duplicate_mobiles', duplicates);
+          }
+
+          // 显示友好提示
+          _this.showMobileError('该手机号已被其他账号绑定');
+
+          // 清空输入，便于重新输入
+          setTimeout(function () {
+            _this.formData.mobile = '';
+          }, 1000);
+        }
+      }).catch(function (err) {
+        console.error('静默检查手机号错误:', err);
+        // 出错时不做特殊处理，等用户提交时再验证
+      });
+    },
     // 检查是否已绑定手机号
     checkPhoneBind: function checkPhoneBind() {
-      var _this = this;
+      var _this2 = this;
       try {
         if (_store.store.userInfo && _store.store.userInfo.mobile) {
           // 已绑定手机号，显示当前绑定状态
@@ -229,7 +295,7 @@ var _default = {
                 uni.navigateBack();
               } else {
                 // 清空已填写的手机号，让用户重新输入
-                _this.formData.mobile = '';
+                _this2.formData.mobile = '';
               }
             }
           });
@@ -275,8 +341,16 @@ var _default = {
     },
     // 检查手机号是否已被其他账号使用
     checkMobileExists: function checkMobileExists(mobile) {
-      var _store$userInfo,
-        _this2 = this;
+      var _store$userInfo2,
+        _this3 = this;
+      // 在验证前先检查本地缓存中已知的手机号冲突记录
+      var knownDuplicates = uni.getStorageSync('duplicate_mobiles') || [];
+      if (knownDuplicates.includes(mobile)) {
+        // 如果是已知重复的手机号，直接提示用户，不显示loading
+        this.showMobileError('该手机号已被其他账号绑定');
+        return;
+      }
+
       // 显示加载提示
       uni.showLoading({
         title: '正在验证...',
@@ -289,28 +363,38 @@ var _default = {
         data: {
           mobile: mobile,
           // 传入当前用户ID，排除自己的账号
-          userId: ((_store$userInfo = _store.store.userInfo) === null || _store$userInfo === void 0 ? void 0 : _store$userInfo._id) || ''
+          userId: ((_store$userInfo2 = _store.store.userInfo) === null || _store$userInfo2 === void 0 ? void 0 : _store$userInfo2._id) || ''
         }
       }).then(function (res) {
         uni.hideLoading();
         if (res.result && res.result.code === 0) {
           // code为0表示不存在冲突
-          _this2.proceedWithBinding();
+          _this3.proceedWithBinding();
         } else if (res.result && res.result.code === 10001) {
           // 手机号已被其他账号使用
-          uni.showModal({
-            title: '提示',
-            content: '该手机号已被其他账号绑定，请更换手机号',
-            showCancel: false
-          });
+          // 缓存这个重复的手机号，下次直接提示，不显示loading
+          var duplicates = uni.getStorageSync('duplicate_mobiles') || [];
+          if (!duplicates.includes(mobile)) {
+            duplicates.push(mobile);
+            uni.setStorageSync('duplicate_mobiles', duplicates);
+          }
+
+          // 显示错误提示
+          _this3.showMobileError('该手机号已被其他账号绑定');
+
+          // 让输入框获取焦点，便于用户直接修改
+          setTimeout(function () {
+            _this3.formData.mobile = '';
+            _this3.focusOnMobileInput();
+          }, 300);
         } else {
           // 其他错误
           console.error('检查手机号失败:', res);
 
           // 如果是开发模式，直接继续流程
-          if (_this2.isDevMode) {
+          if (_this3.isDevMode) {
             console.log('开发模式：忽略手机号检查失败，继续绑定流程');
-            _this2.proceedWithBinding();
+            _this3.proceedWithBinding();
           } else {
             uni.showToast({
               title: '验证失败，请稍后重试',
@@ -323,9 +407,9 @@ var _default = {
         console.error('检查手机号错误:', err);
 
         // 如果是开发模式，直接继续流程
-        if (_this2.isDevMode) {
+        if (_this3.isDevMode) {
           console.log('开发模式：忽略手机号检查错误，继续绑定流程');
-          _this2.proceedWithBinding();
+          _this3.proceedWithBinding();
         } else {
           uni.showToast({
             title: '网络错误，请稍后重试',
@@ -334,9 +418,35 @@ var _default = {
         }
       });
     },
+    // 让手机号输入框获取焦点
+    focusOnMobileInput: function focusOnMobileInput() {
+      var _this4 = this;
+      // 使用uni.createSelectorQuery获取输入框并设置焦点
+      var query = uni.createSelectorQuery().in(this);
+      query.select('.uni-easyinput__content-input').boundingClientRect(function (data) {
+        if (data) {
+          // 清空已有手机号，便于重新输入
+          _this4.formData.mobile = '';
+
+          // 使用setTimeout确保DOM更新后再尝试获取焦点
+          setTimeout(function () {
+            // 小程序环境中使用focus方法获取焦点
+            uni.nextTick(function () {
+              var mobileInput = uni.createSelectorQuery().in(_this4).select('.uni-easyinput__content-input');
+              mobileInput.fields({
+                properties: ['value']
+              }, function () {
+                // 使其获得焦点
+                // 这种方式不一定在所有环境都有效，但可以尝试
+              }).exec();
+            });
+          }, 300);
+        }
+      }).exec();
+    },
     // 继续执行绑定流程
     proceedWithBinding: function proceedWithBinding() {
-      var _this3 = this;
+      var _this5 = this;
       // 显示加载提示
       uni.showLoading({
         title: '正在绑定...',
@@ -350,7 +460,8 @@ var _default = {
 
           // 模拟成功响应
           var mockUserInfo = _objectSpread(_objectSpread({}, _store.store.userInfo), {}, {
-            mobile: _this3.formData.mobile
+            mobile: _this5.formData.mobile,
+            mobile_confirmed: 1 // 确保设置mobile_confirmed字段
           });
 
           // 更新用户信息到存储
@@ -360,14 +471,8 @@ var _default = {
           // 更新全局状态
           _store.mutations.updateUserInfo();
 
-          // 调用API来确保手机号被更新到数据库
-          (0, _user.updatePhoneNumber)({
-            phoneNumber: _this3.formData.mobile
-          }).then(function (result) {
-            console.log('测试模式：手机号更新到数据库成功:', result);
-          }).catch(function (updateErr) {
-            console.error('测试模式：手机号更新到数据库失败:', updateErr);
-          });
+          // 调用API来确保手机号和mobile_confirmed字段被更新到数据库
+          _this5.updateUserInDatabase(_this5.formData.mobile);
           uni.showToast({
             title: '测试模式：绑定成功',
             icon: 'success'
@@ -383,20 +488,19 @@ var _default = {
 
       // 正常模式下使用云对象绑定
       var uniIdCo = uniCloud.importObject("uni-id-co");
-      uniIdCo.bindMobileBySms(this.formData).then(function (res) {
+      uniIdCo.bindMobileBySms({
+        mobile: this.formData.mobile,
+        code: this.formData.code,
+        captcha: this.formData.captcha,
+        mobile_confirmed: 1 // 确保设置mobile_confirmed字段
+      }).then(function (res) {
         uni.hideLoading();
 
         // 更新用户信息
         _store.mutations.updateUserInfo();
 
-        // 调用API来确保手机号被更新到数据库
-        (0, _user.updatePhoneNumber)({
-          phoneNumber: _this3.formData.mobile
-        }).then(function (result) {
-          console.log('手机号更新到数据库成功:', result);
-        }).catch(function (updateErr) {
-          console.error('手机号更新到数据库失败:', updateErr);
-        });
+        // 调用API来确保手机号和mobile_confirmed字段被更新到数据库
+        _this5.updateUserInDatabase(_this5.formData.mobile);
         uni.showToast({
           title: '绑定成功',
           icon: 'success'
@@ -412,12 +516,13 @@ var _default = {
 
         // 检查验证码错误
         if (err.errCode === 'uni-id-captcha-required') {
-          _this3.$refs.captcha.open();
-        } else if (_this3.isDevMode) {
+          _this5.$refs.captcha.open();
+        } else if (_this5.isDevMode) {
           // 测试模式下，无论出现什么错误都模拟成功
           setTimeout(function () {
             var mockUserInfo = _objectSpread(_objectSpread({}, _store.store.userInfo), {}, {
-              mobile: _this3.formData.mobile
+              mobile: _this5.formData.mobile,
+              mobile_confirmed: 1 // 确保设置mobile_confirmed字段
             });
 
             // 更新用户信息到存储
@@ -427,14 +532,8 @@ var _default = {
             // 更新全局状态
             _store.mutations.updateUserInfo();
 
-            // 调用API来确保手机号被更新到数据库
-            (0, _user.updatePhoneNumber)({
-              phoneNumber: _this3.formData.mobile
-            }).then(function (result) {
-              console.log('测试模式：手机号更新到数据库成功:', result);
-            }).catch(function (updateErr) {
-              console.error('测试模式：手机号更新到数据库失败:', updateErr);
-            });
+            // 调用API来确保手机号和mobile_confirmed字段被更新到数据库
+            _this5.updateUserInDatabase(_this5.formData.mobile);
             uni.showToast({
               title: '测试模式：绑定成功',
               icon: 'success'
@@ -452,6 +551,158 @@ var _default = {
           });
         }
       });
+    },
+    // 更新数据库中的用户信息，确保mobile_confirmed字段被设为1
+    updateUserInDatabase: function updateUserInDatabase(phoneNumber) {
+      var _this6 = this;
+      // 使用直接请求确保更新mobile_confirmed字段
+      (0, _user.updatePhoneNumber)({
+        phoneNumber: phoneNumber,
+        mobile_confirmed: 1 // 确保设置mobile_confirmed字段
+      }).then(function (result) {
+        console.log('手机号更新到数据库成功:', result);
+
+        // 如果更新成功，再次请求云函数直接更新mobile_confirmed字段
+        _this6.updateMobileConfirmedField(phoneNumber);
+      }).catch(function (updateErr) {
+        console.error('手机号更新到数据库失败:', updateErr);
+
+        // 即使失败，仍然尝试直接更新mobile_confirmed字段
+        _this6.updateMobileConfirmedField(phoneNumber);
+      });
+    },
+    // 直接更新mobile_confirmed字段
+    updateMobileConfirmedField: function updateMobileConfirmedField(phoneNumber) {
+      console.log('直接更新mobile_confirmed字段');
+
+      // 调用云函数直接更新mobile_confirmed字段
+      uniCloud.callFunction({
+        name: 'updateUserInfo',
+        data: {
+          mobile: phoneNumber,
+          mobile_confirmed: 1,
+          // 提供明确的update对象
+          update: {
+            mobile: phoneNumber,
+            mobile_confirmed: 1
+          }
+        }
+      }).then(function (res) {
+        console.log('mobile_confirmed字段更新成功:', res);
+      }).catch(function (err) {
+        console.error('mobile_confirmed字段更新失败:', err);
+      });
+    },
+    // 发送短信验证码
+    sendSmsCode: function sendSmsCode() {
+      var _this7 = this;
+      if (!this.formData.mobile) {
+        uni.showToast({
+          title: '请输入手机号',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!/^1\d{10}$/.test(this.formData.mobile)) {
+        uni.showToast({
+          title: '请输入正确的手机号',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.formData.captcha) {
+        uni.showToast({
+          title: '请先完成图形验证码',
+          icon: 'none'
+        });
+        this.$refs.captcha.open();
+        return;
+      }
+      this.isSending = true;
+      uni.showLoading({
+        title: '发送中...'
+      });
+      if (this.isDevMode) {
+        // 测试模式直接设置验证码
+        setTimeout(function () {
+          _this7.formData.code = '123456';
+          uni.hideLoading();
+          uni.showToast({
+            title: '测试模式：验证码为123456',
+            icon: 'none'
+          });
+          _this7.startCountdown();
+        }, 1000);
+        return;
+      }
+
+      // 调用云函数发送验证码
+      var uniIdCo = uniCloud.importObject("uni-id-co", {
+        customUI: true
+      });
+      uniIdCo.sendSmsCode({
+        mobile: this.formData.mobile,
+        scene: "bind-mobile-by-sms",
+        captcha: this.formData.captcha
+      }).then(function () {
+        uni.hideLoading();
+        uni.showToast({
+          title: '验证码已发送',
+          icon: 'none'
+        });
+        _this7.startCountdown();
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('发送验证码失败:', err);
+        if (_this7.isDevMode || err.code === 'uni-id-invalid-sms-template-id') {
+          // 开发模式或模板ID错误时，使用测试验证码
+          _this7.formData.code = '123456';
+          uni.showToast({
+            title: '测试模式：验证码为123456',
+            icon: 'none'
+          });
+          _this7.startCountdown();
+        } else {
+          _this7.isSending = false;
+          // 显示错误信息
+          uni.showToast({
+            title: err.message || '发送失败，请稍后重试',
+            icon: 'none'
+          });
+
+          // 如果是验证码错误，重新打开验证码弹窗
+          if (err.errCode === 'uni-id-captcha-required' || err.errCode === 'uni-id-invalid-captcha') {
+            setTimeout(function () {
+              _this7.$refs.captcha.open();
+            }, 1500);
+          }
+        }
+      });
+    },
+    // 开始倒计时
+    startCountdown: function startCountdown() {
+      var _this8 = this;
+      this.countdown = 60;
+      this.sendCodeText = "\u91CD\u65B0\u53D1\u9001(".concat(this.countdown, "s)");
+      this.isSending = true;
+      if (this.timer) clearInterval(this.timer);
+      this.timer = setInterval(function () {
+        _this8.countdown--;
+        _this8.sendCodeText = "\u91CD\u65B0\u53D1\u9001(".concat(_this8.countdown, "s)");
+        if (_this8.countdown <= 0) {
+          clearInterval(_this8.timer);
+          _this8.timer = null;
+          _this8.isSending = false;
+          _this8.sendCodeText = "获取验证码";
+        }
+      }, 1000);
+    }
+  },
+  // 添加组件销毁时的清理
+  onUnload: function onUnload() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
     }
   }
 };

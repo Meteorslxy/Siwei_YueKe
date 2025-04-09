@@ -1,0 +1,10 @@
+{
+    "timing": {
+        "enable": true,
+        "name": "定期更新课程报名人数",
+        "config": "0 0 */3 * * *",
+        "data": {
+            "updateAll": true
+        }
+    }
+} 

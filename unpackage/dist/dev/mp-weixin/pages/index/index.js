@@ -415,9 +415,16 @@ var _default = {
                   // 处理每个课程项，确保有正确的数据格式
                   _this2.recommendCourses = result.data.map(function (course) {
                     // 确保有正确的名额数据
-                    if (!course.courseCount && course.maxEnroll) {
-                      course.courseCount = course.maxEnroll;
+                    if (!course.courseCapacity) {
+                      if (course.courseCount) {
+                        course.courseCapacity = course.courseCount;
+                      } else if (course.maxEnroll) {
+                        course.courseCapacity = course.maxEnroll;
+                      } else {
+                        course.courseCapacity = 20; // 默认值
+                      }
                     }
+
                     if (!course.bookingCount && course.enrollCount) {
                       course.bookingCount = course.enrollCount;
                     }

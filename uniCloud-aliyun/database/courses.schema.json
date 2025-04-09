@@ -95,7 +95,11 @@
     },
     "courseCount": {
       "bsonType": "int",
-      "description": "课时数"
+      "description": "课时数 "
+    },
+    "courseCapacity": {
+      "bsonType": "int",
+      "description": "课程容量/招生人数"
     },
     "startDate": {
       "bsonType": "string",

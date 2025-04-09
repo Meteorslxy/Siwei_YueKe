@@ -87,7 +87,7 @@
             <view class="course-bottom">
               <text class="course-price">¥{{item.price}}</text>
               <view class="course-status">
-                <text class="max-students">名额 {{item.courseCount ? (item.courseCount - item.bookingCount) + '/' + item.courseCount : item.enrollCount + '/' + item.maxEnroll}}</text>
+                <text class="max-students">名额 {{item.bookingCount}}/{{item.courseCapacity || item.courseCount || item.maxEnroll}}</text>
                 <text class="lesson-count">{{item.startDate && item.endDate ? `${item.startDate}-${item.endDate}` : '日期待定'}}</text>
               </view>
             </view>
@@ -207,8 +207,14 @@ export default {
           // 处理每个课程项，确保有正确的数据格式
           this.recommendCourses = result.data.map(course => {
             // 确保有正确的名额数据
-            if (!course.courseCount && course.maxEnroll) {
-              course.courseCount = course.maxEnroll;
+            if (!course.courseCapacity) {
+              if (course.courseCount) {
+                course.courseCapacity = course.courseCount;
+              } else if (course.maxEnroll) {
+                course.courseCapacity = course.maxEnroll;
+              } else {
+                course.courseCapacity = 20; // 默认值
+              }
             }
             
             if (!course.bookingCount && course.enrollCount) {

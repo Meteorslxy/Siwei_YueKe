@@ -272,60 +272,17 @@ export default {
         console.log('云函数返回结果:', result, '数据条数:', result?.data?.length || 0);
         
         // 处理返回结果
-        if (result && result.data) {
-          let filteredData = [...result.data];
-          
-          // 处理每个课程的时间字段，避免NaN问题
-          filteredData = filteredData.map(course => {
-            // 处理日期和时间
-            if (!course.startDate && course.startTime) {
-              if (course.startTime.includes(' ')) {
-                const parts = course.startTime.split(' ');
-                course.startDate = parts[0];
-                course.startTime = parts[1];
-              } else if (course.startTime.includes('T')) {
-                try {
-                  const date = new Date(course.startTime);
-                  if (!isNaN(date.getTime())) {
-                    course.startDate = date.toISOString().split('T')[0];
-                    course.startTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-                  }
-                } catch (e) {
-                  console.error('解析startTime失败:', e, course.startTime);
-                }
-              }
-            }
-            
-            if (!course.endDate && course.endTime) {
-              if (course.endTime.includes(' ')) {
-                const parts = course.endTime.split(' ');
-                course.endDate = parts[0];
-                course.endTime = parts[1];
-              } else if (course.endTime.includes('T')) {
-                try {
-                  const date = new Date(course.endTime);
-                  if (!isNaN(date.getTime())) {
-                    course.endDate = date.toISOString().split('T')[0];
-                    course.endTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-                  }
-                } catch (e) {
-                  console.error('解析endTime失败:', e, course.endTime);
-                }
-              }
-            }
-            
-            return course;
-          });
-          
-          console.log('前端过滤后的数据:', filteredData);
+        if (result && result.data && result.data.length > 0) {
+          // 处理每个课程的教师头像数据
+          const processedData = await this.processTeacherAvatars(result.data);
           
           if (this.page === 1) {
-            this.courseList = filteredData;
+            this.courseList = processedData;
           } else {
-            this.courseList = [...this.courseList, ...filteredData];
+            this.courseList = [...this.courseList, ...processedData];
           }
           
-          this.total = filteredData.length;
+          this.total = result.total || processedData.length;
           
           // 更新加载状态
           if (this.courseList.length >= this.total) {
@@ -349,6 +306,56 @@ export default {
       } finally {
         this.isLoading = false;
       }
+    },
+    
+    // 处理教师头像数据
+    async processTeacherAvatars(courses) {
+      if (!courses || courses.length === 0) return courses;
+      
+      // 获取所有需要查询教师信息的课程
+      const needTeacherInfoCourses = courses.filter(course => 
+        course.teacherName && (!course.teacherAvatarUrl || !course.teacherAvatar)
+      );
+      
+      if (needTeacherInfoCourses.length === 0) return courses;
+      
+      console.log('需要查询教师头像的课程数:', needTeacherInfoCourses.length);
+      
+      // 获取所有需要查询的教师名称
+      const teacherNames = needTeacherInfoCourses
+        .map(course => course.teacherName)
+        .filter((name, index, self) => self.indexOf(name) === index); // 去重
+      
+      try {
+        // 批量查询教师信息
+        const teacherResult = await this.$api.teacher.getTeacherList();
+        
+        if (teacherResult && teacherResult.code === 0 && teacherResult.data) {
+          const teachers = teacherResult.data;
+          console.log('获取到教师数据:', teachers.length);
+          
+          // 创建教师名称到头像的映射
+          const teacherAvatarMap = {};
+          teachers.forEach(teacher => {
+            if (teacher.name && teacher.avatar) {
+              teacherAvatarMap[teacher.name] = teacher.avatar;
+            }
+          });
+          
+          // 为每个课程添加教师头像URL
+          return courses.map(course => {
+            if (course.teacherName && teacherAvatarMap[course.teacherName]) {
+              course.teacherAvatarUrl = teacherAvatarMap[course.teacherName];
+              console.log(`为课程 ${course.title} 设置教师头像:`, course.teacherAvatarUrl);
+            }
+            return course;
+          });
+        }
+      } catch (error) {
+        console.error('获取教师头像信息失败:', error);
+      }
+      
+      return courses;
     },
     
     // 格式化课程时间

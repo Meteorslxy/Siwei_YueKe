@@ -231,7 +231,13 @@ var _default2 = {
         return '/static/images/default-avatar.png';
       }
 
-      // 处理教师头像URL - 优先顺序：teacherAvatar > avatar > 默认头像
+      // 教师头像优先级：teacherAvatarUrl > teacherAvatar > avatar > 默认头像
+      // teacherAvatarUrl是从数据库获取的，优先使用
+      if (course.teacherAvatarUrl) {
+        return course.teacherAvatarUrl;
+      }
+
+      // 如果数据库中没有获取到头像，则尝试使用传入的本地头像
       if (course.teacherAvatar) {
         // 检查teacherAvatar是否为完整URL
         if (course.teacherAvatar.startsWith('http://') || course.teacherAvatar.startsWith('https://')) {

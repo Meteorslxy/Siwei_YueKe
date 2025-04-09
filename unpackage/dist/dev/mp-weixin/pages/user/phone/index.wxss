@@ -92,6 +92,7 @@
 .code-box {
   display: flex;
   align-items: center;
+  position: relative;
 }
 .submit-btn {
   width: 100%;
@@ -120,4 +121,29 @@
   font-size: 24rpx;
   border-radius: 8rpx;
   text-align: center;
+}
+.send-code-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 200rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  font-size: 24rpx;
+  padding: 0;
+  background-color: #FF6B00;
+  color: #FFFFFF;
+  border-radius: 6rpx;
+  z-index: 10;
+}
+.send-code-btn[disabled] {
+  background-color: #cccccc;
+  color: #ffffff;
+}
+.error-tip {
+  margin-top: 8rpx;
+}
+.error-tip .error-text {
+  font-size: 24rpx;
+  color: #f56c6c;
 }

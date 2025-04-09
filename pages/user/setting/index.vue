@@ -18,10 +18,10 @@
           </view>
         </view>
         
-        <view class="setting-item" @click="showFeatureInDevelopment('微信账号管理')">
+        <view class="setting-item" @click="handleWechatAccount">
           <text class="item-label">微信账号</text>
           <view class="item-action">
-            <text class="item-value">未绑定</text>
+            <text class="item-value">{{isWechatBound ? '已绑定' : '未绑定'}}</text>
             <text class="item-arrow">&gt;</text>
           </view>
         </view>
@@ -109,6 +109,13 @@ export default {
     this.checkLoginStatus();
     // 从数据库获取最新用户信息
     this.fetchUserFromDatabase();
+    
+    // 监听微信绑定状态变更
+    uni.$on('wechat:binding:status', this.handleWechatBindingStatus);
+  },
+  onUnload() {
+    // 移除事件监听
+    uni.$off('wechat:binding:status', this.handleWechatBindingStatus);
   },
   methods: {
     // 加载用户信息
@@ -135,6 +142,9 @@ export default {
           } else {
             this.phoneNumber = '';
           }
+          
+          // 检查微信绑定状态
+          this.checkWechatBindStatus(userInfo);
         }
       } catch (e) {
         console.error('加载用户信息失败:', e);
@@ -304,12 +314,174 @@ export default {
             this.phoneNumber = '';
           }
           
+          // 检查微信绑定状态
+          this.checkWechatBindStatus(dbUserInfo);
+          
           // 强制更新视图
           this.$forceUpdate();
         }
       } catch (err) {
         console.error('获取数据库用户信息失败:', err);
       }
+    },
+    
+    // 检查微信绑定状态
+    checkWechatBindStatus(userInfo) {
+      if (!userInfo) return;
+      
+      // 判断wx_openid是否存在且不为空
+      if (userInfo.wx_openid) {
+        if (typeof userInfo.wx_openid === 'object') {
+          // 如果是对象，检查是否有任何属性值
+          this.isWechatBound = Object.keys(userInfo.wx_openid).length > 0;
+        } else if (typeof userInfo.wx_openid === 'string') {
+          // 如果是字符串，检查是否非空
+          this.isWechatBound = !!userInfo.wx_openid;
+        }
+      } else if (userInfo.wx_unionid) {
+        // 或者通过unionid判断
+        this.isWechatBound = !!userInfo.wx_unionid;
+      } else {
+        this.isWechatBound = false;
+      }
+      
+      console.log('微信绑定状态:', this.isWechatBound);
+    },
+    
+    // 处理微信账号点击
+    handleWechatAccount() {
+      if (this.isWechatBound) {
+        // 如果已绑定，跳转到微信账号管理页面
+        uni.navigateTo({
+          url: '/pages/user/wechat/index',
+          fail: (err) => {
+            console.error('微信账号页面跳转失败:', err);
+            this.showFeatureInDevelopment('微信账号管理');
+          }
+        });
+      } else {
+        // 如果未绑定，显示绑定提示
+        uni.showModal({
+          title: '绑定微信',
+          content: '绑定微信账号可以使用微信快捷登录，是否立即绑定？',
+          confirmText: '立即绑定',
+          success: (res) => {
+            if (res.confirm) {
+              this.bindWechatAccount();
+            }
+          }
+        });
+      }
+    },
+    
+    // 绑定微信账号
+    bindWechatAccount() {
+      uni.showLoading({
+        title: '加载中'
+      });
+      
+      // 此处调用微信登录API获取code
+      // #ifdef MP-WEIXIN
+      wx.login({
+        success: (res) => {
+          if (res.code) {
+            // 获取到微信code，调用云函数绑定微信账号
+            this.callBindWechatFunction(res.code);
+          } else {
+            uni.hideLoading();
+            uni.showToast({
+              title: '微信登录失败',
+              icon: 'none'
+            });
+          }
+        },
+        fail: (err) => {
+          uni.hideLoading();
+          console.error('获取微信code失败:', err);
+          uni.showToast({
+            title: '微信登录失败',
+            icon: 'none'
+          });
+        }
+      });
+      // #endif
+      
+      // #ifndef MP-WEIXIN
+      uni.hideLoading();
+      this.showFeatureInDevelopment('绑定微信账号');
+      // #endif
+    },
+    
+    // 调用云函数绑定微信账号
+    async callBindWechatFunction(code) {
+      try {
+        const token = uni.getStorageSync('uni_id_token');
+        if (!token) {
+          throw new Error('用户未登录');
+        }
+        
+        // 调用绑定微信的云函数
+        const result = await uniCloud.callFunction({
+          name: 'uni-id-co',
+          data: {
+            action: 'bindWeixin',
+            params: {
+              code
+            }
+          }
+        });
+        
+        uni.hideLoading();
+        
+        if (result.result && result.result.code === 0) {
+          // 绑定成功
+          this.isWechatBound = true;
+          
+          // 更新本地存储的用户信息
+          this.fetchUserFromDatabase();
+          
+          uni.showToast({
+            title: '微信绑定成功',
+            icon: 'success'
+          });
+          
+          // 触发绑定状态变更事件
+          uni.$emit('wechat:binding:changed', { isBound: true });
+        } else {
+          // 绑定失败
+          uni.showToast({
+            title: result.result?.message || '绑定失败',
+            icon: 'none'
+          });
+        }
+      } catch (error) {
+        uni.hideLoading();
+        console.error('绑定微信失败:', error);
+        uni.showToast({
+          title: '绑定失败，请稍后再试',
+          icon: 'none'
+        });
+      }
+    },
+    
+    // 处理微信绑定状态变更
+    handleWechatBindingStatus(data) {
+      console.log('接收到微信绑定状态:', data);
+      if (data && typeof data.isBound !== 'undefined') {
+        this.isWechatBound = data.isBound;
+      }
+    },
+    
+    // 解绑微信，在微信账号页面完成后回调
+    handleWechatUnbindCallback() {
+      // 更新本地绑定状态
+      this.isWechatBound = false;
+      
+      // 重新获取用户信息
+      this.fetchUserFromDatabase();
+      
+      // 触发绑定状态变更事件
+      uni.$emit('wechat:binding:changed', { isBound: false });
     }
   }
 }

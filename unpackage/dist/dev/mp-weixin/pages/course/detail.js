@@ -203,6 +203,15 @@ var _default = {
       statusBarHeight: 90 // 默认状态栏高度（rpx单位）
     };
   },
+
+  computed: {
+    // 添加计算属性：判断课程是否已满
+    isCourseFulled: function isCourseFulled() {
+      var total = this.courseInfo.courseCapacity || this.courseInfo.courseCount || this.courseInfo.capacity || 20;
+      var enrolled = this.courseInfo.bookingCount || 0;
+      return enrolled >= total;
+    }
+  },
   mounted: function mounted() {
     console.log('课程详情页已挂载，当前状态:', {
       courseId: this.courseId,
@@ -373,6 +382,9 @@ var _default = {
                     console.log('主动获取教师详情，teacherId:', _this2.courseInfo.teacherId);
                     _this2.fetchTeacherDescription(_this2.courseInfo.teacherId);
                   }
+
+                  // 主动更新课程报名人数
+                  _this2.updateCourseBookingCount();
                 } else if (result && result.code === -1 && retryCount < 3) {
                   // 如果是超时错误且重试次数小于3次，尝试重试
                   console.log("\u83B7\u53D6\u8BFE\u7A0B\u8BE6\u60C5\u5931\u8D25\uFF0C\u51C6\u5907\u7B2C".concat(retryCount + 1, "\u6B21\u91CD\u8BD5..."));
@@ -438,7 +450,9 @@ var _default = {
         endTime: '',
         description: '抱歉，无法加载课程详情，请返回后重试或联系客服。',
         coverImage: '/static/images/course/default.jpg',
+        courseCapacity: 20,
         courseCount: 20,
+        // 保留兼容性
         bookingCount: 0
       };
 
@@ -470,8 +484,8 @@ var _default = {
       this.courseInfo.location = this.courseInfo.location || '未指定';
 
       // 处理课程容量和报名人数
-      this.courseInfo.courseCount = this.courseInfo.courseCount || 20; // 优先使用courseCount
-      this.courseInfo.capacity = this.courseInfo.capacity || this.courseInfo.courseCount || 20;
+      this.courseInfo.courseCapacity = this.courseInfo.courseCapacity || this.courseInfo.courseCount || 20; // 优先使用courseCapacity
+      this.courseInfo.capacity = this.courseInfo.capacity || this.courseInfo.courseCapacity || this.courseInfo.courseCount || 20;
       this.courseInfo.bookingCount = this.courseInfo.bookingCount || 0;
 
       // 处理日期和时间
@@ -596,7 +610,7 @@ var _default = {
       }
 
       // 预加载教师头像
-      if (this.courseInfo.teacherAvatar) {
+      if (this.courseInfo.teacherName || this.courseInfo.teacherId) {
         this.preloadTeacherAvatar();
       }
       console.log('预处理后的课程数据:', this.courseInfo);
@@ -883,70 +897,85 @@ var _default = {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                if (_this5.courseInfo.teacherAvatar) {
+                if (_this5.courseInfo.teacherName) {
                   _context4.next = 2;
                   break;
                 }
                 return _context4.abrupt("return");
               case 2:
                 _context4.prev = 2;
+                console.log('根据教师名称主动查询教师头像:', _this5.courseInfo.teacherName);
+                // 首先尝试从数据库获取教师头像
+                if (!_this5.courseInfo.teacherName) {
+                  _context4.next = 9;
+                  break;
+                }
+                _context4.next = 7;
+                return _this5.fetchTeacherAvatarFromDB(_this5.courseInfo.teacherName);
+              case 7:
+                _context4.next = 12;
+                break;
+              case 9:
+                if (!_this5.courseInfo.teacherId) {
+                  _context4.next = 12;
+                  break;
+                }
+                _context4.next = 12;
+                return _this5.fetchTeacherAvatarByID(_this5.courseInfo.teacherId);
+              case 12:
+                if (!(!_this5.courseInfo.teacherAvatarUrl && _this5.courseInfo.teacherAvatar)) {
+                  _context4.next = 28;
+                  break;
+                }
                 if (!(_this5.courseInfo.teacherAvatar.startsWith('http://') || _this5.courseInfo.teacherAvatar.startsWith('https://'))) {
-                  _context4.next = 8;
+                  _context4.next = 18;
                   break;
                 }
-                console.log('使用云存储URL作为教师头像:', _this5.courseInfo.teacherAvatar);
+                console.log('使用云存储URL作为教师头像备选:', _this5.courseInfo.teacherAvatar);
                 _this5.courseInfo.teacherAvatarUrl = _this5.courseInfo.teacherAvatar;
-                _context4.next = 19;
+                _context4.next = 28;
                 break;
-              case 8:
+              case 18:
                 if (!_this5.courseInfo.teacherAvatar.startsWith('/')) {
-                  _context4.next = 14;
+                  _context4.next = 23;
                   break;
                 }
-                // 已经是本地路径，但可能不是最终需要的头像
-                console.log('临时使用本地路径作为教师头像:', _this5.courseInfo.teacherAvatar);
+                // 已经是本地路径
+                console.log('使用本地路径作为教师头像备选:', _this5.courseInfo.teacherAvatar);
                 _this5.courseInfo.teacherAvatarUrl = _this5.courseInfo.teacherAvatar;
-
-                // 如果有teacherName，尝试从数据库获取正确的头像
-                if (_this5.courseInfo.teacherName) {
-                  _this5.fetchTeacherAvatarFromDB(_this5.courseInfo.teacherName);
-                } else if (_this5.courseInfo.teacherId) {
-                  _this5.fetchTeacherAvatarByID(_this5.courseInfo.teacherId);
-                }
-                _context4.next = 19;
+                _context4.next = 28;
                 break;
-              case 14:
+              case 23:
                 // 否则从云端获取
-                console.log('从云端获取头像图片:', _this5.courseInfo.teacherAvatar);
-                _context4.next = 17;
+                console.log('从云端获取头像图片作为备选:', _this5.courseInfo.teacherAvatar);
+                _context4.next = 26;
                 return _this5.$api.file.getImage(_this5.courseInfo.teacherAvatar);
-              case 17:
+              case 26:
                 avatarResult = _context4.sent;
                 if (avatarResult && avatarResult.data && avatarResult.data.url) {
                   _this5.courseInfo.teacherAvatarUrl = avatarResult.data.url;
                 }
-              case 19:
-                _context4.next = 26;
+              case 28:
+                // 如果仍然没有获得头像URL，使用默认头像
+                if (!_this5.courseInfo.teacherAvatarUrl) {
+                  _this5.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
+                  console.log('使用默认头像');
+                }
+                _context4.next = 36;
                 break;
-              case 21:
-                _context4.prev = 21;
+              case 31:
+                _context4.prev = 31;
                 _context4.t0 = _context4["catch"](2);
                 console.error('加载教师头像失败:', _context4.t0);
-                // 加载失败时使用默认头像，并尝试从数据库获取
+                // 加载失败时使用默认头像
                 _this5.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
-
-                // 如果有teacherName，尝试从数据库获取正确的头像
-                if (_this5.courseInfo.teacherName) {
-                  _this5.fetchTeacherAvatarFromDB(_this5.courseInfo.teacherName);
-                } else if (_this5.courseInfo.teacherId) {
-                  _this5.fetchTeacherAvatarByID(_this5.courseInfo.teacherId);
-                }
-              case 26:
+                console.log('由于错误使用默认头像');
+              case 36:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, null, [[2, 21]]);
+        }, _callee4, null, [[2, 31]]);
       }))();
     },
     // 从数据库获取教师头像
@@ -962,7 +991,7 @@ var _default = {
                   _context5.next = 2;
                   break;
                 }
-                return _context5.abrupt("return");
+                return _context5.abrupt("return", false);
               case 2:
                 _context5.prev = 2;
                 console.log('通过名称从数据库获取教师头像:', teacherName);
@@ -975,29 +1004,35 @@ var _default = {
                 });
               case 7:
                 result = _context5.sent;
-                if (result && result.code === 0 && result.data && result.data.length > 0) {
-                  // 查找精确匹配的教师
-                  foundTeacher = result.data.find(function (item) {
-                    return item.name === nameForSearch;
-                  });
-                  if (foundTeacher && foundTeacher.avatar) {
-                    console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
-                    _this6.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
-                    _this6.$forceUpdate();
-                  }
+                if (!(result && result.code === 0 && result.data && result.data.length > 0)) {
+                  _context5.next = 15;
+                  break;
                 }
-                _context5.next = 14;
-                break;
-              case 11:
-                _context5.prev = 11;
+                // 查找精确匹配的教师
+                foundTeacher = result.data.find(function (item) {
+                  return item.name === nameForSearch;
+                });
+                if (!(foundTeacher && foundTeacher.avatar)) {
+                  _context5.next = 15;
+                  break;
+                }
+                console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
+                _this6.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
+                _this6.$forceUpdate();
+                return _context5.abrupt("return", true);
+              case 15:
+                return _context5.abrupt("return", false);
+              case 18:
+                _context5.prev = 18;
                 _context5.t0 = _context5["catch"](2);
                 console.error('通过名称获取教师头像失败:', _context5.t0);
-              case 14:
+                return _context5.abrupt("return", false);
+              case 22:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, null, [[2, 11]]);
+        }, _callee5, null, [[2, 18]]);
       }))();
     },
     // 通过ID从数据库获取教师头像
@@ -1013,7 +1048,7 @@ var _default = {
                   _context6.next = 2;
                   break;
                 }
-                return _context6.abrupt("return");
+                return _context6.abrupt("return", false);
               case 2:
                 _context6.prev = 2;
                 console.log('通过ID从数据库获取教师头像:', teacherId);
@@ -1025,23 +1060,27 @@ var _default = {
                 });
               case 6:
                 result = _context6.sent;
-                if (result && result.code === 0 && result.data && result.data.avatar) {
-                  console.log('从数据库获取到教师头像URL:', result.data.avatar);
-                  _this7.courseInfo.teacherAvatarUrl = result.data.avatar;
-                  _this7.$forceUpdate();
+                if (!(result && result.code === 0 && result.data && result.data.avatar)) {
+                  _context6.next = 12;
+                  break;
                 }
-                _context6.next = 13;
-                break;
-              case 10:
-                _context6.prev = 10;
+                console.log('从数据库获取到教师头像URL:', result.data.avatar);
+                _this7.courseInfo.teacherAvatarUrl = result.data.avatar;
+                _this7.$forceUpdate();
+                return _context6.abrupt("return", true);
+              case 12:
+                return _context6.abrupt("return", false);
+              case 15:
+                _context6.prev = 15;
                 _context6.t0 = _context6["catch"](2);
                 console.error('通过ID获取教师头像失败:', _context6.t0);
-              case 13:
+                return _context6.abrupt("return", false);
+              case 19:
               case "end":
                 return _context6.stop();
             }
           }
-        }, _callee6, null, [[2, 10]]);
+        }, _callee6, null, [[2, 15]]);
       }))();
     },
     // 格式化课程时间
@@ -1461,6 +1500,15 @@ var _default = {
       var _this12 = this;
       console.log('点击预约课程按钮');
 
+      // 检查课程是否已满
+      if (this.isCourseFulled) {
+        uni.showToast({
+          title: '该课程已约满',
+          icon: 'none'
+        });
+        return;
+      }
+
       // 如果仍然未登录
       if (!this.userInfo) {
         console.log('未找到用户信息对象，用户未登录');
@@ -1831,7 +1879,7 @@ var _default = {
     },
     // 计算剩余名额
     calculateRemainingSeats: function calculateRemainingSeats() {
-      var total = this.courseInfo.courseCount || this.courseInfo.capacity || 20;
+      var total = this.courseInfo.courseCapacity || this.courseInfo.courseCount || this.courseInfo.capacity || 20;
       var enrolled = this.courseInfo.bookingCount || 0;
       var remaining = Math.max(0, total - enrolled);
       return remaining;
@@ -2266,6 +2314,47 @@ var _default = {
           url: "/pages/login/login?redirect=".concat(encodeURIComponent(currentUrl))
         });
       }, 1500);
+    },
+    // 更新课程报名人数
+    updateCourseBookingCount: function updateCourseBookingCount() {
+      var _this21 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee12() {
+        var result, bookingCount;
+        return _regenerator.default.wrap(function _callee12$(_context12) {
+          while (1) {
+            switch (_context12.prev = _context12.next) {
+              case 0:
+                _context12.prev = 0;
+                console.log('主动更新课程报名人数:', _this21.courseId);
+                // 使用API更新课程报名人数
+                _context12.next = 4;
+                return _this21.$api.course.updateCourseBookingCount(_this21.courseId);
+              case 4:
+                result = _context12.sent;
+                console.log('更新课程报名人数结果:', result);
+
+                // 如果更新成功并返回了最新的报名人数，更新本地数据
+                if (result && result.success && result.data) {
+                  bookingCount = result.data.bookingCount;
+                  console.log('获取到最新报名人数:', bookingCount);
+
+                  // 更新本地courseInfo中的bookingCount
+                  _this21.courseInfo.bookingCount = bookingCount;
+                  _this21.$forceUpdate();
+                }
+                _context12.next = 12;
+                break;
+              case 9:
+                _context12.prev = 9;
+                _context12.t0 = _context12["catch"](0);
+                console.error('更新课程报名人数失败:', _context12.t0);
+              case 12:
+              case "end":
+                return _context12.stop();
+            }
+          }
+        }, _callee12, null, [[0, 9]]);
+      }))();
     }
   }
 };

@@ -136,12 +136,15 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
 
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
 //
 //
 //
@@ -168,9 +171,43 @@ exports.default = void 0;
 //
 var _default = {
   data: function data() {
-    return {};
+    return {
+      wechatInfo: {
+        nickName: '',
+        avatarUrl: ''
+      }
+    };
+  },
+  onLoad: function onLoad() {
+    // 加载用户微信信息
+    this.loadWechatInfo();
   },
   methods: {
+    // 加载微信信息
+    loadWechatInfo: function loadWechatInfo() {
+      try {
+        var userInfoStr = uni.getStorageSync('userInfo');
+        if (userInfoStr) {
+          // 解析用户信息
+          var userInfo;
+          if (typeof userInfoStr === 'string') {
+            userInfo = JSON.parse(userInfoStr);
+          } else {
+            userInfo = userInfoStr;
+          }
+
+          // 获取微信相关信息
+          if (userInfo.nickname) {
+            this.wechatInfo.nickName = userInfo.nickname;
+          }
+          if (userInfo.avatar) {
+            this.wechatInfo.avatarUrl = userInfo.avatar;
+          }
+        }
+      } catch (error) {
+        console.error('加载微信信息失败:', error);
+      }
+    },
     // 显示解绑确认弹窗
     showUnbindConfirm: function showUnbindConfirm() {
       var _this = this;
@@ -188,26 +225,147 @@ var _default = {
     },
     // 解除微信绑定
     unbindWechat: function unbindWechat() {
-      uni.showLoading({
-        title: '解绑中'
-      });
-      setTimeout(function () {
-        uni.hideLoading();
-        uni.showModal({
-          title: '提示',
-          content: '当前应用必须绑定微信账号才能使用，暂不支持解除绑定',
-          showCancel: false,
-          success: function success() {
-            // 返回上一页
-            // uni.navigateBack();
+      var _this2 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+        var result, _result$result;
+        return _regenerator.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                uni.showLoading({
+                  title: '解绑中'
+                });
+                _context.prev = 1;
+                _context.next = 4;
+                return uniCloud.callFunction({
+                  name: 'uni-id-co',
+                  data: {
+                    action: 'unbindWeixin'
+                  }
+                });
+              case 4:
+                result = _context.sent;
+                uni.hideLoading();
+                if (result.result && result.result.code === 0) {
+                  // 解绑成功
+                  uni.showToast({
+                    title: '解绑成功',
+                    icon: 'success'
+                  });
+
+                  // 更新缓存中的用户信息
+                  _this2.updateUserInfoAfterUnbind();
+
+                  // 触发微信绑定状态变更事件
+                  uni.$emit('wechat:binding:changed', {
+                    isBound: false
+                  });
+
+                  // 延迟返回上一页
+                  setTimeout(function () {
+                    uni.navigateBack();
+                  }, 1500);
+                } else {
+                  // 解绑失败
+                  uni.showModal({
+                    title: '解绑失败',
+                    content: ((_result$result = result.result) === null || _result$result === void 0 ? void 0 : _result$result.message) || '微信账号解绑失败，请稍后再试',
+                    showCancel: false
+                  });
+                }
+                _context.next = 14;
+                break;
+              case 9:
+                _context.prev = 9;
+                _context.t0 = _context["catch"](1);
+                uni.hideLoading();
+                console.error('解绑微信失败:', _context.t0);
+                uni.showModal({
+                  title: '提示',
+                  content: '当前应用必须绑定微信账号才能使用，暂不支持解除绑定',
+                  showCancel: false
+                });
+              case 14:
+              case "end":
+                return _context.stop();
+            }
           }
-        });
-      }, 1000);
+        }, _callee, null, [[1, 9]]);
+      }))();
+    },
+    // 更新解绑后的用户信息
+    updateUserInfoAfterUnbind: function updateUserInfoAfterUnbind() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var userInfoStr, userInfo, userId, result;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                // 从缓存获取用户信息
+                userInfoStr = uni.getStorageSync('userInfo');
+                if (userInfoStr) {
+                  _context2.next = 4;
+                  break;
+                }
+                return _context2.abrupt("return");
+              case 4:
+                if (typeof userInfoStr === 'string') {
+                  userInfo = JSON.parse(userInfoStr);
+                } else {
+                  userInfo = userInfoStr;
+                }
+
+                // 清除微信相关信息
+                if (userInfo.wx_openid) {
+                  userInfo.wx_openid = {};
+                }
+                if (userInfo.wx_unionid) {
+                  userInfo.wx_unionid = '';
+                }
+
+                // 更新缓存
+                uni.setStorageSync('userInfo', userInfo);
+
+                // 刷新用户信息
+                userId = userInfo._id || userInfo.uid;
+                if (!userId) {
+                  _context2.next = 14;
+                  break;
+                }
+                _context2.next = 12;
+                return uniCloud.callFunction({
+                  name: 'getUserInfoById',
+                  data: {
+                    userId: userId,
+                    uniIdToken: uni.getStorageSync('uni_id_token')
+                  }
+                });
+              case 12:
+                result = _context2.sent;
+                if (result.result && result.result.code === 0 && result.result.userInfo) {
+                  // 更新到缓存
+                  uni.setStorageSync('userInfo', result.result.userInfo);
+                }
+              case 14:
+                _context2.next = 19;
+                break;
+              case 16:
+                _context2.prev = 16;
+                _context2.t0 = _context2["catch"](0);
+                console.error('更新解绑后用户信息失败:', _context2.t0);
+              case 19:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 16]]);
+      }))();
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
 
 /***/ }),
 

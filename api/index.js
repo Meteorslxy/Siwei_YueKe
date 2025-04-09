@@ -182,6 +182,16 @@ const courseApi = {
       name: 'bookCourse',
       data
     });
+  },
+  
+  // 更新课程报名人数
+  updateCourseBookingCount(courseId) {
+    console.log('调用updateCourseBookingCount，ID:', courseId);
+    return request({
+      name: 'updateCourseBookingCount',
+      data: { courseId },
+      showLoading: false // 不显示加载提示
+    }).then(res => debugAPI('updateCourseBookingCount返回', res));
   }
 }
 

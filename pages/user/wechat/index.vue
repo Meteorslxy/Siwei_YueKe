@@ -6,9 +6,9 @@
     
     <view class="content">
       <view class="wechat-info">
-        <image class="wechat-avatar" src="/static/images/default-avatar.png" mode="aspectFill"></image>
+        <image class="wechat-avatar" :src="wechatInfo.avatarUrl || '/static/images/default-avatar.png'" mode="aspectFill"></image>
         <view class="wechat-detail">
-          <text class="wechat-name">微信用户</text>
+          <text class="wechat-name">{{wechatInfo.nickName || '微信用户'}}</text>
           <text class="wechat-status">已绑定</text>
         </view>
       </view>
@@ -26,10 +26,44 @@
 export default {
   data() {
     return {
-      
+      wechatInfo: {
+        nickName: '',
+        avatarUrl: ''
+      }
     }
   },
+  onLoad() {
+    // 加载用户微信信息
+    this.loadWechatInfo();
+  },
   methods: {
+    // 加载微信信息
+    loadWechatInfo() {
+      try {
+        const userInfoStr = uni.getStorageSync('userInfo');
+        if (userInfoStr) {
+          // 解析用户信息
+          let userInfo;
+          if (typeof userInfoStr === 'string') {
+            userInfo = JSON.parse(userInfoStr);
+          } else {
+            userInfo = userInfoStr;
+          }
+          
+          // 获取微信相关信息
+          if (userInfo.nickname) {
+            this.wechatInfo.nickName = userInfo.nickname;
+          }
+          
+          if (userInfo.avatar) {
+            this.wechatInfo.avatarUrl = userInfo.avatar;
+          }
+        }
+      } catch (error) {
+        console.error('加载微信信息失败:', error);
+      }
+    },
+    
     // 显示解绑确认弹窗
     showUnbindConfirm() {
       uni.showModal({
@@ -46,24 +80,106 @@ export default {
     },
     
     // 解除微信绑定
-    unbindWechat() {
+    async unbindWechat() {
       uni.showLoading({
         title: '解绑中'
       });
       
-      setTimeout(() => {
+      try {
+        // 调用云函数解绑微信
+        const result = await uniCloud.callFunction({
+          name: 'uni-id-co',
+          data: {
+            action: 'unbindWeixin'
+          }
+        });
+        
         uni.hideLoading();
+        
+        if (result.result && result.result.code === 0) {
+          // 解绑成功
+          uni.showToast({
+            title: '解绑成功',
+            icon: 'success'
+          });
+          
+          // 更新缓存中的用户信息
+          this.updateUserInfoAfterUnbind();
+          
+          // 触发微信绑定状态变更事件
+          uni.$emit('wechat:binding:changed', { isBound: false });
+          
+          // 延迟返回上一页
+          setTimeout(() => {
+            uni.navigateBack();
+          }, 1500);
+        } else {
+          // 解绑失败
+          uni.showModal({
+            title: '解绑失败',
+            content: result.result?.message || '微信账号解绑失败，请稍后再试',
+            showCancel: false
+          });
+        }
+      } catch (error) {
+        uni.hideLoading();
+        console.error('解绑微信失败:', error);
         
         uni.showModal({
           title: '提示',
           content: '当前应用必须绑定微信账号才能使用，暂不支持解除绑定',
-          showCancel: false,
-          success: () => {
-            // 返回上一页
-            // uni.navigateBack();
-          }
+          showCancel: false
         });
-      }, 1000);
+      }
+    },
+    
+    // 更新解绑后的用户信息
+    async updateUserInfoAfterUnbind() {
+      try {
+        // 从缓存获取用户信息
+        const userInfoStr = uni.getStorageSync('userInfo');
+        if (!userInfoStr) return;
+        
+        // 解析用户信息
+        let userInfo;
+        if (typeof userInfoStr === 'string') {
+          userInfo = JSON.parse(userInfoStr);
+        } else {
+          userInfo = userInfoStr;
+        }
+        
+        // 清除微信相关信息
+        if (userInfo.wx_openid) {
+          userInfo.wx_openid = {};
+        }
+        
+        if (userInfo.wx_unionid) {
+          userInfo.wx_unionid = '';
+        }
+        
+        // 更新缓存
+        uni.setStorageSync('userInfo', userInfo);
+        
+        // 刷新用户信息
+        const userId = userInfo._id || userInfo.uid;
+        if (userId) {
+          // 获取最新用户信息
+          const result = await uniCloud.callFunction({
+            name: 'getUserInfoById',
+            data: {
+              userId,
+              uniIdToken: uni.getStorageSync('uni_id_token')
+            }
+          });
+          
+          if (result.result && result.result.code === 0 && result.result.userInfo) {
+            // 更新到缓存
+            uni.setStorageSync('userInfo', result.result.userInfo);
+          }
+        }
+      } catch (error) {
+        console.error('更新解绑后用户信息失败:', error);
+      }
     }
   }
 }
