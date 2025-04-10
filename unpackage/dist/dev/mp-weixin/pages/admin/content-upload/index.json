@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "内容上传",
-  "navigationBarBackgroundColor": "#EC7A49",
-  "navigationBarTextStyle": "white",
-  "usingComponents": {
-    "image-upload": "/components/image-upload/image-upload"
-  }
-}

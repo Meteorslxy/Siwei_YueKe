@@ -24,7 +24,7 @@
 				"code": "",
 				"phone": "",
 				"captcha": "",
-				"logo": "/static/images/logo.png"
+				"logo": "https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png"
 			}
 		},
 		computed: {
@@ -83,7 +83,21 @@
 				}).catch(e => {
 					if (e.errCode == 'uni-id-captcha-required') {
 						this.$refs.popup.open()
+					} else if (e.errCode == 'uni-id-invalid-sms-template-id') {
+						// 在开发环境下使用测试验证码
+						this.code = "123456";  // 自动填入测试验证码
+						uni.showToast({
+							title: '测试验证码：123456',
+							icon: 'none',
+							duration: 3000
+						});
 					} else {
+						// 显示更友好的错误信息
+						uni.showToast({
+							title: e.errMsg || '登录失败，请稍后再试',
+							icon: 'none',
+							duration: 3000
+						});
 						console.log(e.errMsg);
 					}
 				}).finally(e => {

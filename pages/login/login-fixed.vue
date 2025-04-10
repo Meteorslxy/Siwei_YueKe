@@ -1,7 +1,7 @@
 <template>
   <view class="login-container">
     <view class="header">
-      <image class="logo" src="../../static/images/logo.png" mode="aspectFit"></image>
+      <image class="logo" src="https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png" mode="aspectFit"></image>
       <view class="title">四维教育</view>
       <view class="subtitle">艺术教育预约平台</view>
     </view>
@@ -179,14 +179,16 @@ export default {
               iconWidth: '45px',
               iconHeight: '45px',
               list: [{
-                  iconPath: '../../static/images/logo.png',
-                  title: '微信登录'
-                },
-                {
-                  iconPath: '../../static/images/logo.png',
-                  title: '微博登录'
-                }
-              ]
+                name: '微信登录',
+                id: 'weixin',
+                authType: 'wechat',
+                iconPath: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
+              }, {
+                name: '手机号登录',
+                id: 'univerify',
+                authType: 'univerify',
+                iconPath: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
+              }]
             }
           },
           success: (res) => {

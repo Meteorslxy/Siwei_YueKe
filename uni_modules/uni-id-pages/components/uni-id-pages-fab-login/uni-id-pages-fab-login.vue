@@ -57,11 +57,12 @@
 						"logo": "/uni_modules/uni-id-pages/static/login/uni-fab-login/sms.png",
 						"path": "/uni_modules/uni-id-pages/pages/login/login-withoutpwd?type=smsCode"
 					},
-					{
-						"id": "weixin",
-						"text": "微信登录",
-						"logo": "/uni_modules/uni-id-pages/static/login/uni-fab-login/weixin.png",
-					},
+					// 已隐藏微信登录选项
+					// {
+					// 	"id": "weixin",
+					// 	"text": "微信登录",
+					// 	"logo": "/uni_modules/uni-id-pages/static/login/uni-fab-login/weixin.png",
+					// },
 					{
 						"id": "huawei",
 						"text": "华为登录",
@@ -133,8 +134,8 @@
 						"defaultCheckBoxState": false, // 条款勾选框初始状态 默认值： true
 						"textColor": "#BBBBBB", // 文字颜色 默认值：#BBBBBB
 						"termsColor": "#5496E3", //  协议文字颜色 默认值： #5496E3
-						"prefix": "我已阅读并同意", // 条款前的文案 默认值：“我已阅读并同意”
-						"suffix": "并使用本机号码登录", // 条款后的文案 默认值：“并使用本机号码登录”
+						"prefix": "我已阅读并同意", // 条款前的文案 默认值："我已阅读并同意"
+						"suffix": "并使用本机号码登录", // 条款后的文案 默认值："并使用本机号码登录"
 						"privacyItems": []
 					}
 				}

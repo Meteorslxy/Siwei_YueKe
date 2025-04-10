@@ -93,12 +93,6 @@
             <text class="list-text">图片上传</text>
             <text class="list-arrow">></text>
           </view> -->
-          <!-- 管理员工具入口 - 开发环境可见 -->
-          <view v-if="isDev" class="menu-list-item" @click="navigateTo('/pages/admin/import-data')">
-            <text class="list-icon iconfont icon-setting"></text>
-            <text class="list-text">云数据库导入工具</text>
-            <text class="list-arrow">></text>
-          </view>
         </view>
       </view>
       
@@ -127,9 +121,6 @@
 
     <!-- 退出登录 (放在页面底部) -->
     <view class="bottom-area">
-      <!-- 管理员入口按钮 (隐藏起来，但开发者或管理员可以通过特定操作激活) -->
-      <view class="admin-entry-btn" v-if="isDev" @click="navigateToAdminLogin">管理员入口</view>
-      
       <!-- 退出登录按钮 -->
       <view v-if="hasUserInfo" class="logout-btn" @click="logout">退出登录</view>
       
@@ -154,7 +145,6 @@ export default {
         canceled: 0
       },
       isDev: false, // 是否为开发环境
-      isAdmin: false, // 是否为管理员
       hasContent: false, // 是否存在内容
       verboseLogging: false, // 是否显示详细日志
       // 添加防止重复更新的标记
@@ -165,9 +155,6 @@ export default {
   onLoad() {
     // 获取全局变量
     this.isDev = getApp().globalData.$isDevMode
-    
-    // 设置为管理员（测试阶段都显示管理功能）
-    this.isAdmin = true
     
     // 清理不完整的登录状态
     this.checkAndCleanupIncompleteLogin()
@@ -851,13 +838,6 @@ export default {
           });
         }
       });
-    },
-    
-    // 管理员登录入口
-    navigateToAdminLogin() {
-      uni.navigateTo({
-        url: '/pages/admin/login'
-      })
     },
     
     // 打开反馈页面
@@ -1790,18 +1770,6 @@ export default {
 .bottom-area {
   margin-top: auto;
   padding: 30rpx 20rpx;
-  
-  .admin-entry-btn {
-    margin-bottom: 20rpx;
-    height: 90rpx;
-    line-height: 90rpx;
-    text-align: center;
-    background-color: #fff;
-    border-radius: 12rpx;
-    font-size: 32rpx;
-    color: #2C405A;
-    border: 1px solid #eee;
-  }
   
   .logout-btn {
     height: 90rpx;

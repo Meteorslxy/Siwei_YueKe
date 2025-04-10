@@ -1,6 +1,6 @@
 (global["webpackJsonp"] = global["webpackJsonp"] || []).push([["pages/login/login"],{
 
-/***/ 141:
+/***/ 142:
 /*!***********************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/main.js?{"page":"pages%2Flogin%2Flogin"} ***!
   \***********************************************************************************************************/
@@ -14,7 +14,7 @@ var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/inte
 __webpack_require__(/*! uni-pages */ 38);
 __webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
-var _login = _interopRequireDefault(__webpack_require__(/*! ./pages/login/login.vue */ 142));
+var _login = _interopRequireDefault(__webpack_require__(/*! ./pages/login/login.vue */ 143));
 // @ts-ignore
 wx.__webpack_require_UNI_MP_PLUGIN__ = __webpack_require__;
 createPage(_login.default);
@@ -22,7 +22,7 @@ createPage(_login.default);
 
 /***/ }),
 
-/***/ 142:
+/***/ 143:
 /*!****************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/login/login.vue ***!
   \****************************************************************************************/
@@ -31,10 +31,10 @@ createPage(_login.default);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _login_vue_vue_type_template_id_b237504c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./login.vue?vue&type=template&id=b237504c& */ 143);
-/* harmony import */ var _login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./login.vue?vue&type=script&lang=js& */ 145);
+/* harmony import */ var _login_vue_vue_type_template_id_b237504c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./login.vue?vue&type=template&id=b237504c& */ 144);
+/* harmony import */ var _login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./login.vue?vue&type=script&lang=js& */ 146);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./login.vue?vue&type=style&index=0&lang=scss& */ 147);
+/* harmony import */ var _login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./login.vue?vue&type=style&index=0&lang=scss& */ 148);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 44);
 
 var renderjs
@@ -63,7 +63,7 @@ component.options.__file = "pages/login/login.vue"
 
 /***/ }),
 
-/***/ 143:
+/***/ 144:
 /*!***********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/login/login.vue?vue&type=template&id=b237504c& ***!
   \***********************************************************************************************************************/
@@ -72,7 +72,7 @@ component.options.__file = "pages/login/login.vue"
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_template_id_b237504c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./login.vue?vue&type=template&id=b237504c& */ 144);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_template_id_b237504c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./login.vue?vue&type=template&id=b237504c& */ 145);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_template_id_b237504c___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_17_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_template_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_uni_app_loader_page_meta_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_template_id_b237504c___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
@@ -85,7 +85,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ 144:
+/***/ 145:
 /*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--17-0!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/template.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-uni-app-loader/page-meta.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/login/login.vue?vue&type=template&id=b237504c& ***!
   \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -104,13 +104,11 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   var g0 = _vm.providerList.length
-  var m0 = g0 > 0 ? _vm.hasProvider("weixin") : null
   _vm.$mp.data = Object.assign(
     {},
     {
       $root: {
         g0: g0,
-        m0: m0,
       },
     }
   )
@@ -123,7 +121,7 @@ render._withStripped = true
 
 /***/ }),
 
-/***/ 145:
+/***/ 146:
 /*!*****************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/login/login.vue?vue&type=script&lang=js& ***!
   \*****************************************************************************************************************/
@@ -132,14 +130,14 @@ render._withStripped = true
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./login.vue?vue&type=script&lang=js& */ 146);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./login.vue?vue&type=script&lang=js& */ 147);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_babel_loader_lib_index_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_13_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_script_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
-/***/ 146:
+/***/ 147:
 /*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--13-1!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/script.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/login/login.vue?vue&type=script&lang=js& ***!
   \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -165,6 +163,10 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+//
+//
+//
+//
 //
 //
 //
@@ -338,7 +340,7 @@ var _default = {
     // 检查是否支持一键登录
     this.checkSupport();
 
-    // 进入页面就开始静默登录
+    // 页面加载时自动尝试静默登录
     this.silentLogin();
   },
   methods: (_methods = {
@@ -851,63 +853,114 @@ var _default = {
     silentLogin: function silentLogin() {
       var _this6 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var token, tokenExpired;
+        var savedOpenid, deviceInfo, uuid, loginResult, loginRes;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.prev = 0;
-                // 检查是否已有token
-                token = uni.getStorageSync('uni_id_token');
-                tokenExpired = uni.getStorageSync('uni_id_token_expired'); // 如果没有token或者token已过期，不做任何操作
-                if (!(!token || !tokenExpired || Date.now() > tokenExpired)) {
-                  _context.next = 6;
+                console.log('尝试静默登录');
+                _context.prev = 1;
+                // 获取存储的openid
+                savedOpenid = uni.getStorageSync('wx_openid');
+                if (!savedOpenid) {
+                  _context.next = 24;
                   break;
                 }
-                console.log('无有效token或token已过期，需要用户主动登录');
-                return _context.abrupt("return");
-              case 6:
-                console.log('发现有效token，尝试静默登录');
+                console.log('发现存储的openid，尝试自动登录:', savedOpenid);
 
-                // 使用云函数验证token
-                uniCloud.callFunction({
-                  name: 'getUserInfoByToken',
+                // 获取设备信息
+                _context.next = 7;
+                return _this6.getDeviceInfo();
+              case 7:
+                deviceInfo = _context.sent;
+                _context.next = 10;
+                return _this6.getStoredUUID();
+              case 10:
+                uuid = _context.sent;
+                _context.next = 13;
+                return uniCloud.callFunction({
+                  name: 'login',
                   data: {
-                    uniIdToken: token
-                  }
-                }).then(function (res) {
-                  if (res.result && res.result.code === 0 && res.result.userInfo) {
-                    console.log('token有效，静默登录成功');
-
-                    // 刷新页面显示
-                    _this6.refreshUserInfo(res.result);
-
-                    // 如果有重定向页面，直接跳转
-                    setTimeout(function () {
-                      var redirectUrl = _this6.getRedirectUrl();
-                      if (redirectUrl) {
-                        console.log('静默登录成功，跳转到:', redirectUrl);
-                        _this6.navigateAfterLogin();
-                      }
-                    }, 500);
-                  } else {
-                    console.log('token无效，需要用户主动登录');
+                    loginType: 'wechat',
+                    openid: savedOpenid,
+                    userInfo: {
+                      nickName: '微信用户',
+                      avatarUrl: '',
+                      gender: 0
+                    },
+                    deviceInfo: deviceInfo,
+                    uuid: uuid
                   }
                 }).catch(function (err) {
                   console.error('静默登录失败:', err);
+                  return null;
                 });
-                _context.next = 13;
-                break;
-              case 10:
-                _context.prev = 10;
-                _context.t0 = _context["catch"](0);
-                console.error('静默登录出错:', _context.t0);
               case 13:
+                loginResult = _context.sent;
+                if (!(loginResult && loginResult.result && loginResult.result.code === 0)) {
+                  _context.next = 20;
+                  break;
+                }
+                console.log('静默登录成功:', loginResult.result);
+                // 更新用户信息并跳转
+                _this6.saveUserInfo(loginResult.result);
+                return _context.abrupt("return", true);
+              case 20:
+                console.log('静默登录失败，需要重新登录');
+                // 清除无效的openid
+                uni.removeStorageSync('wx_openid');
+              case 22:
+                _context.next = 25;
+                break;
+              case 24:
+                console.log('未找到存储的openid，无法静默登录');
+              case 25:
+                if (!uni.canIUse('login')) {
+                  _context.next = 36;
+                  break;
+                }
+                _context.prev = 26;
+                _context.next = 29;
+                return new Promise(function (resolve, reject) {
+                  uni.login({
+                    provider: 'weixin',
+                    success: function success(res) {
+                      return resolve(res);
+                    },
+                    fail: function fail(err) {
+                      return reject(err);
+                    }
+                  });
+                });
+              case 29:
+                loginRes = _context.sent;
+                if (loginRes && loginRes.code) {
+                  console.log('静默获取code成功:', loginRes.code);
+                  // 保存code，等用户主动点击微信登录时使用
+                  _this6.loginState.code = loginRes.code;
+
+                  // 可以选择尝试使用code进行自动登录
+                  // 但这里我们不自动登录，等用户手动点击微信登录按钮
+                }
+                _context.next = 36;
+                break;
+              case 33:
+                _context.prev = 33;
+                _context.t0 = _context["catch"](26);
+                console.error('静默获取code失败:', _context.t0);
+              case 36:
+                return _context.abrupt("return", false);
+              case 39:
+                _context.prev = 39;
+                _context.t1 = _context["catch"](1);
+                console.error('静默登录过程中出错:', _context.t1);
+                return _context.abrupt("return", false);
+              case 43:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[0, 10]]);
+        }, _callee, null, [[1, 39], [26, 33]]);
       }))();
     },
     // 刷新用户信息 - 添加此方法以修复静默登录
@@ -1190,6 +1243,9 @@ var _default = {
           title: '请先获取图形验证码',
           icon: 'none'
         });
+
+        // 自动打开验证码模态框
+        this.getCaptcha();
         return;
       }
 
@@ -1201,6 +1257,11 @@ var _default = {
           title: '请输入图形验证码',
           icon: 'none'
         });
+
+        // 如果验证码框没有显示，打开它
+        if (!this.showCaptchaModal) {
+          this.showCaptchaModal = true;
+        }
         return;
       }
 
@@ -1227,13 +1288,8 @@ var _default = {
         this.sendSmsByCloudFunction(phoneNumber);
         return;
       }
-      console.log('发送短信验证码，参数:', {
-        mobile: phoneNumber,
-        captcha: this.captchaCode,
-        captchaId: this.captchaData.captchaId
-      });
 
-      // 使用uni-id-co方式发送短信验证码
+      // 尝试使用importObject发送短信
       this.sendSmsByImportObject(phoneNumber);
     },
     // 本地模拟发送短信验证码
@@ -1535,7 +1591,7 @@ var _default = {
     wxLogin: function wxLogin() {
       var _this12 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-        var _yield$uni$login, _yield$uni$login2, error, loginRes, userInfo, _yield$uni$getUserPro, _yield$uni$getUserPro2, profileError, profileRes, createResult;
+        var deviceInfo, uuid, _yield$uni$login, _yield$uni$login2, error, loginRes, userInfo, _yield$uni$getUserPro, _yield$uni$getUserPro2, profileError, profileRes, loginResult, openid, openidResult, wxOpenid;
         return _regenerator.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -1548,16 +1604,24 @@ var _default = {
                 });
                 _context3.prev = 3;
                 _context3.next = 6;
+                return _this12.getDeviceInfo();
+              case 6:
+                deviceInfo = _context3.sent;
+                _context3.next = 9;
+                return _this12.getStoredUUID();
+              case 9:
+                uuid = _context3.sent;
+                _context3.next = 12;
                 return uni.login({
                   provider: 'weixin'
                 });
-              case 6:
+              case 12:
                 _yield$uni$login = _context3.sent;
                 _yield$uni$login2 = (0, _slicedToArray2.default)(_yield$uni$login, 2);
                 error = _yield$uni$login2[0];
                 loginRes = _yield$uni$login2[1];
                 if (!error) {
-                  _context3.next = 16;
+                  _context3.next = 22;
                   break;
                 }
                 console.error('微信登录失败:', error);
@@ -1568,10 +1632,10 @@ var _default = {
                 });
                 _this12.showLoginLoading = false;
                 return _context3.abrupt("return");
-              case 16:
+              case 22:
                 console.log('获取到微信登录code:', loginRes.code);
                 if (loginRes.code) {
-                  _context3.next = 23;
+                  _context3.next = 29;
                   break;
                 }
                 console.error('未获取到微信code');
@@ -1582,108 +1646,171 @@ var _default = {
                 });
                 _this12.showLoginLoading = false;
                 return _context3.abrupt("return");
-              case 23:
+              case 29:
+                // 保存code
+                _this12.loginState.code = loginRes.code;
+
                 // 获取用户信息
                 userInfo = {};
-                _context3.prev = 24;
-                _context3.next = 27;
+                _context3.prev = 31;
+                _context3.next = 34;
                 return uni.getUserProfile({
-                  desc: '用于完善用户资料'
+                  desc: '用于完善会员资料'
                 });
-              case 27:
+              case 34:
                 _yield$uni$getUserPro = _context3.sent;
                 _yield$uni$getUserPro2 = (0, _slicedToArray2.default)(_yield$uni$getUserPro, 2);
                 profileError = _yield$uni$getUserPro2[0];
                 profileRes = _yield$uni$getUserPro2[1];
-                if (!profileError && profileRes && profileRes.userInfo) {
-                  console.log('获取到用户信息:', profileRes.userInfo);
+                if (!profileError && profileRes.userInfo) {
+                  console.log('获取用户资料成功:', profileRes.userInfo);
                   userInfo = profileRes.userInfo;
-                } else {
-                  console.log('获取用户信息失败，将使用默认用户信息');
-                  // 使用默认用户信息
-                  userInfo = {
-                    nickName: '微信用户',
-                    avatarUrl: ''
-                  };
                 }
-                _context3.next = 38;
+                _context3.next = 45;
                 break;
-              case 34:
-                _context3.prev = 34;
-                _context3.t0 = _context3["catch"](24);
-                console.error('获取用户信息过程中出错:', _context3.t0);
-                // 继续执行，使用默认用户信息
+              case 41:
+                _context3.prev = 41;
+                _context3.t0 = _context3["catch"](31);
+                console.warn('获取用户信息失败，将使用默认用户信息');
                 userInfo = {
                   nickName: '微信用户',
-                  avatarUrl: ''
+                  avatarUrl: '',
+                  gender: 0
                 };
-              case 38:
-                _context3.prev = 38;
-                console.log('直接调用创建用户云函数');
-                _context3.next = 42;
+              case 45:
+                // 直接调用login云函数，让云函数处理微信登录全流程
+                console.log('直接调用login云函数处理微信登录');
+                _context3.prev = 46;
+                _context3.next = 49;
                 return uniCloud.callFunction({
                   name: 'login',
                   data: {
-                    loginType: 'createUserInDb',
+                    loginType: 'wechat',
                     code: loginRes.code,
-                    // 直接传递code参数
-                    userInfo: _objectSpread({}, userInfo)
+                    userInfo: {
+                      nickName: userInfo.nickName || '微信用户',
+                      avatarUrl: userInfo.avatarUrl || '',
+                      gender: userInfo.gender || 0
+                    },
+                    // 传递额外信息用于开发环境生成稳定openid
+                    deviceInfo: deviceInfo,
+                    uuid: uuid
                   }
                 });
-              case 42:
-                createResult = _context3.sent;
-                console.log('创建/登录用户结果:', createResult);
-                if (!(createResult.result && createResult.result.code === 0)) {
-                  _context3.next = 50;
+              case 49:
+                loginResult = _context3.sent;
+                console.log('微信登录结果:', loginResult);
+                if (loginResult.result && loginResult.result.code === 0) {
+                  // 登录成功，保存用户信息
+                  if (loginResult.result.userInfo && loginResult.result.userInfo.wx_openid) {
+                    openid = loginResult.result.userInfo.wx_openid['mp-weixin'];
+                    if (openid) {
+                      console.log('保存openid到本地存储:', openid);
+                      // 保存openid到本地存储，用于静默登录
+                      uni.setStorageSync('wx_openid', openid);
+                    }
+                  }
+                  _this12.saveUserInfo(loginResult.result);
+                } else {
+                  // 登录失败，显示错误信息
+                  console.error('微信登录失败:', loginResult.result);
+                  uni.showToast({
+                    title: loginResult.result && loginResult.result.message || '登录失败，请重试',
+                    icon: 'none'
+                  });
+                }
+                _context3.next = 81;
+                break;
+              case 54:
+                _context3.prev = 54;
+                _context3.t1 = _context3["catch"](46);
+                console.error('调用login云函数失败:', _context3.t1);
+
+                // 尝试使用备用方法
+                if (!loginRes.code) {
+                  _context3.next = 80;
                   break;
                 }
-                // 创建/登录成功
-                uni.hideLoading();
-                _this12.handleLoginSuccess(createResult.result);
-                return _context3.abrupt("return", true);
-              case 50:
-                console.error('创建/登录用户失败:', createResult.result);
-                uni.hideLoading();
+                console.log('尝试使用直接getWxOpenid获取openid');
+                _context3.prev = 59;
+                _context3.next = 62;
+                return uniCloud.callFunction({
+                  name: 'getWxOpenid',
+                  data: {
+                    code: loginRes.code,
+                    deviceInfo: deviceInfo,
+                    uuid: uuid
+                  }
+                });
+              case 62:
+                openidResult = _context3.sent;
+                if (!(openidResult.result && openidResult.result.code === 0 && openidResult.result.data && openidResult.result.data.openid)) {
+                  _context3.next = 71;
+                  break;
+                }
+                wxOpenid = openidResult.result.data.openid;
+                console.log('成功获取到openid，尝试使用openid登录:', wxOpenid);
+
+                // 保存openid
+                uni.setStorageSync('wx_openid', wxOpenid);
+
+                // 直接创建用户
                 uni.showToast({
-                  title: createResult.result && createResult.result.message || '登录失败，请重试',
+                  title: '正在创建用户...',
                   icon: 'none'
                 });
-              case 53:
-                _context3.next = 60;
+
+                // 在下次启动时使用此openid登录
+                setTimeout(function () {
+                  uni.redirectTo({
+                    url: '/pages/login/login'
+                  });
+                }, 1500);
+                _context3.next = 72;
                 break;
-              case 55:
-                _context3.prev = 55;
-                _context3.t1 = _context3["catch"](38);
-                console.error('调用创建用户云函数出错:', _context3.t1);
-                uni.hideLoading();
+              case 71:
+                throw new Error('获取openid失败');
+              case 72:
+                _context3.next = 78;
+                break;
+              case 74:
+                _context3.prev = 74;
+                _context3.t2 = _context3["catch"](59);
+                console.error('备用方法也失败:', _context3.t2);
                 uni.showToast({
-                  title: '创建用户出错: ' + (_context3.t1.message || '未知错误'),
+                  title: '登录失败，请重试',
                   icon: 'none'
                 });
-              case 60:
-                uni.hideLoading();
-                return _context3.abrupt("return", false);
-              case 64:
-                _context3.prev = 64;
-                _context3.t2 = _context3["catch"](3);
-                console.error('微信登录过程中出错:', _context3.t2);
-                uni.hideLoading();
+              case 78:
+                _context3.next = 81;
+                break;
+              case 80:
                 uni.showToast({
-                  title: '登录过程出错: ' + (_context3.t2.message || '未知错误'),
+                  title: '登录失败，请重试',
                   icon: 'none'
                 });
-                return _context3.abrupt("return", false);
-              case 70:
-                _context3.prev = 70;
+              case 81:
+                _context3.next = 87;
+                break;
+              case 83:
+                _context3.prev = 83;
+                _context3.t3 = _context3["catch"](3);
+                console.error('登录过程中出错:', _context3.t3);
+                uni.showToast({
+                  title: '登录失败，请重试',
+                  icon: 'none'
+                });
+              case 87:
+                _context3.prev = 87;
                 _this12.showLoginLoading = false;
                 uni.hideLoading();
-                return _context3.finish(70);
-              case 74:
+                return _context3.finish(87);
+              case 91:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, null, [[3, 64, 70, 74], [24, 34], [38, 55]]);
+        }, _callee3, null, [[3, 83, 87, 91], [31, 41], [46, 54], [59, 74]]);
       }))();
     },
     // 处理登录成功
@@ -2610,6 +2737,243 @@ var _default = {
       }
     }
     return null;
+  }), (0, _defineProperty2.default)(_methods, "createUserWithCode", function createUserWithCode(code, userInfo) {
+    var _this27 = this;
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
+      var username, password, result, _result$result;
+      return _regenerator.default.wrap(function _callee6$(_context6) {
+        while (1) {
+          switch (_context6.prev = _context6.next) {
+            case 0:
+              console.log('创建新用户并使用code登录');
+              _context6.prev = 1;
+              // 生成随机用户名和密码
+              username = 'wx_user_' + Math.random().toString(36).substring(2, 10);
+              password = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10); // 调用登录云函数创建用户
+              _context6.next = 6;
+              return uniCloud.callFunction({
+                name: 'login',
+                data: {
+                  loginType: 'register',
+                  username: username,
+                  password: password,
+                  code: code,
+                  userInfo: {
+                    nickName: userInfo.nickName || '微信用户',
+                    avatarUrl: userInfo.avatarUrl || '',
+                    gender: userInfo.gender || 0
+                  }
+                }
+              });
+            case 6:
+              result = _context6.sent;
+              console.log('创建用户结果:', result);
+              if (!(result.result && result.result.code === 0)) {
+                _context6.next = 13;
+                break;
+              }
+              // 创建成功，保存用户信息
+              _this27.saveUserInfo(result.result);
+              return _context6.abrupt("return", true);
+            case 13:
+              throw new Error(((_result$result = result.result) === null || _result$result === void 0 ? void 0 : _result$result.message) || '创建用户失败');
+            case 14:
+              _context6.next = 21;
+              break;
+            case 16:
+              _context6.prev = 16;
+              _context6.t0 = _context6["catch"](1);
+              console.error('创建用户过程中出错:', _context6.t0);
+              uni.showToast({
+                title: '创建用户失败',
+                icon: 'none'
+              });
+              return _context6.abrupt("return", false);
+            case 21:
+            case "end":
+              return _context6.stop();
+          }
+        }
+      }, _callee6, null, [[1, 16]]);
+    }))();
+  }), (0, _defineProperty2.default)(_methods, "saveUserInfo", function saveUserInfo(result) {
+    var _this28 = this;
+    console.log('保存用户信息:', result);
+
+    // 确保result有正确的格式
+    var data = result.data || result.userInfo || {};
+    var token = result.token;
+    var tokenExpired = result.tokenExpired;
+
+    // 保存token和用户信息
+    if (token) {
+      uni.setStorageSync('uni_id_token', token);
+    }
+    if (tokenExpired) {
+      uni.setStorageSync('uni_id_token_expired', tokenExpired);
+    }
+
+    // 保存用户信息
+    uni.setStorageSync('uni-id-pages-userInfo', data);
+    uni.setStorageSync('userInfo', data);
+
+    // 更新页面状态
+    this.isLoggedIn = true;
+    this.userInfo = data;
+
+    // 触发登录成功事件
+    uni.$emit('login:success', data);
+    uni.$emit('user:login', data);
+
+    // 显示成功提示
+    uni.hideLoading();
+    uni.showToast({
+      title: '登录成功',
+      icon: 'success'
+    });
+
+    // 延迟导航
+    setTimeout(function () {
+      _this28.navigate();
+    }, 1500);
+  }), (0, _defineProperty2.default)(_methods, "getCaptcha", function getCaptcha() {
+    var _this29 = this;
+    console.log('开始获取图形验证码');
+
+    // 创建随机ID作为captchaId
+    var captchaId = 'captcha_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+
+    // 移动端应用可能无法正常获取图形验证码，使用模拟方式
+    uni.showLoading({
+      title: '加载中...',
+      mask: true
+    });
+    try {
+      // 尝试调用uni-id-co的createCaptcha方法
+      var uniIdCo = uniCloud.importObject('uni-id-co', {
+        customUI: true
+      });
+      uniIdCo.createCaptcha({
+        scene: 'send-sms-code'
+      }).then(function (res) {
+        console.log('图形验证码获取成功:', res);
+        uni.hideLoading();
+
+        // 保存验证码信息
+        _this29.captchaData = {
+          captchaId: res.captchaId || captchaId,
+          imageBase64: res.captcha || ''
+        };
+
+        // 显示验证码输入框
+        _this29.showCaptchaModal = true;
+      }).catch(function (err) {
+        console.error('图形验证码获取失败:', err);
+        uni.hideLoading();
+
+        // 创建备用验证码
+        _this29.createFallbackCaptcha(captchaId);
+      });
+    } catch (e) {
+      console.error('初始化uni-id-co失败:', e);
+      uni.hideLoading();
+
+      // 创建备用验证码
+      this.createFallbackCaptcha(captchaId);
+    }
+  }), (0, _defineProperty2.default)(_methods, "createFallbackCaptcha", function createFallbackCaptcha(captchaId) {
+    console.log('创建备用验证码');
+
+    // 创建一个基本的验证码数据
+    this.captchaData = {
+      captchaId: captchaId || 'manual_captcha_' + Date.now(),
+      imageBase64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAAA8CAYAAADha7PDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAWXSURBVHhe7ZpbiBxFFIbXO+pDQEVERfEhKIqIF9BVQQQR8QYqKnkRQRBEEN/0SURFfPIlURFvqKioiPggiKKIiNeIl6hR1KiJGo2JmrjZ3exms5vL/p3pmvRMV3VXz/RM78z54Ued7qo6VdP1zz97abrDmqaJmOUHFllVf2bNW2Ltmxey9uwy1rpxrvHeOva4u+zPPpuOtbDdJFtBrm+tXpHxRt4OmNs3ZAf3DrP2xtns5/XzrPPoMvbz1lIrL1ky3KgTKAM9/8DGgbbhvLXz/tX9Nd9cbO0b5llr1Uw7/OCy/ntmbCMorBPwSXeNGG/ke8DcN8P8fPc8VrlyBevcuoB1HljUF+PzK1gcqg3aHvnm6/lNxRyc/9fD2fWvrvLLRPTsukJ+VgHfKwEbB0SRPGJRhCe41uXLmNs8n9lty5l9frnYjmFKCdi+Y75dVzHni2Wbv6WTg7dVaLdz9zL7vT9mUbRzqZiXVUSngCE5ckFi+HYu4NmQWWvdJ/Sy2m/3bIutvf0C+34txRi+7tPL2f7bFrHcC8vs60/ODrYJ56uKmLLa75lOAZqEmNMoID6uXNn/0YF0gm1CtTu/nmfdy8XWfW65/fzTKzvY7/nV/rbhuKqI3lDsh+GwrNepXcCmdQKGQ2Y+HEphUEgcQt0XVvD7YXHCZ5MxP3NvX+W3DfvBNnH7IuaYx+0bB+tQZRoXcJLCYVAKYj+h2o4JvTn9YnjYPmwjYI7pPJwzYd84eIfXoao0JmAT4YdMgCfwH86F8JnxI8WE8eH5k3DXGdZVDkWVqF3AJiULh0YJ9dCJmPOQ6fdD+2HbkNuW88xD+0j7LadVvEMVqVXAJiRzz69k7qPlvP9Y/34ohk+Y8EO5Lzm0/dC+wns51UL7T4v45JJZfr2qUJuAdYbDPSPFQvhEzJnPEWP4RN7GUuoMueF9n9oXwrtI+tnCfdQtYh0CNimWH+pE6ET4DPcdMZwnc+ckXJq3L0fvS7cXQPvze+TCe+G9p0NsXcxSRQGbDo/+/ZPgfZzQSbif+OF9mDDsp0OtCLkhvS+9Lwm5L7lfibSPtM8SJBVF0o6hEscloDhFAnbfWFl6+JRwn9PzO4jj9pWCn7NcGHWe9o2T2KdE2k9ZgZ3fzmMusdNUUZXxC1hFOWPkUz3hdBJOKuekxRyrgGJcI98KwvtiJYxpICah2w05vW9WZ9GRXYCYwuMXqWIA1gkoQmJ4MXyifOpnDMhx36X0vhLu0ykW4JziMxQ9+D/Ot6RzHfpQQzEuAYXAUDsOCZ1zc2J+P+T0vCXjKZlxUUQh9x7NZ5BQlPAZbifn+8/rj+eO1ZwPEzNCAacjPPpDcNrlE3FDL8Pv+/TKQkL31eV+G+Q4z4DbTeazRBj2ddt0iJXHIyDElNAl9cchGXLTQzDXMNVDcN2IkPvGQj/k4v6Gc8YnYNPhi5cwp2rq14QsTQko5lQ99VPMCQFjYyZDwFj5YmZDwGj5YiZbwGj5YiZTwEbyxczUDDhWvphJEnC65JsQsDMF8k3EDFgX05csTEVmRMCm5ZvyIXimomn5YmoXMFa+mCkScFrkE6dShpgpaRJjFDBavpikGTDGfTHTIGB0+J1q+WIaGwHryBczWQJGh1/J91QvmZlEE3IVjF3A2PA7XTNfWh7JVcwXM5kCRskXM50CTk/4jZmiGTBavpiJErAp+ZqaAcVUyAiakq8RAZsOv9MlX6xktcsX8z8WsLHwGyNfzGQIGFu2GCdvfI2n/FTRlHwxEyFgbHk6J/I1NRMWESNf7QI2FX5nUr7I8FuFgE2IX9sMGEOs+03LN+MCNU2sfLUKKJoIv3XJF+N+GytfDSIOJ+Z/LF9MI+G3DvmaJlq+WhAy1ilfzBQJGCNRU8TKV+sMeNJJFEL8CzXFzr45H4flAAAAAElFTkSuQmCC'
+    };
+
+    // 显示验证码输入框
+    this.showCaptchaModal = true;
+  }), (0, _defineProperty2.default)(_methods, "handleGetVerifyCode", function handleGetVerifyCode() {
+    console.log('点击获取验证码');
+
+    // 检查手机号是否有效
+    var phoneStr = String(this.mobile).trim();
+    if (!phoneStr || phoneStr.length !== 11) {
+      uni.showToast({
+        title: '请输入正确的手机号',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 获取图形验证码
+    this.getCaptcha();
+  }), (0, _defineProperty2.default)(_methods, "getDeviceInfo", function getDeviceInfo() {
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
+      var _yield$uni$getSystemI, _yield$uni$getSystemI2, error, sysInfo, deviceId;
+      return _regenerator.default.wrap(function _callee7$(_context7) {
+        while (1) {
+          switch (_context7.prev = _context7.next) {
+            case 0:
+              _context7.prev = 0;
+              _context7.next = 3;
+              return uni.getSystemInfo();
+            case 3:
+              _yield$uni$getSystemI = _context7.sent;
+              _yield$uni$getSystemI2 = (0, _slicedToArray2.default)(_yield$uni$getSystemI, 2);
+              error = _yield$uni$getSystemI2[0];
+              sysInfo = _yield$uni$getSystemI2[1];
+              if (!error) {
+                _context7.next = 10;
+                break;
+              }
+              console.error('获取系统信息失败:', error);
+              return _context7.abrupt("return", 'unknown_device');
+            case 10:
+              // 创建唯一标识符
+              deviceId = [sysInfo.brand || '', sysInfo.model || '', sysInfo.platform || '', sysInfo.deviceId || '', sysInfo.devicePixelRatio || ''].filter(Boolean).join('_');
+              if (!deviceId) {
+                deviceId = 'generic_device';
+              }
+              return _context7.abrupt("return", deviceId);
+            case 15:
+              _context7.prev = 15;
+              _context7.t0 = _context7["catch"](0);
+              console.error('获取设备信息异常:', _context7.t0);
+              return _context7.abrupt("return", 'error_device');
+            case 19:
+            case "end":
+              return _context7.stop();
+          }
+        }
+      }, _callee7, null, [[0, 15]]);
+    }))();
+  }), (0, _defineProperty2.default)(_methods, "getStoredUUID", function getStoredUUID() {
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
+      var uuid;
+      return _regenerator.default.wrap(function _callee8$(_context8) {
+        while (1) {
+          switch (_context8.prev = _context8.next) {
+            case 0:
+              _context8.prev = 0;
+              uuid = uni.getStorageSync('device_uuid');
+              if (!uuid) {
+                // 生成新UUID
+                uuid = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+                uni.setStorageSync('device_uuid', uuid);
+              }
+              return _context8.abrupt("return", uuid);
+            case 6:
+              _context8.prev = 6;
+              _context8.t0 = _context8["catch"](0);
+              console.error('UUID处理异常:', _context8.t0);
+              return _context8.abrupt("return", 'error_uuid_' + Date.now());
+            case 10:
+            case "end":
+              return _context8.stop();
+          }
+        }
+      }, _callee8, null, [[0, 6]]);
+    }))();
   }), _methods)
 };
 exports.default = _default;
@@ -2617,7 +2981,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 147:
+/***/ 148:
 /*!**************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/login/login.vue?vue&type=style&index=0&lang=scss& ***!
   \**************************************************************************************************************************/
@@ -2626,14 +2990,14 @@ exports.default = _default;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./login.vue?vue&type=style&index=0&lang=scss& */ 148);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./login.vue?vue&type=style&index=0&lang=scss& */ 149);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_login_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
-/***/ 148:
+/***/ 149:
 /*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages/login/login.vue?vue&type=style&index=0&lang=scss& ***!
   \******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -2646,5 +3010,5 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ })
 
-},[[141,"common/runtime","common/vendor"]]]);
+},[[142,"common/runtime","common/vendor"]]]);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/login/login.js.map

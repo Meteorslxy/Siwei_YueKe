@@ -81,7 +81,7 @@
 				errorType: ["account", "password", "captcha", "mobile", 'nickname'],
 				focusAccount: false,
 				focusPassword: false,
-				logo: '/static/logo.png',
+				logo: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
 				showPassword: false, //是否显示密码
 				username: "",
 				password: "",

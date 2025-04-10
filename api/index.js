@@ -486,43 +486,11 @@ const fileApi = {
   }
 }
 
-// 管理后台相关API
-const adminApi = {
-  // 上传各种内容（教师、讲座、课程、新闻等）
-  uploadContent(data) {
-    if (!data.type) {
-      console.error('uploadContent: 缺少内容类型');
-      return Promise.reject({
-        code: -1,
-        success: false,
-        message: '缺少内容类型'
-      });
-    }
-    
-    if (!data.data) {
-      console.error('uploadContent: 缺少内容数据');
-      return Promise.reject({
-        code: -1,
-        success: false,
-        message: '缺少内容数据'
-      });
-    }
-    
-    console.log(`上传${data.type}内容`);
-    
-    return request({
-      name: 'uploadContent',
-      data
-    });
-  }
-}
-
 export default {
   course: courseApi,
   user: userApi,
   teacher: teacherApi,
   lecture: lectureApi,
   file: fileApi,
-  admin: adminApi,
   location: locationApi
 } 

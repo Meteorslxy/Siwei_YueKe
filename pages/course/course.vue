@@ -71,7 +71,7 @@
       </block>
       
       <!-- 加载更多 -->
-      <load-more :status="loadMoreStatus" @click="loadMore"></load-more>
+      <load-more :status="loadMoreStatus" @click="loadMore" :autoLoad="true"></load-more>
       
       <!-- 空数据提示 -->
       <empty-tip v-if="courseList.length === 0" tip="暂无相关课程"></empty-tip>
@@ -125,10 +125,13 @@ export default {
       // 课程列表相关
       courseList: [],
       page: 1,
-      limit: 10,
+      limit: 999, // 增大每页数量，一次性加载所有课程
       total: 0,
       loadMoreStatus: 'more', // more-加载更多 loading-加载中 noMore-没有更多了
-      isLoading: false
+      isLoading: false,
+      allCourses: [], // 存储所有课程数据
+      displayCount: 10, // 初始显示数量
+      isReachBottom: false // 是否触底标记
     }
   },
   computed: {
@@ -154,9 +157,9 @@ export default {
     })
   },
   onReachBottom() {
-    if (this.loadMoreStatus === 'more') {
-      this.loadMore()
-    }
+    console.log('触发页面触底事件');
+    this.isReachBottom = true;
+    this.loadMoreCourses();
   },
   methods: {
     // 获取状态栏高度
@@ -219,15 +222,45 @@ export default {
     resetList() {
       this.page = 1;
       this.courseList = [];
+      this.allCourses = [];
+      this.displayCount = 10;
       this.total = 0;
       this.loadMoreStatus = 'more';
     },
     
     // 加载更多
     loadMore() {
-      if (this.isLoading) return;
-      this.page++;
-      this.loadCourseList();
+      // 优先从已加载的数据中显示更多
+      if (this.allCourses.length > this.courseList.length) {
+        this.loadMoreCourses();
+      } 
+      // 如果已加载的数据都显示完了，再从服务器加载更多
+      else if (this.loadMoreStatus === 'more' && !this.isLoading) {
+        this.page++;
+        this.loadCourseList();
+      }
+    },
+    
+    // 从已加载的课程中显示更多
+    loadMoreCourses() {
+      if (this.allCourses.length <= this.courseList.length) {
+        console.log('已经显示所有已加载的课程数据');
+        return;
+      }
+      
+      console.log('从已加载数据中显示更多课程');
+      const newDisplayCount = this.displayCount + 10; // 每次增加10个
+      this.displayCount = newDisplayCount;
+      this.courseList = this.allCourses.slice(0, newDisplayCount);
+      console.log('增加显示课程数量，当前显示:', this.courseList.length);
+      
+      // 检查是否已显示所有数据
+      if (this.courseList.length >= this.allCourses.length && this.courseList.length >= this.total) {
+        this.loadMoreStatus = 'noMore';
+      }
+      
+      // 重置触底状态
+      this.isReachBottom = false;
     },
     
     // 获取课程列表
@@ -277,22 +310,37 @@ export default {
           const processedData = await this.processTeacherAvatars(result.data);
           
           if (this.page === 1) {
-            this.courseList = processedData;
+            this.allCourses = processedData;
+            // 初始只显示部分课程
+            this.courseList = processedData.slice(0, this.displayCount);
           } else {
-            this.courseList = [...this.courseList, ...processedData];
+            this.allCourses = [...this.allCourses, ...processedData];
+            // 更新显示的课程
+            this.courseList = this.allCourses.slice(0, this.displayCount);
           }
           
           this.total = result.total || processedData.length;
           
+          console.log('当前显示课程总数:', this.courseList.length);
+          console.log('已加载课程总数:', this.allCourses.length);
+          console.log('服务器返回总数:', this.total);
+          
           // 更新加载状态
-          if (this.courseList.length >= this.total) {
+          const hasMoreOnServer = this.allCourses.length < this.total;
+          if (!hasMoreOnServer && this.courseList.length >= this.allCourses.length) {
             this.loadMoreStatus = 'noMore';
           } else {
             this.loadMoreStatus = 'more';
           }
+          
+          // 如果触底了，立即显示更多
+          if (this.isReachBottom) {
+            this.loadMoreCourses();
+          }
         } else {
           if (this.page === 1) {
             this.courseList = [];
+            this.allCourses = [];
           }
           this.loadMoreStatus = 'noMore';
         }

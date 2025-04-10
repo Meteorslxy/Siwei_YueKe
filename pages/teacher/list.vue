@@ -66,7 +66,7 @@
       </block>
       <empty-tip v-else tip="暂无教师" :show="!loading"></empty-tip>
       
-      <load-more :status="loadMoreStatus" @click="loadMore"></load-more>
+      <load-more :status="loadMoreStatus" @click="loadMore" :autoLoad="true"></load-more>
     </view>
   </view>
 </template>
@@ -88,10 +88,14 @@ export default {
       showSchoolFilter: false,
       teacherList: [],
       page: 1,
-      pageSize: 10,
+      pageSize: 999,  // 大幅提高每页数量，确保能一次获取到所有老师
       loading: false,
       loadMoreStatus: 'more',
-      hasMore: true
+      hasMore: true,
+      allTeacherList: [], // 存储所有老师数据
+      displayedTeachers: [], // 当前显示的老师数据
+      displayCount: 10, // 初始显示数量
+      isReachBottom: false // 是否触底标记
     }
   },
   computed: {
@@ -132,6 +136,12 @@ export default {
   },
   onPullDownRefresh() {
     this.refreshList();
+  },
+  // 添加页面触底事件处理函数
+  onReachBottom() {
+    this.isReachBottom = true;
+    console.log('触发页面触底事件');
+    this.loadMoreTeachers();
   },
   methods: {
     // 搜索
@@ -178,15 +188,6 @@ export default {
       this.refreshList();
     },
     
-    // 刷新列表
-    refreshList() {
-      this.page = 1;
-      this.hasMore = true;
-      this.loadMoreStatus = 'more';
-      this.teacherList = [];
-      this.getTeacherList();
-    },
-    
     // 获取教师列表
     getTeacherList() {
       if (this.loading) return;
@@ -226,15 +227,39 @@ export default {
         console.log('获取教师列表结果:', result);
         if (result && result.data) {
           const list = result.data || [];
+          console.log('获取到教师列表数量:', list.length);
+          console.log('当前页码:', this.page);
+          console.log('每页大小:', this.pageSize);
           
           if (this.page === 1) {
-            this.teacherList = list;
+            this.allTeacherList = list;
+            // 初始只显示部分教师
+            this.teacherList = list.slice(0, this.displayCount);
           } else {
-            this.teacherList = [...this.teacherList, ...list];
+            this.allTeacherList = [...this.allTeacherList, ...list];
+            // 添加新加载的教师到显示列表
+            this.teacherList = this.allTeacherList.slice(0, this.displayCount);
           }
           
-          this.hasMore = list.length === this.pageSize;
+          console.log('当前显示教师总数:', this.teacherList.length);
+          console.log('已加载教师总数:', this.allTeacherList.length);
+          
+          // 修改判断逻辑：如果返回的数据长度等于页大小，则认为还有更多数据
+          // 如果后端返回了总数，则使用总数判断
+          if (result.total !== undefined) {
+            console.log('服务器返回总数:', result.total);
+            this.hasMore = this.allTeacherList.length < result.total;
+          } else {
+            this.hasMore = list.length >= this.pageSize;
+          }
+          console.log('是否有更多数据:', this.hasMore);
           this.loadMoreStatus = this.hasMore ? 'more' : 'noMore';
+          
+          // 如果触底了，立即显示更多
+          if (this.isReachBottom) {
+            this.loadMoreTeachers();
+            this.isReachBottom = false;
+          }
         } else {
           uni.showToast({
             title: '获取教师列表失败',
@@ -260,10 +285,48 @@ export default {
     
     // 加载更多
     loadMore() {
-      if (this.hasMore && !this.loading) {
+      // 优先从已加载的数据中显示更多
+      if (this.allTeacherList.length > this.teacherList.length) {
+        this.loadMoreTeachers();
+      } 
+      // 如果已加载的数据都显示完了，再从服务器加载更多
+      else if (this.hasMore && !this.loading) {
+        console.log('已显示所有已加载数据，从服务器加载更多，页码增加到:', this.page + 1);
         this.page++;
         this.getTeacherList();
+      } else {
+        console.log('没有更多数据或正在加载中');
       }
+    },
+    
+    // 从已加载的数据中显示更多教师
+    loadMoreTeachers() {
+      if (this.allTeacherList.length <= this.teacherList.length) {
+        console.log('已经显示所有已加载的教师数据');
+        return;
+      }
+      
+      console.log('从已加载数据中显示更多教师');
+      const newDisplayCount = this.displayCount + 10; // 每次增加10个
+      this.displayCount = newDisplayCount;
+      this.teacherList = this.allTeacherList.slice(0, newDisplayCount);
+      console.log('增加显示教师数量，当前显示:', this.teacherList.length);
+      
+      // 检查是否已显示所有数据
+      if (this.teacherList.length >= this.allTeacherList.length && !this.hasMore) {
+        this.loadMoreStatus = 'noMore';
+      }
+    },
+    
+    // 刷新列表
+    refreshList() {
+      this.page = 1;
+      this.hasMore = true;
+      this.loadMoreStatus = 'more';
+      this.teacherList = [];
+      this.allTeacherList = [];
+      this.displayCount = 10;
+      this.getTeacherList();
     }
   }
 }

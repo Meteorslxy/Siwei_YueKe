@@ -1,0 +1,25 @@
+{
+  "passwordSecret": "passwordSecret-demo",
+  "tokenSecret": "tokenSecret-demo",
+  "tokenExpiresIn": 7200,
+  "passwordErrorLimit": 6,
+  "passwordErrorRetryTime": 3600,
+  "bindTokenToDevice": false,
+  "app": {
+    "tokenExpiresIn": 2592000,
+    "oauth": {
+      "weixin": {
+        "appid": "your-wx-appid",
+        "appsecret": "your-wx-secret"
+      }
+    }
+  },
+  "mp-weixin": {
+    "oauth": {
+      "weixin": {
+        "appid": "your-wx-appid",
+        "appsecret": "your-wx-secret"
+      }
+    }
+  }
+} 

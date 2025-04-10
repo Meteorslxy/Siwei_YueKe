@@ -18,6 +18,7 @@ var _App = _interopRequireDefault(__webpack_require__(/*! ./App */ 39));
 var _init = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/init.js */ 45));
 __webpack_require__(/*! ./components/global.js */ 47);
 var _index2 = _interopRequireDefault(__webpack_require__(/*! ./api/index.js */ 90));
+var _cloudConfig = __webpack_require__(/*! ./utils/cloud-config.js */ 92);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // @ts-ignore
@@ -43,6 +44,9 @@ console.log('微信小程序环境 - 只使用UniCloud阿里云');
 // 全局组件注册
 
 _vue.default.prototype.$api = _index2.default;
+
+// 引入云服务配置
+
 _vue.default.config.productionTip = false;
 _App.default.mpType = 'app';
 _vue.default.prototype.$spaceId = spaceId;
@@ -52,6 +56,8 @@ if (!_App.default.globalData) {
   _App.default.globalData = {};
 }
 _App.default.globalData.$spaceId = spaceId;
+// 设置全局测试模式变量为false，关闭测试模式
+_App.default.globalData.$isDevMode = false;
 
 // 全局混入
 _vue.default.mixin({
@@ -88,27 +94,27 @@ _vue.default.mixin({
 var themeColor = 'var(--theme-color)'; // 使用CSS变量
 _vue.default.prototype.$themeColor = themeColor;
 
-// 初始化UniCloud云服务
-if (typeof uniCloud !== 'undefined') {
-  console.log('正在初始化UniCloud阿里云服务...');
-  try {
-    // 初始化阿里云
-    uniCloud.init({
-      provider: 'aliyun',
-      // 服务商，使用阿里云
-      spaceId: spaceId,
-      // 服务空间ID
-      clientSecret: '6YQCnJGxPGKuluPbkDTiyg==',
-      // 服务空间客户端密钥
-      endpoint: 'https://api.next.bspapp.com' // 阿里云服务空间地址
-    });
+// 初始化云服务
+var cloudInitResult = (0, _cloudConfig.initCloudService)();
+console.log('云服务初始化结果:', cloudInitResult);
 
-    console.log('UniCloud阿里云环境初始化完成');
-  } catch (error) {
-    console.error('UniCloud初始化失败:', error);
-  }
-} else {
-  console.warn('uniCloud不可用');
+// 测试云函数连接
+
+if (cloudInitResult) {
+  setTimeout(function () {
+    console.log('测试云函数连接...');
+    var cloudObj = typeof uniCloud !== 'undefined' ? uniCloud : uni.cloud;
+    cloudObj.callFunction({
+      name: 'yuekeCloudTest',
+      data: {
+        message: '连接测试'
+      }
+    }).then(function (res) {
+      console.log('云服务连接测试成功:', res.result);
+    }).catch(function (err) {
+      console.error('云服务连接测试失败:', err);
+    });
+  }, 2000);
 }
 
 // 添加页面跳转的错误处理
@@ -1059,9 +1065,25 @@ var _default = {
     status: {
       type: String,
       default: 'more' // more-加载更多 loading-加载中 noMore-没有更多了
+    },
+
+    autoLoad: {
+      type: Boolean,
+      default: false // 是否自动加载
     }
   },
 
+  watch: {
+    status: function status(val) {
+      var _this = this;
+      // 当状态变为'more'且设置了自动加载时，自动触发加载
+      if (val === 'more' && this.autoLoad) {
+        this.$nextTick(function () {
+          _this.onClick();
+        });
+      }
+    }
+  },
   methods: {
     onClick: function onClick(event) {
       // 防止事件冒泡

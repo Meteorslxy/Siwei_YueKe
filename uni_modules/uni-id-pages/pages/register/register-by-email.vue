@@ -113,7 +113,7 @@
 				focusNickname:false,
 				focusPassword:false,
 				focusPassword2:false,
-				logo: "/static/logo.png"
+				logo: "https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png"
 			}
 		},
 		onReady() {

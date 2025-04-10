@@ -36,6 +36,35 @@ function request(options = {}) {
     
     console.log(`调用阿里云云函数[${name}]，环境ID: ${spaceId}`);
     
+    // 获取可用的云函数调用对象
+    let cloudObj = null;
+    
+    // 检查微信小程序环境
+    // #ifdef MP-WEIXIN
+    console.log('当前运行环境: 微信小程序');
+    
+    // 优先使用uniCloud而不是uni.cloud
+    cloudObj = (typeof uniCloud !== 'undefined' && uniCloud) ? uniCloud : 
+               (typeof uni !== 'undefined' && uni.cloud) ? uni.cloud : null;
+    
+    if (!cloudObj) {
+      console.error('云函数对象不可用，无法调用云函数');
+      
+      if (showLoading) {
+        uni.hideLoading();
+      }
+      
+      // 返回错误
+      return resolve({
+        code: -501001,
+        message: '云服务不可用，请检查网络或重新登录',
+        data: null
+      });
+    } else {
+      console.log('云函数调用对象已准备就绪:', cloudObj === uniCloud ? 'uniCloud' : 'uni.cloud');
+    }
+    // #endif
+    
     // 检查uniCloud是否存在
     if (typeof uniCloud === 'undefined' || !uniCloud) {
       console.error('uniCloud对象不存在，使用模拟数据');
@@ -61,6 +90,11 @@ function request(options = {}) {
       
       return resolve(mockResult);
     }
+    
+    // 非微信环境默认使用uniCloud
+    // #ifndef MP-WEIXIN
+    cloudObj = uniCloud;
+    // #endif
     
     // 处理超时的定时器
     let timeoutTimer = null;
@@ -101,7 +135,7 @@ function request(options = {}) {
     }
     
     // 使用uniCloud调用云函数
-    uniCloud.callFunction({
+    cloudObj.callFunction({
       name,
       data,
       success: res => {
@@ -155,10 +189,36 @@ function request(options = {}) {
         
         console.error(`云函数 ${name} 调用失败:`, err);
         
+        // 记录更详细的错误信息以便调试
+        let errorMsg = '未知错误';
+        let errorCode = -1;
+        
+        // 解析具体错误类型
+        if (err.errCode) {
+          errorCode = err.errCode;
+          switch(err.errCode) {
+            case -501004:
+              errorMsg = '云函数不存在或执行出错';
+              break;
+            case -403009:
+              errorMsg = '没有访问权限';
+              break;
+            case -501001:
+              errorMsg = '云服务未开通或已到期';
+              break;
+            default:
+              errorMsg = err.errMsg || '调用失败';
+          }
+        } else if (err.errMsg) {
+          errorMsg = err.errMsg;
+        }
+        
+        console.error(`[云函数错误] 代码: ${errorCode}, 消息: ${errorMsg}`);
+        
         // 返回错误数据而不是reject，让业务层处理
         resolve({
-          code: -1,
-          message: '请求失败，请稍后重试',
+          code: errorCode,
+          message: errorMsg,
           error: err
         });
       },

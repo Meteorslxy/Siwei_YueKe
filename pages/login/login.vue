@@ -1,7 +1,11 @@
 <template>
   <view class="login-container">
     <!-- 背景图 -->
-    <image class="bg-image" src="/static/images/login.png" mode="aspectFill"></image>
+    <image 
+      class="bg-image" 
+      src="https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/a3ef4ccc-5a4d-4ad5-9697-fd22b2288237" 
+      mode="aspectFill"
+    ></image>
     
     <!-- 自定义导航栏 -->
     <view class="custom-nav" :style="{ paddingTop: statusBarHeight + 'px' }">
@@ -40,7 +44,7 @@
     <view class="content" v-else>
       <!-- Logo -->
       <view class="header">
-        <image class="logo" src="../../static/images/logo.png" mode="aspectFit"></image>
+        <image class="logo" src="https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png" mode="aspectFit"></image>
       </view>
       
       <!-- 登录按钮 -->
@@ -101,13 +105,13 @@
     </view>
     
       <view class="auth-items">
-        <!-- 微信授权登录按钮 -->
-        <view class="auth-item" v-if="hasProvider('weixin')" @click="handleGetUserInfo">
+        <!-- 微信授权登录按钮 - 已隐藏 -->
+        <!-- <view class="auth-item" v-if="hasProvider('weixin')" @click="handleGetUserInfo">
           <view class="icon-btn">
             <text class="iconfont icon-wechat" style="color: #07C160;"></text>
-        </view>
+          </view>
           <text class="auth-name">微信登录</text>
-    </view>
+        </view> -->
     
         <!-- 其他登录方式 -->
         </view>
@@ -161,7 +165,7 @@ export default {
     // 检查是否支持一键登录
     this.checkSupport();
     
-    // 进入页面就开始静默登录
+    // 页面加载时自动尝试静默登录
     this.silentLogin();
   },
   methods: {
@@ -714,48 +718,80 @@ export default {
     
     // 静默登录
     async silentLogin() {
+      console.log('尝试静默登录');
+      
       try {
-        // 检查是否已有token
-        const token = uni.getStorageSync('uni_id_token');
-        const tokenExpired = uni.getStorageSync('uni_id_token_expired');
+        // 获取存储的openid
+        const savedOpenid = uni.getStorageSync('wx_openid');
         
-        // 如果没有token或者token已过期，不做任何操作
-        if (!token || !tokenExpired || Date.now() > tokenExpired) {
-          console.log('无有效token或token已过期，需要用户主动登录');
-          return;
+        if (savedOpenid) {
+          console.log('发现存储的openid，尝试自动登录:', savedOpenid);
+          
+          // 获取设备信息
+          const deviceInfo = await this.getDeviceInfo();
+          const uuid = await this.getStoredUUID();
+          
+          // 尝试使用openid直接登录
+          const loginResult = await uniCloud.callFunction({
+            name: 'login',
+            data: {
+              loginType: 'wechat',
+              openid: savedOpenid,
+              userInfo: {
+                nickName: '微信用户',
+                avatarUrl: '',
+                gender: 0
+              },
+              deviceInfo,
+              uuid
+            }
+          }).catch(err => {
+            console.error('静默登录失败:', err);
+            return null;
+          });
+          
+          if (loginResult && loginResult.result && loginResult.result.code === 0) {
+            console.log('静默登录成功:', loginResult.result);
+            // 更新用户信息并跳转
+            this.saveUserInfo(loginResult.result);
+            return true;
+          } else {
+            console.log('静默登录失败，需要重新登录');
+            // 清除无效的openid
+            uni.removeStorageSync('wx_openid');
+          }
+        } else {
+          console.log('未找到存储的openid，无法静默登录');
         }
         
-        console.log('发现有效token，尝试静默登录');
-        
-        // 使用云函数验证token
-        uniCloud.callFunction({
-          name: 'getUserInfoByToken',
-          data: { uniIdToken: token }
-        })
-        .then(res => {
-          if (res.result && res.result.code === 0 && res.result.userInfo) {
-            console.log('token有效，静默登录成功');
+        // 如果静默登录失败，但微信平台支持，可以尝试获取新的code
+        if (uni.canIUse('login')) {
+          try {
+            const loginRes = await new Promise((resolve, reject) => {
+              uni.login({
+                provider: 'weixin',
+                success: res => resolve(res),
+                fail: err => reject(err)
+              });
+            });
             
-            // 刷新页面显示
-            this.refreshUserInfo(res.result);
-            
-            // 如果有重定向页面，直接跳转
-            setTimeout(() => {
-              const redirectUrl = this.getRedirectUrl();
-              if (redirectUrl) {
-                console.log('静默登录成功，跳转到:', redirectUrl);
-                this.navigateAfterLogin();
-              }
-            }, 500);
-          } else {
-            console.log('token无效，需要用户主动登录');
+            if (loginRes && loginRes.code) {
+              console.log('静默获取code成功:', loginRes.code);
+              // 保存code，等用户主动点击微信登录时使用
+              this.loginState.code = loginRes.code;
+              
+              // 可以选择尝试使用code进行自动登录
+              // 但这里我们不自动登录，等用户手动点击微信登录按钮
+            }
+          } catch (e) {
+            console.error('静默获取code失败:', e);
           }
-        })
-        .catch(err => {
-          console.error('静默登录失败:', err);
-        });
-      } catch (err) {
-        console.error('静默登录出错:', err);
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('静默登录过程中出错:', error);
+        return false;
       }
     },
     
@@ -1025,7 +1061,7 @@ export default {
       phoneNumber = String(phoneNumber).trim();
       if (!phoneNumber || phoneNumber.length !== 11) {
         console.error("手机号格式不正确:", phoneNumber);
-          uni.hideLoading();
+        uni.hideLoading();
         uni.showToast({
           title: '手机号格式不正确',
           icon: 'none'
@@ -1036,14 +1072,17 @@ export default {
       // 检查是否有验证码数据
       if (!this.captchaData || !this.captchaData.captchaId) {
         console.error("缺少图形验证码数据");
-          uni.hideLoading();
-          uni.showToast({
+        uni.hideLoading();
+        uni.showToast({
           title: '请先获取图形验证码',
-            icon: 'none'
-          });
+          icon: 'none'
+        });
+        
+        // 自动打开验证码模态框
+        this.getCaptcha();
         return;
       }
-    
+      
       // 检查是否已输入图形验证码
       if (!this.captchaCode) {
         console.error("未输入图形验证码");
@@ -1052,6 +1091,11 @@ export default {
           title: '请输入图形验证码',
           icon: 'none'
         });
+        
+        // 如果验证码框没有显示，打开它
+        if (!this.showCaptchaModal) {
+          this.showCaptchaModal = true;
+        }
         return;
       }
       
@@ -1062,13 +1106,13 @@ export default {
           console.log('使用本地模拟方式发送验证码');
           this.simulateSmsSend(phoneNumber);
           return;
-          } else {
+        } else {
           uni.hideLoading();
-        uni.showToast({
+          uni.showToast({
             title: '验证码错误，请重新输入',
-          icon: 'none'
-        });
-        return;
+            icon: 'none'
+          });
+          return;
         }
       }
       
@@ -1081,13 +1125,7 @@ export default {
         return;
       }
       
-      console.log('发送短信验证码，参数:', {
-        mobile: phoneNumber,
-        captcha: this.captchaCode,
-        captchaId: this.captchaData.captchaId
-      });
-      
-      // 使用uni-id-co方式发送短信验证码
+      // 尝试使用importObject发送短信
       this.sendSmsByImportObject(phoneNumber);
     },
     
@@ -1405,6 +1443,10 @@ export default {
       });
       
       try {
+        // 获取设备信息用于唯一标识
+        const deviceInfo = await this.getDeviceInfo();
+        const uuid = await this.getStoredUUID();
+        
         // 获取微信登录code
         const [error, loginRes] = await uni.login({
           provider: 'weixin'
@@ -1434,84 +1476,127 @@ export default {
           return;
         }
         
+        // 保存code
+        this.loginState.code = loginRes.code;
+        
         // 获取用户信息
         let userInfo = {};
         
         try {
-          // 尝试获取用户信息
+          // 新版微信小程序，使用getUserProfile
           const [profileError, profileRes] = await uni.getUserProfile({
-            desc: '用于完善用户资料'
+            desc: '用于完善会员资料'
           });
           
-          if (!profileError && profileRes && profileRes.userInfo) {
-            console.log('获取到用户信息:', profileRes.userInfo);
+          if (!profileError && profileRes.userInfo) {
+            console.log('获取用户资料成功:', profileRes.userInfo);
             userInfo = profileRes.userInfo;
-          } else {
-            console.log('获取用户信息失败，将使用默认用户信息');
-            // 使用默认用户信息
-            userInfo = {
-              nickName: '微信用户',
-              avatarUrl: ''
-            };
           }
-        } catch (profileErr) {
-          console.error('获取用户信息过程中出错:', profileErr);
-          // 继续执行，使用默认用户信息
-          userInfo = {
-            nickName: '微信用户',
-            avatarUrl: ''
-          };
+        } catch (e) {
+          console.warn('获取用户信息失败，将使用默认用户信息');
+          userInfo = { nickName: '微信用户', avatarUrl: '', gender: 0 };
         }
         
-        // 直接创建用户，不管是否存在
-        // 云函数会处理用户是否已存在的逻辑
+        // 直接调用login云函数，让云函数处理微信登录全流程
+        console.log('直接调用login云函数处理微信登录');
         try {
-          console.log('直接调用创建用户云函数');
-          const createResult = await uniCloud.callFunction({
-        name: 'login',
-        data: {
-              loginType: 'createUserInDb',
-              code: loginRes.code,   // 直接传递code参数
+          const loginResult = await uniCloud.callFunction({
+            name: 'login',
+            data: {
+              loginType: 'wechat',
+              code: loginRes.code,
               userInfo: {
-                ...userInfo
-              }
+                nickName: userInfo.nickName || '微信用户',
+                avatarUrl: userInfo.avatarUrl || '',
+                gender: userInfo.gender || 0
+              },
+              // 传递额外信息用于开发环境生成稳定openid
+              deviceInfo: deviceInfo,
+              uuid: uuid
             }
           });
           
-          console.log('创建/登录用户结果:', createResult);
+          console.log('微信登录结果:', loginResult);
           
-          if (createResult.result && createResult.result.code === 0) {
-            // 创建/登录成功
-            uni.hideLoading();
-            this.handleLoginSuccess(createResult.result);
-            return true;
+          if (loginResult.result && loginResult.result.code === 0) {
+            // 登录成功，保存用户信息
+            if (loginResult.result.userInfo && loginResult.result.userInfo.wx_openid) {
+              const openid = loginResult.result.userInfo.wx_openid['mp-weixin'];
+              if (openid) {
+                console.log('保存openid到本地存储:', openid);
+                // 保存openid到本地存储，用于静默登录
+                uni.setStorageSync('wx_openid', openid);
+              }
+            }
+            
+            this.saveUserInfo(loginResult.result);
           } else {
-            console.error('创建/登录用户失败:', createResult.result);
-            uni.hideLoading();
+            // 登录失败，显示错误信息
+            console.error('微信登录失败:', loginResult.result);
             uni.showToast({
-              title: (createResult.result && createResult.result.message) || '登录失败，请重试',
+              title: (loginResult.result && loginResult.result.message) || '登录失败，请重试',
               icon: 'none'
             });
           }
-        } catch (createErr) {
-          console.error('调用创建用户云函数出错:', createErr);
-          uni.hideLoading();
-          uni.showToast({
-            title: '创建用户出错: ' + (createErr.message || '未知错误'),
-            icon: 'none'
-          });
+        } catch (loginErr) {
+          console.error('调用login云函数失败:', loginErr);
+          
+          // 尝试使用备用方法
+          if (loginRes.code) {
+            console.log('尝试使用直接getWxOpenid获取openid');
+            try {
+              const openidResult = await uniCloud.callFunction({
+                name: 'getWxOpenid',
+                data: { 
+                  code: loginRes.code,
+                  deviceInfo: deviceInfo,
+                  uuid: uuid
+                }
+              });
+              
+              if (openidResult.result && openidResult.result.code === 0 && 
+                  openidResult.result.data && openidResult.result.data.openid) {
+                const wxOpenid = openidResult.result.data.openid;
+                console.log('成功获取到openid，尝试使用openid登录:', wxOpenid);
+                
+                // 保存openid
+                uni.setStorageSync('wx_openid', wxOpenid);
+                
+                // 直接创建用户
+                uni.showToast({
+                  title: '正在创建用户...',
+                  icon: 'none'
+                });
+                
+                // 在下次启动时使用此openid登录
+                setTimeout(() => {
+                  uni.redirectTo({
+                    url: '/pages/login/login'
+                  });
+                }, 1500);
+              } else {
+                throw new Error('获取openid失败');
+              }
+            } catch (e) {
+              console.error('备用方法也失败:', e);
+              uni.showToast({
+                title: '登录失败，请重试',
+                icon: 'none'
+              });
+            }
+          } else {
+            uni.showToast({
+              title: '登录失败，请重试',
+              icon: 'none'
+            });
+          }
         }
-        
-        uni.hideLoading();
-        return false;
-      } catch (err) {
-        console.error('微信登录过程中出错:', err);
-        uni.hideLoading();
+      } catch (error) {
+        console.error('登录过程中出错:', error);
         uni.showToast({
-          title: '登录过程出错: ' + (err.message || '未知错误'),
+          title: '登录失败，请重试',
           icon: 'none'
         });
-        return false;
       } finally {
         this.showLoginLoading = false;
         uni.hideLoading();
@@ -2463,6 +2548,221 @@ export default {
       }
       
       return null;
+    },
+    
+    // 创建用户并使用code登录 - 新增方法
+    async createUserWithCode(code, userInfo) {
+      console.log('创建新用户并使用code登录');
+      
+      try {
+        // 生成随机用户名和密码
+        const username = 'wx_user_' + Math.random().toString(36).substring(2, 10);
+        const password = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+        
+        // 调用登录云函数创建用户
+        const result = await uniCloud.callFunction({
+          name: 'login',
+          data: {
+            loginType: 'register',
+            username,
+            password,
+            code,
+            userInfo: {
+              nickName: userInfo.nickName || '微信用户',
+              avatarUrl: userInfo.avatarUrl || '',
+              gender: userInfo.gender || 0
+            }
+          }
+        });
+        
+        console.log('创建用户结果:', result);
+        
+        if (result.result && result.result.code === 0) {
+          // 创建成功，保存用户信息
+          this.saveUserInfo(result.result);
+          return true;
+        } else {
+          throw new Error(result.result?.message || '创建用户失败');
+        }
+      } catch (error) {
+        console.error('创建用户过程中出错:', error);
+        uni.showToast({
+          title: '创建用户失败',
+          icon: 'none'
+        });
+        return false;
+      }
+    },
+    
+    // 保存用户信息并处理登录成功 - 新增方法
+    saveUserInfo(result) {
+      console.log('保存用户信息:', result);
+      
+      // 确保result有正确的格式
+      const data = result.data || result.userInfo || {};
+      const token = result.token;
+      const tokenExpired = result.tokenExpired;
+      
+      // 保存token和用户信息
+      if (token) {
+        uni.setStorageSync('uni_id_token', token);
+      }
+      if (tokenExpired) {
+        uni.setStorageSync('uni_id_token_expired', tokenExpired);
+      }
+      
+      // 保存用户信息
+      uni.setStorageSync('uni-id-pages-userInfo', data);
+      uni.setStorageSync('userInfo', data);
+      
+      // 更新页面状态
+      this.isLoggedIn = true;
+      this.userInfo = data;
+      
+      // 触发登录成功事件
+      uni.$emit('login:success', data);
+      uni.$emit('user:login', data);
+      
+      // 显示成功提示
+      uni.hideLoading();
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success'
+      });
+      
+      // 延迟导航
+      setTimeout(() => {
+        this.navigate();
+      }, 1500);
+    },
+    
+    // 获取验证码
+    getCaptcha() {
+      console.log('开始获取图形验证码');
+      
+      // 创建随机ID作为captchaId
+      const captchaId = 'captcha_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      
+      // 移动端应用可能无法正常获取图形验证码，使用模拟方式
+      uni.showLoading({
+        title: '加载中...',
+        mask: true
+      });
+      
+      try {
+        // 尝试调用uni-id-co的createCaptcha方法
+        const uniIdCo = uniCloud.importObject('uni-id-co', {
+          customUI: true
+        });
+        
+        uniIdCo.createCaptcha({
+          scene: 'send-sms-code'
+        }).then(res => {
+          console.log('图形验证码获取成功:', res);
+          uni.hideLoading();
+          
+          // 保存验证码信息
+          this.captchaData = {
+            captchaId: res.captchaId || captchaId,
+            imageBase64: res.captcha || ''
+          };
+          
+          // 显示验证码输入框
+          this.showCaptchaModal = true;
+        }).catch(err => {
+          console.error('图形验证码获取失败:', err);
+          uni.hideLoading();
+          
+          // 创建备用验证码
+          this.createFallbackCaptcha(captchaId);
+        });
+      } catch (e) {
+        console.error('初始化uni-id-co失败:', e);
+        uni.hideLoading();
+        
+        // 创建备用验证码
+        this.createFallbackCaptcha(captchaId);
+      }
+    },
+    
+    // 创建备用验证码
+    createFallbackCaptcha(captchaId) {
+      console.log('创建备用验证码');
+      
+      // 创建一个基本的验证码数据
+      this.captchaData = {
+        captchaId: captchaId || 'manual_captcha_' + Date.now(),
+        imageBase64: 'data:image/png;base64,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'
+      };
+      
+      // 显示验证码输入框
+      this.showCaptchaModal = true;
+    },
+    
+    // 获取图像验证码并显示图形验证码框
+    handleGetVerifyCode() {
+      console.log('点击获取验证码');
+      
+      // 检查手机号是否有效
+      const phoneStr = String(this.mobile).trim();
+      if (!phoneStr || phoneStr.length !== 11) {
+        uni.showToast({
+          title: '请输入正确的手机号',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 获取图形验证码
+      this.getCaptcha();
+    },
+    
+    // 获取设备信息用于生成稳定的openid
+    async getDeviceInfo() {
+      try {
+        // 尝试获取系统信息作为设备标识
+        const [error, sysInfo] = await uni.getSystemInfo();
+        if (error) {
+          console.error('获取系统信息失败:', error);
+          return 'unknown_device';
+        }
+        
+        // 创建唯一标识符
+        let deviceId = [
+          sysInfo.brand || '',
+          sysInfo.model || '',
+          sysInfo.platform || '',
+          sysInfo.deviceId || '',
+          sysInfo.devicePixelRatio || ''
+        ].filter(Boolean).join('_');
+        
+        if (!deviceId) {
+          deviceId = 'generic_device';
+        }
+        
+        return deviceId;
+      } catch (e) {
+        console.error('获取设备信息异常:', e);
+        return 'error_device';
+      }
+    },
+    
+    // 获取或创建并存储设备UUID
+    async getStoredUUID() {
+      try {
+        let uuid = uni.getStorageSync('device_uuid');
+        
+        if (!uuid) {
+          // 生成新UUID
+          uuid = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+          uni.setStorageSync('device_uuid', uuid);
+        }
+        
+        return uuid;
+      } catch (e) {
+        console.error('UUID处理异常:', e);
+        return 'error_uuid_' + Date.now();
+      }
     },
   }
 }

@@ -155,13 +155,17 @@
 					this.getCode();
 				}).catch(e => {
 					if (e.code == "uni-id-invalid-sms-template-id") {
-						this.modelValue = "123456"
+						// 在开发环境下使用测试验证码
+						console.log('使用测试验证码:', '123456');
+						this.modelValue = "123456";
+						this.reverseNumber = Number(this.count);
+						this.getCode();
+						
 						uni.showToast({
-							title: '已启动测试模式,详情【控制台信息】',
+							title: '测试模式: 123456',
 							icon: 'none',
 							duration: 3000
 						});
-						console.warn(e.message);
 					} else if (e.code == "uni-id-captcha-required") {
 						// 如果需要验证码但没有提供，重新获取验证码
 						this.getImageCaptcha(true);
@@ -170,6 +174,15 @@
 							icon: 'none',
 							duration: 3000
 						});
+					} else if (e.code == "uni-id-sms-send-failed") {
+						// 短信发送失败
+						uni.showModal({
+							title: '发送失败',
+							content: '短信发送服务异常，请稍后再试',
+							showCancel: false
+						});
+						this.getImageCaptcha();
+						this.captcha = "";
 					} else {
 						this.getImageCaptcha()
 						this.captcha = ""

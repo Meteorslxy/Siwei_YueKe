@@ -1,7 +1,7 @@
 <template>
   <view class="login-container">
     <!-- 背景图 -->
-    <image class="bg-image" src="/static/images/login.png" mode="aspectFill"></image>
+    <image class="bg-image" src="https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/a3ef4ccc-5a4d-4ad5-9697-fd22b2288237" mode="aspectFill"></image>
     
     <!-- 自定义导航栏 -->
     <view class="custom-nav" :style="{ paddingTop: statusBarHeight + 'px' }">
@@ -13,7 +13,7 @@
     <view class="content">
       <!-- Logo -->
       <view class="header">
-        <image class="logo" src="../../static/images/logo.png" mode="aspectFit"></image>
+        <image class="logo" src="https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png" mode="aspectFit"></image>
       </view>
       
       <!-- 登录按钮 -->
@@ -51,7 +51,19 @@ export default {
         code: '', // 微信登录code
         openid: '', // 用户openid
         sessionKey: '' // 会话密钥
-      }
+      },
+      loading: false,
+      providerList: [{
+        name: '微信登录',
+        id: 'weixin',
+        authType: 'scanCode',
+        iconPath: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
+      }, {
+        name: '密码登录',
+        id: 'univerify',
+        authType: 'password',
+        iconPath: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
+      }]
     }
   },
   onLoad(options) {
@@ -117,11 +129,11 @@ export default {
               iconWidth: '45px',
               iconHeight: '45px',
               list: [{
-                  iconPath: '/static/images/logo.png',
+                  iconPath: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
                   title: '微信登录'
                 },
                 {
-                  iconPath: '/static/images/logo.png',
+                  iconPath: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
                   title: '微博登录'
                 }
               ]

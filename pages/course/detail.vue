@@ -76,7 +76,6 @@
     <view class="teacher-intro">
       <view class="detail-title">
         师资介绍
-        <text class="title-hint">点击查看详情 <text class="iconfont icon-right"></text></text>
       </view>
       <view class="teacher-card" @click="navigateToTeacherDetail">
         <image class="teacher-avatar" 

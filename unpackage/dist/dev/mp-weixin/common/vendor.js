@@ -93,7 +93,7 @@ module.exports = _defineProperty, module.exports.__esModule = true, module.expor
 
 /***/ }),
 
-/***/ 114:
+/***/ 115:
 /*!***********************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/store.js ***!
   \***********************************************************************************************************/
@@ -864,17 +864,6 @@ module.exports = _isNativeReflectConstruct, module.exports.__esModule = true, mo
 
 /***/ }),
 
-/***/ 179:
-/*!**************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/static/data/filter-options.json ***!
-  \**************************************************************************************************/
-/*! exports provided: gradeOptions, subjectOptions, schoolOptions, educationalStages, courseTypes, teacherTitles, statusOptions, bookingStatus, databaseFields, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"高中\",\"value\":\"高中\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"},{\"label\":\"生物\",\"value\":\"生物\"},{\"label\":\"历史\",\"value\":\"历史\"},{\"label\":\"地理\",\"value\":\"地理\"},{\"label\":\"政治\",\"value\":\"政治\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
-
-/***/ }),
-
 /***/ 18:
 /*!******************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/toConsumableArray.js ***!
@@ -894,6 +883,17 @@ module.exports = _toConsumableArray, module.exports.__esModule = true, module.ex
 /***/ }),
 
 /***/ 180:
+/*!**************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/static/data/filter-options.json ***!
+  \**************************************************************************************************/
+/*! exports provided: gradeOptions, subjectOptions, schoolOptions, educationalStages, courseTypes, teacherTitles, statusOptions, bookingStatus, databaseFields, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"高中\",\"value\":\"高中\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"},{\"label\":\"生物\",\"value\":\"生物\"},{\"label\":\"历史\",\"value\":\"历史\"},{\"label\":\"地理\",\"value\":\"地理\"},{\"label\":\"政治\",\"value\":\"政治\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
+
+/***/ }),
+
+/***/ 181:
 /*!***************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/utils/filters.js ***!
   \***************************************************************************************/
@@ -919,7 +919,7 @@ exports.getSchoolOptions = getSchoolOptions;
 exports.getSubjectLabelByValue = getSubjectLabelByValue;
 exports.getSubjectOptions = getSubjectOptions;
 exports.isValidFilterValue = isValidFilterValue;
-var _filterOptions = _interopRequireDefault(__webpack_require__(/*! @/static/data/filter-options.json */ 179));
+var _filterOptions = _interopRequireDefault(__webpack_require__(/*! @/static/data/filter-options.json */ 180));
 /**
  * 筛选选项工具类
  * 用于统一管理和获取筛选选项数据
@@ -18589,6 +18589,249 @@ exports.default = Zs;
 
 /***/ }),
 
+/***/ 262:
+/*!**************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/modules/user.js ***!
+  \**************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.addFavorite = addFavorite;
+exports.checkFavorite = checkFavorite;
+exports.default = void 0;
+exports.getUserInfo = getUserInfo;
+exports.getWxOpenid = getWxOpenid;
+exports.login = login;
+exports.logout = logout;
+exports.removeFavorite = removeFavorite;
+exports.updatePhoneNumber = updatePhoneNumber;
+var _request = _interopRequireDefault(__webpack_require__(/*! ../request */ 91));
+/**
+ * 用户相关API
+ */
+
+/**
+ * 用户登录
+ * @param {Object} params - 登录参数
+ * @param {String} params.code - 微信登录code
+ * @param {Object} params.userInfo - 用户信息
+ * @param {String} params.loginType - 登录类型 wechat/phone
+ * @param {String} params.phoneNumber - 手机号(loginType为phone时必填)
+ * @returns {Promise} API请求Promise
+ */
+function login() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用login API，参数:', params);
+  return (0, _request.default)({
+    name: 'login',
+    data: params
+  });
+}
+
+/**
+ * 获取微信OpenID
+ * @param {Object} params - 请求参数
+ * @param {String} params.code - 微信登录code
+ * @returns {Promise} API请求Promise
+ */
+function getWxOpenid() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用getWxOpenid API，参数:', params);
+  if (!params.code) {
+    return Promise.reject(new Error('缺少code参数'));
+  }
+  return (0, _request.default)({
+    name: 'getWxOpenid',
+    data: params
+  });
+}
+
+/**
+ * 获取用户信息
+ * @returns {Promise} API请求Promise
+ */
+function getUserInfo() {
+  return (0, _request.default)({
+    name: 'getUserInfo',
+    data: {}
+  });
+}
+
+/**
+ * 退出登录
+ * @returns {Promise} API请求Promise
+ */
+function logout() {
+  return (0, _request.default)({
+    name: 'logout',
+    data: {}
+  });
+}
+
+/**
+ * 检查课程/讲座/老师是否已收藏
+ * @param {Object} params - 请求参数
+ * @param {String} params.userId - 用户ID
+ * @param {String} params.itemId - 项目ID
+ * @param {String} params.itemType - 项目类型(course/lecture/teacher)
+ * @returns {Promise} API请求Promise
+ */
+function checkFavorite() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用checkFavorite API，参数:', params);
+  if (!params.userId || !params.itemId || !params.itemType) {
+    console.error('检查收藏状态失败: 参数不完整', params);
+    return Promise.reject(new Error('参数不完整'));
+  }
+  return (0, _request.default)({
+    name: 'checkFavorite',
+    data: params
+  });
+}
+
+/**
+ * 添加收藏
+ * @param {Object} params - 请求参数
+ * @param {String} params.userId - 用户ID
+ * @param {String} params.itemId - 项目ID
+ * @param {String} params.itemType - 项目类型(course/lecture/teacher)
+ * @param {String} params.itemTitle - 项目标题
+ * @param {String} params.itemCover - 项目封面图
+ * @param {String} params.itemUrl - 项目URL
+ * @returns {Promise} API请求Promise
+ */
+function addFavorite() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用addFavorite API，参数:', params);
+  if (!params.userId || !params.itemId || !params.itemType) {
+    console.error('添加收藏失败: 参数不完整', params);
+    return Promise.reject(new Error('参数不完整'));
+  }
+  return (0, _request.default)({
+    name: 'addFavorite',
+    data: params
+  });
+}
+
+/**
+ * 删除收藏
+ * @param {String} favoriteId - 收藏记录ID
+ * @returns {Promise} API请求Promise
+ */
+function removeFavorite(favoriteId) {
+  console.log('调用removeFavorite API，参数:', favoriteId);
+  if (!favoriteId) {
+    console.error('删除收藏失败: 收藏ID不能为空');
+    return Promise.reject(new Error('收藏ID不能为空'));
+  }
+  return (0, _request.default)({
+    name: 'removeFavorite',
+    data: {
+      favoriteId: favoriteId
+    }
+  });
+}
+
+/**
+ * 更新用户手机号
+ * @param {Object} params - 请求参数
+ * @param {String} params.phoneNumber - 新的手机号码
+ * @returns {Promise} API请求Promise
+ */
+function updatePhoneNumber() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用updatePhoneNumber API，参数:', params);
+  if (!params.phoneNumber) {
+    return Promise.reject(new Error('缺少phoneNumber参数'));
+  }
+
+  // 尝试获取所有可能的token
+  var uniIdToken = uni.getStorageSync('uni_id_token') || '';
+  var token = uni.getStorageSync('token') || '';
+  var userToken = uni.getStorageSync('userToken') || '';
+
+  // 获取优先级: uniIdToken > token > userToken
+  var effectiveToken = uniIdToken || token || userToken;
+
+  // 获取可能的用户ID
+  var userId = '';
+  try {
+    var userInfoStr = uni.getStorageSync('userInfo');
+    if (userInfoStr) {
+      // 检查是否已经是对象，避免重复解析
+      var userInfo;
+      if (typeof userInfoStr === 'string') {
+        userInfo = JSON.parse(userInfoStr);
+      } else {
+        // 已经是对象
+        userInfo = userInfoStr;
+      }
+      userId = userInfo._id || userInfo.userId || userInfo.id || '';
+    }
+  } catch (e) {
+    console.error('获取用户ID失败:', e);
+  }
+  console.log('使用token:', {
+    'uni_id_token': !!uniIdToken,
+    'token': !!token,
+    'userToken': !!userToken,
+    'effectiveToken': !!effectiveToken,
+    'userId': userId
+  });
+  return (0, _request.default)({
+    name: 'updateUserInfo',
+    data: {
+      // 明确指定update对象中的mobile字段
+      update: {
+        mobile: params.phoneNumber,
+        phoneNumber: params.phoneNumber,
+        mobile_confirmed: 1
+      },
+      // 直接在根级别也提供mobile字段，以防update对象处理有问题
+      mobile: params.phoneNumber,
+      phoneNumber: params.phoneNumber,
+      mobile_confirmed: 1,
+      // 用户ID参数，使用多种可能的参数名增加成功率
+      uid: userId,
+      // uni-id标准用户ID参数
+      userId: userId,
+      // 常见用户ID参数
+      _id: userId,
+      // MongoDB文档ID
+      id: userId,
+      // 通用ID参数名
+      user_id: userId,
+      // 下划线格式ID
+
+      // token相关参数
+      uniIdToken: effectiveToken,
+      token: effectiveToken,
+      userToken: effectiveToken
+    }
+  });
+}
+var _default = {
+  login: login,
+  getWxOpenid: getWxOpenid,
+  getUserInfo: getUserInfo,
+  logout: logout,
+  updatePhoneNumber: updatePhoneNumber,
+  checkFavorite: checkFavorite,
+  addFavorite: addFavorite,
+  removeFavorite: removeFavorite
+};
+exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
 /***/ 27:
 /*!************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
@@ -19042,745 +19285,7 @@ module.exports = _inherits, module.exports.__esModule = true, module.exports["de
 
 /***/ }),
 
-/***/ 32:
-/*!**************************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js ***!
-  \**************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-var assertThisInitialized = __webpack_require__(/*! ./assertThisInitialized.js */ 29);
-function _possibleConstructorReturn(self, call) {
-  if (call && (_typeof(call) === "object" || typeof call === "function")) {
-    return call;
-  } else if (call !== void 0) {
-    throw new TypeError("Derived constructors may only return object or undefined");
-  }
-  return assertThisInitialized(self);
-}
-module.exports = _possibleConstructorReturn, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 33:
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _getPrototypeOf(o) {
-  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _getPrototypeOf(o);
-}
-module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 333:
-/*!**************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/modules/user.js ***!
-  \**************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.addFavorite = addFavorite;
-exports.checkFavorite = checkFavorite;
-exports.default = void 0;
-exports.getUserInfo = getUserInfo;
-exports.getWxOpenid = getWxOpenid;
-exports.login = login;
-exports.logout = logout;
-exports.removeFavorite = removeFavorite;
-exports.updatePhoneNumber = updatePhoneNumber;
-var _request = _interopRequireDefault(__webpack_require__(/*! ../request */ 91));
-/**
- * 用户相关API
- */
-
-/**
- * 用户登录
- * @param {Object} params - 登录参数
- * @param {String} params.code - 微信登录code
- * @param {Object} params.userInfo - 用户信息
- * @param {String} params.loginType - 登录类型 wechat/phone
- * @param {String} params.phoneNumber - 手机号(loginType为phone时必填)
- * @returns {Promise} API请求Promise
- */
-function login() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用login API，参数:', params);
-  return (0, _request.default)({
-    name: 'login',
-    data: params
-  });
-}
-
-/**
- * 获取微信OpenID
- * @param {Object} params - 请求参数
- * @param {String} params.code - 微信登录code
- * @returns {Promise} API请求Promise
- */
-function getWxOpenid() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用getWxOpenid API，参数:', params);
-  if (!params.code) {
-    return Promise.reject(new Error('缺少code参数'));
-  }
-  return (0, _request.default)({
-    name: 'getWxOpenid',
-    data: params
-  });
-}
-
-/**
- * 获取用户信息
- * @returns {Promise} API请求Promise
- */
-function getUserInfo() {
-  return (0, _request.default)({
-    name: 'getUserInfo',
-    data: {}
-  });
-}
-
-/**
- * 退出登录
- * @returns {Promise} API请求Promise
- */
-function logout() {
-  return (0, _request.default)({
-    name: 'logout',
-    data: {}
-  });
-}
-
-/**
- * 检查课程/讲座/老师是否已收藏
- * @param {Object} params - 请求参数
- * @param {String} params.userId - 用户ID
- * @param {String} params.itemId - 项目ID
- * @param {String} params.itemType - 项目类型(course/lecture/teacher)
- * @returns {Promise} API请求Promise
- */
-function checkFavorite() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用checkFavorite API，参数:', params);
-  if (!params.userId || !params.itemId || !params.itemType) {
-    console.error('检查收藏状态失败: 参数不完整', params);
-    return Promise.reject(new Error('参数不完整'));
-  }
-  return (0, _request.default)({
-    name: 'checkFavorite',
-    data: params
-  });
-}
-
-/**
- * 添加收藏
- * @param {Object} params - 请求参数
- * @param {String} params.userId - 用户ID
- * @param {String} params.itemId - 项目ID
- * @param {String} params.itemType - 项目类型(course/lecture/teacher)
- * @param {String} params.itemTitle - 项目标题
- * @param {String} params.itemCover - 项目封面图
- * @param {String} params.itemUrl - 项目URL
- * @returns {Promise} API请求Promise
- */
-function addFavorite() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用addFavorite API，参数:', params);
-  if (!params.userId || !params.itemId || !params.itemType) {
-    console.error('添加收藏失败: 参数不完整', params);
-    return Promise.reject(new Error('参数不完整'));
-  }
-  return (0, _request.default)({
-    name: 'addFavorite',
-    data: params
-  });
-}
-
-/**
- * 删除收藏
- * @param {String} favoriteId - 收藏记录ID
- * @returns {Promise} API请求Promise
- */
-function removeFavorite(favoriteId) {
-  console.log('调用removeFavorite API，参数:', favoriteId);
-  if (!favoriteId) {
-    console.error('删除收藏失败: 收藏ID不能为空');
-    return Promise.reject(new Error('收藏ID不能为空'));
-  }
-  return (0, _request.default)({
-    name: 'removeFavorite',
-    data: {
-      favoriteId: favoriteId
-    }
-  });
-}
-
-/**
- * 更新用户手机号
- * @param {Object} params - 请求参数
- * @param {String} params.phoneNumber - 新的手机号码
- * @returns {Promise} API请求Promise
- */
-function updatePhoneNumber() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用updatePhoneNumber API，参数:', params);
-  if (!params.phoneNumber) {
-    return Promise.reject(new Error('缺少phoneNumber参数'));
-  }
-
-  // 尝试获取所有可能的token
-  var uniIdToken = uni.getStorageSync('uni_id_token') || '';
-  var token = uni.getStorageSync('token') || '';
-  var userToken = uni.getStorageSync('userToken') || '';
-
-  // 获取优先级: uniIdToken > token > userToken
-  var effectiveToken = uniIdToken || token || userToken;
-
-  // 获取可能的用户ID
-  var userId = '';
-  try {
-    var userInfoStr = uni.getStorageSync('userInfo');
-    if (userInfoStr) {
-      // 检查是否已经是对象，避免重复解析
-      var userInfo;
-      if (typeof userInfoStr === 'string') {
-        userInfo = JSON.parse(userInfoStr);
-      } else {
-        // 已经是对象
-        userInfo = userInfoStr;
-      }
-      userId = userInfo._id || userInfo.userId || userInfo.id || '';
-    }
-  } catch (e) {
-    console.error('获取用户ID失败:', e);
-  }
-  console.log('使用token:', {
-    'uni_id_token': !!uniIdToken,
-    'token': !!token,
-    'userToken': !!userToken,
-    'effectiveToken': !!effectiveToken,
-    'userId': userId
-  });
-  return (0, _request.default)({
-    name: 'updateUserInfo',
-    data: {
-      // 明确指定update对象中的mobile字段
-      update: {
-        mobile: params.phoneNumber,
-        phoneNumber: params.phoneNumber,
-        mobile_confirmed: 1
-      },
-      // 直接在根级别也提供mobile字段，以防update对象处理有问题
-      mobile: params.phoneNumber,
-      phoneNumber: params.phoneNumber,
-      mobile_confirmed: 1,
-      // 用户ID参数，使用多种可能的参数名增加成功率
-      uid: userId,
-      // uni-id标准用户ID参数
-      userId: userId,
-      // 常见用户ID参数
-      _id: userId,
-      // MongoDB文档ID
-      id: userId,
-      // 通用ID参数名
-      user_id: userId,
-      // 下划线格式ID
-
-      // token相关参数
-      uniIdToken: effectiveToken,
-      token: effectiveToken,
-      userToken: effectiveToken
-    }
-  });
-}
-var _default = {
-  login: login,
-  getWxOpenid: getWxOpenid,
-  getUserInfo: getUserInfo,
-  logout: logout,
-  updatePhoneNumber: updatePhoneNumber,
-  checkFavorite: checkFavorite,
-  addFavorite: addFavorite,
-  removeFavorite: removeFavorite
-};
-exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
-/***/ 34:
-/*!****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
-  \****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 33);
-var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
-var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 35);
-var construct = __webpack_require__(/*! ./construct.js */ 15);
-function _wrapNativeSuper(Class) {
-  var _cache = typeof Map === "function" ? new Map() : undefined;
-  module.exports = _wrapNativeSuper = function _wrapNativeSuper(Class) {
-    if (Class === null || !isNativeFunction(Class)) return Class;
-    if (typeof Class !== "function") {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    if (typeof _cache !== "undefined") {
-      if (_cache.has(Class)) return _cache.get(Class);
-      _cache.set(Class, Wrapper);
-    }
-    function Wrapper() {
-      return construct(Class, arguments, getPrototypeOf(this).constructor);
-    }
-    Wrapper.prototype = Object.create(Class.prototype, {
-      constructor: {
-        value: Wrapper,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-    return setPrototypeOf(Wrapper, Class);
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _wrapNativeSuper(Class);
-}
-module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 35:
-/*!*****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
-  \*****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _isNativeFunction(fn) {
-  try {
-    return Function.toString.call(fn).indexOf("[native code]") !== -1;
-  } catch (e) {
-    return typeof fn === "function";
-  }
-}
-module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 36:
-/*!**********************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"origin-pages-json"} ***!
-  \**********************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  "pages": [{
-    "path": "pages/index/index",
-    "style": {
-      "navigationBarTitleText": "",
-      "navigationBarBackgroundColor": "#ffffff",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/course/course",
-    "style": {
-      "navigationBarTitleText": "",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/user/user",
-    "style": {
-      "navigationBarTitleText": "我的",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/favorite/index",
-    "style": {
-      "navigationBarTitleText": "我的收藏",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/course/detail",
-    "style": {
-      "navigationBarTitleText": "课程详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/teacher/detail",
-    "style": {
-      "navigationBarTitleText": "教师详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/login/login",
-    "style": {
-      "navigationBarTitleText": "登录",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/booking/list",
-    "style": {
-      "navigationBarTitleText": "我的预约",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/featured",
-    "style": {
-      "navigationBarTitleText": "精选好课",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/lectures",
-    "style": {
-      "navigationBarTitleText": "热点讲座",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/teacher/list",
-    "style": {
-      "navigationBarTitleText": "名师介绍",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/booking/create",
-    "style": {
-      "navigationBarTitleText": "课程预约",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/school/detail",
-    "style": {
-      "navigationBarTitleText": "校区详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/lecture-detail",
-    "style": {
-      "navigationBarTitleText": "讲座详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/upload-image",
-    "style": {
-      "navigationBarTitleText": "图片上传",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/login",
-    "style": {
-      "navigationBarTitleText": "管理员登录",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/dashboard",
-    "style": {
-      "navigationBarTitleText": "管理控制台",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/teacher",
-    "style": {
-      "navigationBarTitleText": "教师管理",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/course",
-    "style": {
-      "navigationBarTitleText": "课程管理",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/lecture",
-    "style": {
-      "navigationBarTitleText": "讲座管理",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/news",
-    "style": {
-      "navigationBarTitleText": "新闻动态管理",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/booking",
-    "style": {
-      "navigationBarTitleText": "预约管理",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/content-upload/index",
-    "style": {
-      "navigationBarTitleText": "内容上传",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/admin/course-teacher-update",
-    "style": {
-      "navigationBarTitleText": "课程教师关联",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/news/list",
-    "style": {
-      "navigationBarTitleText": "最新通知",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/news/detail",
-    "style": {
-      "navigationBarTitleText": "通知详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/user/booking",
-    "style": {
-      "navigationBarTitleText": "预约记录",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/user/booking-detail",
-    "style": {
-      "navigationBarTitleText": "预约详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/about/index",
-    "style": {
-      "navigationBarTitleText": "关于我们",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/setting/index",
-    "style": {
-      "navigationBarTitleText": "设置",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/edit-field",
-    "style": {
-      "navigationBarTitleText": "编辑资料",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/user/profile/index",
-    "style": {
-      "navigationBarTitleText": "个人资料",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/phone/index",
-    "style": {
-      "navigationBarTitleText": "手机绑定",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/wechat/index",
-    "style": {
-      "navigationBarTitleText": "微信账号",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/common/input-page",
-    "style": {
-      "navigationBarTitleText": "输入",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/common/markdown",
-    "style": {
-      "navigationBarTitleText": "文档",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }],
-  "globalStyle": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "四维教育",
-    "navigationBarBackgroundColor": "#EC7A49",
-    "backgroundColor": "#F8F8F8"
-  },
-  "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#EC7A49",
-    "borderStyle": "black",
-    "backgroundColor": "#ffffff",
-    "list": [{
-      "pagePath": "pages/index/index",
-      "iconPath": "static/images/tabbar/home.png",
-      "selectedIconPath": "static/images/tabbar/home_cur.png",
-      "text": "首页"
-    }, {
-      "pagePath": "pages/course/course",
-      "iconPath": "static/images/tabbar/course.png",
-      "selectedIconPath": "static/images/tabbar/course_cur.png",
-      "text": "课程"
-    }, {
-      "pagePath": "pages/user/user",
-      "iconPath": "static/images/tabbar/my.png",
-      "selectedIconPath": "static/images/tabbar/my_cur.png",
-      "text": "我的"
-    }]
-  },
-  "subPackages": [{
-    "root": "uni_modules/uni-id-pages/pages",
-    "pages": [{
-      "path": "login/login-withoutpwd",
-      "style": {
-        "navigationBarTitleText": "登录"
-      }
-    }, {
-      "path": "login/login-withpwd",
-      "style": {
-        "navigationBarTitleText": "登录"
-      }
-    }, {
-      "path": "login/login-smscode",
-      "style": {
-        "navigationBarTitleText": "登录"
-      }
-    }, {
-      "path": "register/register",
-      "style": {
-        "navigationBarTitleText": "注册"
-      }
-    }, {
-      "path": "retrieve/retrieve",
-      "style": {
-        "navigationBarTitleText": "找回密码"
-      }
-    }, {
-      "path": "common/webview/webview",
-      "style": {
-        "enablePullDownRefresh": false,
-        "navigationBarTitleText": ""
-      }
-    }, {
-      "path": "userinfo/userinfo",
-      "style": {
-        "navigationBarTitleText": "个人资料"
-      }
-    }, {
-      "path": "userinfo/bind-mobile/bind-mobile",
-      "style": {
-        "navigationBarTitleText": "绑定手机号码"
-      }
-    }, {
-      "path": "userinfo/cropImage/cropImage",
-      "style": {
-        "navigationBarTitleText": ""
-      }
-    }, {
-      "path": "userinfo/set-pwd/set-pwd",
-      "style": {
-        "navigationBarTitleText": "设置密码"
-      }
-    }]
-  }]
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 37:
-/*!*********************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"stat"} ***!
-  \*********************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  "appid": "__UNI__3F36A45"
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 38:
-/*!*****************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json ***!
-  \*****************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-
-
-/***/ }),
-
-/***/ 382:
+/***/ 311:
 /*!*********************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/common/utils/marked.min.js ***!
   \*********************************************************************************************/
@@ -19849,7 +19354,28 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 391:
+/***/ 32:
+/*!**************************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js ***!
+  \**************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
+var assertThisInitialized = __webpack_require__(/*! ./assertThisInitialized.js */ 29);
+function _possibleConstructorReturn(self, call) {
+  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+    return call;
+  } else if (call !== void 0) {
+    throw new TypeError("Derived constructors may only return object or undefined");
+  }
+  return assertThisInitialized(self);
+}
+module.exports = _possibleConstructorReturn, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 320:
 /*!**********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
   \**********************************************************************************************************************/
@@ -19865,7 +19391,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 114);
+var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 115);
 var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -19963,23 +19489,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 4:
-/*!**********************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
-  \**********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
-  };
-}
-module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 400:
+/***/ 329:
 /*!**************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vuex3/dist/vuex.common.js ***!
   \**************************************************************************************/
@@ -21236,7 +20746,65 @@ module.exports = index_cjs;
 
 /***/ }),
 
-/***/ 417:
+/***/ 33:
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _getPrototypeOf(o) {
+  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _getPrototypeOf(o);
+}
+module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 34:
+/*!****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 33);
+var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
+var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 35);
+var construct = __webpack_require__(/*! ./construct.js */ 15);
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+  module.exports = _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !isNativeFunction(Class)) return Class;
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+      _cache.set(Class, Wrapper);
+    }
+    function Wrapper() {
+      return construct(Class, arguments, getPrototypeOf(this).constructor);
+    }
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return setPrototypeOf(Wrapper, Class);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _wrapNativeSuper(Class);
+}
+module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 346:
 /*!***********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/pages/register/validator.js ***!
   \***********************************************************************************************************************/
@@ -21252,7 +20820,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 418));
+var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 347));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var _default = _objectSpread({
@@ -21312,7 +20880,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 418:
+/***/ 347:
 /*!**************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/password.js ***!
   \**************************************************************************************************************/
@@ -21409,279 +20977,28 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 44:
-/*!**********************************************************************************************************!*\
-  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
-  \**********************************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return normalizeComponent; });
-/* globals __VUE_SSR_CONTEXT__ */
-
-// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-function normalizeComponent (
-  scriptExports,
-  render,
-  staticRenderFns,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier, /* server only */
-  shadowMode, /* vue-cli only */
-  components, // fixed by xxxxxx auto components
-  renderjs // fixed by xxxxxx renderjs
-) {
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // fixed by xxxxxx auto components
-  if (components) {
-    if (!options.components) {
-      options.components = {}
-    }
-    var hasOwn = Object.prototype.hasOwnProperty
-    for (var name in components) {
-      if (hasOwn.call(components, name) && !hasOwn.call(options.components, name)) {
-        options.components[name] = components[name]
-      }
-    }
-  }
-  // fixed by xxxxxx renderjs
-  if (renderjs) {
-    if(typeof renderjs.beforeCreate === 'function'){
-			renderjs.beforeCreate = [renderjs.beforeCreate]
-		}
-    (renderjs.beforeCreate || (renderjs.beforeCreate = [])).unshift(function() {
-      this[renderjs.__module] = this
-    });
-    (options.mixins || (options.mixins = [])).push(renderjs)
-  }
-
-  // render functions
-  if (render) {
-    options.render = render
-    options.staticRenderFns = staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = 'data-v-' + scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
-    }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = shadowMode
-      ? function () { injectStyles.call(this, this.$root.$options.shadowRoot) }
-      : injectStyles
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functioal component in vue file
-      var originalRender = options.render
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return originalRender(h, context)
-      }
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
-    }
-  }
-
-  return {
-    exports: scriptExports,
-    options: options
-  }
-}
-
-
-/***/ }),
-
-/***/ 45:
-/*!***************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/init.js ***!
-  \***************************************************************************************************/
+/***/ 35:
+/*!*****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
+  \*****************************************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
-var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
-// 导入配置
-
-// uni-id的云对象
-var uniIdCo = uniCloud.importObject('uni-id-co', {
-  customUI: true
-});
-// 用户配置的登录方式、是否打开调试模式
-var loginTypes = _config.default.loginTypes,
-  debug = _config.default.debug;
-function _default() {
-  return _ref.apply(this, arguments);
+function _isNativeFunction(fn) {
+  try {
+    return Function.toString.call(fn).indexOf("[native code]") !== -1;
+  } catch (e) {
+    return typeof fn === "function";
+  }
 }
-function _ref() {
-  _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-    var _yield$uniIdCo$getSup, supportedLoginType, data, list, db, onDBError;
-    return _regenerator.default.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            onDBError = function _onDBError(_ref2) {
-              var code = _ref2.code,
-                message = _ref2.message;
-            } // console.error('onDBError', {code,message});
-            ;
-            if (!debug) {
-              _context2.next = 10;
-              break;
-            }
-            _context2.next = 4;
-            return uniIdCo.getSupportedLoginType();
-          case 4:
-            _yield$uniIdCo$getSup = _context2.sent;
-            supportedLoginType = _yield$uniIdCo$getSup.supportedLoginType;
-            console.log('supportedLoginType: ' + JSON.stringify(supportedLoginType));
-            // 登录方式，服务端和客户端的映射关系
-            data = {
-              smsCode: 'mobile-code',
-              univerify: 'univerify',
-              username: 'username-password',
-              weixin: 'weixin',
-              qq: 'qq',
-              xiaomi: 'xiaomi',
-              sinaweibo: 'sinaweibo',
-              taobao: 'taobao',
-              facebook: 'facebook',
-              google: 'google',
-              alipay: 'alipay',
-              apple: 'apple',
-              weixinMobile: 'weixin'
-            }; // 遍历客户端配置的登录方式，与服务端比对。并在错误时抛出错误提示
-            list = loginTypes.filter(function (type) {
-              return !supportedLoginType.includes(data[type]);
-            });
-            if (list.length) {
-              console.error("\u9519\u8BEF\uFF1A\u524D\u7AEF\u542F\u7528\u7684\u767B\u5F55\u65B9\u5F0F:".concat(list.join('，'), ";\u6CA1\u6709\u5728\u670D\u52A1\u7AEF\u5B8C\u6210\u914D\u7F6E\u3002\u914D\u7F6E\u6587\u4EF6\u8DEF\u5F84\uFF1A\"/uni_modules/uni-config-center/uniCloud/cloudfunctions/common/uni-config-center/uni-id/config.json\""));
-            }
-          case 10:
-            // 3. 绑定clientDB错误事件
-            // clientDB对象
-            db = uniCloud.database();
-            db.on('error', onDBError);
-            // clientDB的错误提示
-
-            // 解绑clientDB错误事件
-            // db.off('error', onDBError)
-
-            // 4. 同步客户端push_clientid至device表
-            if (uniCloud.onRefreshToken) {
-              uniCloud.onRefreshToken(function () {
-                // console.log('onRefreshToken');
-                if (uni.getPushClientId) {
-                  uni.getPushClientId({
-                    success: function () {
-                      var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(e) {
-                        var pushClientId, res;
-                        return _regenerator.default.wrap(function _callee$(_context) {
-                          while (1) {
-                            switch (_context.prev = _context.next) {
-                              case 0:
-                                // console.log(e)
-                                pushClientId = e.cid; // console.log(pushClientId);
-                                _context.next = 3;
-                                return uniIdCo.setPushCid({
-                                  pushClientId: pushClientId
-                                });
-                              case 3:
-                                res = _context.sent;
-                              case 4:
-                              case "end":
-                                return _context.stop();
-                            }
-                          }
-                        }, _callee);
-                      }));
-                      function success(_x) {
-                        return _success.apply(this, arguments);
-                      }
-                      return success;
-                    }(),
-                    fail: function fail(e) {
-                      // console.log(e)
-                    }
-                  });
-                }
-              });
-            }
-          case 13:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-  return _ref.apply(this, arguments);
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
 
-/***/ 46:
-/*!*****************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/config.js ***!
-  \*****************************************************************************************************/
+/***/ 36:
+/*!**********************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"origin-pages-json"} ***!
+  \**********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21693,82 +21010,343 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _default = {
-  debug: true,
-  isAdmin: false,
-  customLoginPagePath: "/pages/login/login",
-  customHomePagePath: "/pages/index/index",
-  loginTypes: ['univerify', 'weixin', 'username', 'smsCode'],
-  agreements: {
-    serviceUrl: 'https://example.com/agreement',
-    privacyUrl: 'https://example.com/privacy',
-    scope: ['register', 'login']
+  "pages": [{
+    "path": "pages/index/index",
+    "style": {
+      "navigationBarTitleText": "",
+      "navigationBarBackgroundColor": "#ffffff",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/course/course",
+    "style": {
+      "navigationBarTitleText": "",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/user/user",
+    "style": {
+      "navigationBarTitleText": "我的",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/favorite/index",
+    "style": {
+      "navigationBarTitleText": "我的收藏",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "enablePullDownRefresh": true
+    }
+  }, {
+    "path": "pages/course/detail",
+    "style": {
+      "navigationBarTitleText": "课程详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/teacher/detail",
+    "style": {
+      "navigationBarTitleText": "教师详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/login/login",
+    "style": {
+      "navigationBarTitleText": "登录",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/booking/list",
+    "style": {
+      "navigationBarTitleText": "我的预约",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/featured",
+    "style": {
+      "navigationBarTitleText": "精选好课",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/lectures",
+    "style": {
+      "navigationBarTitleText": "热点讲座",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/teacher/list",
+    "style": {
+      "navigationBarTitleText": "名师介绍",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/booking/create",
+    "style": {
+      "navigationBarTitleText": "课程预约",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/school/detail",
+    "style": {
+      "navigationBarTitleText": "校区详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/lecture-detail",
+    "style": {
+      "navigationBarTitleText": "讲座详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/upload-image",
+    "style": {
+      "navigationBarTitleText": "图片上传",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/news/list",
+    "style": {
+      "navigationBarTitleText": "最新通知",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom",
+      "enablePullDownRefresh": true
+    }
+  }, {
+    "path": "pages/news/detail",
+    "style": {
+      "navigationBarTitleText": "通知详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/user/booking",
+    "style": {
+      "navigationBarTitleText": "预约记录",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "enablePullDownRefresh": true
+    }
+  }, {
+    "path": "pages/user/booking-detail",
+    "style": {
+      "navigationBarTitleText": "预约详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/about/index",
+    "style": {
+      "navigationBarTitleText": "关于我们",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/setting/index",
+    "style": {
+      "navigationBarTitleText": "设置",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/edit-field",
+    "style": {
+      "navigationBarTitleText": "编辑资料",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/user/profile/index",
+    "style": {
+      "navigationBarTitleText": "个人资料",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/phone/index",
+    "style": {
+      "navigationBarTitleText": "手机绑定",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/wechat/index",
+    "style": {
+      "navigationBarTitleText": "微信账号",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/common/input-page",
+    "style": {
+      "navigationBarTitleText": "输入",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/common/markdown",
+    "style": {
+      "navigationBarTitleText": "文档",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "四维教育",
+    "navigationBarBackgroundColor": "#EC7A49",
+    "backgroundColor": "#F8F8F8"
   },
-  "mp-weixin": {
-    "oauth": {
-      "weixin": {
-        "appid": "wx64b3a851f619fc04",
-        "appsecret": "c5c9c4047bf0c292e28f5019a950b18d"
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#EC7A49",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [{
+      "pagePath": "pages/index/index",
+      "iconPath": "static/images/tabbar/home.png",
+      "selectedIconPath": "static/images/tabbar/home_cur.png",
+      "text": "首页"
+    }, {
+      "pagePath": "pages/course/course",
+      "iconPath": "static/images/tabbar/course.png",
+      "selectedIconPath": "static/images/tabbar/course_cur.png",
+      "text": "课程"
+    }, {
+      "pagePath": "pages/user/user",
+      "iconPath": "static/images/tabbar/my.png",
+      "selectedIconPath": "static/images/tabbar/my_cur.png",
+      "text": "我的"
+    }]
+  },
+  "subPackages": [{
+    "root": "uni_modules/uni-id-pages/pages",
+    "pages": [{
+      "path": "login/login-withoutpwd",
+      "style": {
+        "navigationBarTitleText": "登录"
       }
-    }
-  },
-  appid: {
-    weixin: {
-      h5: 'wx64b3a851f619fc04',
-      web: 'wx64b3a851f619fc04'
-    }
-  },
-  passwordStrength: 'medium',
-  setPasswordAfterLogin: false
+    }, {
+      "path": "login/login-withpwd",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    }, {
+      "path": "login/login-smscode",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    }, {
+      "path": "register/register",
+      "style": {
+        "navigationBarTitleText": "注册"
+      }
+    }, {
+      "path": "retrieve/retrieve",
+      "style": {
+        "navigationBarTitleText": "找回密码"
+      }
+    }, {
+      "path": "common/webview/webview",
+      "style": {
+        "enablePullDownRefresh": false,
+        "navigationBarTitleText": ""
+      }
+    }, {
+      "path": "userinfo/userinfo",
+      "style": {
+        "navigationBarTitleText": "个人资料"
+      }
+    }, {
+      "path": "userinfo/bind-mobile/bind-mobile",
+      "style": {
+        "navigationBarTitleText": "绑定手机号码"
+      }
+    }, {
+      "path": "userinfo/cropImage/cropImage",
+      "style": {
+        "navigationBarTitleText": ""
+      }
+    }, {
+      "path": "userinfo/set-pwd/set-pwd",
+      "style": {
+        "navigationBarTitleText": "设置密码"
+      }
+    }]
+  }]
 };
 exports.default = _default;
 
 /***/ }),
 
-/***/ 47:
-/*!***************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/global.js ***!
-  \***************************************************************************************/
+/***/ 37:
+/*!*********************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"stat"} ***!
+  \*********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
-var _emptyTip = _interopRequireDefault(__webpack_require__(/*! ./empty-tip/empty-tip.vue */ 48));
-var _loadMore = _interopRequireDefault(__webpack_require__(/*! ./load-more/load-more.vue */ 55));
-var _courseCard = _interopRequireDefault(__webpack_require__(/*! ./course-card/course-card.vue */ 62));
-var _bookingItem = _interopRequireDefault(__webpack_require__(/*! ./booking-item/booking-item.vue */ 69));
-var _teacherCard = _interopRequireDefault(__webpack_require__(/*! ./teacher-card/teacher-card.vue */ 76));
-var _favoriteButton = _interopRequireDefault(__webpack_require__(/*! ./favorite-button/favorite-button.vue */ 83));
-// 空数据提示组件
-
-_vue.default.component('empty-tip', _emptyTip.default);
-
-// 加载更多组件
-
-_vue.default.component('load-more', _loadMore.default);
-
-// 课程卡片组件
-
-_vue.default.component('course-card', _courseCard.default);
-
-// 预约项目组件
-
-_vue.default.component('booking-item', _bookingItem.default);
-
-// 教师卡片组件
-
-_vue.default.component('teacher-card', _teacherCard.default);
-
-// 收藏按钮组件
-
-_vue.default.component('favorite-button', _favoriteButton.default);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  "appid": "__UNI__3F36A45"
+};
+exports.default = _default;
 
 /***/ }),
 
-/***/ 486:
+/***/ 38:
+/*!*****************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json ***!
+  \*****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+
+/***/ }),
+
+/***/ 4:
+/*!**********************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
+  \**********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 408:
 /*!**********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/popup.js ***!
   \**********************************************************************************************************************/
@@ -21810,7 +21388,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 487:
+/***/ 409:
 /*!***************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
   \***************************************************************************************************************************/
@@ -21825,9 +21403,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 488));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 489));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 490));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 410));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 411));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 412));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
@@ -21837,7 +21415,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 488:
+/***/ 410:
 /*!**************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
   \**************************************************************************************************************************/
@@ -21848,7 +21426,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 489:
+/***/ 411:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
   \*******************************************************************************************************************************/
@@ -21859,7 +21437,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 490:
+/***/ 412:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
   \*******************************************************************************************************************************/
@@ -21870,7 +21448,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 498:
+/***/ 420:
 /*!*************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/validate.js ***!
   \*************************************************************************************************************************/
@@ -22562,7 +22140,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 499:
+/***/ 421:
 /*!**********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/utils.js ***!
   \**********************************************************************************************************************/
@@ -22898,6 +22476,365 @@ exports.isEqual = isEqual;
 
 /***/ }),
 
+/***/ 44:
+/*!**********************************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
+  \**********************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return normalizeComponent; });
+/* globals __VUE_SSR_CONTEXT__ */
+
+// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
+// This module is a runtime utility for cleaner component module output and will
+// be included in the final webpack user bundle.
+
+function normalizeComponent (
+  scriptExports,
+  render,
+  staticRenderFns,
+  functionalTemplate,
+  injectStyles,
+  scopeId,
+  moduleIdentifier, /* server only */
+  shadowMode, /* vue-cli only */
+  components, // fixed by xxxxxx auto components
+  renderjs // fixed by xxxxxx renderjs
+) {
+  // Vue.extend constructor export interop
+  var options = typeof scriptExports === 'function'
+    ? scriptExports.options
+    : scriptExports
+
+  // fixed by xxxxxx auto components
+  if (components) {
+    if (!options.components) {
+      options.components = {}
+    }
+    var hasOwn = Object.prototype.hasOwnProperty
+    for (var name in components) {
+      if (hasOwn.call(components, name) && !hasOwn.call(options.components, name)) {
+        options.components[name] = components[name]
+      }
+    }
+  }
+  // fixed by xxxxxx renderjs
+  if (renderjs) {
+    if(typeof renderjs.beforeCreate === 'function'){
+			renderjs.beforeCreate = [renderjs.beforeCreate]
+		}
+    (renderjs.beforeCreate || (renderjs.beforeCreate = [])).unshift(function() {
+      this[renderjs.__module] = this
+    });
+    (options.mixins || (options.mixins = [])).push(renderjs)
+  }
+
+  // render functions
+  if (render) {
+    options.render = render
+    options.staticRenderFns = staticRenderFns
+    options._compiled = true
+  }
+
+  // functional template
+  if (functionalTemplate) {
+    options.functional = true
+  }
+
+  // scopedId
+  if (scopeId) {
+    options._scopeId = 'data-v-' + scopeId
+  }
+
+  var hook
+  if (moduleIdentifier) { // server build
+    hook = function (context) {
+      // 2.3 injection
+      context =
+        context || // cached call
+        (this.$vnode && this.$vnode.ssrContext) || // stateful
+        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
+      // 2.2 with runInNewContext: true
+      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+        context = __VUE_SSR_CONTEXT__
+      }
+      // inject component styles
+      if (injectStyles) {
+        injectStyles.call(this, context)
+      }
+      // register component module identifier for async chunk inferrence
+      if (context && context._registeredComponents) {
+        context._registeredComponents.add(moduleIdentifier)
+      }
+    }
+    // used by ssr in case component is cached and beforeCreate
+    // never gets called
+    options._ssrRegister = hook
+  } else if (injectStyles) {
+    hook = shadowMode
+      ? function () { injectStyles.call(this, this.$root.$options.shadowRoot) }
+      : injectStyles
+  }
+
+  if (hook) {
+    if (options.functional) {
+      // for template-only hot-reload because in that case the render fn doesn't
+      // go through the normalizer
+      options._injectStyles = hook
+      // register for functioal component in vue file
+      var originalRender = options.render
+      options.render = function renderWithStyleInjection (h, context) {
+        hook.call(context)
+        return originalRender(h, context)
+      }
+    } else {
+      // inject component registration as beforeCreate hook
+      var existing = options.beforeCreate
+      options.beforeCreate = existing
+        ? [].concat(existing, hook)
+        : [hook]
+    }
+  }
+
+  return {
+    exports: scriptExports,
+    options: options
+  }
+}
+
+
+/***/ }),
+
+/***/ 45:
+/*!***************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/init.js ***!
+  \***************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
+// 导入配置
+
+// uni-id的云对象
+var uniIdCo = uniCloud.importObject('uni-id-co', {
+  customUI: true
+});
+// 用户配置的登录方式、是否打开调试模式
+var loginTypes = _config.default.loginTypes,
+  debug = _config.default.debug;
+function _default() {
+  return _ref.apply(this, arguments);
+}
+function _ref() {
+  _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+    var _yield$uniIdCo$getSup, supportedLoginType, data, list, db, onDBError;
+    return _regenerator.default.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            onDBError = function _onDBError(_ref2) {
+              var code = _ref2.code,
+                message = _ref2.message;
+            } // console.error('onDBError', {code,message});
+            ;
+            if (!debug) {
+              _context2.next = 10;
+              break;
+            }
+            _context2.next = 4;
+            return uniIdCo.getSupportedLoginType();
+          case 4:
+            _yield$uniIdCo$getSup = _context2.sent;
+            supportedLoginType = _yield$uniIdCo$getSup.supportedLoginType;
+            console.log('supportedLoginType: ' + JSON.stringify(supportedLoginType));
+            // 登录方式，服务端和客户端的映射关系
+            data = {
+              smsCode: 'mobile-code',
+              univerify: 'univerify',
+              username: 'username-password',
+              weixin: 'weixin',
+              qq: 'qq',
+              xiaomi: 'xiaomi',
+              sinaweibo: 'sinaweibo',
+              taobao: 'taobao',
+              facebook: 'facebook',
+              google: 'google',
+              alipay: 'alipay',
+              apple: 'apple',
+              weixinMobile: 'weixin'
+            }; // 遍历客户端配置的登录方式，与服务端比对。并在错误时抛出错误提示
+            list = loginTypes.filter(function (type) {
+              return !supportedLoginType.includes(data[type]);
+            });
+            if (list.length) {
+              console.error("\u9519\u8BEF\uFF1A\u524D\u7AEF\u542F\u7528\u7684\u767B\u5F55\u65B9\u5F0F:".concat(list.join('，'), ";\u6CA1\u6709\u5728\u670D\u52A1\u7AEF\u5B8C\u6210\u914D\u7F6E\u3002\u914D\u7F6E\u6587\u4EF6\u8DEF\u5F84\uFF1A\"/uni_modules/uni-config-center/uniCloud/cloudfunctions/common/uni-config-center/uni-id/config.json\""));
+            }
+          case 10:
+            // 3. 绑定clientDB错误事件
+            // clientDB对象
+            db = uniCloud.database();
+            db.on('error', onDBError);
+            // clientDB的错误提示
+
+            // 解绑clientDB错误事件
+            // db.off('error', onDBError)
+
+            // 4. 同步客户端push_clientid至device表
+            if (uniCloud.onRefreshToken) {
+              uniCloud.onRefreshToken(function () {
+                // console.log('onRefreshToken');
+                if (uni.getPushClientId) {
+                  uni.getPushClientId({
+                    success: function () {
+                      var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(e) {
+                        var pushClientId, res;
+                        return _regenerator.default.wrap(function _callee$(_context) {
+                          while (1) {
+                            switch (_context.prev = _context.next) {
+                              case 0:
+                                // console.log(e)
+                                pushClientId = e.cid; // console.log(pushClientId);
+                                _context.next = 3;
+                                return uniIdCo.setPushCid({
+                                  pushClientId: pushClientId
+                                });
+                              case 3:
+                                res = _context.sent;
+                              case 4:
+                              case "end":
+                                return _context.stop();
+                            }
+                          }
+                        }, _callee);
+                      }));
+                      function success(_x) {
+                        return _success.apply(this, arguments);
+                      }
+                      return success;
+                    }(),
+                    fail: function fail(e) {
+                      // console.log(e)
+                    }
+                  });
+                }
+              });
+            }
+          case 13:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _ref.apply(this, arguments);
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
+/***/ 46:
+/*!*****************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/config.js ***!
+  \*****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  debug: true,
+  isAdmin: false,
+  customLoginPagePath: "/pages/login/login",
+  customHomePagePath: "/pages/index/index",
+  loginTypes: ['univerify', 'weixin', 'username', 'smsCode'],
+  agreements: {
+    serviceUrl: 'https://example.com/agreement',
+    privacyUrl: 'https://example.com/privacy',
+    scope: ['register', 'login']
+  },
+  "mp-weixin": {
+    "oauth": {
+      "weixin": {
+        "appid": "wx64b3a851f619fc04",
+        "appsecret": "c5c9c4047bf0c292e28f5019a950b18d"
+      }
+    }
+  },
+  appid: {
+    weixin: {
+      h5: 'wx64b3a851f619fc04',
+      web: 'wx64b3a851f619fc04'
+    }
+  },
+  passwordStrength: 'medium',
+  setPasswordAfterLogin: false
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 47:
+/*!***************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/global.js ***!
+  \***************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
+var _emptyTip = _interopRequireDefault(__webpack_require__(/*! ./empty-tip/empty-tip.vue */ 48));
+var _loadMore = _interopRequireDefault(__webpack_require__(/*! ./load-more/load-more.vue */ 55));
+var _courseCard = _interopRequireDefault(__webpack_require__(/*! ./course-card/course-card.vue */ 62));
+var _bookingItem = _interopRequireDefault(__webpack_require__(/*! ./booking-item/booking-item.vue */ 69));
+var _teacherCard = _interopRequireDefault(__webpack_require__(/*! ./teacher-card/teacher-card.vue */ 76));
+var _favoriteButton = _interopRequireDefault(__webpack_require__(/*! ./favorite-button/favorite-button.vue */ 83));
+// 空数据提示组件
+
+_vue.default.component('empty-tip', _emptyTip.default);
+
+// 加载更多组件
+
+_vue.default.component('load-more', _loadMore.default);
+
+// 课程卡片组件
+
+_vue.default.component('course-card', _courseCard.default);
+
+// 预约项目组件
+
+_vue.default.component('booking-item', _bookingItem.default);
+
+// 教师卡片组件
+
+_vue.default.component('teacher-card', _teacherCard.default);
+
+// 收藏按钮组件
+
+_vue.default.component('favorite-button', _favoriteButton.default);
+
+/***/ }),
+
 /***/ 5:
 /*!**************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/slicedToArray.js ***!
@@ -22916,7 +22853,7 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 
 /***/ }),
 
-/***/ 584:
+/***/ 506:
 /*!*****************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
   \*****************************************************************************************************************************************/
@@ -23172,7 +23109,7 @@ function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
 
 /***/ }),
 
-/***/ 592:
+/***/ 514:
 /*!******************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
   \******************************************************************************************************************************************/
@@ -23307,7 +23244,7 @@ function createAnimation(option, _this) {
 
 /***/ }),
 
-/***/ 598:
+/***/ 520:
 /*!**********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
   \**********************************************************************************************************************************/
@@ -24430,41 +24367,12 @@ var fileApi = {
     });
   }
 };
-
-// 管理后台相关API
-var adminApi = {
-  // 上传各种内容（教师、讲座、课程、新闻等）
-  uploadContent: function uploadContent(data) {
-    if (!data.type) {
-      console.error('uploadContent: 缺少内容类型');
-      return Promise.reject({
-        code: -1,
-        success: false,
-        message: '缺少内容类型'
-      });
-    }
-    if (!data.data) {
-      console.error('uploadContent: 缺少内容数据');
-      return Promise.reject({
-        code: -1,
-        success: false,
-        message: '缺少内容数据'
-      });
-    }
-    console.log("\u4E0A\u4F20".concat(data.type, "\u5185\u5BB9"));
-    return (0, _request.default)({
-      name: 'uploadContent',
-      data: data
-    });
-  }
-};
 var _default = {
   course: courseApi,
   user: userApi,
   teacher: teacherApi,
   lecture: lectureApi,
   file: fileApi,
-  admin: adminApi,
   location: locationApi
 };
 exports.default = _default;
@@ -24527,6 +24435,31 @@ function request() {
     }
     console.log("\u8C03\u7528\u963F\u91CC\u4E91\u4E91\u51FD\u6570[".concat(name, "]\uFF0C\u73AF\u5883ID: ").concat(spaceId));
 
+    // 获取可用的云函数调用对象
+    var cloudObj = null;
+
+    // 检查微信小程序环境
+
+    console.log('当前运行环境: 微信小程序');
+
+    // 优先使用uniCloud而不是uni.cloud
+    cloudObj = typeof uniCloud !== 'undefined' && uniCloud ? uniCloud : typeof uni !== 'undefined' && uni.cloud ? uni.cloud : null;
+    if (!cloudObj) {
+      console.error('云函数对象不可用，无法调用云函数');
+      if (showLoading) {
+        uni.hideLoading();
+      }
+
+      // 返回错误
+      return resolve({
+        code: -501001,
+        message: '云服务不可用，请检查网络或重新登录',
+        data: null
+      });
+    } else {
+      console.log('云函数调用对象已准备就绪:', cloudObj === uniCloud ? 'uniCloud' : 'uni.cloud');
+    }
+
     // 检查uniCloud是否存在
     if (typeof uniCloud === 'undefined' || !uniCloud) {
       console.error('uniCloud对象不存在，使用模拟数据');
@@ -24549,6 +24482,8 @@ function request() {
       }
       return resolve(mockResult);
     }
+
+    // 非微信环境默认使用uniCloud
 
     // 处理超时的定时器
     var timeoutTimer = null;
@@ -24587,7 +24522,7 @@ function request() {
     }
 
     // 使用uniCloud调用云函数
-    uniCloud.callFunction({
+    cloudObj.callFunction({
       name: name,
       data: data,
       success: function success(res) {
@@ -24638,10 +24573,35 @@ function request() {
         }
         console.error("\u4E91\u51FD\u6570 ".concat(name, " \u8C03\u7528\u5931\u8D25:"), err);
 
+        // 记录更详细的错误信息以便调试
+        var errorMsg = '未知错误';
+        var errorCode = -1;
+
+        // 解析具体错误类型
+        if (err.errCode) {
+          errorCode = err.errCode;
+          switch (err.errCode) {
+            case -501004:
+              errorMsg = '云函数不存在或执行出错';
+              break;
+            case -403009:
+              errorMsg = '没有访问权限';
+              break;
+            case -501001:
+              errorMsg = '云服务未开通或已到期';
+              break;
+            default:
+              errorMsg = err.errMsg || '调用失败';
+          }
+        } else if (err.errMsg) {
+          errorMsg = err.errMsg;
+        }
+        console.error("[\u4E91\u51FD\u6570\u9519\u8BEF] \u4EE3\u7801: ".concat(errorCode, ", \u6D88\u606F: ").concat(errorMsg));
+
         // 返回错误数据而不是reject，让业务层处理
         resolve({
-          code: -1,
-          message: '请求失败，请稍后重试',
+          code: errorCode,
+          message: errorMsg,
           error: err
         });
       },
@@ -24656,6 +24616,82 @@ function request() {
 var _default = request;
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+
+/***/ }),
+
+/***/ 92:
+/*!****************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/utils/cloud-config.js ***!
+  \****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.cloudConfig = void 0;
+exports.initCloudService = initCloudService;
+/**
+ * 云服务配置文件
+ * 集中管理云服务配置，便于维护
+ */
+
+// 阿里云服务空间配置
+var cloudConfig = {
+  provider: 'aliyun',
+  spaceId: 'mp-d0c06b27-ec33-40fe-b28b-337811bd2f29',
+  clientSecret: 'c3DWEyYRkArWA6mZ2b+gxQ==',
+  endpoint: 'https://api.next.bspapp.com'
+};
+
+/**
+ * 初始化云服务
+ * 确保在各个平台上都能正确初始化云服务
+ */
+exports.cloudConfig = cloudConfig;
+function initCloudService() {
+  if (typeof uniCloud === 'undefined') {
+    console.error('uniCloud对象不存在，无法初始化云服务');
+    return false;
+  }
+  try {
+    console.log('正在初始化云服务...');
+
+    // 检查是否已在开发者工具调试环境
+    var accountInfo = uni.getAccountInfoSync ? uni.getAccountInfoSync() : null;
+    var isRelease = accountInfo && accountInfo.miniProgram && accountInfo.miniProgram.envVersion === 'release';
+    if (isRelease) {
+      console.log('当前为正式发布环境，使用标准初始化');
+    }
+
+    // 初始化阿里云服务
+    uniCloud.init({
+      provider: cloudConfig.provider,
+      spaceId: cloudConfig.spaceId,
+      clientSecret: cloudConfig.clientSecret,
+      endpoint: cloudConfig.endpoint
+    });
+
+    // 微信小程序环境特殊处理
+
+    if (typeof uni !== 'undefined' && uni) {
+      if (!uni.cloud) {
+        uni.cloud = {};
+        uni.cloud.init = uniCloud.init;
+        uni.cloud.callFunction = uniCloud.callFunction;
+      }
+    }
+    console.log('云服务初始化成功');
+    return true;
+  } catch (error) {
+    console.error('云服务初始化失败:', error);
+    return false;
+  }
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ })
 

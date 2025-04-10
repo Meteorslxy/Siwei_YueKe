@@ -73,7 +73,7 @@ export default {
         code: '',
         captcha: ''
       },
-      isDevMode: true,
+      isDevMode: false,
       isSending: false,
       countdown: 60,
       sendCodeText: '获取验证码',

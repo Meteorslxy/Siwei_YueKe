@@ -137,9 +137,25 @@ var _default = {
     status: {
       type: String,
       default: 'more' // more-加载更多 loading-加载中 noMore-没有更多了
+    },
+
+    autoLoad: {
+      type: Boolean,
+      default: false // 是否自动加载
     }
   },
 
+  watch: {
+    status: function status(val) {
+      var _this = this;
+      // 当状态变为'more'且设置了自动加载时，自动触发加载
+      if (val === 'more' && this.autoLoad) {
+        this.$nextTick(function () {
+          _this.onClick();
+        });
+      }
+    }
+  },
   methods: {
     onClick: function onClick(event) {
       // 防止事件冒泡

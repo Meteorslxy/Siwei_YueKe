@@ -16,7 +16,9 @@ exports.main = async (event, context) => {
     password,
     verificationCode,
     loginType, 
-    checkOnly = false 
+    checkOnly = false,
+    deviceInfo, // 设备信息
+    uuid        // 设备uuid
   } = event;
   
   console.log('登录函数调用，参数:', event);
@@ -30,6 +32,22 @@ exports.main = async (event, context) => {
       code: 1,
       success: false,
       message: '登录类型不能为空'
+    };
+  }
+  
+  // 特殊处理微信登录方式
+  if (loginType === 'wechat' || loginType === 'weixin') {
+    // 微信登录不需要用户名和密码，使用专门的处理函数
+    return await handleWechatLogin(code, openid, userInfo, PLATFORM, context, {deviceInfo, uuid});
+  }
+  
+  // 用户名和密码验证 - 只有非微信登录才需要验证
+  if ((loginType === 'login' || loginType === 'username') && (!event.username || !password)) {
+    console.error('用户名和密码不能为空');
+    return {
+      code: 1,
+      success: false,
+      message: '用户名和密码不能为空'
     };
   }
   
@@ -442,170 +460,192 @@ exports.main = async (event, context) => {
       // 如果没有openid但有code，通过云函数获取openid
       if (!wxOpenid && code) {
         try {
+          console.log('开始使用code获取openid:', code);
           // 调用获取openid的云函数
           const openidResult = await uniCloud.callFunction({
             name: 'getWxOpenid',
-            data: { code }
+            data: { code, deviceInfo, uuid }
           });
           
           console.log('获取openid结果:', openidResult);
           
-          if (openidResult.result && openidResult.result.code === 0 && openidResult.result.data && openidResult.result.data.openid) {
+          if (openidResult.result && openidResult.result.code === 0 && 
+              openidResult.result.data && openidResult.result.data.openid) {
             wxOpenid = openidResult.result.data.openid;
-            console.log('成功获取到openid:', wxOpenid);
+            console.log('成功获取到openid:', wxOpenid, 
+                       openidResult.result.data.mock ? '(模拟)' : '(真实)');
           } else {
-            // 微信开发工具调试模式下，可能无法获取真实openid
-            // 为了便于开发测试，生成一个模拟openid
-            if (PLATFORM === 'mp-weixin') {
-              console.log('微信开发工具中使用模拟openid');
-              wxOpenid = 'wx_' + Math.random().toString(36).substr(2, 10);
-              console.log('生成的模拟openid:', wxOpenid);
-            } else {
-              console.error('获取openid失败:', openidResult);
-              return {
-                code: -1,
-                success: false,
-                message: '获取openid失败: ' + (openidResult.result ? openidResult.result.msg : '未知错误')
-              };
-            }
-          }
-        } catch (err) {
-          // 调用云函数失败时，在开发环境下可以使用模拟openid
-          console.error('获取openid云函数调用失败:', err);
-          
-          if (PLATFORM === 'mp-weixin') {
-            console.log('微信开发工具中使用模拟openid');
-            wxOpenid = 'wx_' + Math.random().toString(36).substr(2, 10);
-            console.log('生成的模拟openid:', wxOpenid);
-          } else {
+            // 获取openid失败，返回错误
+            console.error('获取openid失败:', openidResult);
             return {
               code: -1,
               success: false,
-              message: '获取openid失败: ' + (err.message || err)
+              message: '获取openid失败: ' + (openidResult.result ? openidResult.result.msg : '未知错误')
             };
           }
-        }
-      }
-      
-      // 查询用户是否已存在
-      console.log('使用openid查询用户:', wxOpenid);
-      const userResult = await db.collection('users')
-        .where({
-          openid: wxOpenid
-        })
-        .get();
-      
-      console.log('查询用户结果:', userResult);
-      
-      // 如果仅检查用户是否存在，则返回结果
-      if (checkOnly) {
-        const userExists = userResult.data && userResult.data.length > 0;
-        console.log('仅检查用户是否存在, 结果:', userExists);
-        return {
-          code: 0,
-          success: true,
-          userExists,
-          message: userExists ? '用户已存在' : '用户不存在'
-        };
-      }
-      
-      if (userResult.data && userResult.data.length > 0) {
-        // 用户已存在，更新用户信息
-        const existUser = userResult.data[0];
-        userId = existUser._id;
-        console.log('用户已存在，ID:', userId);
-        
-        // 更新用户信息
-        if (Object.keys(userInfo).length > 0) {
-          // 处理用户信息，确保字段的完整性
-          const processedUserInfo = processUserInfo(userInfo, wxOpenid);
-          
-          await db.collection('users')
-            .doc(userId)
-            .update({
-              nickName: processedUserInfo.nickName,
-              avatarUrl: processedUserInfo.avatarUrl,
-              gender: processedUserInfo.gender,
-              country: processedUserInfo.country,
-              province: processedUserInfo.province,
-              city: processedUserInfo.city,
-              language: processedUserInfo.language,
-              lastLoginTime: serverDate
-            });
-            
-          console.log('用户信息已更新');
-        } else {
-          // 仅更新登录时间
-          await db.collection('users')
-            .doc(userId)
-            .update({
-              lastLoginTime: serverDate
-            });
-            
-          console.log('用户登录时间已更新');
-        }
-      } else {
-        // 用户不存在，创建新用户
-        console.log('用户不存在，创建新用户');
-        const processedUserInfo = processUserInfo(userInfo || {}, wxOpenid);
-        
-        // 添加额外信息
-        const newUser = {
-          ...processedUserInfo,
-          appid: APPID || '',
-          unionid: event.unionid || '',
-          createTime: serverDate,
-          lastLoginTime: serverDate,
-          platform: PLATFORM,
-          role: 'user', // 默认角色为普通用户
-          status: 0 // 默认状态为正常
-        };
-        
-        console.log('新建用户数据:', newUser);
-        
-        try {
-          const result = await db.collection('users').add(newUser);
-          userId = result.id;
-          console.log('用户创建成功，ID:', userId);
-          
-          // 更新userId字段，确保与_id一致
-          await db.collection('users')
-            .doc(userId)
-            .update({
-              userId: userId
-            });
-            
-          console.log('用户ID已更新');
-        } catch (err) {
-          console.error('创建用户失败:', err);
+        } catch (error) {
+          console.error('获取openid异常:', error);
           return {
             code: -1,
             success: false,
-            message: '创建用户失败: ' + err.message
+            message: '获取openid异常: ' + error.message
           };
         }
       }
       
-      // 获取用户完整信息
-      console.log('获取用户完整信息, ID:', userId);
-      const userData = await db.collection('users')
-        .doc(userId)
-        .get();
+      // 确保此时有openid
+      if (!wxOpenid) {
+        return {
+          code: -1,
+          success: false,
+          message: '无法获取有效的openid'
+        };
+      }
       
-      // 过滤敏感信息，只返回前端需要的数据
-      const filteredData = filterUserData(userData.data);
+      console.log('准备查询用户，使用openid:', wxOpenid);
       
-      // 添加userId字段
-      filteredData.userId = userId;
-      
-      console.log('登录成功，返回用户数据:', filteredData);
-      
-      return {
-        code: 0,
-        success: true,
-        data: filteredData,
-        message: '微信登录成功'
-      };
+      // 查询用户是否已经存在
+      const db = uniCloud.database();
+      try {
+        // 查询用户 - 使用多种可能的字段格式
+        console.log('尝试查询用户，使用多种可能的openid格式');
+        const userQuery = db.collection('uni-id-users').where(db.command.or([
+          // 主要格式：wx_openid.mp-weixin
+          { 'wx_openid.mp-weixin': wxOpenid },
+          // 兼容格式：weixin_openid
+          { weixin_openid: wxOpenid },
+          // 其他可能格式：wx_openid.weixin
+          { 'wx_openid.weixin': wxOpenid },
+          // 其他可能的字段
+          { openid: wxOpenid }
+        ]));
+        
+        // 查询用户
+        const userRecord = await userQuery.get();
+        console.log('用户查询结果:', userRecord);
+        
+        // 检查是否找到用户
+        if (userRecord.data && userRecord.data.length > 0) {
+          // 找到用户，执行登录
+          const user = userRecord.data[0];
+          console.log('找到已存在用户:', user._id);
+          
+          // 生成token
+          const timestamp = Date.now();
+          const token = 'token_' + user._id + '_' + timestamp + '_' + Math.random().toString(36).substring(2, 10);
+          const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+          
+          // 更新用户token、登录时间，并确保openid格式统一
+          let updateData = {
+            last_login_date: new Date(),
+            last_login_ip: CLIENTIP || '',
+            token: token,
+            token_expired: tokenExpired
+          };
+          
+          // 确保openid存储在标准格式中
+          if (!user.wx_openid || !user.wx_openid['mp-weixin']) {
+            updateData.wx_openid = user.wx_openid || {};
+            updateData.wx_openid['mp-weixin'] = wxOpenid;
+          }
+          
+          // 如果有用户信息，也更新用户资料
+          if (userInfo) {
+            if (userInfo.nickName || userInfo.nickname) {
+              updateData.nickname = userInfo.nickName || userInfo.nickname;
+            }
+            
+            if (userInfo.avatarUrl || userInfo.avatar) {
+              updateData.avatar = userInfo.avatarUrl || userInfo.avatar;
+            }
+            
+            if (userInfo.gender !== undefined) {
+              updateData.gender = userInfo.gender;
+            }
+          }
+          
+          await db.collection('uni-id-users').doc(user._id).update(updateData);
+          
+          console.log('用户登录成功，信息已更新:', updateData);
+          
+          // 返回登录成功信息
+          return {
+            code: 0,
+            success: true,
+            message: '登录成功',
+            token,
+            tokenExpired,
+            uid: user._id,
+            userInfo: {
+              _id: user._id,
+              username: user.username || user.nickname || '微信用户',
+              nickname: updateData.nickname || user.nickname || '微信用户',
+              avatar: updateData.avatar || user.avatar || '',
+              gender: updateData.gender !== undefined ? updateData.gender : (user.gender || 0),
+              wx_openid: { 'mp-weixin': wxOpenid }
+            }
+          };
+        } else {
+          // 用户不存在，创建新用户
+          console.log('未找到用户，创建新用户, openid:', wxOpenid);
+          
+          // 创建新用户数据
+          const newUser = {
+            username: 'wx_user_' + Date.now().toString(36),
+            nickname: userInfo ? (userInfo.nickName || userInfo.nickname || '微信用户') : '微信用户',
+            avatar: userInfo ? (userInfo.avatarUrl || userInfo.avatar || '') : '',
+            gender: userInfo ? userInfo.gender || 0 : 0,
+            wx_openid: {
+              'mp-weixin': wxOpenid
+            },
+            register_date: new Date(),
+            register_ip: CLIENTIP || '',
+            status: 1
+          };
+          
+          // 生成token
+          const timestamp = Date.now();
+          const userId = 'user_' + timestamp + '_' + Math.random().toString(36).substring(2, 10);
+          const token = 'token_' + userId + '_' + timestamp + '_' + Math.random().toString(36).substring(2, 10);
+          const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+          
+          // 添加token信息
+          newUser._id = userId;
+          newUser.token = token;
+          newUser.token_expired = tokenExpired;
+          
+          console.log('创建新用户数据:', newUser);
+          
+          // 插入新用户
+          await db.collection('uni-id-users').add(newUser);
+          console.log('新用户创建成功');
+          
+          // 返回创建成功信息
+          return {
+            code: 0,
+            success: true,
+            message: '注册并登录成功',
+            token,
+            tokenExpired,
+            uid: userId,
+            userInfo: {
+              _id: userId,
+              username: newUser.username,
+              nickname: newUser.nickname,
+              avatar: newUser.avatar,
+              gender: newUser.gender,
+              wx_openid: { 'mp-weixin': wxOpenid }
+            }
+          };
+        }
+      } catch (error) {
+        console.error('微信登录处理出错:', error);
+        return {
+          code: -1,
+          success: false,
+          message: '登录处理出错: ' + error.message
+        };
+      }
     } else if (loginType === 'createUserInDb') {
       // 直接在云数据库中创建微信用户
       console.log('直接在云数据库中创建微信用户, 参数:', { openid, code, userInfo });
@@ -891,7 +931,7 @@ exports.main = async (event, context) => {
     } else if (loginType === 'checkWxUser') {
       return await checkWxUser(code);
     } else if (loginType === 'loginWithOpenid') {
-      return await loginWithOpenid(openid, userInfo);
+      return await loginWithOpenid(openid, userInfo, PLATFORM, APPID);
     } else if (loginType === 'createUserInDb') {
       return await createUserInDb(openid, userInfo);
     } else {
@@ -1290,101 +1330,351 @@ async function createUserInDb(openid, userInfo) {
 }
 
 // 使用openid登录
-async function loginWithOpenid(openid, userInfo) {
-  console.log('使用openid登录:', {openid, userInfo});
+async function loginWithOpenid(openid, userInfo, platform, appid) {
+  console.log('使用openid登录:', openid);
   
-  if (!openid) {
+  // 查询用户是否存在
+  const db = uniCloud.database();
+  const userCollection = db.collection('uni-id-users');
+  
+  try {
+    // 查询是否已存在该openid的用户
+    const userResult = await userCollection.where({
+      'wx_openid.mp-weixin': openid
+    }).get();
+    
+    if (userResult.data && userResult.data.length > 0) {
+      // 用户已存在，执行登录
+      const user = userResult.data[0];
+      
+      // 生成token
+      const token = 'token_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      const tokenExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+      
+      // 更新用户的token和登录时间
+      await userCollection.doc(user._id).update({
+        token,
+        token_expired: tokenExpired,
+        last_login_date: new Date(),
+        last_login_ip: context.CLIENTIP
+      });
+      
+      // 返回登录成功信息
+      return {
+        code: 0,
+        success: true,
+        message: '登录成功',
+        token,
+        tokenExpired,
+        uid: user._id,
+        userInfo: {
+          _id: user._id,
+          username: user.username || user.nickname || '微信用户',
+          nickname: user.nickname || userInfo.nickName || '微信用户',
+          avatar: user.avatar || userInfo.avatarUrl || '',
+          gender: user.gender || userInfo.gender || 0
+        }
+      };
+    } else {
+      // 用户不存在，需要创建新用户
+      const userId = 'user-wx-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
+      const username = 'wx_user_' + Math.random().toString(36).substring(2, 10);
+      
+      // 生成token
+      const token = 'token_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      const tokenExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+      
+      // 创建新用户
+      const newUser = {
+        _id: userId,
+        username,
+        nickname: userInfo.nickName || '微信用户',
+        avatar: userInfo.avatarUrl || '',
+        gender: userInfo.gender || 0,
+        wx_openid: {
+          'mp-weixin': openid
+        },
+        register_date: new Date(),
+        register_ip: context.CLIENTIP,
+        last_login_date: new Date(),
+        last_login_ip: context.CLIENTIP,
+        token,
+        token_expired: tokenExpired
+      };
+      
+      // 将用户保存到数据库
+      await userCollection.add(newUser);
+      
+      // 返回创建成功信息
+      return {
+        code: 0,
+        success: true,
+        message: '注册并登录成功',
+        token,
+        tokenExpired,
+        uid: userId,
+        userInfo: {
+          _id: userId,
+          username,
+          nickname: userInfo.nickName || '微信用户',
+          avatar: userInfo.avatarUrl || '',
+          gender: userInfo.gender || 0
+        }
+      };
+    }
+  } catch (error) {
+    console.error('openid登录处理出错:', error);
+    throw error;
+  }
+}
+
+// 使用code登录
+async function loginWithCode(code, userInfo, platform, appid) {
+  console.log('使用code登录:', code);
+  
+  try {
+    // 获取openid
+    let openid;
+    
+    // 调用获取openid的云函数
+    try {
+      const openidResult = await uniCloud.callFunction({
+        name: 'getWxOpenid',
+        data: { code, deviceInfo, uuid }
+      });
+      
+      console.log('获取openid结果:', openidResult);
+      
+      if (openidResult.result && openidResult.result.code === 0 && openidResult.result.data && openidResult.result.data.openid) {
+        openid = openidResult.result.data.openid;
+        console.log('成功获取到openid:', openid);
+      } else {
+        // 微信开发工具调试模式下，可能无法获取真实openid
+        // 为了便于开发测试，生成一个模拟openid
+        if (platform === 'mp-weixin') {
+          console.log('微信开发工具中使用模拟openid');
+          openid = 'wx_' + Math.random().toString(36).substring(2, 8);
+          console.log('生成的模拟openid:', openid);
+        } else {
+          throw new Error('获取openid失败: ' + (openidResult.result ? openidResult.result.msg : '未知错误'));
+        }
+      }
+    } catch (error) {
+      console.error('获取openid失败:', error);
+      throw new Error('获取openid失败: ' + error.message);
+    }
+    
+    // 有了openid后，复用上面的openid登录方法
+    return await loginWithOpenid(openid, userInfo, platform, appid);
+  } catch (error) {
+    console.error('code登录处理出错:', error);
+    throw error;
+  }
+}
+
+// 处理微信登录
+async function handleWechatLogin(code, openid, userInfo, platform, context, {deviceInfo, uuid}) {
+  console.log('处理微信登录，参数:', { code, openid, userInfo, platform, deviceInfo, uuid });
+  const { CLIENTIP } = context || {};
+  
+  if (!code && !openid) {
+    console.error('微信登录缺少必要参数');
     return {
-      code: -1,
-      message: '缺少openid参数'
+      code: 1,
+      success: false,
+      message: '微信登录需要code或openid参数'
     };
   }
   
-  try {
-    const db = uniCloud.database();
-    
-    // 查询用户 - 使用正确的字段名称
-    const userRecord = await db.collection('uni-id-users')
-      .where({
-        'wx_openid.mp-weixin': openid
-      })
-      .limit(1)
-      .get();
-    
-    console.log('查询用户结果:', userRecord);
-    
-    if (!userRecord.data || userRecord.data.length === 0) {
+  let wxOpenid = openid;
+  
+  // 如果没有openid但有code，通过云函数获取openid
+  if (!wxOpenid && code) {
+    try {
+      console.log('开始使用code获取openid:', code);
+      // 调用获取openid的云函数
+      const openidResult = await uniCloud.callFunction({
+        name: 'getWxOpenid',
+        data: { code, deviceInfo, uuid }
+      });
+      
+      console.log('获取openid结果:', openidResult);
+      
+      if (openidResult.result && openidResult.result.code === 0 && 
+          openidResult.result.data && openidResult.result.data.openid) {
+        wxOpenid = openidResult.result.data.openid;
+        console.log('成功获取到openid:', wxOpenid, 
+                   openidResult.result.data.mock ? '(模拟)' : '(真实)');
+      } else {
+        // 获取openid失败，返回错误
+        console.error('获取openid失败:', openidResult);
+        return {
+          code: -1,
+          success: false,
+          message: '获取openid失败: ' + (openidResult.result ? openidResult.result.msg : '未知错误')
+        };
+      }
+    } catch (error) {
+      console.error('获取openid异常:', error);
       return {
-        code: -2,
-        message: '用户不存在',
-        openid
+        code: -1,
+        success: false,
+        message: '获取openid异常: ' + error.message
       };
     }
+  }
+  
+  // 确保此时有openid
+  if (!wxOpenid) {
+    return {
+      code: -1,
+      success: false,
+      message: '无法获取有效的openid'
+    };
+  }
+  
+  console.log('准备查询用户，使用openid:', wxOpenid);
+  
+  // 查询用户是否已经存在
+  const db = uniCloud.database();
+  try {
+    // 查询用户 - 使用多种可能的字段格式
+    console.log('尝试查询用户，使用多种可能的openid格式');
+    const userQuery = db.collection('uni-id-users').where(db.command.or([
+      // 主要格式：wx_openid.mp-weixin
+      { 'wx_openid.mp-weixin': wxOpenid },
+      // 兼容格式：weixin_openid
+      { weixin_openid: wxOpenid },
+      // 其他可能格式：wx_openid.weixin
+      { 'wx_openid.weixin': wxOpenid },
+      // 其他可能的字段
+      { openid: wxOpenid }
+    ]));
     
-    const user = userRecord.data[0];
+    // 查询用户
+    const userRecord = await userQuery.get();
+    console.log('用户查询结果:', userRecord);
     
-    // 更新用户资料（如果提供了新的用户信息）
-    if (userInfo) {
-      const updateData = {};
+    // 检查是否找到用户
+    if (userRecord.data && userRecord.data.length > 0) {
+      // 找到用户，执行登录
+      const user = userRecord.data[0];
+      console.log('找到已存在用户:', user._id);
       
-      if (userInfo.nickName || userInfo.nickname) {
-        updateData.nickname = userInfo.nickName || userInfo.nickname;
-      }
+      // 生成token
+      const timestamp = Date.now();
+      const token = 'token_' + user._id + '_' + timestamp + '_' + Math.random().toString(36).substring(2, 10);
+      const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
       
-      if (userInfo.avatarUrl || userInfo.avatar) {
-        updateData.avatar = userInfo.avatarUrl || userInfo.avatar;
-      }
-      
-      if (Object.keys(updateData).length > 0) {
-        console.log('更新用户资料:', updateData);
-        await db.collection('uni-id-users')
-          .doc(user._id)
-          .update(updateData);
-        
-        // 合并更新的数据到用户对象
-        Object.assign(user, updateData);
-      }
-    }
-    
-    // 生成token
-    const timestamp = Date.now();
-    const token = generateToken(user._id);
-    const tokenExpired = new Date(timestamp + 7 * 24 * 60 * 60 * 1000).toISOString();
-    
-    // 更新最后登录时间和token
-    await db.collection('uni-id-users')
-      .doc(user._id)
-      .update({
-        last_login_date: timestamp,
-        last_login_ip: context.CLIENTIP || '',
-        token: [token],
+      // 更新用户token、登录时间，并确保openid格式统一
+      let updateData = {
+        last_login_date: new Date(),
+        last_login_ip: CLIENTIP || '',
+        token: token,
         token_expired: tokenExpired
-      });
-    
-    // 为了前端显示，格式化返回的数据
-    const formattedUserData = {
-      _id: user._id,
-      uid: user._id,
-      username: user.username || user._id,
-      nickname: user.nickname || '微信用户',
-      avatar: user.avatar || '',
-      wx_openid: user.wx_openid || {}
-    };
-    
-    // 返回成功结果
+      };
+      
+      // 确保openid存储在标准格式中
+      if (!user.wx_openid || !user.wx_openid['mp-weixin']) {
+        updateData.wx_openid = user.wx_openid || {};
+        updateData.wx_openid['mp-weixin'] = wxOpenid;
+      }
+      
+      // 如果有用户信息，也更新用户资料
+      if (userInfo) {
+        if (userInfo.nickName || userInfo.nickname) {
+          updateData.nickname = userInfo.nickName || userInfo.nickname;
+        }
+        
+        if (userInfo.avatarUrl || userInfo.avatar) {
+          updateData.avatar = userInfo.avatarUrl || userInfo.avatar;
+        }
+        
+        if (userInfo.gender !== undefined) {
+          updateData.gender = userInfo.gender;
+        }
+      }
+      
+      await db.collection('uni-id-users').doc(user._id).update(updateData);
+      
+      console.log('用户登录成功，信息已更新:', updateData);
+      
+      // 返回登录成功信息
+      return {
+        code: 0,
+        success: true,
+        message: '登录成功',
+        token,
+        tokenExpired,
+        uid: user._id,
+        userInfo: {
+          _id: user._id,
+          username: user.username || user.nickname || '微信用户',
+          nickname: updateData.nickname || user.nickname || '微信用户',
+          avatar: updateData.avatar || user.avatar || '',
+          gender: updateData.gender !== undefined ? updateData.gender : (user.gender || 0),
+          wx_openid: { 'mp-weixin': wxOpenid }
+        }
+      };
+    } else {
+      // 用户不存在，创建新用户
+      console.log('未找到用户，创建新用户, openid:', wxOpenid);
+      
+      // 创建新用户数据
+      const newUser = {
+        username: 'wx_user_' + Date.now().toString(36),
+        nickname: userInfo ? (userInfo.nickName || userInfo.nickname || '微信用户') : '微信用户',
+        avatar: userInfo ? (userInfo.avatarUrl || userInfo.avatar || '') : '',
+        gender: userInfo ? userInfo.gender || 0 : 0,
+        wx_openid: {
+          'mp-weixin': wxOpenid
+        },
+        register_date: new Date(),
+        register_ip: CLIENTIP || '',
+        status: 1
+      };
+      
+      // 生成token
+      const timestamp = Date.now();
+      const userId = 'user_' + timestamp + '_' + Math.random().toString(36).substring(2, 10);
+      const token = 'token_' + userId + '_' + timestamp + '_' + Math.random().toString(36).substring(2, 10);
+      const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000; // 7天后过期
+      
+      // 添加token信息
+      newUser._id = userId;
+      newUser.token = token;
+      newUser.token_expired = tokenExpired;
+      
+      console.log('创建新用户数据:', newUser);
+      
+      // 插入新用户
+      await db.collection('uni-id-users').add(newUser);
+      console.log('新用户创建成功');
+      
+      // 返回创建成功信息
+      return {
+        code: 0,
+        success: true,
+        message: '注册并登录成功',
+        token,
+        tokenExpired,
+        uid: userId,
+        userInfo: {
+          _id: userId,
+          username: newUser.username,
+          nickname: newUser.nickname,
+          avatar: newUser.avatar,
+          gender: newUser.gender,
+          wx_openid: { 'mp-weixin': wxOpenid }
+        }
+      };
+    }
+  } catch (error) {
+    console.error('微信登录处理出错:', error);
     return {
-      code: 0,
-      message: '登录成功',
-      token,
-      tokenExpired,
-      data: formattedUserData
-    };
-  } catch (err) {
-    console.error('openid登录失败:', err);
-    return {
-      code: -3,
-      message: '登录过程出错: ' + err.message,
-      error: err.stack
+      code: -1,
+      success: false,
+      message: '登录处理出错: ' + error.message
     };
   }
 } 

@@ -32,6 +32,9 @@ import './components/global.js'
 import api from './api/index.js'
 Vue.prototype.$api = api
 
+// 引入云服务配置
+import { cloudConfig, initCloudService } from './utils/cloud-config.js'
+
 Vue.config.productionTip = false
 
 App.mpType = 'app'
@@ -43,6 +46,8 @@ if (!App.globalData) {
     App.globalData = {};
 }
 App.globalData.$spaceId = spaceId;
+// 设置全局测试模式变量为false，关闭测试模式
+App.globalData.$isDevMode = false;
 
 // 全局混入
 Vue.mixin({
@@ -81,27 +86,27 @@ Vue.mixin({
 const themeColor = 'var(--theme-color)' // 使用CSS变量
 Vue.prototype.$themeColor = themeColor
 
-// 初始化UniCloud云服务
-if (typeof uniCloud !== 'undefined') {
-  console.log('正在初始化UniCloud阿里云服务...');
-  
-  try {
-    // 初始化阿里云
-    uniCloud.init({
-      provider: 'aliyun', // 服务商，使用阿里云
-      spaceId, // 服务空间ID
-      clientSecret: '6YQCnJGxPGKuluPbkDTiyg==', // 服务空间客户端密钥
-      endpoint: 'https://api.next.bspapp.com', // 阿里云服务空间地址
+// 初始化云服务
+const cloudInitResult = initCloudService();
+console.log('云服务初始化结果:', cloudInitResult);
+
+// 测试云函数连接
+// #ifdef MP-WEIXIN
+if (cloudInitResult) {
+  setTimeout(() => {
+    console.log('测试云函数连接...');
+    const cloudObj = typeof uniCloud !== 'undefined' ? uniCloud : uni.cloud;
+    cloudObj.callFunction({
+      name: 'yuekeCloudTest',
+      data: { message: '连接测试' }
+    }).then(res => {
+      console.log('云服务连接测试成功:', res.result);
+    }).catch(err => {
+      console.error('云服务连接测试失败:', err);
     });
-    
-    
-    console.log('UniCloud阿里云环境初始化完成');
-  } catch (error) {
-    console.error('UniCloud初始化失败:', error);
-  }
-} else {
-  console.warn('uniCloud不可用');
+  }, 2000);
 }
+// #endif
 
 // 添加页面跳转的错误处理
 uni.addInterceptor('navigateTo', {

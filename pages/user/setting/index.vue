@@ -18,13 +18,14 @@
           </view>
         </view>
         
-        <view class="setting-item" @click="handleWechatAccount">
+        <!-- 微信账号选项已隐藏 -->
+        <!-- <view class="setting-item" @click="handleWechatAccount">
           <text class="item-label">微信账号</text>
           <view class="item-action">
             <text class="item-value">{{isWechatBound ? '已绑定' : '未绑定'}}</text>
             <text class="item-arrow">&gt;</text>
           </view>
-        </view>
+        </view> -->
       </view>
     </view>
     
@@ -348,8 +349,12 @@ export default {
       console.log('微信绑定状态:', this.isWechatBound);
     },
     
-    // 处理微信账号点击
+    // 处理微信账号点击 - 已禁用
     handleWechatAccount() {
+      // 微信账号功能已禁用
+      return;
+      
+      /* 原代码已注释
       if (this.isWechatBound) {
         // 如果已绑定，跳转到微信账号管理页面
         uni.navigateTo({
@@ -372,10 +377,15 @@ export default {
           }
         });
       }
+      */
     },
     
-    // 绑定微信账号
+    // 绑定微信账号 - 已禁用
     bindWechatAccount() {
+      // 微信账号绑定功能已禁用
+      return;
+      
+      /* 原代码已注释
       uni.showLoading({
         title: '加载中'
       });
@@ -410,58 +420,75 @@ export default {
       uni.hideLoading();
       this.showFeatureInDevelopment('绑定微信账号');
       // #endif
+      */
     },
     
-    // 调用云函数绑定微信账号
-    async callBindWechatFunction(code) {
-      try {
-        const token = uni.getStorageSync('uni_id_token');
-        if (!token) {
-          throw new Error('用户未登录');
+    // 调用云函数绑定微信账号 - 已禁用
+    callBindWechatFunction(code) {
+      // 微信账号绑定功能已禁用
+      return;
+      
+      /* 原代码已注释
+      // 调用云函数进行绑定
+      uniCloud.callFunction({
+        name: 'bindWechat',
+        data: {
+          code: code
         }
-        
-        // 调用绑定微信的云函数
-        const result = await uniCloud.callFunction({
-          name: 'uni-id-co',
-          data: {
-            action: 'bindWeixin',
-            params: {
-              code
-            }
-          }
-        });
-        
+      }).then(res => {
         uni.hideLoading();
+        console.log('绑定微信账号结果:', res);
         
-        if (result.result && result.result.code === 0) {
+        if (res.result && res.result.code === 0) {
           // 绑定成功
-          this.isWechatBound = true;
-          
-          // 更新本地存储的用户信息
-          this.fetchUserFromDatabase();
-          
           uni.showToast({
-            title: '微信绑定成功',
+            title: '微信账号绑定成功',
             icon: 'success'
           });
           
-          // 触发绑定状态变更事件
-          uni.$emit('wechat:binding:changed', { isBound: true });
+          // 修改绑定状态
+          this.isWechatBound = true;
+          
+          // 更新本地存储的用户信息
+          const userInfo = uni.getStorageSync('userInfo');
+          if (userInfo) {
+            let userObj = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
+            
+            // 更新wx_openid字段
+            if (res.result.openid) {
+              if (!userObj.wx_openid) {
+                userObj.wx_openid = {};
+              }
+              userObj.wx_openid.mp = res.result.openid;
+            }
+            
+            // 如果有unionid也进行更新
+            if (res.result.unionid) {
+              userObj.wx_unionid = res.result.unionid;
+            }
+            
+            // 保存更新后的用户信息
+            uni.setStorageSync('userInfo', userObj);
+            
+            // 发布微信绑定状态变更事件
+            uni.$emit('wechat:binding:status', true);
+          }
         } else {
           // 绑定失败
           uni.showToast({
-            title: result.result?.message || '绑定失败',
+            title: (res.result && res.result.message) || '微信账号绑定失败',
             icon: 'none'
           });
         }
-      } catch (error) {
+      }).catch(err => {
         uni.hideLoading();
-        console.error('绑定微信失败:', error);
+        console.error('绑定微信账号失败:', err);
         uni.showToast({
-          title: '绑定失败，请稍后再试',
+          title: '微信账号绑定失败',
           icon: 'none'
         });
-      }
+      });
+      */
     },
     
     // 处理微信绑定状态变更

@@ -5,7 +5,7 @@
       <text class="loading-text">加载中...</text>
     </view>
     <text class="text" v-else-if="status === 'noMore'">没有更多了</text>
-    <text class="text" v-else>点击加载更多</text>
+    <text class="text action-text" v-else>点击加载更多</text>
   </view>
 </template>
 
@@ -16,6 +16,20 @@ export default {
     status: {
       type: String,
       default: 'more' // more-加载更多 loading-加载中 noMore-没有更多了
+    },
+    autoLoad: {
+      type: Boolean,
+      default: false // 是否自动加载
+    }
+  },
+  watch: {
+    status(val) {
+      // 当状态变为'more'且设置了自动加载时，自动触发加载
+      if (val === 'more' && this.autoLoad) {
+        this.$nextTick(() => {
+          this.onClick();
+        });
+      }
     }
   },
   methods: {
@@ -73,5 +87,12 @@ export default {
 .loading-text, .text {
   font-size: 28rpx;
   color: #999;
+}
+
+.action-text {
+  padding: 15rpx 30rpx;
+  background-color: #f8f8f8;
+  border-radius: 30rpx;
+  color: #666;
 }
 </style> 

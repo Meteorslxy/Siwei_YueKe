@@ -15,15 +15,6 @@
     "pages/school/detail",
     "pages/course/lecture-detail",
     "pages/user/upload-image",
-    "pages/admin/login",
-    "pages/admin/dashboard",
-    "pages/admin/teacher",
-    "pages/admin/course",
-    "pages/admin/lecture",
-    "pages/admin/news",
-    "pages/admin/booking",
-    "pages/admin/content-upload/index",
-    "pages/admin/course-teacher-update",
     "pages/news/list",
     "pages/news/detail",
     "pages/user/booking",
@@ -97,7 +88,7 @@
   "plugins": {},
   "uniCloud": {
     "provider": "aliyun",
-    "spaceId": "mp-db123abc-4def-5678-9abc-123456789012"
+    "spaceId": "mp-d0c06b27-ec33-40fe-b28b-337811bd2f29"
   },
   "usingComponents": {}
 }

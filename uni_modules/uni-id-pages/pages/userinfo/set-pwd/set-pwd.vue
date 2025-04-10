@@ -48,7 +48,7 @@ export default {
     return {
       uniIdRedirectUrl: '',
       loginType: '',
-      logo: '../../../../static/images/logo.png',
+      logo: 'https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png',
       focusNewPassword: false,
       focusNewPassword2: false,
       allowSkip: false,

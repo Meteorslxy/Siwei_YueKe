@@ -273,17 +273,6 @@
   margin-top: auto;
   padding: 30rpx 20rpx;
 }
-.bottom-area .admin-entry-btn {
-  margin-bottom: 20rpx;
-  height: 90rpx;
-  line-height: 90rpx;
-  text-align: center;
-  background-color: #fff;
-  border-radius: 12rpx;
-  font-size: 32rpx;
-  color: #2C405A;
-  border: 1px solid #eee;
-}
 .bottom-area .logout-btn {
   height: 90rpx;
   line-height: 90rpx;

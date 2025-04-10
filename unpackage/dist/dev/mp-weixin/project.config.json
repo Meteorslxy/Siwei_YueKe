@@ -19,7 +19,7 @@
     "ignoreUploadUnusedFiles": true
   },
   "compileType": "miniprogram",
-  "libVersion": "3.7.10",
+  "libVersion": "3.7.12",
   "appid": "wx64b3a851f619fc04",
   "projectname": "四维教育",
   "condition": {},

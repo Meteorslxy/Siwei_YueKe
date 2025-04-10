@@ -1,7 +1,7 @@
 <template>
   <view class="about-container">
     <view class="header">
-      <image class="logo" src="/static/images/logo.png" mode="widthFix"></image>
+      <image class="logo" src="https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/images/logo.png" mode="widthFix"></image>
       <text class="version">版本 1.0.0</text>
     </view>
     

@@ -718,6 +718,12 @@ text {
   font-size: 28rpx;
   color: #999;
 }
+.action-text {
+  padding: 15rpx 30rpx;
+  background-color: #f8f8f8;
+  border-radius: 30rpx;
+  color: #666;
+}
 
 
 .course-card {
