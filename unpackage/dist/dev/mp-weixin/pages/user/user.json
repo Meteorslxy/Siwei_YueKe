@@ -2,5 +2,7 @@
   "navigationBarTitleText": "我的",
   "navigationBarBackgroundColor": "#EC7A49",
   "navigationBarTextStyle": "white",
-  "usingComponents": {}
+  "usingComponents": {
+    "student-name-modal": "/components/common/student-name-modal"
+  }
 }

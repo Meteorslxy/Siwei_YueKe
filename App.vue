@@ -37,6 +37,11 @@ export default {
       // 先更新用户信息，确保登录页面能正常跳转
       uni.$emit('user:updated', userInfo);
       
+      // 延迟检查学生姓名设置状态
+      setTimeout(() => {
+        this.checkStudentNameStatus(userInfo);
+      }, 800);
+      
       // 延迟检查手机绑定状态，确保先跳转到首页/用户页面后再提示
       setTimeout(() => {
         this.checkMobileBindingStatus(userInfo);
@@ -423,6 +428,49 @@ export default {
         console.error('云函数连接测试失败:', error);
         return false;
       }
+    },
+
+    // 添加检查学生姓名设置状态的方法
+    checkStudentNameStatus(userInfo, forceShow = false) {
+      // 检查是否已经设置过学生姓名
+      const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+      if (hasSetStudentName && !forceShow) {
+        console.log('已经设置过学生姓名，无需再次设置');
+        return;
+      }
+      
+      // 获取当前用户信息
+      let currentUserInfo = userInfo;
+      
+      // 如果没有传入用户信息，则从存储中获取
+      if (!currentUserInfo) {
+        currentUserInfo = this.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
+        if (!currentUserInfo) {
+          console.log('没有找到用户信息，无需设置学生姓名');
+          return;
+        }
+      }
+      
+      console.log('检查用户是否需要设置学生姓名');
+      
+      // 如果用户已有昵称并且不是默认昵称（如"微信用户"或包含用户ID的昵称），则认为已设置
+      if (currentUserInfo.nickname && 
+          currentUserInfo.nickname !== '微信用户' && 
+          !currentUserInfo.nickname.startsWith('用户') && 
+          !currentUserInfo.nickname.startsWith('wx_user')) {
+        console.log('用户已设置有效昵称:', currentUserInfo.nickname);
+        // 记录已设置姓名
+        uni.setStorageSync('hasSetStudentName', true);
+        return;
+      }
+      
+      // 延迟显示设置学生姓名弹窗，确保页面已完全加载
+      setTimeout(() => {
+        // 显示学生姓名设置弹窗
+        console.log('显示学生姓名设置弹窗');
+        // 全局事件触发学生姓名设置弹窗
+        uni.$emit('show:student-name-modal');
+      }, 500);
     }
   }
 }

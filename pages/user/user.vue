@@ -127,14 +127,23 @@
       <!-- 安全区域 -->
       <view class="safe-area-bottom"></view>
     </view>
+
+    <!-- 添加学生姓名设置弹窗 -->
+    <student-name-modal ref="studentNameModal"></student-name-modal>
   </view>
 </template>
 
 <script>
 // 导入uni-id-pages的store
 import { store as uniIdPagesStore, mutations as uniIdPagesMutations } from '@/uni_modules/uni-id-pages/common/store.js';
+// 导入学生姓名设置弹窗组件
+import StudentNameModal from '@/components/common/student-name-modal.vue'
 
 export default {
+  components: {
+    // 添加学生姓名设置弹窗组件
+    StudentNameModal
+  },
   data() {
     return {
       userInfo: {},
@@ -182,12 +191,22 @@ export default {
       console.log('接收到uni-id-pages-login-success事件，刷新用户信息')
       this.loadUserInfo()
     })
+    
+    // 监听显示学生姓名设置弹窗事件
+    uni.$on('show:student-name-modal', () => {
+      console.log('接收到show:student-name-modal事件，显示学生姓名设置弹窗');
+      if (this.$refs.studentNameModal) {
+        this.$refs.studentNameModal.open();
+      }
+    });
   },
   onUnload() {
     // 取消监听登录事件
     uni.$off('user:login')
     uni.$off('login:success')
     uni.$off('uni-id-pages-login-success')
+    // 取消监听显示学生姓名设置弹窗事件
+    uni.$off('show:student-name-modal')
   },
   onShow() {
     // 每次页面显示时重新获取用户信息，解决登录后跳转但不显示用户信息的问题
@@ -861,335 +880,81 @@ export default {
     
     // 使用token获取用户信息
     async fetchUserInfoByToken() {
-      if (this.isDev) console.log('尝试使用token获取用户信息');
-      
       try {
-        // 使用自定义云函数获取完整用户信息
+        // 先检查token是否存在
         const token = uni.getStorageSync('uni_id_token');
-        
         if (!token) {
-          if (this.isDev) console.log('没有找到token，无法获取用户信息');
+          console.error('token不存在，无法获取用户信息');
           return false;
         }
         
-        // 尝试从简单格式token中解析用户ID，格式：userId_timestamp_randomPart
-        let userId = '';
-        if (token.includes('_')) {
-          const parts = token.split('_');
-          if (parts.length >= 2) {
-            userId = parts[0];
-            if (this.isDev) console.log('从token中解析出用户ID:', userId);
+        // 检查token是否过期
+        const tokenExpired = uni.getStorageSync('uni_id_token_expired');
+        if (tokenExpired) {
+          const now = Date.now();
+          if (now >= tokenExpired) {
+            console.error('token已过期');
+            // 清除过期的token
+            uni.removeStorageSync('uni_id_token');
+            uni.removeStorageSync('uni_id_token_expired');
+            return false;
           }
         }
         
-        // 调用自定义云函数获取完整用户信息
-        const result = await uniCloud.callFunction({
-          name: 'getUserInfoByToken',
-          data: { 
-            uniIdToken: token,
-            userId: userId // 传递解析出的用户ID作为备用
+        // 使用云函数获取用户信息
+        try {
+          // 使用login云函数验证token并获取用户信息
+          const result = await uniCloud.callFunction({
+            name: 'login',
+            data: {
+              loginType: 'token',
+              token: token
+            }
+          });
+          
+          if (result.result && result.result.code === 0 && result.result.data) {
+            const userInfo = result.result.data;
+            console.log('通过云函数获取的用户信息:', userInfo);
+            
+            // 保存用户信息
+            uni.setStorageSync('uni-id-pages-userInfo', userInfo);
+            uni.setStorageSync('userInfo', userInfo);
+            
+            // 更新当前页面状态
+            this.userInfo = this.formatUserInfo(userInfo);
+            this.hasUserInfo = true;
+            
+            // 触发登录成功事件
+            uni.$emit('user:login', userInfo);
+            uni.$emit('login:success', userInfo);
+            
+            // 获取预约数量
+            this.fetchBookingCounts();
+            
+            return true;
           }
-        });
+        } catch (cloudError) {
+          console.error('通过云函数获取用户信息失败:', cloudError);
+        }
         
-        if (this.verboseLogging) console.log('获取完整用户信息结果:', result);
-        
-        if (result && result.result && result.result.code === 0 && result.result.userInfo) {
-          // 使用完整的用户信息
-          const completeUserInfo = result.result.userInfo;
-          
-          // 确保用户信息中包含nickname字段，用于显示用户名
-          if (completeUserInfo._id && !completeUserInfo.nickname && completeUserInfo.username) {
-            completeUserInfo.nickname = completeUserInfo.username;
-          }
-          
-          if (this.isDev) console.log('获取到完整用户信息:', completeUserInfo);
-          
-          // 保存到存储
-          uni.setStorageSync('uni-id-pages-userInfo', completeUserInfo);
-          uni.setStorageSync('userInfo', completeUserInfo);
+        // 如果云函数方法失败，尝试使用本地存储中的用户信息
+        const userInfo = uni.getStorageSync('userInfo') || uni.getStorageSync('uni-id-pages-userInfo');
+        if (userInfo && (userInfo._id || userInfo.uid)) {
+          console.log('使用本地存储的用户信息:', userInfo);
           
           // 更新当前页面状态
-          this.userInfo = this.formatUserInfo(completeUserInfo);
+          this.userInfo = this.formatUserInfo(userInfo);
           this.hasUserInfo = true;
-          
-          // 触发事件
-          uni.$emit('user:login', completeUserInfo);
-          uni.$emit('login:success', completeUserInfo);
           
           // 获取预约数量
           this.fetchBookingCounts();
           
-          if (this.isDev) console.log('完整用户信息保存成功');
-          
-          // 延迟检查用户手机绑定状态
-          setTimeout(() => {
-            // 获取App实例调用检查方法
-            const app = getApp();
-            if (app && app.checkMobileBindingStatus) {
-              console.log('检查用户手机绑定状态');
-              app.checkMobileBindingStatus(completeUserInfo);
-            }
-          }, 1000);
-          
-          return true;
-        } else if (result && result.result && result.result.code !== 0) {
-          if (this.isDev) console.warn('getUserInfoByToken返回错误:', result.result.message);
-          
-          // 如果有解析出的用户ID，尝试直接从数据库获取用户信息
-          if (userId) {
-            if (this.isDev) console.log('尝试使用解析出的用户ID直接获取用户信息');
-            try {
-              const db = uniCloud.database();
-              const userDetailRes = await db.collection('uni-id-users').doc(userId).get();
-              
-              if (userDetailRes.data && userDetailRes.data.length > 0) {
-                const userDetail = userDetailRes.data[0];
-                if (this.isDev) console.log('直接从数据库获取到用户信息:', userDetail);
-                
-                // 保存到存储
-                uni.setStorageSync('uni-id-pages-userInfo', userDetail);
-                uni.setStorageSync('userInfo', userDetail);
-                
-                // 更新当前页面状态
-                this.userInfo = this.formatUserInfo(userDetail);
-                this.hasUserInfo = true;
-                
-                // 触发事件
-                uni.$emit('user:login', userDetail);
-                
-                // 获取预约数量
-                this.fetchBookingCounts();
-                
-                if (this.isDev) console.log('直接从数据库获取用户信息成功');
-                return true;
-              }
-            } catch (dbErr) {
-              console.error('直接从数据库获取用户信息失败:', dbErr);
-            }
-          }
-        }
-        
-        // 如果上面的方法失败，回退到原来的方法
-        if (this.isDev) console.log('无法获取完整用户信息，尝试使用uni-id-co方法');
-        
-        // 使用uni-id-co获取当前用户信息
-        const uniIdCo = uniCloud.importObject('uni-id-co', {
-          customUI: true
-        })
-        
-        // 调用getAccountInfo方法
-        const res = await uniIdCo.getAccountInfo()
-        console.log('获取到的用户信息:', res)
-        
-        if (res) {
-          // 构建用户信息对象，从API响应中正确提取用户信息
-          const userInfo = {
-            _id: '',
-            uid: '',
-            nickname: '',
-            username: '',
-            mobile: '',
-            email: '',
-            avatar_file: ''
-          }
-          
-          // 检查完整的响应结构，对不同格式进行处理
-          if (res.errCode === 0) {
-            console.log('API调用成功，提取用户信息');
-            
-            // 获取完整的用户基本信息，而不仅仅是标志信息
-            try {
-              console.log('尝试获取完整的用户详细信息');
-              // 创建云对象获取用户详细信息
-              const db = uniCloud.database();
-              // 获取当前登录用户的uid
-              const token = uni.getStorageSync('uni_id_token');
-              
-              if (token) {
-                console.log('使用uni_id_token获取用户详情');
-                // 验证token并获取uid
-                try {
-                  // 从res中获取用户ID，如果响应中没有就尝试从token中获取
-                  let uid = res.uid || '';
-                  if (!uid && res.userInfo && res.userInfo._id) {
-                    uid = res.userInfo._id;
-                  }
-                  
-                  // 如果还是没有获取到uid，尝试从token中解析
-                  if (!uid) {
-                    try {
-                      // 尝试解析token，获取uid
-                      const tokenParts = token.split('.');
-                      if (tokenParts.length === 3) {
-                        const base64Payload = tokenParts[1];
-                        const payload = JSON.parse(atob(base64Payload));
-                        console.log('token payload:', payload);
-                        
-                        if (payload && payload.uid) {
-                          uid = payload.uid;
-                          console.log('从token payload中获取到用户ID:', uid);
-                        }
-                      }
-                    } catch (e) {
-                      console.error('解析token失败:', e);
-                    }
-                  }
-                  
-                  // 如果成功获取到uid，直接查询用户数据
-                  if (uid) {
-                    console.log('获取到有效用户ID:', uid);
-                  
-                  // 查询用户信息
-                  const userDetailRes = await db.collection('uni-id-users').doc(uid).get();
-                  console.log('用户详情查询结果:', userDetailRes);
-                  
-                  if (userDetailRes.data && userDetailRes.data.length > 0) {
-                    const userDetail = userDetailRes.data[0];
-                    console.log('获取到完整用户详情:', userDetail);
-                    
-                    // 填充用户信息
-                    userInfo._id = userDetail._id || '';
-                    userInfo.uid = userDetail._id || '';  // _id和uid相同
-                    userInfo.nickname = userDetail.nickname || '';
-                    userInfo.username = userDetail.username || '';
-                    userInfo.mobile = userDetail.mobile || '';
-                    userInfo.email = userDetail.email || '';
-                    userInfo.avatar_file = userDetail.avatar || userDetail.avatar_file || '';
-                    
-                    console.log('从数据库获取的详细用户信息:', userInfo);
-                  }
-                  }
-                } catch (checkTokenError) {
-                  console.error('处理token获取用户信息失败:', checkTokenError);
-                }
-              }
-            } catch (detailError) {
-              console.error('获取用户详情失败:', detailError);
-            }
-            
-            // 如果上述方法没有获取到数据，再尝试从res中提取
-            if (!userInfo._id && !userInfo.uid) {
-              console.log('从API响应中提取用户信息');
-              // 如果直接返回了完整的用户对象，提取其中的值
-              if (res.userInfo) {
-                console.log('使用userInfo字段中的数据:', res.userInfo);
-                userInfo._id = res.userInfo._id || res.uid || '';
-                userInfo.uid = res.userInfo._id || res.uid || '';
-                userInfo.nickname = res.userInfo.nickname || '';
-                userInfo.username = res.userInfo.username || '';
-                userInfo.mobile = res.userInfo.mobile || '';
-                userInfo.email = res.userInfo.email || '';
-                userInfo.avatar_file = res.userInfo.avatar_file || '';
-              } 
-              // 处理没有userInfo字段但有uid和其他用户信息的情况
-              else {
-                console.log('直接使用根级字段数据');
-                userInfo._id = res.uid || '';
-                userInfo.uid = res.uid || '';
-                
-                // 尝试所有可能的字段名称
-                userInfo.nickname = res.nickname || '';
-                userInfo.username = res.username || '';
-                
-                // 如果设置了昵称但没有昵称值，使用用户名
-                if (res.isNicknameSet && !userInfo.nickname) {
-                  userInfo.nickname = res.username || '';
-                }
-                
-                userInfo.mobile = res.mobile || '';
-                userInfo.email = res.email || '';
-                userInfo.avatar_file = res.avatar || res.avatarUrl || res.avatar_file || '';
-              }
-            }
-          }
-          
-          // 如果以上都无法获取数据，尝试直接从原始响应中提取
-          if (!userInfo.uid && !userInfo._id && typeof res === 'object') {
-            console.log('尝试从原始响应中直接提取用户ID');
-            // 尝试遍历所有字段查找可能的用户ID
-            for (const key in res) {
-              if ((key === 'uid' || key === '_id') && res[key]) {
-                userInfo._id = res[key];
-                userInfo.uid = res[key];
-                console.log('找到用户ID:', res[key]);
-                break;
-              }
-            }
-          }
-          
-          // 最后尝试从token中获取用户ID
-          if (!userInfo.uid && !userInfo._id) {
-            try {
-              const token = uni.getStorageSync('uni_id_token');
-              if (token) {
-                console.log('从token中尝试获取用户ID');
-                // 尝试解析token
-                const tokenParts = token.split('.');
-                if (tokenParts.length === 3) {
-                  try {
-                    // 解码payload部分
-                    const base64Payload = tokenParts[1];
-                    const payload = JSON.parse(atob(base64Payload));
-                    console.log('token payload:', payload);
-                    
-                    if (payload && payload.uid) {
-                      userInfo._id = payload.uid;
-                      userInfo.uid = payload.uid;
-                      console.log('从token payload中获取到用户ID:', payload.uid);
-                    }
-                  } catch (decodeError) {
-                    console.error('解析token失败:', decodeError);
-                  }
-                }
-              }
-            } catch (tokenError) {
-              console.error('处理token时出错:', tokenError);
-            }
-          }
-
-          // 确保至少有些数据
-          if ((userInfo.uid || userInfo._id) && !userInfo.nickname && !userInfo.username) {
-            const userId = userInfo.uid || userInfo._id;
-            userInfo.nickname = '用户' + userId.substr(-4);
-            console.log('生成默认昵称:', userInfo.nickname);
-          }
-          
-          console.log('处理后待存储的用户信息对象:', JSON.stringify(userInfo));
-          
-          // 保存到uni-id-pages的存储位置
-          uni.setStorageSync('uni-id-pages-userInfo', userInfo)
-          
-          // 同时保存到自定义位置确保兼容性
-          uni.setStorageSync('userInfo', userInfo)
-          
-          // 更新当前页面状态
-          this.userInfo = this.formatUserInfo(userInfo)
-          this.hasUserInfo = true
-          
-          // 触发登录成功事件，确保其他页面也能知道登录状态
-          uni.$emit('user:login', userInfo)
-          uni.$emit('login:success', userInfo)
-          
-          // 获取预约数量
-          this.fetchBookingCounts()
-          
-          console.log('token获取用户信息成功，已更新状态')
-          
-          // 延迟检查用户手机绑定状态
-          setTimeout(() => {
-            // 获取App实例调用检查方法
-            const app = getApp();
-            if (app && app.checkMobileBindingStatus) {
-              console.log('检查用户手机绑定状态');
-              app.checkMobileBindingStatus(userInfo);
-            }
-          }, 1000);
-          
           return true;
         }
+        
         return false;
       } catch (err) {
-        console.error('获取用户信息失败:', err)
+        console.error('获取用户信息失败:', err);
         return false;
       }
     },

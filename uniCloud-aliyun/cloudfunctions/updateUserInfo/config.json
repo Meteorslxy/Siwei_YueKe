@@ -1,0 +1,9 @@
+{
+  "name": "updateUserInfo",
+  "desc": "更新用户信息",
+  "auth": {
+    "authorization": "authenticated",
+    "timeout": 10000,
+    "memorySize": 128
+  }
+} 

@@ -19,9 +19,9 @@
     "ignoreUploadUnusedFiles": true
   },
   "compileType": "miniprogram",
-  "libVersion": "3.7.10",
-  "appid": "wx6e610d9b47f85ffc",
-  "projectname": "四维教育",
+  "libVersion": "3.7.12",
+  "appid": "wxba8e830214e74736",
+  "projectname": "四维工作室初中部",
   "condition": {},
   "cloudfunctionRoot": "uniCloud-aliyun/cloudfunctions/",
   "editorSetting": {

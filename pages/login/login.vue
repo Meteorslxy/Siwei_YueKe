@@ -2879,6 +2879,16 @@ export default {
       console.log('使用手机号登录或注册:', phoneNumber);
       
       try {
+        // 获取微信用户信息
+        let userInfo = {};
+        if (this.loginState && this.loginState.userInfo) {
+          userInfo = {
+            nickName: this.loginState.userInfo.nickName || '微信用户',
+            avatarUrl: this.loginState.userInfo.avatarUrl || '',
+            gender: this.loginState.userInfo.gender || 0
+          };
+        }
+        
         // 调用登录云函数
         const loginResult = await uniCloud.callFunction({
           name: 'login',
@@ -2886,7 +2896,9 @@ export default {
             loginType: 'phone',
             phone: phoneNumber,
             // 传递微信code，可用于关联微信openid
-            wxCode: this.loginState.code
+            wxCode: this.loginState.code,
+            // 传递用户信息
+            userInfo: userInfo
           }
         });
         

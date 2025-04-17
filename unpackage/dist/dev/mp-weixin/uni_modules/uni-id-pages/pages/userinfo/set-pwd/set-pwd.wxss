@@ -120,7 +120,7 @@
 .uni-body.uni_modules-uni-id-pages-pages-login-login-withoutpwd.data-v-8dcd6296 {
   height: auto !important;
 }
-.uni-btn[type="default"].data-v-8dcd6296 {
+.uni-btn[type=default].data-v-8dcd6296 {
   color: inherit !important;
 }
 .uni-content.data-v-8dcd6296  .uni-forms-item {
@@ -149,4 +149,3 @@
 .popup-captcha .uni-btn.data-v-8dcd6296 {
   margin: 0;
 }
-

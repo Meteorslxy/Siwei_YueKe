@@ -5,288 +5,216 @@ const dbCmd = db.command;
 
 // 云函数入口函数
 exports.main = async (event, context) => {
+  // 获取客户端信息
+  const { PLATFORM, APPID, CLIENTIP } = context;
+  
+  // 直接记录完整的event对象
+  console.log('完整的event参数:', JSON.stringify(event));
+  
+  // 尝试多种方式获取nickname
+  const nickname = event.nickname || event.nickName || (event.data && event.data.nickname) || '';
+  const avatar = event.avatar || event.avatarUrl || (event.data && event.data.avatar) || '';
+  const gender = event.gender !== undefined ? event.gender : 
+                (event.data && event.data.gender !== undefined ? event.data.gender : undefined);
+  
+  console.log('提取的参数:', {nickname, avatar, gender});
+  
   try {
-    console.log('更新用户信息', event);
+    // 获取当前用户ID
+    // 先尝试从事件参数中获取token，再尝试从context中获取
+    const token = event.token || event.uni_id_token || context.UNICLOUD_TOKEN || '';
     
-    // 增加参数原始内容的日志输出
-    console.log('更新用户信息 - 原始参数:', JSON.stringify(event));
-    console.log('更新用户信息 - update字段:', JSON.stringify(event.update));
-    
-    // 获取更新的字段
-    const { update } = event;
-    
-    if (!update) {
+    if (!token) {
+      console.error('未获取到token');
       return {
         code: -1,
-        message: '未提供更新数据'
+        message: '未登录'
       };
     }
     
-    // 获取token，支持多种参数名
-    const uniIdToken = event.uniIdToken || event.token || event.userToken;
+    console.log('获取到token:', token.substring(0, 20) + '...');
     
-    // 请求中没有提供token
-    if (!uniIdToken) {
-      console.log('未提供Token');
-      return {
-        code: -1,
-        message: '未登录或登录已过期'
-      };
-    }
+    // 解析token获取用户ID
+    let userId = '';
     
-    console.log('接收到token:', uniIdToken.substring(0, 10) + '...');
-    
-    // 从token中获取用户ID
-    let userId;
+    // 尝试解析JWT格式token
     try {
-      // 尝试从context中获取用户信息
-      const { USERID } = context;
-      userId = USERID;
-      console.log('从context获取的userId:', userId);
-      
-      // 如果没有，则尝试从数据库查询token对应的用户
-      if (!userId) {
-        try {
-          // 尝试查询uni-id-tokens表
-          const tokenInfo = await db.collection('uni-id-tokens')
-            .where({
-              token: uniIdToken
-            })
-            .limit(1)
-            .get();
-          
-          if (tokenInfo.data && tokenInfo.data.length > 0) {
-            userId = tokenInfo.data[0].user_id;
-            console.log('从uni-id-tokens查询到userId:', userId);
-          }
-        } catch (e) {
-          console.error('查询uni-id-tokens失败:', e);
+      // JWT格式: header.payload.signature
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        // 解码payload部分
+        const base64Payload = parts[1];
+        let payload;
+        
+        // 解码base64
+        if (typeof atob === 'function') {
+          payload = JSON.parse(atob(base64Payload));
+        } else {
+          // Node.js环境
+          payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
+        }
+        
+        console.log('JWT token payload:', JSON.stringify(payload));
+        
+        if (payload && payload.uid) {
+          userId = payload.uid;
+          console.log('从JWT token获取用户ID:', userId);
         }
       }
-      
-      // 如果还是没有，尝试直接从users表中查询
-      if (!userId) {
-        try {
-          // 尝试通过token字段查询
-          const userInfo = await db.collection('uni-id-users')
-            .where({
-              token: uniIdToken
-            })
-            .limit(1)
-            .get();
-          
-          if (userInfo.data && userInfo.data.length > 0) {
-            userId = userInfo.data[0]._id;
-            console.log('从uni-id-users表token字段查询到userId:', userId);
-          }
-        } catch (e) {
-          console.error('通过token查询uni-id-users表失败:', e);
-        }
-      }
-      
-      // 如果还是没有，尝试通过openid查询
-      if (!userId && update.phoneNumber) {
-        try {
-          // 查询是否有与该手机号关联的用户
-          const userByPhone = await db.collection('uni-id-users')
-            .where({
-              mobile: update.phoneNumber
-            })
-            .limit(1)
-            .get();
-          
-          if (userByPhone.data && userByPhone.data.length > 0) {
-            userId = userByPhone.data[0]._id;
-            console.log('通过手机号查询到userId:', userId);
-          }
-        } catch (e) {
-          console.error('通过手机号查询用户失败:', e);
-        }
-      }
-      
-      // 如果还是没有，以防万一，尝试解析token (简化代码，实际应使用uni-id)
-      if (!userId && uniIdToken) {
-        try {
-          const tokenParts = uniIdToken.split('.');
-          if (tokenParts.length === 3) {
-            const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-            userId = payload.uid || payload.userId || payload._id;
-            console.log('从token解析得到userId:', userId);
-          }
-        } catch (e) {
-          console.error('尝试解析token失败:', e);
-        }
-      }
-    } catch (e) {
-      console.error('获取用户ID失败:', e);
+    } catch (jwtError) {
+      console.error('解析JWT token失败:', jwtError);
     }
     
-    // 如果还是没有userId，尝试从请求中获取
-    if (!userId && (event.userId || event.user_id || event._id)) {
-      userId = event.userId || event.user_id || event._id;
-      console.log('从请求参数中获取userId:', userId);
+    // 如果JWT解析失败，尝试解析简单格式token (格式: token_userId_timestamp_random)
+    if (!userId && token.includes('_')) {
+      const parts = token.split('_');
+      if (parts.length >= 3 && parts[0] === 'token') {
+        userId = parts[1];
+        console.log('从简单token获取用户ID:', userId);
+      }
     }
     
-    // 如果还是没有userId，则返回错误
+    // 如果还是没有userId，尝试直接从event中获取
+    if (!userId && (event.userId || event.uid || event._id || event.user_id)) {
+      userId = event.userId || event.uid || event._id || event.user_id;
+      console.log('从请求参数中获取用户ID:', userId);
+    }
+    
+    // 直接从token查询用户
+    if (!userId && token) {
+      try {
+        // 尝试通过token从uni-id-tokens集合获取用户ID
+        const tokenInfo = await db.collection('uni-id-tokens')
+          .where({
+            token: token
+          })
+          .limit(1)
+          .get();
+        
+        if (tokenInfo.data && tokenInfo.data.length > 0) {
+          userId = tokenInfo.data[0].user_id;
+          console.log('从uni-id-tokens表获取用户ID:', userId);
+        }
+      } catch (err) {
+        console.error('查询token表失败:', err);
+      }
+    }
+    
+    // 如果前面的方法都没有获取到userId，尝试通过用户信息中的手机号查询
+    if (!userId && event.mobile) {
+      try {
+        const userByMobile = await db.collection('uni-id-users')
+          .where({
+            mobile: event.mobile
+          })
+          .limit(1)
+          .get();
+        
+        if (userByMobile.data && userByMobile.data.length > 0) {
+          userId = userByMobile.data[0]._id;
+          console.log('通过手机号查询获取用户ID:', userId);
+        }
+      } catch (err) {
+        console.error('通过手机号查询用户失败:', err);
+      }
+    }
+    
     if (!userId) {
-      console.log('无法确定用户身份');
+      console.error('无法识别用户ID');
       return {
         code: -1,
-        message: '无法获取用户信息'
+        message: '无法识别用户，请重新登录'
       };
     }
     
-    console.log('最终确定的userId:', userId);
+    // 准备要更新的数据
+    const updateData = {};
     
-    // 检查用户是否存在
-    const userCheck = await db.collection('uni-id-users')
+    if (nickname) {
+      console.log('设置昵称:', nickname);
+      updateData.nickname = nickname;
+    }
+    
+    if (avatar) {
+      console.log('设置头像:', avatar);
+      updateData.avatar = avatar;
+    }
+    
+    if (gender !== undefined) {
+      console.log('设置性别:', gender);
+      updateData.gender = gender;
+    }
+    
+    // 如果没有要更新的数据则返回错误
+    if (Object.keys(updateData).length === 0) {
+      console.error('未提供要更新的数据');
+      return {
+        code: -1,
+        message: '未提供要更新的数据'
+      };
+    }
+    
+    console.log('最终更新数据:', JSON.stringify(updateData));
+    
+    // 更新用户信息
+    await db.collection('uni-id-users')
+      .doc(userId)
+      .update(updateData);
+    
+    console.log('数据库更新成功');
+    
+    // 获取更新后的用户信息
+    const userInfo = await db.collection('uni-id-users')
       .doc(userId)
       .get();
     
-    if (!userCheck.data || userCheck.data.length === 0) {
-      console.log('用户不存在:', userId);
+    if (!userInfo.data || userInfo.data.length === 0) {
+      console.error('获取更新后用户信息失败');
       return {
         code: -1,
-        message: '用户不存在'
+        message: '获取更新后的用户信息失败'
       };
     }
     
-    // 执行更新
-    const allowedFields = ['phoneNumber', 'mobile', 'mobile_confirmed', 'nickName', 'avatarUrl', 'gender', 'province', 'city', 'country'];
-    const updateData = {};
+    // 过滤敏感信息，返回前端需要的数据
+    const filteredData = filterUserData(userInfo.data[0]);
     
-    // 只更新允许的字段
-    for (const key of allowedFields) {
-      if (update[key] !== undefined) {
-        updateData[key] = update[key];
-      }
-    }
-    
-    // 确保mobile字段存在
-    if (update.phoneNumber && !updateData.mobile) {
-      updateData.mobile = update.phoneNumber;
-    }
-    
-    // 如果外部直接传递了mobile字段，也添加到更新数据中
-    if (event.mobile && typeof event.mobile === 'string') {
-      console.log('从event根参数中获取到mobile:', event.mobile);
-      updateData.mobile = event.mobile;
-    }
-    
-    // 如果更新了手机号，自动设置mobile_confirmed为1
-    if (updateData.mobile || updateData.phoneNumber) {
-      console.log('检测到手机号更新，设置mobile_confirmed=1');
-      updateData.mobile_confirmed = 1;
-    }
-    
-    // 从event根级别获取mobile_confirmed
-    if (event.mobile_confirmed !== undefined) {
-      console.log('从event根参数中获取到mobile_confirmed:', event.mobile_confirmed);
-      updateData.mobile_confirmed = event.mobile_confirmed;
-    }
-    
-    // 如果没有要更新的字段
-    if (Object.keys(updateData).length === 0) {
-      return {
-        code: -1,
-        message: '没有有效的更新字段'
-      };
-    }
-    
-    // 添加updateTime字段
-    updateData.updateTime = Date.now();
-    
-    // 强制设置mobile_confirmed为1，确保这个字段一定被更新
-    if (updateData.mobile || updateData.phoneNumber) {
-      updateData.mobile_confirmed = 1;
-      console.log('再次确认mobile_confirmed设置为1');
-    }
-    
-    console.log('更新用户数据:', {userId, updateData});
-    
-    try {
-      // 首先尝试使用update方法更新
-      const updateResult = await db.collection('uni-id-users')
-        .doc(userId)
-        .update(updateData);
-      
-      console.log('数据库更新结果:', updateResult);
-      
-      // 进行二次更新，确保mobile_confirmed字段被设置
-      if (updateData.mobile || updateData.phoneNumber) {
-        console.log('执行二次更新，确保mobile_confirmed字段被设置');
-        await db.collection('uni-id-users')
-          .doc(userId)
-          .update({
-            mobile_confirmed: 1
-          });
-      }
-      
-      // 更新后再次查询验证
-      const verifyUpdate = await db.collection('uni-id-users')
-        .doc(userId)
-        .get();
-      
-      console.log('更新后的用户数据:', JSON.stringify(verifyUpdate.data));
-      
-      // 检查mobile字段和mobile_confirmed字段是否正确更新
-      const userAfterUpdate = verifyUpdate.data && verifyUpdate.data[0];
-      let needFurtherUpdate = false;
-      
-      // 创建最终更新对象
-      const finalUpdate = {};
-      
-      if (userAfterUpdate) {
-        // 检查mobile字段
-        if (!userAfterUpdate.mobile && (updateData.mobile || updateData.phoneNumber)) {
-          console.log('mobile字段更新失败，将在最终更新中添加');
-          finalUpdate.mobile = updateData.mobile || updateData.phoneNumber;
-          needFurtherUpdate = true;
-        }
-        
-        // 检查mobile_confirmed字段
-        if (userAfterUpdate.mobile_confirmed !== 1 && (updateData.mobile || updateData.phoneNumber)) {
-          console.log('mobile_confirmed字段未设置为1，将在最终更新中添加');
-          finalUpdate.mobile_confirmed = 1;
-          needFurtherUpdate = true;
-        }
-        
-        // 如果需要进一步更新
-        if (needFurtherUpdate) {
-          console.log('执行最终更新:', finalUpdate);
-          await db.collection('uni-id-users')
-            .doc(userId)
-            .update(finalUpdate);
-          
-          // 再次验证更新
-          const finalVerify = await db.collection('uni-id-users')
-            .doc(userId)
-            .get();
-          
-          console.log('最终更新后的用户数据:', JSON.stringify(finalVerify.data));
-        }
-      }
-      
-      return {
-        code: 0,
-        message: '更新成功',
-        data: {
-          updated: updateData,
-          finalUpdate: needFurtherUpdate ? finalUpdate : null
-        }
-      };
-    } catch (updateErr) {
-      console.error('数据库更新操作失败:', updateErr);
-      return {
-        code: -1,
-        message: '数据库更新失败: ' + updateErr.message
-      };
-    }
-  } catch (err) {
-    console.error('更新用户信息失败:', err);
+    return {
+      code: 0,
+      message: '更新成功',
+      data: filteredData
+    };
+  } catch (error) {
+    console.error('更新用户信息失败:', error);
     return {
       code: -1,
-      message: '更新用户信息失败: ' + err.message
+      message: '更新失败: ' + error.message
     };
   }
-}; 
+};
+
+// 过滤用户数据
+function filterUserData(userData) {
+  if (!userData) return {};
+  
+  // 创建新对象，避免修改原有数据
+  const filteredData = {
+    _id: userData._id || '',
+    uid: userData._id || '',  // 使用_id作为uid确保一致性
+    nickname: userData.nickname || '',
+    username: userData.username || '',
+    mobile: userData.mobile || '',
+    email: userData.email || '',
+    avatar: userData.avatar || '',
+    gender: userData.gender || 0,
+    status: userData.status || 0
+  };
+  
+  // 确保兼容性：添加前端可能使用的其他字段名
+  filteredData.userId = filteredData._id;
+  filteredData.nickName = filteredData.nickname;
+  filteredData.avatarUrl = filteredData.avatar;
+  filteredData.phoneNumber = filteredData.mobile;
+  
+  return filteredData;
+} 
