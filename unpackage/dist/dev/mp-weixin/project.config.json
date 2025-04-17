@@ -7,7 +7,7 @@
   "setting": {
     "urlCheck": false,
     "es6": true,
-    "postcss": true,
+    "postcss": false,
     "minified": true,
     "newFeature": true,
     "bigPackageSizeSupport": true,
@@ -19,8 +19,8 @@
     "ignoreUploadUnusedFiles": true
   },
   "compileType": "miniprogram",
-  "libVersion": "3.7.12",
-  "appid": "wx64b3a851f619fc04",
+  "libVersion": "3.7.10",
+  "appid": "wx6e610d9b47f85ffc",
   "projectname": "四维教育",
   "condition": {},
   "cloudfunctionRoot": "uniCloud-aliyun/cloudfunctions/",

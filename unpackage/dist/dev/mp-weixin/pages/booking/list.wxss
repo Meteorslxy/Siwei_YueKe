@@ -90,7 +90,7 @@
   font-weight: 500;
 }
 .booking-list .tab-container .tab-item.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -105,3 +105,4 @@
   flex: 1;
   padding: 20rpx;
 }
+

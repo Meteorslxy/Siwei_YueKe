@@ -95,7 +95,7 @@
   background-color: transparent;
   border: 1px solid #fff;
   text-align: center;
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
   font-size: 12px;
 }
 .uni-badge--info {
@@ -138,3 +138,4 @@
   color: #dd524d;
   background-color: transparent;
 }
+

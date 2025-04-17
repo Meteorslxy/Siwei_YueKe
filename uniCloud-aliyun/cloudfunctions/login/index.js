@@ -12,7 +12,9 @@ exports.main = async (event, context) => {
     userInfo = {}, 
     openid, 
     phoneNumber, 
+    phone, // 新增手机号参数
     code, 
+    wxCode, // 新增微信code参数，用于关联微信号
     password,
     verificationCode,
     loginType, 
@@ -39,6 +41,12 @@ exports.main = async (event, context) => {
   if (loginType === 'wechat' || loginType === 'weixin') {
     // 微信登录不需要用户名和密码，使用专门的处理函数
     return await handleWechatLogin(code, openid, userInfo, PLATFORM, context, {deviceInfo, uuid});
+  }
+  
+  // 特殊处理手机号登录
+  if (loginType === 'phone') {
+    // 手机号登录，使用专门的处理函数
+    return await handlePhoneLogin(phone || phoneNumber, wxCode, userInfo, PLATFORM, APPID);
   }
   
   // 用户名和密码验证 - 只有非微信登录才需要验证
@@ -1675,6 +1683,153 @@ async function handleWechatLogin(code, openid, userInfo, platform, context, {dev
       code: -1,
       success: false,
       message: '登录处理出错: ' + error.message
+    };
+  }
+}
+
+// 新增手机号登录处理函数
+async function handlePhoneLogin(phone, wxCode, userInfo, platform, appid) {
+  console.log('处理手机号登录:', phone);
+  
+  if (!phone) {
+    return {
+      code: -1,
+      success: false,
+      message: '手机号不能为空'
+    };
+  }
+  
+  // 验证手机号格式
+  if (!/^1\d{10}$/.test(phone)) {
+    return {
+      code: -1,
+      success: false,
+      message: '手机号格式不正确'
+    };
+  }
+  
+  const serverDate = new Date();
+  
+  try {
+    // 查询用户是否存在
+    let userResult = await db.collection('users')
+      .where({
+        phoneNumber: phone
+      })
+      .get();
+    
+    let userId;
+    let isNewUser = false;
+    
+    // 如果有微信code，尝试获取openid并关联
+    let wxOpenid = null;
+    if (wxCode) {
+      try {
+        const wxUser = await checkWxUser(wxCode);
+        if (wxUser && wxUser.openid) {
+          wxOpenid = wxUser.openid;
+          console.log('获取到微信openid:', wxOpenid);
+        }
+      } catch (wxErr) {
+        console.error('获取微信openid失败:', wxErr);
+        // 继续处理，不影响主流程
+      }
+    }
+    
+    if (userResult.data && userResult.data.length > 0) {
+      // 用户已存在，更新用户信息
+      const existUser = userResult.data[0];
+      userId = existUser._id;
+      
+      const updateData = {
+        lastLoginTime: serverDate,
+        platform: platform
+      };
+      
+      // 如果有微信openid，更新用户的openid
+      if (wxOpenid) {
+        updateData['wx_openid.mp-weixin'] = wxOpenid;
+      }
+      
+      // 更新用户登录时间和其他信息
+      await db.collection('users')
+        .doc(userId)
+        .update(updateData);
+      
+      // 获取最新用户信息
+      userResult = await db.collection('users')
+        .doc(userId)
+        .get();
+    } else {
+      // 用户不存在，创建新用户
+      isNewUser = true;
+      
+      // 创建用户
+      const newUser = {
+        phoneNumber: phone,
+        appid: appid || '',
+        nickName: userInfo.nickName || ('用户' + phone.substr(phone.length - 4)),
+        avatarUrl: userInfo.avatarUrl || '',
+        gender: userInfo.gender || 0,
+        country: userInfo.country || '',
+        province: userInfo.province || '',
+        city: userInfo.city || '',
+        language: userInfo.language || 'zh_CN',
+        createTime: serverDate,
+        lastLoginTime: serverDate,
+        platform: platform,
+        role: 'user',
+        status: 0
+      };
+      
+      // 如果有微信openid，添加到用户信息中
+      if (wxOpenid) {
+        newUser.wx_openid = {
+          'mp-weixin': wxOpenid
+        };
+      }
+      
+      // 添加用户到数据库
+      const result = await db.collection('users')
+        .add(newUser);
+      
+      userId = result.id;
+      
+      // 更新userId字段，确保与_id一致
+      await db.collection('users')
+        .doc(userId)
+        .update({
+          userId: userId
+        });
+      
+      // 获取创建后的用户信息
+      userResult = await db.collection('users')
+        .doc(userId)
+        .get();
+    }
+    
+    // 过滤敏感信息，只返回前端需要的数据
+    const filteredData = filterUserData(userResult.data);
+    
+    // 生成token
+    const token = generateToken(userId);
+    
+    return {
+      code: 0,
+      success: true,
+      message: isNewUser ? '用户注册成功' : '登录成功',
+      data: filteredData,
+      userInfo: filteredData,
+      token: token,
+      tokenExpired: new Date().getTime() + 7 * 24 * 60 * 60 * 1000, // 7天有效期
+      isNewUser
+    };
+  } catch (error) {
+    console.error('手机号登录出错:', error);
+    return {
+      code: -1,
+      success: false,
+      message: '登录失败: ' + error.message
     };
   }
 } 

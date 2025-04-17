@@ -49,9 +49,9 @@
       
       <!-- 登录按钮 -->
       <view class="auth-buttons">
-        <button class="auth-btn wechat-btn" @click="handleGetUserInfo">
+        <button class="auth-btn wechat-btn" open-type="getPhoneNumber" @getphonenumber="onGetPhoneNumber">
           <image src="../../static/images/wechat.png" mode="aspectFit" class="btn-icon"></image>
-          微信登录
+          一键授权登录/注册
         </button>
         <button class="auth-btn other-login-btn" @click="showLoginOptions">
           其他登录方式
@@ -2762,6 +2762,155 @@ export default {
       } catch (e) {
         console.error('UUID处理异常:', e);
         return 'error_uuid_' + Date.now();
+      }
+    },
+    
+    // 新增：处理一键获取手机号
+    handleGetPhoneNumber() {
+      console.log('开始一键获取手机号');
+      
+      uni.showLoading({
+        title: '授权中...',
+        mask: true
+      });
+      
+      // 微信小程序内
+      // #ifdef MP-WEIXIN
+      // 打开获取手机号的授权
+      uni.login({
+        provider: 'weixin',
+        success: (loginRes) => {
+          if (loginRes.code) {
+            // 先获取code，用于后续openid获取
+            this.loginState.code = loginRes.code;
+            // 注意：在微信小程序中，不再在这里调用wx.getPhoneNumber()
+            // 而是通过button的open-type="getPhoneNumber"触发
+          } else {
+            console.error('微信登录失败:', loginRes);
+            uni.hideLoading();
+            uni.showToast({
+              title: '微信登录失败',
+              icon: 'none'
+            });
+          }
+        },
+        fail: (err) => {
+          console.error('微信登录失败:', err);
+          uni.hideLoading();
+          uni.showToast({
+            title: '微信登录失败',
+            icon: 'none'
+          });
+        }
+      });
+      // #endif
+      
+      // 非微信小程序环境
+      // #ifndef MP-WEIXIN
+      uni.hideLoading();
+      uni.showToast({
+        title: '当前平台不支持一键登录',
+        icon: 'none'
+      });
+      // #endif
+    },
+    
+    // 新增：接收微信小程序获取手机号按钮的回调
+    async onGetPhoneNumber(e) {
+      console.log('获取手机号回调:', e);
+      
+      uni.showLoading({
+        title: '处理中...',
+        mask: true
+      });
+      
+      if (e.detail.code) {
+        // 获取手机号的code成功
+        console.log('获取手机号的code成功:', e.detail.code);
+        
+        try {
+          // 调用云函数获取手机号
+          const result = await uniCloud.callFunction({
+            name: 'getPhoneNumber',
+            data: {
+              access_token: e.detail.code
+            }
+          });
+          
+          console.log('获取手机号结果:', result);
+          
+          if (result.result && result.result.code === 0 && result.result.phoneNumber) {
+            // 获取手机号成功
+            const phoneNumber = result.result.phoneNumber;
+            console.log('获取到的手机号:', phoneNumber);
+            
+            // 使用手机号登录或注册
+            this.loginOrRegisterWithPhone(phoneNumber);
+          } else {
+            throw new Error(result.result?.message || '获取手机号失败');
+          }
+        } catch (error) {
+          console.error('获取手机号过程中出错:', error);
+          uni.hideLoading();
+          uni.showToast({
+            title: '获取手机号失败，请重试',
+            icon: 'none'
+          });
+        }
+      } else if (e.detail.errMsg && e.detail.errMsg.indexOf('deny') > -1) {
+        // 用户拒绝授权
+        uni.hideLoading();
+        uni.showToast({
+          title: '您已拒绝授权手机号',
+          icon: 'none'
+        });
+      } else {
+        console.error('获取手机号失败:', e.detail);
+        uni.hideLoading();
+        uni.showToast({
+          title: '获取手机号失败，请重试',
+          icon: 'none'
+        });
+      }
+    },
+    
+    // 新增：使用手机号登录或注册
+    async loginOrRegisterWithPhone(phoneNumber) {
+      console.log('使用手机号登录或注册:', phoneNumber);
+      
+      try {
+        // 调用登录云函数
+        const loginResult = await uniCloud.callFunction({
+          name: 'login',
+          data: {
+            loginType: 'phone',
+            phone: phoneNumber,
+            // 传递微信code，可用于关联微信openid
+            wxCode: this.loginState.code
+          }
+        });
+        
+        console.log('手机号登录结果:', loginResult);
+        
+        if (loginResult.result && loginResult.result.code === 0) {
+          // 登录成功，保存用户信息
+          this.saveUserInfo(loginResult.result);
+        } else {
+          // 登录失败，显示错误信息
+          console.error('手机号登录失败:', loginResult.result);
+          uni.showToast({
+            title: (loginResult.result && loginResult.result.message) || '登录失败，请重试',
+            icon: 'none'
+          });
+        }
+      } catch (error) {
+        console.error('手机号登录过程中出错:', error);
+        uni.showToast({
+          title: '登录失败，请重试',
+          icon: 'none'
+        });
+      } finally {
+        uni.hideLoading();
       }
     },
   }

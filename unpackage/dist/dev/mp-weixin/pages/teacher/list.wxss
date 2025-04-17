@@ -156,7 +156,7 @@
   position: relative;
 }
 .teacher-list .subject-tabs .tab-item.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 30%;
@@ -171,3 +171,4 @@
   padding-top: 90rpx;
   background-color: var(--bg-color);
 }
+

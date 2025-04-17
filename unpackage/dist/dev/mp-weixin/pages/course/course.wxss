@@ -171,7 +171,7 @@
   font-weight: bold;
 }
 .subject-scroll .subject-item.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -296,3 +296,4 @@
 .course-list .course-item:first-child {
   margin-top: 10rpx;
 }
+
