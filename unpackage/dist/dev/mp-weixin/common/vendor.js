@@ -10723,7 +10723,7 @@ var b = "development" === "development",
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
   A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
-  O = T([{"provider":"aliyun","spaceName":"yueke-demo","spaceId":"mp-d0c06b27-ec33-40fe-b28b-337811bd2f29","clientSecret":"c3DWEyYRkArWA6mZ2b+gxQ==","endpoint":"https://api.next.bspapp.com"}]) || [],
+  O = T([{"provider":"aliyun","spaceName":"siwei-xiaoxue","spaceId":"mp-d0c06b27-ec33-40fe-b28b-337811bd2f29","clientSecret":"c3DWEyYRkArWA6mZ2b+gxQ==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
 try {
@@ -21346,7 +21346,7 @@ module.exports = _interopRequireDefault, module.exports.__esModule = true, modul
 
 /***/ }),
 
-/***/ 408:
+/***/ 413:
 /*!**********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/popup.js ***!
   \**********************************************************************************************************************/
@@ -21388,7 +21388,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 409:
+/***/ 414:
 /*!***************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
   \***************************************************************************************************************************/
@@ -21403,9 +21403,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 410));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 411));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 412));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 415));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 416));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 417));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
@@ -21415,7 +21415,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 410:
+/***/ 415:
 /*!**************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
   \**************************************************************************************************************************/
@@ -21426,7 +21426,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 411:
+/***/ 416:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
   \*******************************************************************************************************************************/
@@ -21437,7 +21437,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 412:
+/***/ 417:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
   \*******************************************************************************************************************************/
@@ -21448,7 +21448,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 420:
+/***/ 425:
 /*!*************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/validate.js ***!
   \*************************************************************************************************************************/
@@ -22140,7 +22140,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 421:
+/***/ 426:
 /*!**********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/utils.js ***!
   \**********************************************************************************************************************/
@@ -22853,7 +22853,7 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 
 /***/ }),
 
-/***/ 506:
+/***/ 511:
 /*!*****************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
   \*****************************************************************************************************************************************/
@@ -23109,7 +23109,7 @@ function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
 
 /***/ }),
 
-/***/ 514:
+/***/ 519:
 /*!******************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
   \******************************************************************************************************************************************/
@@ -23244,7 +23244,7 @@ function createAnimation(option, _this) {
 
 /***/ }),
 
-/***/ 520:
+/***/ 525:
 /*!**********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
   \**********************************************************************************************************************************/

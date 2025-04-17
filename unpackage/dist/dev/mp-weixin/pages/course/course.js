@@ -176,7 +176,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -217,12 +217,6 @@ var _default = {
       gradeGroups: [{
         label: '全部年级',
         value: 'all'
-      }, {
-        label: '小学',
-        value: '小学'
-      }, {
-        label: '初中',
-        value: '初中'
       }],
       // 校区筛选相关
       isSchoolFilterShow: false,
@@ -236,21 +230,6 @@ var _default = {
       subjectOptions: [{
         label: '全部',
         value: 'all'
-      }, {
-        label: '语文',
-        value: '语文'
-      }, {
-        label: '数学',
-        value: '数学'
-      }, {
-        label: '英语',
-        value: '英语'
-      }, {
-        label: '物理',
-        value: '物理'
-      }, {
-        label: '化学',
-        value: '化学'
       }],
       // 课程列表相关
       courseList: [],
@@ -289,6 +268,10 @@ var _default = {
     this.getStatusBarHeight();
     // 加载校区数据
     this.getLocationList();
+    // 加载年级数据
+    this.fetchGrades();
+    // 加载学科数据
+    this.fetchSubjects();
     this.loadCourseList();
   },
   onPullDownRefresh: function onPullDownRefresh() {
@@ -678,11 +661,220 @@ var _default = {
           }
         }, _callee3, null, [[0, 8]]);
       }))();
+    },
+    // 获取年级数据
+    fetchGrades: function fetchGrades() {
+      var _this6 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+        var result, grades, gradeOptions;
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.prev = 0;
+                uni.showLoading({
+                  title: '加载中...',
+                  mask: true
+                });
+                _context4.next = 4;
+                return uniCloud.callFunction({
+                  name: 'getOptions',
+                  data: {
+                    type: 'grades'
+                  }
+                });
+              case 4:
+                result = _context4.sent;
+                console.log('获取年级数据结果:', result);
+                if (result.result && result.result.code === 0 && result.result.data) {
+                  grades = result.result.data; // 处理年级数据并添加到gradeGroups
+                  if (Array.isArray(grades) && grades.length > 0) {
+                    gradeOptions = grades.map(function (grade) {
+                      return {
+                        label: grade.name || grade.label || grade,
+                        value: grade.value || grade.name || grade
+                      };
+                    }); // 保留"全部年级"选项，并添加从云端获取的年级
+                    _this6.gradeGroups = [{
+                      label: '全部年级',
+                      value: 'all'
+                    }].concat((0, _toConsumableArray2.default)(gradeOptions));
+                    console.log('年级选项已更新:', _this6.gradeGroups);
+                  } else {
+                    console.warn('获取到的年级数据为空，使用默认值');
+                    // 如果获取失败或为空，使用默认年级
+                    _this6.gradeGroups = [{
+                      label: '全部年级',
+                      value: 'all'
+                    }, {
+                      label: '小学',
+                      value: '小学'
+                    }, {
+                      label: '初中',
+                      value: '初中'
+                    }];
+                  }
+                } else {
+                  console.warn('获取年级数据失败:', result);
+                  // 使用默认年级
+                  _this6.gradeGroups = [{
+                    label: '全部年级',
+                    value: 'all'
+                  }, {
+                    label: '小学',
+                    value: '小学'
+                  }, {
+                    label: '初中',
+                    value: '初中'
+                  }];
+                }
+                _context4.next = 13;
+                break;
+              case 9:
+                _context4.prev = 9;
+                _context4.t0 = _context4["catch"](0);
+                console.error('获取年级数据出错:', _context4.t0);
+                // 使用默认年级
+                _this6.gradeGroups = [{
+                  label: '全部年级',
+                  value: 'all'
+                }, {
+                  label: '小学',
+                  value: '小学'
+                }, {
+                  label: '初中',
+                  value: '初中'
+                }];
+              case 13:
+                _context4.prev = 13;
+                uni.hideLoading();
+                return _context4.finish(13);
+              case 16:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, null, [[0, 9, 13, 16]]);
+      }))();
+    },
+    // 获取学科数据
+    fetchSubjects: function fetchSubjects() {
+      var _this7 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+        var result, subjects, subjectOptions;
+        return _regenerator.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+                _context5.next = 3;
+                return uniCloud.callFunction({
+                  name: 'getOptions',
+                  data: {
+                    type: 'subjects'
+                  }
+                });
+              case 3:
+                result = _context5.sent;
+                console.log('获取学科数据结果:', result);
+                if (result.result && result.result.code === 0 && result.result.data) {
+                  subjects = result.result.data; // 处理学科数据并添加到subjectOptions
+                  if (Array.isArray(subjects) && subjects.length > 0) {
+                    subjectOptions = subjects.map(function (subject) {
+                      return {
+                        label: subject.name || subject.label || subject,
+                        value: subject.value || subject.name || subject
+                      };
+                    }); // 保留"全部"选项，并添加从云端获取的学科
+                    _this7.subjectOptions = [{
+                      label: '全部',
+                      value: 'all'
+                    }].concat((0, _toConsumableArray2.default)(subjectOptions));
+                    console.log('学科选项已更新:', _this7.subjectOptions);
+                  } else {
+                    console.warn('获取到的学科数据为空，使用默认值');
+                    // 如果获取失败或为空，使用默认学科
+                    _this7.subjectOptions = [{
+                      label: '全部',
+                      value: 'all'
+                    }, {
+                      label: '语文',
+                      value: '语文'
+                    }, {
+                      label: '数学',
+                      value: '数学'
+                    }, {
+                      label: '英语',
+                      value: '英语'
+                    }, {
+                      label: '物理',
+                      value: '物理'
+                    }, {
+                      label: '化学',
+                      value: '化学'
+                    }];
+                  }
+                } else {
+                  console.warn('获取学科数据失败:', result);
+                  // 使用默认学科
+                  _this7.subjectOptions = [{
+                    label: '全部',
+                    value: 'all'
+                  }, {
+                    label: '语文',
+                    value: '语文'
+                  }, {
+                    label: '数学',
+                    value: '数学'
+                  }, {
+                    label: '英语',
+                    value: '英语'
+                  }, {
+                    label: '物理',
+                    value: '物理'
+                  }, {
+                    label: '化学',
+                    value: '化学'
+                  }];
+                }
+                _context5.next = 12;
+                break;
+              case 8:
+                _context5.prev = 8;
+                _context5.t0 = _context5["catch"](0);
+                console.error('获取学科数据出错:', _context5.t0);
+                // 使用默认学科
+                _this7.subjectOptions = [{
+                  label: '全部',
+                  value: 'all'
+                }, {
+                  label: '语文',
+                  value: '语文'
+                }, {
+                  label: '数学',
+                  value: '数学'
+                }, {
+                  label: '英语',
+                  value: '英语'
+                }, {
+                  label: '物理',
+                  value: '物理'
+                }, {
+                  label: '化学',
+                  value: '化学'
+                }];
+              case 12:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[0, 8]]);
+      }))();
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
 
 /***/ }),
 

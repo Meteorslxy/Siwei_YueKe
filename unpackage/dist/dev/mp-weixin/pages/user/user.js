@@ -161,7 +161,7 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var StudentNameModal = function StudentNameModal() {
   __webpack_require__.e(/*! require.ensure | components/common/student-name-modal */ "components/common/student-name-modal").then((function () {
-    return resolve(__webpack_require__(/*! @/components/common/student-name-modal.vue */ 595));
+    return resolve(__webpack_require__(/*! @/components/common/student-name-modal.vue */ 396));
   }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
 };
 var _default = {
@@ -221,6 +221,20 @@ var _default = {
       _this.loadUserInfo();
     });
 
+    // 添加user:updated事件监听，确保用户信息更新后能够刷新界面显示
+    uni.$on('user:updated', function (userData) {
+      console.log('接收到user:updated事件，刷新用户信息:', userData);
+      // 先更新本地用户信息
+      if (userData) {
+        _this.userInfo = _this.formatUserInfo(userData);
+        _this.hasUserInfo = true;
+      }
+      // 延迟一下再刷新页面，确保数据已完全保存
+      setTimeout(function () {
+        _this.loadUserInfo();
+      }, 200);
+    });
+
     // 监听显示学生姓名设置弹窗事件
     uni.$on('show:student-name-modal', function () {
       console.log('接收到show:student-name-modal事件，显示学生姓名设置弹窗');
@@ -234,6 +248,8 @@ var _default = {
     uni.$off('user:login');
     uni.$off('login:success');
     uni.$off('uni-id-pages-login-success');
+    // 取消监听用户信息更新事件
+    uni.$off('user:updated');
     // 取消监听显示学生姓名设置弹窗事件
     uni.$off('show:student-name-modal');
   },
@@ -1154,12 +1170,30 @@ var _default = {
     },
     // 获取用户显示名称
     getUserDisplayName: function getUserDisplayName() {
-      if (this.userInfo.nickName) {
-        return this.userInfo.nickName;
-      } else if (this.userInfo.nickname) {
+      // 最高优先级显示nickname
+      if (this.userInfo.nickname && this.userInfo.nickname.trim()) {
         return this.userInfo.nickname;
-      } else {
-        return '未知用户';
+      }
+      // 其次显示nickName
+      else if (this.userInfo.nickName && this.userInfo.nickName.trim()) {
+        return this.userInfo.nickName;
+      }
+      // 其次显示username
+      else if (this.userInfo.username && this.userInfo.username.trim()) {
+        return this.userInfo.username;
+      }
+      // 尝试用手机号构建用户名
+      else if (this.userInfo.mobile || this.userInfo.phoneNumber) {
+        var phone = this.userInfo.mobile || this.userInfo.phoneNumber;
+        return '用户' + phone.substr(phone.length - 4);
+      }
+      // 尝试用ID构建用户名
+      else if (this.userInfo._id && this.userInfo._id.length > 4) {
+        return '用户' + this.userInfo._id.substring(this.userInfo._id.length - 4);
+      }
+      // 如果上述条件都不满足，返回默认名称
+      else {
+        return '未设置昵称';
       }
     },
     // 同步用户信息到uni-id-pages组件
@@ -1300,8 +1334,15 @@ var _default = {
         canceled: 0
       };
 
-      // 重新获取用户信息
+      // 强制清除更新状态锁
+      this.isUpdatingUserInfo = false;
+      this.lastUserUpdateTime = 0;
+
+      // 强制重新获取用户信息（从存储和云端）
       this.loadUserInfo();
+
+      // 尝试从服务器获取最新用户信息
+      this.fetchCompleteUserInfo(this.userInfo._id);
 
       // 重新获取预约数量
       this.fetchBookingCounts();
@@ -1312,6 +1353,9 @@ var _default = {
       // 2秒后隐藏加载提示
       setTimeout(function () {
         uni.hideLoading();
+
+        // 再次确保用户信息已更新
+        _this8.loadUserInfo();
 
         // 通知用户
         uni.showToast({

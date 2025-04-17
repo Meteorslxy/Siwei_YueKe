@@ -192,6 +192,20 @@ export default {
       this.loadUserInfo()
     })
     
+    // 添加user:updated事件监听，确保用户信息更新后能够刷新界面显示
+    uni.$on('user:updated', (userData) => {
+      console.log('接收到user:updated事件，刷新用户信息:', userData)
+      // 先更新本地用户信息
+      if (userData) {
+        this.userInfo = this.formatUserInfo(userData)
+        this.hasUserInfo = true
+      }
+      // 延迟一下再刷新页面，确保数据已完全保存
+      setTimeout(() => {
+        this.loadUserInfo()
+      }, 200)
+    })
+    
     // 监听显示学生姓名设置弹窗事件
     uni.$on('show:student-name-modal', () => {
       console.log('接收到show:student-name-modal事件，显示学生姓名设置弹窗');
@@ -205,6 +219,8 @@ export default {
     uni.$off('user:login')
     uni.$off('login:success')
     uni.$off('uni-id-pages-login-success')
+    // 取消监听用户信息更新事件
+    uni.$off('user:updated')
     // 取消监听显示学生姓名设置弹窗事件
     uni.$off('show:student-name-modal')
   },
@@ -1055,12 +1071,30 @@ export default {
 
     // 获取用户显示名称
     getUserDisplayName() {
-      if (this.userInfo.nickName) {
-        return this.userInfo.nickName;
-      } else if (this.userInfo.nickname) {
+      // 最高优先级显示nickname
+      if (this.userInfo.nickname && this.userInfo.nickname.trim()) {
         return this.userInfo.nickname;
-      } else {
-        return '未知用户';
+      }
+      // 其次显示nickName
+      else if (this.userInfo.nickName && this.userInfo.nickName.trim()) {
+        return this.userInfo.nickName;
+      }
+      // 其次显示username
+      else if (this.userInfo.username && this.userInfo.username.trim()) {
+        return this.userInfo.username;
+      }
+      // 尝试用手机号构建用户名
+      else if (this.userInfo.mobile || this.userInfo.phoneNumber) {
+        const phone = this.userInfo.mobile || this.userInfo.phoneNumber;
+        return '用户' + phone.substr(phone.length - 4);
+      }
+      // 尝试用ID构建用户名
+      else if (this.userInfo._id && this.userInfo._id.length > 4) {
+        return '用户' + this.userInfo._id.substring(this.userInfo._id.length - 4);
+      }
+      // 如果上述条件都不满足，返回默认名称
+      else {
+        return '未设置昵称';
       }
     },
 
@@ -1206,8 +1240,15 @@ export default {
         canceled: 0
       };
       
-      // 重新获取用户信息
+      // 强制清除更新状态锁
+      this.isUpdatingUserInfo = false;
+      this.lastUserUpdateTime = 0;
+      
+      // 强制重新获取用户信息（从存储和云端）
       this.loadUserInfo();
+      
+      // 尝试从服务器获取最新用户信息
+      this.fetchCompleteUserInfo(this.userInfo._id);
       
       // 重新获取预约数量
       this.fetchBookingCounts();
@@ -1218,6 +1259,9 @@ export default {
       // 2秒后隐藏加载提示
       setTimeout(() => {
         uni.hideLoading();
+        
+        // 再次确保用户信息已更新
+        this.loadUserInfo();
         
         // 通知用户
         uni.showToast({
