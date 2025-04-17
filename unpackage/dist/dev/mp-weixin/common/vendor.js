@@ -94,9 +94,9 @@ module.exports = _defineProperty, module.exports.__esModule = true, module.expor
 /***/ }),
 
 /***/ 115:
-/*!***********************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/store.js ***!
-  \***********************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/store.js ***!
+  \********************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -883,9 +883,9 @@ module.exports = _toConsumableArray, module.exports.__esModule = true, module.ex
 /***/ }),
 
 /***/ 180:
-/*!**************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/static/data/filter-options.json ***!
-  \**************************************************************************************************/
+/*!***********************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/static/data/filter-options.json ***!
+  \***********************************************************************************************************/
 /*! exports provided: gradeOptions, subjectOptions, schoolOptions, educationalStages, courseTypes, teacherTitles, statusOptions, bookingStatus, databaseFields, default */
 /***/ (function(module) {
 
@@ -894,9 +894,9 @@ module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选�
 /***/ }),
 
 /***/ 181:
-/*!***************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/utils/filters.js ***!
-  \***************************************************************************************/
+/*!************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/utils/filters.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10722,8 +10722,8 @@ var b = "development" === "development",
   k = "true" === undefined || !0 === undefined,
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
-  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
-  O = T([{"provider":"aliyun","spaceName":"yueke-demo","spaceId":"mp-d0c06b27-ec33-40fe-b28b-337811bd2f29","clientSecret":"c3DWEyYRkArWA6mZ2b+gxQ==","endpoint":"https://api.next.bspapp.com"}]) || [],
+  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7001,"debugPort":9001,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+  O = T([{"provider":"aliyun","spaceName":"siwei-chuzhong","spaceId":"mp-a876f469-bab5-46b7-8863-2e7147900fdd","clientSecret":"IhCqrULEYv+AG3PS/Z7jrw==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
 try {
@@ -18590,9 +18590,9 @@ exports.default = Zs;
 /***/ }),
 
 /***/ 262:
-/*!**************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/modules/user.js ***!
-  \**************************************************************************************/
+/*!***********************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/user.js ***!
+  \***********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19286,9 +19286,9 @@ module.exports = _inherits, module.exports.__esModule = true, module.exports["de
 /***/ }),
 
 /***/ 311:
-/*!*********************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/common/utils/marked.min.js ***!
-  \*********************************************************************************************/
+/*!******************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/common/utils/marked.min.js ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19376,9 +19376,9 @@ module.exports = _possibleConstructorReturn, module.exports.__esModule = true, m
 /***/ }),
 
 /***/ 320:
-/*!**********************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
-  \**********************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
+  \*******************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -20805,9 +20805,9 @@ module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.expo
 /***/ }),
 
 /***/ 346:
-/*!***********************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/pages/register/validator.js ***!
-  \***********************************************************************************************************************/
+/*!********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/register/validator.js ***!
+  \********************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -20881,9 +20881,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 347:
-/*!**************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/common/password.js ***!
-  \**************************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/password.js ***!
+  \***********************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -20996,9 +20996,9 @@ module.exports = _isNativeFunction, module.exports.__esModule = true, module.exp
 /***/ }),
 
 /***/ 36:
-/*!**********************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"origin-pages-json"} ***!
-  \**********************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json?{"type":"origin-pages-json"} ***!
+  \*******************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21299,9 +21299,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 37:
-/*!*********************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json?{"type":"stat"} ***!
-  \*********************************************************************************************/
+/*!******************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json?{"type":"stat"} ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21320,9 +21320,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 38:
-/*!*****************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/pages.json ***!
-  \*****************************************************************************/
+/*!**************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json ***!
+  \**************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -21346,10 +21346,10 @@ module.exports = _interopRequireDefault, module.exports.__esModule = true, modul
 
 /***/ }),
 
-/***/ 408:
-/*!**********************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/popup.js ***!
-  \**********************************************************************************************************************/
+/***/ 413:
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
+  \*******************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21388,10 +21388,10 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 409:
-/*!***************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
-  \***************************************************************************************************************************/
+/***/ 414:
+/*!************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
+  \************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21403,9 +21403,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 410));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 411));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 412));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 415));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 416));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 417));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
@@ -21415,10 +21415,10 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 410:
-/*!**************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
-  \**************************************************************************************************************************/
+/***/ 415:
+/*!***********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
+  \***********************************************************************************************************************************/
 /*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
 /***/ (function(module) {
 
@@ -21426,10 +21426,10 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 411:
-/*!*******************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
-  \*******************************************************************************************************************************/
+/***/ 416:
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
+  \****************************************************************************************************************************************/
 /*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
 /***/ (function(module) {
 
@@ -21437,10 +21437,10 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 412:
-/*!*******************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
-  \*******************************************************************************************************************************/
+/***/ 417:
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
+  \****************************************************************************************************************************************/
 /*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
 /***/ (function(module) {
 
@@ -21448,10 +21448,10 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 420:
-/*!*************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/validate.js ***!
-  \*************************************************************************************************************************/
+/***/ 425:
+/*!**********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/validate.js ***!
+  \**********************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22140,10 +22140,10 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 421:
-/*!**********************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-forms/components/uni-forms/utils.js ***!
-  \**********************************************************************************************************************/
+/***/ 426:
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/utils.js ***!
+  \*******************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22609,9 +22609,9 @@ function normalizeComponent (
 /***/ }),
 
 /***/ 45:
-/*!***************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/init.js ***!
-  \***************************************************************************************************/
+/*!************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/init.js ***!
+  \************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22746,9 +22746,9 @@ function _ref() {
 /***/ }),
 
 /***/ 46:
-/*!*****************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/config.js ***!
-  \*****************************************************************************************************/
+/*!**************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/config.js ***!
+  \**************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22792,9 +22792,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 47:
-/*!***************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/components/global.js ***!
-  \***************************************************************************************/
+/*!************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/components/global.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22853,10 +22853,10 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 
 /***/ }),
 
-/***/ 506:
-/*!*****************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
-  \*****************************************************************************************************************************************/
+/***/ 511:
+/*!**************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
+  \**************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23109,10 +23109,10 @@ function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
 
 /***/ }),
 
-/***/ 514:
-/*!******************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
-  \******************************************************************************************************************************************/
+/***/ 519:
+/*!***************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
+  \***************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23244,10 +23244,10 @@ function createAnimation(option, _this) {
 
 /***/ }),
 
-/***/ 520:
-/*!**********************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
-  \**********************************************************************************************************************************/
+/***/ 525:
+/*!*******************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
+  \*******************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23841,9 +23841,9 @@ module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exp
 /***/ }),
 
 /***/ 90:
-/*!*******************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/index.js ***!
-  \*******************************************************************************/
+/*!****************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/index.js ***!
+  \****************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -24381,9 +24381,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 91:
-/*!*********************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/api/request.js ***!
-  \*********************************************************************************/
+/*!******************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/request.js ***!
+  \******************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -24620,9 +24620,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 92:
-/*!****************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/YueKe/utils/cloud-config.js ***!
-  \****************************************************************************************/
+/*!*************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/utils/cloud-config.js ***!
+  \*************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
