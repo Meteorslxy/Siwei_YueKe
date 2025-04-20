@@ -267,6 +267,7 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
+//
 var _default = {
   data: function data() {
     return {
@@ -322,6 +323,15 @@ var _default = {
       } else {
         return this.bookingDetail.courseTime || '暂无';
       }
+    },
+    // 判断是否需要显示联系老师按钮
+    isNeedContactTeacher: function isNeedContactTeacher() {
+      // 只有当状态为已确认但未缴费时才显示联系老师按钮
+      return this.bookingDetail.status === 'confirmed' && this.bookingDetail.paymentStatus !== 'paid' && !this.isPaid;
+    },
+    // 判断是否已支付
+    isPaid: function isPaid() {
+      return this.bookingDetail.paymentStatus === 'paid' || this.bookingDetail.isPaid === true;
     }
   },
   methods: {
@@ -432,8 +442,8 @@ var _default = {
     // 取消预约
     cancelBooking: function cancelBooking() {
       var _this2 = this;
-      // 检查支付状态
-      var hasPaid = this.bookingDetail.paymentStatus === 'paid' || this.bookingDetail.status === 'confirmed' || this.bookingDetail.isPaid === true;
+      // 检查支付状态，更准确地判断是否已支付
+      var hasPaid = this.bookingDetail.paymentStatus === 'paid' || this.bookingDetail.isPaid === true;
 
       // 确认是否取消
       uni.showModal({

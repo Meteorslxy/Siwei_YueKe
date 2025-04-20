@@ -145,16 +145,18 @@ var render = function () {
     var m3 = _vm.formatCourseTime(item)
     var m4 = _vm.formatBookingTime(item.createTime)
     var m5 = _vm.showActions(item)
+    var m6 = m5 ? _vm.shouldShowContactButton(item) : null
     return {
       $orig: $orig,
       m2: m2,
       m3: m3,
       m4: m4,
       m5: m5,
+      m6: m6,
     }
   })
   var g0 = _vm.filteredBookingList.length
-  var m6 = g0 === 0 ? _vm.getEmptyTipText() : null
+  var m7 = g0 === 0 ? _vm.getEmptyTipText() : null
   if (!_vm._isMounted) {
     _vm.e0 = function ($event, item) {
       var _temp = arguments[arguments.length - 1].currentTarget.dataset,
@@ -184,7 +186,7 @@ var render = function () {
         l0: l0,
         l1: l1,
         g0: g0,
-        m6: m6,
+        m7: m7,
       },
     }
   )
@@ -1178,7 +1180,7 @@ var _default = {
       }
 
       // 检查支付状态
-      var hasPaid = booking.paymentStatus === 'paid' || booking.status === 'confirmed' || booking.isPaid === true;
+      var hasPaid = booking.paymentStatus === 'paid' || booking.isPaid === true;
 
       // 确认是否取消
       uni.showModal({
@@ -1817,6 +1819,16 @@ var _default = {
     // 在methods部分添加检查是否显示操作按钮的方法
     showActions: function showActions(item) {
       return item && (item.status !== 'cancelled' && item.status !== 'finished' || item.status === 'confirmed' || item.status === 'confirmed_unpaid' || item.status !== 'cancelled');
+    },
+    // 判断是否应该显示联系老师按钮
+    shouldShowContactButton: function shouldShowContactButton(item) {
+      if (!item) return false;
+
+      // 判断是否已支付
+      var isPaid = item.paymentStatus === 'paid' || item.isPaid === true;
+
+      // 只有当状态为已确认但未缴费时才显示联系老师按钮
+      return item.status === 'confirmed' && !isPaid || item.status === 'confirmed_unpaid';
     }
   }
 };

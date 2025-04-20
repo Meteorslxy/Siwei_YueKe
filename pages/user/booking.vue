@@ -70,7 +70,7 @@
                   v-if="item && item.status !== 'cancelled' && item.status !== 'finished'"
                   @click.stop="$event => cancelBooking(item, $event)">取消预约</view>
             <view class="action-btn" 
-                  v-if="item && (item.status === 'confirmed' || item.status === 'confirmed_unpaid')"
+                  v-if="shouldShowContactButton(item)"
                   @click.stop="$event => contactTeacher(item, $event)">联系老师</view>
           </view>
         </view>
@@ -915,7 +915,6 @@ export default {
       
       // 检查支付状态
       const hasPaid = booking.paymentStatus === 'paid' || 
-                      booking.status === 'confirmed' ||
                       booking.isPaid === true;
       
       // 确认是否取消
@@ -1499,6 +1498,18 @@ export default {
         (item.status === 'confirmed' || item.status === 'confirmed_unpaid') ||
         item.status !== 'cancelled'
       );
+    },
+    
+    // 判断是否应该显示联系老师按钮
+    shouldShowContactButton(item) {
+      if (!item) return false;
+      
+      // 判断是否已支付
+      const isPaid = item.paymentStatus === 'paid' || item.isPaid === true;
+      
+      // 只有当状态为已确认但未缴费时才显示联系老师按钮
+      return (item.status === 'confirmed' && !isPaid) || 
+             item.status === 'confirmed_unpaid';
     }
   }
 }

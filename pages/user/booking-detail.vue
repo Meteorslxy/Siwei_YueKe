@@ -63,7 +63,8 @@
           <view class="action-btn primary" @click="cancelBooking">取消预约</view>
         </block>
         
-        <block v-if="bookingDetail.status === 'confirmed'">
+        <!-- 已确认但未缴费时才显示联系老师按钮 -->
+        <block v-if="isNeedContactTeacher">
           <view class="action-btn primary" @click="contactTeacher">联系老师</view>
         </block>
       </view>
@@ -138,6 +139,18 @@ export default {
       } else {
         return this.bookingDetail.courseTime || '暂无';
       }
+    },
+    // 判断是否需要显示联系老师按钮
+    isNeedContactTeacher() {
+      // 只有当状态为已确认但未缴费时才显示联系老师按钮
+      return this.bookingDetail.status === 'confirmed' && 
+             this.bookingDetail.paymentStatus !== 'paid' &&
+             !this.isPaid;
+    },
+    // 判断是否已支付
+    isPaid() {
+      return this.bookingDetail.paymentStatus === 'paid' || 
+             this.bookingDetail.isPaid === true;
     }
   },
   methods: {
@@ -234,9 +247,8 @@ export default {
     
     // 取消预约
     cancelBooking() {
-      // 检查支付状态
+      // 检查支付状态，更准确地判断是否已支付
       const hasPaid = this.bookingDetail.paymentStatus === 'paid' || 
-                      this.bookingDetail.status === 'confirmed' ||
                       this.bookingDetail.isPaid === true;
       
       // 确认是否取消
