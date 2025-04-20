@@ -432,45 +432,68 @@ export default {
 
     // 添加检查学生姓名设置状态的方法
     checkStudentNameStatus(userInfo, forceShow = false) {
+      // 先检查用户是否已登录
+      const token = uni.getStorageSync('uni_id_token')
+      
+      // 如果没有token，说明用户未登录，不需要检查
+      if (!token) {
+        console.log('用户未登录，不需要设置学生姓名')
+        return
+      }
+      
       // 检查是否已经设置过学生姓名
-      const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+      const hasSetStudentName = uni.getStorageSync('hasSetStudentName')
+      
+      // 如果强制显示或未设置过，则继续
       if (hasSetStudentName && !forceShow) {
-        console.log('已经设置过学生姓名，无需再次设置');
-        return;
+        console.log('已经设置过学生姓名，无需再次设置')
+        return
       }
       
       // 获取当前用户信息
-      let currentUserInfo = userInfo;
+      let currentUserInfo = userInfo
       
       // 如果没有传入用户信息，则从存储中获取
       if (!currentUserInfo) {
-        currentUserInfo = this.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
-        if (!currentUserInfo) {
-          console.log('没有找到用户信息，无需设置学生姓名');
-          return;
+        currentUserInfo = this.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo')
+        if (!currentUserInfo || !currentUserInfo._id) {
+          console.log('没有找到有效的用户信息，无需设置学生姓名')
+          return
         }
       }
       
-      console.log('检查用户是否需要设置学生姓名');
+      console.log('检查用户是否需要设置学生姓名', currentUserInfo)
       
-      // 如果用户已有昵称并且不是默认昵称（如"微信用户"或包含用户ID的昵称），则认为已设置
-      if (currentUserInfo.nickname && 
-          currentUserInfo.nickname !== '微信用户' && 
-          !currentUserInfo.nickname.startsWith('用户') && 
-          !currentUserInfo.nickname.startsWith('wx_user')) {
-        console.log('用户已设置有效昵称:', currentUserInfo.nickname);
-        // 记录已设置姓名
-        uni.setStorageSync('hasSetStudentName', true);
-        return;
-      }
+      // 清除可能错误设置的标记，确保弹窗显示
+      uni.removeStorageSync('hasSetStudentName')
       
       // 延迟显示设置学生姓名弹窗，确保页面已完全加载
       setTimeout(() => {
         // 显示学生姓名设置弹窗
-        console.log('显示学生姓名设置弹窗');
-        // 全局事件触发学生姓名设置弹窗
-        uni.$emit('show:student-name-modal');
-      }, 500);
+        console.log('准备显示学生姓名设置弹窗')
+        
+        // 检查当前页面是否是用户页面
+        const currentPages = getCurrentPages()
+        const currentPage = currentPages[currentPages.length - 1]
+        const currentPagePath = currentPage ? currentPage.route : ''
+        
+        console.log('当前页面路径:', currentPagePath)
+        
+        if (currentPagePath && currentPagePath.includes('pages/user/user')) {
+          // 如果在用户页面，直接触发弹窗
+          console.log('当前在用户页面，直接触发弹窗')
+          uni.$emit('show:student-name-modal')
+        } else {
+          // 如果不在用户页面，跳转到用户页面并设置标记
+          console.log('当前不在用户页面，跳转到用户页面')
+          // 设置全局变量，指示需要显示弹窗
+          this.globalData.needShowStudentNameModal = true
+          // 跳转到用户页面
+          uni.switchTab({
+            url: '/pages/user/user'
+          })
+        }
+      }, 500)
     }
   }
 }

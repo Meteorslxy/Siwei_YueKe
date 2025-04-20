@@ -484,6 +484,7 @@ var mutations = {
     });
   },
   loginSuccess: function loginSuccess() {
+    var _this3 = this;
     var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     // 设置 token
     var _e$showToast = e.showToast,
@@ -513,47 +514,47 @@ var mutations = {
 
     //习惯问题，有的云端会返回 token 有的返回 accessToken 
     if (e.token || e.accessToken) {
-      var token = e.token || e.accessToken;
+      var _token = e.token || e.accessToken;
 
       // 增强的类型检查和错误处理
       // 1. 如果token是数组，取第一个有效的字符串token
-      if (Array.isArray(token)) {
+      if (Array.isArray(_token)) {
         console.log('收到token数组，尝试提取有效token');
-        var validTokens = token.filter(function (t) {
+        var validTokens = _token.filter(function (t) {
           return typeof t === 'string' && t.length > 0;
         });
         if (validTokens.length > 0) {
-          token = validTokens[0];
+          _token = validTokens[0];
           console.log('从数组中提取到有效token');
         } else {
           console.error('token数组中没有有效的token');
-          token = null;
+          _token = null;
         }
       }
       // 2. 如果token是对象但不是数组，尝试转为字符串
-      else if ((0, _typeof2.default)(token) === 'object' && token !== null) {
-        console.error('收到对象类型token，尝试转换为字符串', (0, _typeof2.default)(token));
+      else if ((0, _typeof2.default)(_token) === 'object' && _token !== null) {
+        console.error('收到对象类型token，尝试转换为字符串', (0, _typeof2.default)(_token));
         try {
-          if (token.toString && typeof token.toString === 'function' && token.toString() !== '[object Object]') {
-            token = token.toString();
+          if (_token.toString && typeof _token.toString === 'function' && _token.toString() !== '[object Object]') {
+            _token = _token.toString();
             console.log('将对象token转换为字符串');
           } else {
             console.error('无法将对象token转换为有效字符串');
-            token = null;
+            _token = null;
           }
         } catch (err) {
           console.error('转换token对象为字符串时出错:', err);
-          token = null;
+          _token = null;
         }
       }
 
       // 3. 最后检查token是否为有效字符串
-      if (typeof token === 'string' && token.length > 0) {
-        uni.setStorageSync('uni_id_token', token);
+      if (typeof _token === 'string' && _token.length > 0) {
+        uni.setStorageSync('uni_id_token', _token);
         uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
         console.log('已保存token信息到storage');
       } else {
-        console.error('token格式无效，无法保存:', (0, _typeof2.default)(token));
+        console.error('token格式无效，无法保存:', (0, _typeof2.default)(_token));
         // 创建临时token以便用户后续刷新
         if (e.uid || e.userInfo && e.userInfo._id) {
           var userId = e.uid || e.userInfo._id;
@@ -583,6 +584,33 @@ var mutations = {
         icon: 'none',
         duration: 3000
       });
+    }
+
+    // 检查是否是首次登录
+    var hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+    var isFirstLogin = !hasSetStudentName;
+
+    // 检查用户信息是否有效
+    var token = uni.getStorageSync('uni_id_token');
+    var userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+    var hasValidUserInfo = token && userInfo && userInfo._id;
+
+    // 如果是首次登录且用户信息有效，在跳转后触发学生姓名设置弹窗
+    if (isFirstLogin && hasValidUserInfo) {
+      console.log('检测到首次登录，即将展示学生姓名设置弹窗');
+      // 确保清除可能错误设置的标记
+      uni.removeStorageSync('hasSetStudentName');
+      setTimeout(function () {
+        // 再次检查登录状态，确保用户仍然登录
+        var currentToken = uni.getStorageSync('uni_id_token');
+        if (currentToken) {
+          // 强制触发学生姓名设置弹窗事件
+          console.log('强制触发学生姓名设置弹窗事件');
+          uni.$emit('show:student-name-modal');
+        } else {
+          console.log('用户已退出登录，不显示姓名设置弹窗');
+        }
+      }, 1500); // 页面跳转完成后显示弹窗
     }
 
     // 检查是否需要设置密码
@@ -640,10 +668,26 @@ var mutations = {
         }
       }
     }
+
+    // 修改：优先跳转到用户个人中心页面
     if (autoBack) {
-      this.loginBack({
-        uniIdRedirectUrl: uniIdRedirectUrl
-      });
+      // 跳转到个人中心页面
+      console.log('登录成功，跳转到个人中心页面');
+      setTimeout(function () {
+        uni.switchTab({
+          url: '/pages/user/user',
+          success: function success() {
+            console.log('跳转到个人中心成功');
+          },
+          fail: function fail(err) {
+            console.error('跳转到个人中心失败:', err);
+            // 失败时使用原有的跳转逻辑
+            _this3.loginBack({
+              uniIdRedirectUrl: uniIdRedirectUrl
+            });
+          }
+        });
+      }, 1000);
     } else if (!needSetPassword) {
       // 没有自动返回且不需要设置密码时，跳转到首页
       console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);

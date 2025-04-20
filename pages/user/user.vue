@@ -195,10 +195,8 @@ export default {
     // 监听显示学生姓名设置弹窗事件
     uni.$on('show:student-name-modal', () => {
       console.log('接收到show:student-name-modal事件，显示学生姓名设置弹窗');
-      if (this.$refs.studentNameModal) {
-        this.$refs.studentNameModal.open();
-      }
-    });
+      this.showStudentNameModal();
+    })
   },
   onUnload() {
     // 取消监听登录事件
@@ -278,6 +276,9 @@ export default {
         this.testUniIdPages('register')
       }, 800)
     }
+
+    // 检查是否需要显示学生姓名设置弹窗
+    this.checkAndShowStudentNameModal();
   },
   mounted() {
     // 加载用户信息
@@ -359,14 +360,12 @@ export default {
       this.hasUserInfo = false
     },
     
-    // 加载用户信息
-    loadUserInfo() {
-      if (this.isDev && this.verboseLogging) console.log('加载用户信息');
-      
-      // 防止短时间内重复调用
+    // 获取当前用户信息
+    async loadUserInfo() {
+      // 加载用户信息前先检查标记，避免短时间内多次加载
       const now = Date.now();
-      if (this.isUpdatingUserInfo || (now - this.lastUserUpdateTime < 500)) {
-        if (this.isDev && this.verboseLogging) console.log('正在更新用户信息中，跳过重复调用');
+      if (this.isUpdatingUserInfo && now - this.lastUserUpdateTime < 5000) {
+        console.log('上次更新用户信息时间太近，跳过此次更新');
         return;
       }
       
@@ -374,72 +373,81 @@ export default {
       this.lastUserUpdateTime = now;
       
       try {
-        // 先检查是否有token，如果有token但没有用户信息，优先尝试从token获取用户信息
-        const token = uni.getStorageSync('uni_id_token')
-        const tokenExpired = uni.getStorageSync('uni_id_token_expired')
+        console.log('加载用户信息...');
         
-        if (token && tokenExpired && new Date(tokenExpired).getTime() > Date.now() && !this.hasUserInfo) {
-          if (this.isDev && this.verboseLogging) console.log('发现有效的token，尝试获取用户信息')
-          this.fetchUserInfoByToken()
-          this.isUpdatingUserInfo = false;
-          return
-        }
+        // 优先从本地存储获取用户信息
+        const userInfo = uni.getStorageSync('uni-id-pages-userInfo') || uni.getStorageSync('userInfo') || {};
         
-        // 先尝试从uni-id-pages的存储位置读取
-        const uniIdPagesUserInfo = uni.getStorageSync('uni-id-pages-userInfo')
-        if (uniIdPagesUserInfo && Object.keys(uniIdPagesUserInfo).length > 0) {
-          if (this.isDev && this.verboseLogging) console.log('从uni-id-pages读取到的用户信息:', uniIdPagesUserInfo)
+        // 检查用户ID
+        if (userInfo && (userInfo._id || userInfo.uid)) {
+          console.log('从本地存储中加载到用户信息:', userInfo.nickname || userInfo.nickName || userInfo.username || userInfo._id);
           
-          // 处理uni-id-pages格式的用户信息
-          const formattedInfo = this.formatUserInfo(uniIdPagesUserInfo)
-          this.userInfo = formattedInfo
-          this.hasUserInfo = true
+          // 更新组件的用户信息
+          this.userInfo = userInfo;
+          this.hasUserInfo = true;
+          this.hasContent = true;
           
-          if (this.isDev && this.verboseLogging) {
-            console.log('处理后的用户信息:', JSON.stringify(this.userInfo))
-            console.log('是否有用户信息：', this.hasUserInfo)
+          // 检查是否为首次登录（无学生姓名）并需要弹窗
+          const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+          const nickname = userInfo.nickname || userInfo.nickName;
+          if (!hasSetStudentName && !nickname) {
+            console.log('检测到用户未设置学生姓名，将显示学生姓名设置弹窗');
+            setTimeout(() => {
+              this.showStudentNameModal();
+            }, 500);
           }
-          this.isUpdatingUserInfo = false;
-          return;
-        }
-        
-        // 如果uni-id-pages中没有，再尝试从自定义位置读取
-        const userInfoStorage = uni.getStorageSync('userInfo')
-        if (userInfoStorage) {
-          try {
-            // 检查是否已经是对象，避免重复解析
-            let userInfo = typeof userInfoStorage === 'string' ? JSON.parse(userInfoStorage) : userInfoStorage
-            if (this.isDev && this.verboseLogging) console.log('读取到的用户信息类型:', typeof userInfo)
-            
-            // 检查是否为数组格式(登录函数可能返回数组格式)
-            if (Array.isArray(userInfo) && userInfo.length > 0) {
-              userInfo = userInfo[0]
-            }
-            
-            // 处理一层嵌套数据的情况（有些时候data是嵌套的）
-            if (userInfo.data && typeof userInfo.data === 'object') {
-              userInfo = userInfo.data
-            }
-            
-            this.userInfo = this.formatUserInfo(userInfo)
-            this.hasUserInfo = !!this.userInfo.nickName || !!this.userInfo.nickname
-            
-            if (this.isDev && this.verboseLogging) {
-              console.log('处理后的用户信息:', JSON.stringify(this.userInfo))
-              console.log('是否有用户信息：', this.hasUserInfo)
-            }
-          } catch (e) {
-            console.error('解析用户信息失败:', e)
-            this.userInfo = {}
-            this.hasUserInfo = false
+          
+          // 同步更新全局状态的用户信息
+          if (getApp().globalData) {
+            getApp().globalData.userInfo = userInfo;
+          }
+          
+          // 同步更新uni-id-pages的store
+          if (uniIdPagesStore && typeof uniIdPagesStore === 'object') {
+            uniIdPagesStore.userInfo = userInfo;
+            uniIdPagesStore.hasLogin = true;
           }
         } else {
-          if (this.isDev && this.verboseLogging) console.log('未找到用户信息')
-          this.userInfo = {}
-          this.hasUserInfo = false
+          console.log('本地存储中没有有效的用户信息');
+          
+          // 尝试从uniId页面获取
+          if (uniIdPagesStore && uniIdPagesStore.hasLogin && uniIdPagesStore.userInfo) {
+            console.log('从uni-id-pages的store中获取用户信息');
+            this.userInfo = uniIdPagesStore.userInfo;
+            this.hasUserInfo = true;
+            this.hasContent = true;
+            
+            // 同步到全局状态
+            if (getApp().globalData) {
+              getApp().globalData.userInfo = uniIdPagesStore.userInfo;
+            }
+            
+            // 同步到本地存储
+            uni.setStorageSync('userInfo', uniIdPagesStore.userInfo);
+            uni.setStorageSync('uni-id-pages-userInfo', uniIdPagesStore.userInfo);
+          } else {
+            // 都没有，则清空用户信息
+            this.userInfo = {};
+            this.hasUserInfo = false;
+            
+            // 仍然显示基本内容
+            this.hasContent = true;
+          }
         }
+      } catch (e) {
+        console.error('加载用户信息错误:', e);
+        // 发生错误时，确保basic content仍然可见
+        this.hasContent = true;
       } finally {
         this.isUpdatingUserInfo = false;
+        
+        // 确认是否显示内容
+        setTimeout(() => {
+          if (!this.hasContent) {
+            this.hasContent = true;
+          }
+          console.log('内容检查结果:', this.hasContent, '用户信息状态:', this.hasUserInfo);
+        }, 300);
       }
     },
     
@@ -1291,6 +1299,74 @@ export default {
         
         console.log('内容检查结果:', this.hasContent, '用户信息状态:', this.hasUserInfo);
       }, 300);
+    },
+
+    // 检查是否需要显示学生姓名设置弹窗
+    checkAndShowStudentNameModal() {
+      // 检查全局变量中是否有显示弹窗的标记
+      const app = getApp();
+      if (app && app.globalData) {
+        if (app.globalData.needShowStudentNameModal) {
+          console.log('检测到全局变量中有显示学生姓名弹窗的标记');
+          // 清除标记
+          app.globalData.needShowStudentNameModal = false;
+          // 显示弹窗
+          setTimeout(() => {
+            this.showStudentNameModal();
+          }, 500);
+          return;
+        }
+      }
+      
+      // 检查本地存储是否设置过学生姓名
+      const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+      if (!hasSetStudentName) {
+        console.log('检测到用户未设置学生姓名，将显示弹窗');
+        // 延迟显示，确保页面已加载完成
+        setTimeout(() => {
+          this.showStudentNameModal();
+        }, 500);
+      }
+      
+      if (getApp().globalData.openUserProfile) {
+        // 清除标记
+        getApp().globalData.openUserProfile = false
+        
+        // 延迟执行，确保页面已经加载完成
+        setTimeout(() => {
+          if (this.hasUserInfo) {
+            this.testUniIdPages('profile')
+          } else {
+            uni.showToast({
+              title: '请先登录',
+              icon: 'none'
+            })
+          }
+        }, 800)
+      }
+    },
+
+    // 显示学生姓名设置弹窗
+    showStudentNameModal() {
+      console.log('执行showStudentNameModal方法', this.$refs.studentNameModal ? '弹窗组件已找到' : '弹窗组件未找到');
+      
+      if (this.$refs.studentNameModal) {
+        this.$refs.studentNameModal.open();
+        console.log('已调用studentNameModal组件的open方法');
+      } else {
+        console.error('找不到studentNameModal组件引用');
+        // 如果找不到组件引用，延迟再次尝试
+        setTimeout(() => {
+          if (this.$refs.studentNameModal) {
+            console.log('延迟后找到了studentNameModal组件');
+            this.$refs.studentNameModal.open();
+          } else {
+            console.error('即使延迟后仍找不到studentNameModal组件，尝试强制刷新页面');
+            // 强制刷新页面以确保组件正确加载
+            this.reload();
+          }
+        }, 1000);
+      }
     }
   }
 }

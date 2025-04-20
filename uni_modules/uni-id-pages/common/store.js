@@ -387,6 +387,34 @@ export const mutations = {
 			});
 		}
 		
+		// 检查是否是首次登录
+		const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+		const isFirstLogin = !hasSetStudentName;
+		
+		// 检查用户信息是否有效
+		const token = uni.getStorageSync('uni_id_token');
+		const userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+		const hasValidUserInfo = token && userInfo && userInfo._id;
+		
+		// 如果是首次登录且用户信息有效，在跳转后触发学生姓名设置弹窗
+		if (isFirstLogin && hasValidUserInfo) {
+			console.log('检测到首次登录，即将展示学生姓名设置弹窗');
+			// 确保清除可能错误设置的标记
+			uni.removeStorageSync('hasSetStudentName');
+			
+			setTimeout(() => {
+				// 再次检查登录状态，确保用户仍然登录
+				const currentToken = uni.getStorageSync('uni_id_token');
+				if (currentToken) {
+					// 强制触发学生姓名设置弹窗事件
+					console.log('强制触发学生姓名设置弹窗事件');
+					uni.$emit('show:student-name-modal');
+				} else {
+					console.log('用户已退出登录，不显示姓名设置弹窗');
+				}
+			}, 1500); // 页面跳转完成后显示弹窗
+		}
+		
 		// 检查是否需要设置密码
 		if (needSetPassword && !passwordConfirmed) {
 			// 账号密码登录方式不需要跳转到设置密码页面
@@ -447,8 +475,23 @@ export const mutations = {
 			}
 		}
 
+		// 修改：优先跳转到用户个人中心页面
 		if (autoBack) {
-			this.loginBack({uniIdRedirectUrl});
+			// 跳转到个人中心页面
+			console.log('登录成功，跳转到个人中心页面');
+			setTimeout(() => {
+				uni.switchTab({
+					url: '/pages/user/user',
+					success: () => {
+						console.log('跳转到个人中心成功');
+					},
+					fail: (err) => {
+						console.error('跳转到个人中心失败:', err);
+						// 失败时使用原有的跳转逻辑
+						this.loginBack({uniIdRedirectUrl});
+					}
+				});
+			}, 1000);
 		} else if (!needSetPassword) {
 			// 没有自动返回且不需要设置密码时，跳转到首页
 			console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);

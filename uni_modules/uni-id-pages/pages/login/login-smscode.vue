@@ -79,7 +79,24 @@
 					"code": this.code,
 					"captcha": this.captcha
 				}).then(e => {
-					this.loginSuccess(e)
+					// 登录成功前检查是否是首次登录
+					const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+					const isFirstLogin = !hasSetStudentName;
+					
+					// 如果是首次登录，记录在e对象中
+					if (isFirstLogin) {
+						e.isFirstLogin = true;
+						console.log('检测到验证码登录的首次登录用户');
+					}
+					
+					// 将自定义参数传递给loginSuccess
+					this.loginSuccess({
+						...e,
+						autoBack: true,
+						toastText: '登录成功，跳转中...',
+						// 验证码登录成功后始终跳转到用户页面
+						uniIdRedirectUrl: '/pages/user/user'
+					});
 				}).catch(e => {
 					if (e.errCode == 'uni-id-captcha-required') {
 						this.$refs.popup.open()
