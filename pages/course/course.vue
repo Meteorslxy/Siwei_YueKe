@@ -100,8 +100,9 @@ export default {
       selectedGradeGroup: 'all',
       gradeGroups: [
         { label: '全部年级', value: 'all' },
-        { label: '小学', value: '小学' },
-        { label: '初中', value: '初中' }
+        { label: '初一', value: '初一' },
+        { label: '初二', value: '初二' },
+        { label: '初三', value: '初三' }
       ],
       
       // 校区筛选相关
@@ -288,6 +289,8 @@ export default {
         // 添加筛选条件 - 确保参数名称与后端一致
         if (this.selectedGradeGroup !== 'all') {
           params.educationalStages = this.selectedGradeGroup;
+          // 同时传递grade参数，以支持新的年级筛选
+          params.grade = this.selectedGradeGroup;
         }
         
         if (this.selectedSchool !== 'all') {
@@ -300,8 +303,33 @@ export default {
         
         console.log('发送到后端的查询参数:', params);
         
-        // 调用云函数获取课程列表
-        const result = await this.$api.course.getCourseList(params);
+        // 设置重试次数
+        let retryCount = 0;
+        const maxRetries = 3;
+        let result = null;
+        
+        while(retryCount < maxRetries) {
+          try {
+            // 调用云函数获取课程列表
+            result = await this.$api.course.getCourseList(params);
+            // 如果成功获取数据，跳出重试循环
+            if(result && result.success) {
+              break;
+            }
+          } catch (error) {
+            console.error(`第${retryCount + 1}次尝试失败:`, error);
+          }
+          
+          // 重试前等待一段时间
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          retryCount++;
+          
+          if(retryCount === maxRetries) {
+            // 所有重试都失败了
+            throw new Error('多次尝试获取课程列表失败');
+          }
+        }
+        
         console.log('云函数返回结果:', result, '数据条数:', result?.data?.length || 0);
         
         // 处理返回结果

@@ -45,6 +45,77 @@ exports.main = async (event, context) => {
       console.log('设置默认的courseCapacity值为:', course.courseCapacity);
     }
     
+    // 查询通用课程描述（当课程描述为空时）
+    if (!course.description || course.description === '') {
+      console.log('课程描述为空，尝试从course_description表获取通用描述');
+      
+      // 从课程中获取科目
+      const subject = course.subject;
+      
+      if (subject) {
+        try {
+          // 步骤1: 尝试获取classtype信息
+          let classtype = null;
+          
+          // 先检查课程是否有classtypeId字段
+          const classtypeId = course.classtypeId || course.classtype_id;
+          if (classtypeId) {
+            console.log('根据classtypeId获取班级类型, ID:', classtypeId);
+            const classtypeResult = await db.collection('course_classtype').doc(classtypeId).get();
+            if (classtypeResult.data && classtypeResult.data.length > 0) {
+              classtype = classtypeResult.data[0].classtype;
+            } else if (classtypeResult.data) {
+              classtype = classtypeResult.data.classtype;
+            }
+            console.log('从course_classtype表获取到classtype:', classtype);
+          } 
+          
+          // 如果上面没找到，尝试直接使用课程的classtype字段
+          if (!classtype) {
+            classtype = course.classtype || course.classType || course.type;
+            console.log('直接使用课程的classtype字段:', classtype);
+          }
+          
+          // 步骤2: 使用subject和classtype在course_description表中查询
+          if (classtype) {
+            console.log('使用subject和classtype查询课程描述, subject:', subject, 'classtype:', classtype);
+            const descResult = await db.collection('course_description')
+              .where({
+                subject: subject,
+                classtype: classtype
+              })
+              .limit(1)
+              .get();
+              
+            if (descResult.data && descResult.data.length > 0) {
+              course.description = descResult.data[0].description;
+              console.log('找到匹配的课程描述(subject+classtype)');
+            }
+          }
+          
+          // 步骤3: 如果没找到匹配，只用subject查询
+          console.log('使用subject查询课程描述, subject:', subject);
+          const generalResult = await db.collection('course_description')
+            .where({
+              subject: subject
+            })
+            .limit(1)
+            .get();
+            
+          if (generalResult.data && generalResult.data.length > 0) {
+            course.description = generalResult.data[0].description;
+            console.log('找到匹配的课程描述(仅subject)');
+          } else {
+            console.log('未找到任何匹配的课程描述');
+          }
+        } catch (e) {
+          console.error('查询通用课程描述失败:', e);
+        }
+      } else {
+        console.log('课程缺少subject字段，无法查询通用描述');
+      }
+    }
+    
     // 查询教师详情（如果课程中包含教师ID）
     if (course.teacherId) {
       try {

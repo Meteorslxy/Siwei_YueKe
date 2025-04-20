@@ -127,6 +127,9 @@ exports.default = void 0;
 //
 //
 //
+//
+//
+//
 var _default = {
   name: 'empty-tip',
   props: {
@@ -137,6 +140,18 @@ var _default = {
     show: {
       type: Boolean,
       default: true
+    }
+  },
+  data: function data() {
+    return {
+      emptyImageUrl: '/static/images/empty.png'
+    };
+  },
+  methods: {
+    handleImageError: function handleImageError() {
+      console.log('空数据图片加载失败，使用CDN图片');
+      // 使用CDN上的默认图片
+      this.emptyImageUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/empty.png';
     }
   }
 };

@@ -18,21 +18,21 @@
         <view class="section-title">我们的优势</view>
         <view class="section-content">
           <view class="feature-item">
-            <text class="feature-icon iconfont icon-teacher"></text>
+            <view class="feature-icon-box"></view>
             <view class="feature-info">
               <text class="feature-title">优秀师资</text>
               <text class="feature-desc">汇聚经验丰富的优秀教师，确保教学质量</text>
             </view>
           </view>
           <view class="feature-item">
-            <text class="feature-icon iconfont icon-course"></text>
+            <view class="feature-icon-box"></view>
             <view class="feature-info">
               <text class="feature-title">课程多样</text>
               <text class="feature-desc">提供丰富多样的课程内容，满足不同学习需求</text>
             </view>
           </view>
           <view class="feature-item">
-            <text class="feature-icon iconfont icon-security"></text>
+            <view class="feature-icon-box"></view>
             <view class="feature-info">
               <text class="feature-title">安全可靠</text>
               <text class="feature-desc">保障用户信息安全，提供稳定的服务体验</text>
@@ -146,11 +146,15 @@ export default {
 .feature-item {
   display: flex;
   margin-bottom: 30rpx;
+  align-items: center;
   
-  .feature-icon {
-    font-size: 48rpx;
-    color: $theme-color;
+  .feature-icon-box {
+    width: 32rpx;
+    height: 32rpx;
+    background-color: #FF6A3C; /* 橙色 */
     margin-right: 20rpx;
+    border-radius: 0;
+    flex-shrink: 0;
   }
   
   .feature-info {

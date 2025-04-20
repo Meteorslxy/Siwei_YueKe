@@ -266,6 +266,22 @@ var _default2 = {
 
       // 最后返回默认头像
       return '/static/images/default-avatar.png';
+    },
+    handleImageError: function handleImageError(e) {
+      // 处理课程封面图片加载错误
+      console.log('课程封面图片加载失败，使用默认图片');
+      // 使用base64默认图片或CDN上的默认图片
+      if (e.target) {
+        e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-course.jpg';
+      }
+    },
+    handleAvatarError: function handleAvatarError(e) {
+      // 处理教师头像加载错误
+      console.log('教师头像加载失败，使用默认头像');
+      // 使用base64默认头像或CDN上的默认头像
+      if (e.target) {
+        e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-avatar.jpg';
+      }
     }
   }
 };

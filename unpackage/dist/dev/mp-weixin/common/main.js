@@ -18,7 +18,7 @@ var _App = _interopRequireDefault(__webpack_require__(/*! ./App */ 39));
 var _init = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/init.js */ 45));
 __webpack_require__(/*! ./components/global.js */ 47);
 var _index2 = _interopRequireDefault(__webpack_require__(/*! ./api/index.js */ 90));
-var _cloudConfig = __webpack_require__(/*! ./utils/cloud-config.js */ 92);
+var _cloudConfig = __webpack_require__(/*! ./utils/cloud-config.js */ 93);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // @ts-ignore
@@ -933,6 +933,9 @@ exports.default = void 0;
 //
 //
 //
+//
+//
+//
 var _default = {
   name: 'empty-tip',
   props: {
@@ -943,6 +946,18 @@ var _default = {
     show: {
       type: Boolean,
       default: true
+    }
+  },
+  data: function data() {
+    return {
+      emptyImageUrl: '/static/images/empty.png'
+    };
+  },
+  methods: {
+    handleImageError: function handleImageError() {
+      console.log('空数据图片加载失败，使用CDN图片');
+      // 使用CDN上的默认图片
+      this.emptyImageUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/empty.png';
     }
   }
 };
@@ -1441,6 +1456,22 @@ var _default2 = {
 
       // 最后返回默认头像
       return '/static/images/default-avatar.png';
+    },
+    handleImageError: function handleImageError(e) {
+      // 处理课程封面图片加载错误
+      console.log('课程封面图片加载失败，使用默认图片');
+      // 使用base64默认图片或CDN上的默认图片
+      if (e.target) {
+        e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-course.jpg';
+      }
+    },
+    handleAvatarError: function handleAvatarError(e) {
+      // 处理教师头像加载错误
+      console.log('教师头像加载失败，使用默认头像');
+      // 使用base64默认头像或CDN上的默认头像
+      if (e.target) {
+        e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-avatar.jpg';
+      }
     }
   }
 };

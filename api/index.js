@@ -1,4 +1,5 @@
 import request from './request.js'
+import subjectApi from './modules/subject.js'
 
 // 基础请求URL
 const baseURL = ''
@@ -486,11 +487,13 @@ const fileApi = {
   }
 }
 
+// 导出API模块
 export default {
+  location: locationApi,
   course: courseApi,
   user: userApi,
   teacher: teacherApi,
   lecture: lectureApi,
-  file: fileApi,
-  location: locationApi
+  subject: subjectApi,
+  file: fileApi
 } 
