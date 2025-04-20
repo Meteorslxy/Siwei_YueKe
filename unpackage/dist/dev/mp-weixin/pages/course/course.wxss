@@ -151,27 +151,29 @@
   /* 选中项使用主题色 */
   font-weight: bold;
 }
-/* 学科选项卡 */
-.subject-scroll {
-  white-space: nowrap;
+/* 学科选项卡 - 修改为均匀分布 */
+.subject-tabs {
+  display: flex;
+  justify-content: space-between;
   padding: 0 20rpx;
   margin-top: 20rpx;
 }
-.subject-scroll .subject-item {
-  display: inline-block;
-  padding: 0 30rpx;
+.subject-tabs .subject-item {
+  flex: 1;
+  text-align: center;
+  padding: 0 10rpx;
   height: 70rpx;
   line-height: 70rpx;
   font-size: 28rpx;
   position: relative;
   color: rgba(255, 255, 255, 0.8);
 }
-.subject-scroll .subject-item.active {
+.subject-tabs .subject-item.active {
   color: #fff;
   font-weight: bold;
 }
-.subject-scroll .subject-item.active::after {
-  content: "";
+.subject-tabs .subject-item.active::after {
+  content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -296,3 +298,4 @@
 .course-list .course-item:first-child {
   margin-top: 10rpx;
 }
+

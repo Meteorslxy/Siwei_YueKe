@@ -307,6 +307,9 @@ export default {
           if (this.courseInfo.teacherId) {
             console.log('主动获取教师详情，teacherId:', this.courseInfo.teacherId);
             this.fetchTeacherDescription(this.courseInfo.teacherId);
+          } else if (this.courseInfo.teacherName) {
+            console.log('通过教师名称获取教师详情:', this.courseInfo.teacherName);
+            this.fetchTeacherByName(this.courseInfo.teacherName);
           }
           
           // 主动更新课程报名人数
@@ -645,6 +648,12 @@ export default {
             console.log('使用教师introduction作为描述:', teacherData.introduction);
           }
           
+          // 更新教师头像
+          if (teacherData.avatar) {
+            console.log('从教师详情API获取到头像:', teacherData.avatar);
+            this.courseInfo.teacherAvatarUrl = teacherData.avatar;
+          }
+          
           // 添加其他可能的描述字段
           if (!this.courseInfo.teacherDescription) {
             if (teacherData.desc) {
@@ -728,6 +737,12 @@ export default {
               // 如果都没有，尝试直接给定简介
               this.courseInfo.teacherDescription = '该教师暂无详细介绍';
             }
+            
+            // 更新教师头像
+            if (foundTeacher.avatar) {
+              console.log('从教师列表API获取到头像:', foundTeacher.avatar);
+              this.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
+            }
           } else {
             console.log('API返回的教师数据中没有找到精确匹配:', nameForSearch);
             this.courseInfo.teacherDescription = `${teacherName}，暂无详细介绍。`;
@@ -807,8 +822,10 @@ export default {
         // 准备查询参数，去除可能的空格
         const nameForSearch = teacherName.trim();
         
-        // 调用API获取教师信息
-        const result = await this.$api.teacher.getTeacherList({ name: nameForSearch });
+        // 调用API获取教师信息，使用names参数进行精确查询
+        const result = await this.$api.teacher.getTeacherList({ 
+          names: [nameForSearch] // 使用names数组参数进行精确查询
+        });
         
         if (result && result.code === 0 && result.data && result.data.length > 0) {
           // 查找精确匹配的教师

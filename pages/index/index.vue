@@ -2,7 +2,7 @@
   <view class="index-container">
     <!-- 顶部背景图片 -->
     <view class="header-background" :style="{ paddingTop: statusBarHeight + 'px' }">
-      <image class="bg-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/courseImages/middleSchool/初中部.png" mode="widthFix"></image>
+      <image class="bg-image" src="https://mp-d0c06b27-ec33-40fe-b28b-337811bd2f29.cdn.bspapp.com/courseImages/primarySchool/小学部.png" mode="widthFix"></image>
     </view>
     
     <!-- 功能导航菜单 -->

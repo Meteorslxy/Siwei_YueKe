@@ -93,7 +93,7 @@
   font-weight: bold;
 }
 .tab-bar .tab-item.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -10rpx;
   left: 50%;
@@ -209,7 +209,7 @@
   padding-left: 16rpx;
 }
 .booking-list .booking-item .booking-content .booking-main .booking-details .details-column .detail-row .detail-label::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 50%;
@@ -263,3 +263,4 @@
 .booking-list .booking-item .booking-footer .booking-actions .action-btn:active {
   opacity: 0.8;
 }
+

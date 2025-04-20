@@ -47,7 +47,7 @@
       </view>
 
       <!-- 学科选项卡 -->
-      <scroll-view class="subject-scroll" scroll-x show-scrollbar="false">
+      <view class="subject-tabs">
         <view 
           class="subject-item" 
           v-for="(subject, index) in subjectOptions" 
@@ -56,7 +56,7 @@
           @click="selectSubject(subject.value)">
           {{subject.label}}
         </view>
-      </scroll-view>
+      </view>
     </view>
     
     <!-- 课程列表 -->
@@ -100,9 +100,12 @@ export default {
       selectedGradeGroup: 'all',
       gradeGroups: [
         { label: '全部年级', value: 'all' },
-        { label: '初一', value: '初一' },
-        { label: '初二', value: '初二' },
-        { label: '初三', value: '初三' }
+        { label: '一年级', value: '一年级' },
+        { label: '二年级', value: '二年级' },
+        { label: '三年级', value: '三年级' },
+        { label: '四年级', value: '四年级' },
+        { label: '五年级', value: '五年级' },
+        { label: '六年级', value: '六年级' }
       ],
       
       // 校区筛选相关
@@ -118,9 +121,7 @@ export default {
         { label: '全部', value: 'all' },
         { label: '语文', value: '语文' },
         { label: '数学', value: '数学' },
-        { label: '英语', value: '英语' },
-        { label: '物理', value: '物理' },
-        { label: '化学', value: '化学' }
+        { label: '英语', value: '英语' }
       ],
       
       // 课程列表相关
@@ -402,9 +403,18 @@ export default {
         .map(course => course.teacherName)
         .filter((name, index, self) => self.indexOf(name) === index); // 去重
       
+      console.log('需要查询的教师名称:', teacherNames);
+      
+      if (teacherNames.length === 0) {
+        console.log('没有需要查询的教师名称，跳过API调用');
+        return courses;
+      }
+      
       try {
         // 批量查询教师信息
-        const teacherResult = await this.$api.teacher.getTeacherList();
+        const teacherResult = await this.$api.teacher.getTeacherList({
+          names: teacherNames // 传递教师名称数组进行筛选
+        });
         
         if (teacherResult && teacherResult.code === 0 && teacherResult.data) {
           const teachers = teacherResult.data;
@@ -415,6 +425,7 @@ export default {
           teachers.forEach(teacher => {
             if (teacher.name && teacher.avatar) {
               teacherAvatarMap[teacher.name] = teacher.avatar;
+              console.log(`找到教师 ${teacher.name} 的头像:`, teacher.avatar);
             }
           });
           
@@ -423,15 +434,19 @@ export default {
             if (course.teacherName && teacherAvatarMap[course.teacherName]) {
               course.teacherAvatarUrl = teacherAvatarMap[course.teacherName];
               console.log(`为课程 ${course.title} 设置教师头像:`, course.teacherAvatarUrl);
+            } else if (course.teacherName) {
+              console.log(`未找到教师 ${course.teacherName} 的头像`);
             }
             return course;
           });
+        } else {
+          console.log('API调用成功但未返回教师数据:', teacherResult);
+          return courses;
         }
       } catch (error) {
         console.error('获取教师头像信息失败:', error);
+        return courses;
       }
-      
-      return courses;
     },
     
     // 格式化课程时间
@@ -617,15 +632,17 @@ export default {
   }
 }
 
-/* 学科选项卡 */
-.subject-scroll {
-  white-space: nowrap;
+/* 学科选项卡 - 修改为均匀分布 */
+.subject-tabs {
+  display: flex;
+  justify-content: space-between;
   padding: 0 20rpx;
   margin-top: 20rpx;
   
   .subject-item {
-    display: inline-block;
-    padding: 0 30rpx;
+    flex: 1;
+    text-align: center;
+    padding: 0 10rpx;
     height: 70rpx;
     line-height: 70rpx;
     font-size: 28rpx;

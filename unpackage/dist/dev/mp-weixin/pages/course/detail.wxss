@@ -170,7 +170,7 @@
   align-items: center;
 }
 .detail-title::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 8rpx;
@@ -327,7 +327,7 @@
   overflow: hidden;
 }
 .footer .book-btn.booked::before {
-  content: "✓";
+  content: '✓';
   display: inline-block;
   margin-right: 10rpx;
   font-weight: bold;
@@ -343,3 +343,4 @@
   right: 30rpx;
   z-index: 9999;
 }
+
