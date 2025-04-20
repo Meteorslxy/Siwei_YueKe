@@ -1,47 +1,67 @@
 {
   "bsonType": "object",
-  "required": ["name", "value"],
+  "required": ["name", "code"],
   "permission": {
     "read": true,
-    "create": false,
-    "update": false,
-    "delete": false
+    "create": "auth.role == 'admin'",
+    "update": "auth.role == 'admin'",
+    "delete": "auth.role == 'admin'"
   },
   "properties": {
     "_id": {
       "description": "ID，系统自动生成"
     },
+    "code": {
+      "bsonType": "string",
+      "description": "科目编码，唯一标识",
+      "minLength": 1,
+      "maxLength": 20
+    },
     "name": {
       "bsonType": "string",
-      "description": "学科名称",
-      "maxLength": 50,
-      "title": "名称"
+      "description": "科目名称，如语文、数学、英语等",
+      "minLength": 1,
+      "maxLength": 50
     },
-    "value": {
+    "icon": {
       "bsonType": "string",
-      "description": "学科值（用于筛选）",
-      "maxLength": 50,
-      "title": "值"
+      "description": "科目图标路径"
     },
-    "order": {
+    "sort": {
       "bsonType": "int",
-      "description": "排序权重，数字越小越靠前",
-      "defaultValue": 100,
-      "title": "排序"
+      "description": "排序序号，用于前端展示排序",
+      "defaultValue": 9999
     },
-    "isActive": {
-      "bsonType": "bool",
-      "description": "是否启用",
-      "defaultValue": true,
-      "title": "是否启用"
+    "applicable_grades": {
+      "bsonType": "array",
+      "description": "适用年级范围",
+      "items": {
+        "bsonType": "string"
+      }
+    },
+    "description": {
+      "bsonType": "string",
+      "description": "科目描述",
+      "maxLength": 500
+    },
+    "status": {
+      "bsonType": "int",
+      "description": "状态：0-停用，1-启用",
+      "defaultValue": 1
     },
     "create_date": {
       "bsonType": "timestamp",
       "description": "创建时间",
-      "forceDefaultValue": {
+      "defaultValue": {
         "$env": "now"
-      },
-      "title": "创建时间"
+      }
+    },
+    "update_date": {
+      "bsonType": "timestamp",
+      "description": "最后更新时间",
+      "defaultValue": {
+        "$env": "now"
+      }
     }
   }
 } 

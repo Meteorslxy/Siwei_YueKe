@@ -41,7 +41,8 @@ exports.main = async (event, context) => {
       // 使用 OR 查询以适应不同的字段名
       condition.$or = [
         { educationalStages: educationalStages },
-        { gradeGroup: educationalStages }
+        { gradeGroup: educationalStages },
+        { grade: educationalStages }
       ];
       filterConditions.push(`教育阶段=${educationalStages}`);
     }

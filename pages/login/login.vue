@@ -1432,7 +1432,7 @@ export default {
                     }
     },
     
-    // 微信登录方法
+    // 微信登录方法 - 修改为先弹出真实姓名输入框
     async wxLogin() {
       console.log('开始微信登录流程');
       
@@ -1601,6 +1601,18 @@ export default {
         this.showLoginLoading = false;
         uni.hideLoading();
       }
+    },
+    
+    // 添加完成真实姓名输入的方法
+    cancelRealNameInput() {
+      this.showRealNameDialog = false;
+      this.realName = '';
+      this.tempLoginData = null;
+      
+      uni.showToast({
+        title: '已取消登录',
+        icon: 'none'
+      });
     },
     
     // 处理登录成功
@@ -2303,7 +2315,7 @@ export default {
     
     // 显示其他登录方式
     showLoginOptions() {
-      // 直接跳转到账号密码登录页面，不显示选项弹窗
+      // 直接跳转到手机号验证码登录页面
       // 设置全局变量，确保一定会隐藏logo
       try {
         getApp().globalData = getApp().globalData || {};
@@ -2312,14 +2324,23 @@ export default {
         console.error('设置全局变量失败', e);
       }
       
-      // 直接跳转到账号密码登录页面
+      // 直接跳转到手机号验证码登录页面
       uni.navigateTo({
-        url: '/uni_modules/uni-id-pages/pages/login/login-withpwd',
+        url: '/uni_modules/uni-id-pages/pages/login/login-withoutpwd',
         success: (res) => {
           console.log('跳转成功:', res);
         },
         fail: (err) => {
           console.error('跳转失败:', err);
+          // 如果发现路径不存在，检查其他可能的路径
+          uni.navigateTo({
+            url: '/uni_modules/uni-id-pages/pages/retrieve/retrieve-by-sms',
+            fail: (err2) => {
+              console.error('备用路径也跳转失败:', err2);
+              // 所有路径都失败，才显示选择弹窗
+              this.showLoginOptionsModal = true;
+            }
+          });
         }
       });
     },
@@ -2925,6 +2946,106 @@ export default {
         uni.hideLoading();
       }
     },
+    
+    // 添加完成手机号登录的方法 - 需要与原completeLoginWithRealName分开
+    async completePhoneLoginWithRealName() {
+      if (!this.realName.trim()) {
+        uni.showToast({
+          title: '请输入您的真实姓名',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 隐藏弹框
+      this.showRealNameDialog = false;
+      
+      // 显示加载提示
+      uni.showLoading({
+        title: '登录中...',
+        mask: true
+      });
+      
+      // 确保有临时登录数据
+      if (!this.tempLoginData || !this.tempLoginData.phone) {
+        uni.hideLoading();
+        uni.showToast({
+          title: '登录数据丢失，请重试',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      try {
+        // 添加真实姓名到登录参数
+        const loginParams = {
+          ...this.tempLoginData,
+          real_name: this.realName // 添加真实姓名
+        };
+        
+        console.log('调用login云函数处理手机号登录，带真实姓名:', loginParams);
+        
+        // 调用登录云函数
+        const loginResult = await uniCloud.callFunction({
+          name: 'login',
+          data: loginParams
+        });
+        
+        console.log('手机号登录结果:', loginResult);
+        
+        if (loginResult.result && loginResult.result.code === 0) {
+          // 登录成功，保存用户信息
+          this.saveUserInfo(loginResult.result);
+        } else {
+          // 登录失败，显示错误信息
+          console.error('手机号登录失败:', loginResult.result);
+          uni.showToast({
+            title: (loginResult.result && loginResult.result.message) || '登录失败，请重试',
+            icon: 'none'
+          });
+        }
+      } catch (error) {
+        console.error('手机号登录过程中出错:', error);
+        uni.showToast({
+          title: '登录失败，请重试',
+          icon: 'none'
+        });
+      } finally {
+        uni.hideLoading();
+      }
+    },
+    
+    // 添加确认真实姓名的统一处理方法
+    confirmRealNameInput() {
+      // 检查当前的登录类型，调用对应的完成方法
+      if (this.tempLoginData && this.tempLoginData.loginType) {
+        if (this.tempLoginData.loginType === 'wechat') {
+          // 微信登录
+          this.cancelRealNameInput();
+          uni.showToast({
+            title: '未知登录类型',
+            icon: 'none'
+          });
+        } else if (this.tempLoginData.loginType === 'phone') {
+          // 手机号登录
+          this.completePhoneLoginWithRealName();
+        } else {
+          // 其他未知登录类型，默认关闭弹框
+          this.cancelRealNameInput();
+          uni.showToast({
+            title: '未知登录类型',
+            icon: 'none'
+          });
+        }
+      } else {
+        // 没有临时登录数据，直接关闭弹框
+        this.cancelRealNameInput();
+        uni.showToast({
+          title: '登录数据丢失，请重试',
+          icon: 'none'
+        });
+      }
+    }
   }
 }
 </script>
@@ -3338,5 +3459,85 @@ export default {
   color: #fff;
   font-size: 30rpx;
   border-radius: 8rpx;
+}
+
+/* 真实姓名输入弹框样式 */
+.real-name-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .modal-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-content {
+    background-color: #fff;
+    padding: 30rpx;
+    border-radius: 12rpx;
+    width: 80%;
+    position: relative;
+
+    .modal-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      margin-bottom: 20rpx;
+    }
+
+    .modal-body {
+      margin-bottom: 30rpx;
+
+      .name-input {
+        width: 100%;
+        height: 80rpx;
+        border: 1px solid #ddd;
+        border-radius: 40rpx;
+        padding: 0 20rpx;
+        font-size: 28rpx;
+      }
+
+      .input-tip {
+        font-size: 24rpx;
+        color: #666;
+        margin-top: 10rpx;
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+
+      .cancel-btn, .confirm-btn {
+        flex: 1;
+        height: 80rpx;
+        line-height: 80rpx;
+        border-radius: 40rpx;
+        font-size: 30rpx;
+        margin: 0 10rpx;
+      }
+
+      .cancel-btn {
+        background-color: #f5f5f5;
+        color: #666;
+      }
+
+      .confirm-btn {
+        background-color: #47c76d;
+        color: #fff;
+      }
+    }
+  }
 }
 </style> 

@@ -420,6 +420,10 @@ export default {
         // 使用弹出框编辑昵称和个人简介
         this.isLoading = false;
         this.showEditPopup(field, title);
+      } else if (field === 'username') {
+        // 使用弹出框编辑用户名
+        this.isLoading = false;
+        this.showEditPopup(field, title);
       } else {
         // 其他字段仍然使用页面跳转
         this.isLoading = false;

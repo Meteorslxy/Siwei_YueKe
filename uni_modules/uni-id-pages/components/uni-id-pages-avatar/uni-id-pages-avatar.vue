@@ -1,5 +1,5 @@
 <template>
-	<button open-type="chooseAvatar" @chooseavatar="bindchooseavatar" @click="uploadAvatarImg" class="box" :class="{'showBorder':border}"  :style="{width,height,lineHeight:height}">
+	<button open-type="chooseAvatar" @chooseavatar="bindchooseavatar" @click="navigateToProfile" class="box" :class="{'showBorder':border}"  :style="{width,height,lineHeight:height}">
 		<cloud-image v-if="avatar_file" :src="avatar_file.url" :width="width" :height="height"></cloud-image>
 		<uni-icons v-else :style="{width,height,lineHeight:height}" class="chooseAvatar" type="plusempty" size="30"
 			color="#dddddd"></uni-icons>
@@ -113,6 +113,26 @@
 				console.log('avatar_file',avatar_file);
 				this.setAvatarFile(avatar_file)
 			},
+			// 新方法：点击头像时导航到个人资料页面
+			navigateToProfile() {
+				// #ifdef MP-WEIXIN
+				return false // 微信小程序走 bindchooseavatar方法
+				// #endif
+				
+				// #ifndef MP-WEIXIN
+				if(!this.hasLogin){
+					return uni.navigateTo({
+						url:'/uni_modules/uni-id-pages/pages/login/login-withoutpwd'
+					})
+				}
+				
+				// 导航到个人资料页面
+				uni.navigateTo({
+					url: '/pages/user/profile/index'
+				})
+				// #endif
+			},
+			// 保留原方法，但不再通过点击头像调用
 			uploadAvatarImg(res) {
 				// #ifdef MP-WEIXIN
 				return false // 微信小程序走 bindchooseavatar方法
@@ -124,15 +144,12 @@
 						url:'/uni_modules/uni-id-pages/pages/login/login-withoutpwd'
 					})
 				}
-				const crop = {
-					quality: 100,
-					width: 600,
-					height: 600,
-					resize: true
-				};
+				
+				// 直接选择并上传图片，不再跳转到裁剪页面
 				uni.chooseImage({
 					count: 1,
-					crop,
+					sizeType: ['compressed'], // 使用压缩图片
+					sourceType: ['album', 'camera'], // 允许从相册和相机选择
 					success: async (res) => {
 						let tempFile = res.tempFiles[0],
 							avatar_file = {
@@ -145,43 +162,51 @@
 							},
 							filePath = res.tempFilePaths[0]
 							
-						//非app端剪裁头像，app端用内置的原生裁剪
-						// #ifdef H5
-						if (!this.isPC) {
-							filePath = await new Promise((callback) => {
-								uni.navigateTo({
-									url: '/uni_modules/uni-id-pages/pages/userinfo/cropImage/cropImage?path=' +
-										filePath + `&options=${JSON.stringify(crop)}`,
-									animationType: "fade-in",
-									events: {
-										success: url => {
-											callback(url)
-										}
-									},
-									complete(e) {
-										console.log(e);
-									}
-								});
-							})
-						}
-						// #endif
-						
+						// 不再进行裁剪，直接上传图片
 						let cloudPath = this.userInfo._id + '' + Date.now()
 						avatar_file.name = cloudPath
+						
 						uni.showLoading({
 							title: "更新中",
 							mask: true
 						});
-						let {
-							fileID
-						} = await uniCloud.uploadFile({
-							filePath,
-							cloudPath,
-							fileType: "image"
+						
+						try {
+							let {
+								fileID
+							} = await uniCloud.uploadFile({
+								filePath,
+								cloudPath,
+								fileType: "image"
+							});
+							
+							avatar_file.url = fileID
+							this.setAvatarFile(avatar_file)
+							
+							uni.hideLoading()
+							uni.showToast({
+								title: '头像更新成功',
+								icon: 'success'
+							});
+						} catch(err) {
+							console.error('上传头像失败:', err);
+							uni.hideLoading();
+							uni.showToast({
+								title: '上传失败，请重试',
+								icon: 'none'
+							});
+						}
+					},
+					fail: (err) => {
+						if(err.errMsg.indexOf('cancel') !== -1) {
+							console.log('用户取消选择图片');
+							return;
+						}
+						console.error('选择图片失败:', err);
+						uni.showToast({
+							title: '选择图片失败',
+							icon: 'none'
 						});
-						avatar_file.url = fileID
-						uni.hideLoading()
-						this.setAvatarFile(avatar_file)
 					}
 				})
 				// #endif

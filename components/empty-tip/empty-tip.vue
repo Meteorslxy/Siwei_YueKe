@@ -1,6 +1,9 @@
 <template>
   <view class="empty-container" v-if="show">
-    <image class="empty-image" src="/static/images/empty.png" mode="aspectFit"></image>
+    <image class="empty-image" 
+           :src="emptyImageUrl" 
+           mode="aspectFit"
+           @error="handleImageError"></image>
     <text class="empty-text">{{tip}}</text>
   </view>
 </template>
@@ -16,6 +19,18 @@ export default {
     show: {
       type: Boolean,
       default: true
+    }
+  },
+  data() {
+    return {
+      emptyImageUrl: '/static/images/empty.png'
+    }
+  },
+  methods: {
+    handleImageError() {
+      console.log('空数据图片加载失败，使用CDN图片');
+      // 使用CDN上的默认图片
+      this.emptyImageUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/empty.png';
     }
   }
 }

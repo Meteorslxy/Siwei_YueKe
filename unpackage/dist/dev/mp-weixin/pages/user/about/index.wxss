@@ -114,11 +114,16 @@
 .feature-item {
   display: flex;
   margin-bottom: 30rpx;
+  align-items: center;
 }
-.feature-item .feature-icon {
-  font-size: 48rpx;
-  color: var(--theme-color);
+.feature-item .feature-icon-box {
+  width: 32rpx;
+  height: 32rpx;
+  background-color: #FF6A3C;
+  /* 橙色 */
   margin-right: 20rpx;
+  border-radius: 0;
+  flex-shrink: 0;
 }
 .feature-item .feature-info {
   flex: 1;

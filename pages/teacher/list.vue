@@ -1,7 +1,7 @@
 <template>
   <view class="teacher-list">
     <!-- 筛选栏 -->
-    <view class="filter-bar">
+    <view class="filter-bar" v-if="false">
       <!-- 年级选择 -->
       <view class="filter-dropdown">
         <view class="selected-filter" @click="toggleGradeOptions">
@@ -44,13 +44,13 @@
       <scroll-view scroll-x class="scroll-view">
         <view class="tabs-container">
           <view 
-            v-for="(tab, index) in filterOptions.subjectOptions.options" 
+            v-for="(tab, index) in subjectList" 
             :key="index" 
             class="tab-item" 
-            :class="{ active: currentSubject === tab.value }"
-            @click="filterBySubject(tab.value)"
+            :class="{ active: currentSubject === tab._id }"
+            @click="filterBySubject(tab._id)"
           >
-            {{tab.label}}
+            {{tab.name}}
           </view>
         </view>
       </scroll-view>
@@ -87,15 +87,16 @@ export default {
       schoolFilter: '',
       showSchoolFilter: false,
       teacherList: [],
+      subjectList: [], // 从云数据库获取的学科列表
       page: 1,
-      pageSize: 999,  // 大幅提高每页数量，确保能一次获取到所有老师
+      pageSize: 999,
       loading: false,
       loadMoreStatus: 'more',
       hasMore: true,
-      allTeacherList: [], // 存储所有老师数据
-      displayedTeachers: [], // 当前显示的老师数据
-      displayCount: 10, // 初始显示数量
-      isReachBottom: false // 是否触底标记
+      allTeacherList: [],
+      displayedTeachers: [],
+      displayCount: 10,
+      isReachBottom: false
     }
   },
   computed: {
@@ -114,25 +115,39 @@ export default {
   onLoad(options) {
     console.log('教师列表页面加载，参数:', options);
     
-    // 如果有科目参数，设置当前科目
-    if (options.subject) {
-      this.currentSubject = options.subject;
-      console.log('设置初始学科:', this.currentSubject);
-    }
+    // 保存页面传入的参数
+    const initialOptions = {...options};
     
-    // 如果有年级参数，设置当前年级
-    if (options.grade) {
-      this.currentGrade = options.grade;
-      console.log('设置初始年级:', this.currentGrade);
-    }
-    
-    // 如果有校区参数，设置当前校区
-    if (options.school) {
-      this.schoolFilter = options.school;
-      console.log('设置初始校区:', this.schoolFilter);
-    }
-    
-    this.getTeacherList();
+    // 获取学科列表
+    this.getSubjectList().then(() => {
+      // 如果有科目参数，设置当前科目
+      if (initialOptions.subject) {
+        // 检查传入的subject是否存在于获取的学科列表中
+        const foundSubject = this.subjectList.find(s => s._id === initialOptions.subject);
+        if (foundSubject) {
+          this.currentSubject = initialOptions.subject;
+        } else {
+          console.log('未找到匹配的学科，使用默认值');
+          this.currentSubject = 'all';
+        }
+        console.log('设置初始学科:', this.currentSubject);
+      }
+      
+      // 如果有年级参数，设置当前年级
+      if (initialOptions.grade) {
+        this.currentGrade = initialOptions.grade;
+        console.log('设置初始年级:', this.currentGrade);
+      }
+      
+      // 如果有校区参数，设置当前校区
+      if (initialOptions.school) {
+        this.schoolFilter = initialOptions.school;
+        console.log('设置初始校区:', this.schoolFilter);
+      }
+      
+      // 获取教师列表
+      this.getTeacherList();
+    });
   },
   onPullDownRefresh() {
     this.refreshList();
@@ -181,6 +196,57 @@ export default {
       this.refreshList();
     },
     
+    // 获取学科列表
+    getSubjectList() {
+      // 显示加载中提示
+      uni.showLoading({ title: '加载中' });
+      
+      // 返回Promise
+      return new Promise((resolve) => {
+        // 调用API获取学科列表
+        this.$api.subject.getSubjectList()
+          .then(res => {
+            console.log('获取学科列表结果:', res);
+            
+            if (res && res.code === 0 && res.data && res.data.length > 0) {
+              // 添加"全部"选项，确保_id和name字段与数据库一致
+              this.subjectList = [
+                { _id: 'all', name: '全部' },
+                ...res.data
+              ];
+            } else {
+              // 如果获取失败，使用静态数据作为备选
+              console.log('获取学科列表失败，使用默认数据');
+              this.subjectList = [
+                { _id: 'all', name: '全部' },
+                { _id: '语文', name: '语文' },
+                { _id: '数学', name: '数学' },
+                { _id: '英语', name: '英语' },
+                { _id: '物理', name: '物理' },
+                { _id: '化学', name: '化学' }
+              ];
+            }
+            resolve(); // 解析Promise
+          })
+          .catch(err => {
+            console.error('获取学科列表失败:', err);
+            // 使用静态数据作为备选
+            this.subjectList = [
+              { _id: 'all', name: '全部' },
+              { _id: '语文', name: '语文' },
+              { _id: '数学', name: '数学' },
+              { _id: '英语', name: '英语' },
+              { _id: '物理', name: '物理' },
+              { _id: '化学', name: '化学' }
+            ];
+            resolve(); // 即使出错也解析Promise
+          })
+          .finally(() => {
+            uni.hideLoading();
+          });
+      });
+    },
+    
     // 按科目筛选
     filterBySubject(subjectValue) {
       if (this.currentSubject === subjectValue) return;
@@ -206,8 +272,12 @@ export default {
         params.keyword = this.keyword;
       }
       
-      if (filterUtils.isValidFilterValue(this.currentSubject)) {
-        params.subject = this.currentSubject;
+      if (this.currentSubject && this.currentSubject !== 'all') {
+        // 查找对应学科的名称
+        const subject = this.subjectList.find(item => item._id === this.currentSubject);
+        if (subject) {
+          params.subject = subject.name; // 使用科目的name字段作为筛选参数
+        }
       }
       
       if (filterUtils.isValidFilterValue(this.currentGrade)) {
@@ -408,7 +478,8 @@ export default {
   }
   
   .subject-tabs {
-    padding: 10rpx 0 120rpx;
+    padding: 30rpx 0 120rpx;
+    margin-top: 20rpx;
     
     .scroll-view {
       width: 100%;
@@ -448,7 +519,7 @@ export default {
   .content-area {
     flex: 1;
     padding: 20rpx;
-    padding-top: 90rpx;
+    padding-top: 70rpx;
     background-color: $bg-color;
   }
 }

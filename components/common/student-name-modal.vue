@@ -140,19 +140,6 @@ export default {
         // 触发用户信息更新事件
         uni.$emit('user:updated', storedUserInfo)
         
-        // 刷新当前页面，确保显示最新昵称
-        const currentPages = getCurrentPages()
-        const currentPage = currentPages[currentPages.length - 1]
-        if (currentPage && currentPage.$vm) {
-          if (typeof currentPage.$vm.loadUserInfo === 'function') {
-            currentPage.$vm.loadUserInfo()
-          } else if (typeof currentPage.$vm.reload === 'function') {
-            currentPage.$vm.reload()
-          } else if (typeof currentPage.$vm.onShow === 'function') {
-            currentPage.$vm.onShow()
-          }
-        }
-        
         uni.showToast({
           title: success ? '保存成功' : '本地保存成功',
           icon: 'success'

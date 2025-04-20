@@ -98,13 +98,15 @@ export default {
             
             console.log('选择的图片路径:', this.tempFilePath);
             
-            // 保存临时路径，以防裁剪页面返回时丢失
+            // 保存临时路径
             uni.setStorageSync('temp_avatar_path', this.tempFilePath);
             
-            // 如果是头像，需要裁剪
-            if (this.type === 'avatar') {
-              this.cropImage();
-            }
+            // 显示提示，引导用户点击保存按钮
+            uni.showToast({
+              title: '请点击保存按钮上传',
+              icon: 'none',
+              duration: 2000
+            });
           }
         },
         fail: (err) => {
@@ -208,12 +210,12 @@ export default {
             icon: 'success'
           });
           
-          // 延迟返回
+          // 延迟操作
           setTimeout(() => {
             // 返回前清除临时数据
             uni.removeStorageSync('temp_avatar_path');
             
-            // 设置上传成功的结果
+            // 设置上传成功的结果，为了通知上一页更新头像
             const pages = getCurrentPages();
             const prevPage = pages[pages.length - 2];
             if (prevPage && prevPage.$vm) {
@@ -233,8 +235,21 @@ export default {
               }
             }
             
-            uni.navigateBack();
-          }, 1000); // 减少延迟时间
+            // 跳转到"我的"页面，而不是返回上一页
+            uni.switchTab({
+              url: '/pages/user/user',
+              success: () => {
+                console.log('跳转到"我的"页面成功');
+              },
+              fail: (err) => {
+                console.error('跳转到"我的"页面失败:', err);
+                // 失败时尝试普通导航
+                uni.navigateTo({
+                  url: '/pages/user/user'
+                });
+              }
+            });
+          }, 1000); // 保持1秒延迟
         })
         .catch(error => {
           console.error('保存图片失败:', error);
