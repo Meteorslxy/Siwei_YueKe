@@ -82,6 +82,9 @@ exports.main = async (event, context) => {
     
     // 获取关联的课程信息
     let courseTime = '';
+    let isCourseDeleted = false;
+    let courseDeletedNote = '';
+    
     if (booking.courseId) {
       try {
         console.log('查询关联课程详情:', booking.courseId);
@@ -110,9 +113,59 @@ exports.main = async (event, context) => {
           } else if (courseResult.data.time) {
             courseTime = courseResult.data.time;
           }
+        } else {
+          console.log(`课程(${booking.courseId})不存在，标记为已删除`);
+          isCourseDeleted = true;
+          courseDeletedNote = '课程已删除';
+          
+          // 更新预约状态为已取消
+          if (booking.status !== 'cancelled') {
+            try {
+              await db.collection('bookings').doc(bookingId).update({
+                status: 'cancelled',
+                paymentStatus: 'cancelled',
+                isCourseDeleted: true,
+                courseDeletedNote: '课程已删除',
+                updateTime: new Date()
+              });
+              
+              booking.status = 'cancelled';
+              booking.paymentStatus = 'cancelled';
+              
+              console.log(`已更新预约(${bookingId})状态为已取消`);
+            } catch (updateErr) {
+              console.error(`更新预约(${bookingId})状态失败:`, updateErr);
+            }
+          }
         }
       } catch (courseErr) {
         console.error('获取课程信息失败:', courseErr);
+        // 如果是因为课程不存在导致的错误
+        if (courseErr.message && courseErr.message.includes('not exist')) {
+          console.log(`课程(${booking.courseId})不存在，标记为已删除`);
+          isCourseDeleted = true;
+          courseDeletedNote = '课程已删除';
+          
+          // 更新预约状态为已取消
+          if (booking.status !== 'cancelled') {
+            try {
+              await db.collection('bookings').doc(bookingId).update({
+                status: 'cancelled',
+                paymentStatus: 'cancelled',
+                isCourseDeleted: true,
+                courseDeletedNote: '课程已删除',
+                updateTime: new Date()
+              });
+              
+              booking.status = 'cancelled';
+              booking.paymentStatus = 'cancelled';
+              
+              console.log(`已更新预约(${bookingId})状态为已取消`);
+            } catch (updateErr) {
+              console.error(`更新预约(${bookingId})状态失败:`, updateErr);
+            }
+          }
+        }
         // 继续执行，不影响预约详情返回
       }
     }
@@ -144,7 +197,10 @@ exports.main = async (event, context) => {
       createTime: booking.createTime || '',
       confirmTime: booking.confirmTime || '',
       cancelTime: booking.cancelTime || '',
-      finishTime: booking.finishTime || ''
+      finishTime: booking.finishTime || '',
+      // 添加课程删除标记
+      isCourseDeleted: booking.isCourseDeleted || isCourseDeleted,
+      courseDeletedNote: booking.courseDeletedNote || courseDeletedNote
     };
     
     return {

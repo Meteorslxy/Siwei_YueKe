@@ -8,6 +8,9 @@
       <view class="status-info">
         <view class="status-text">{{statusText}}</view>
         <view class="status-desc">{{statusDesc}}</view>
+        <view class="status-desc course-deleted" v-if="bookingDetail.isCourseDeleted">
+          {{ bookingDetail.courseDeletedNote || '课程已删除' }}
+        </view>
       </view>
     </view>
     
@@ -15,6 +18,7 @@
     <view class="info-card">
       <view class="card-title">课程信息</view>
       <view class="course-title">{{bookingDetail.courseTitle}}</view>
+      <view class="course-deleted-tag" v-if="bookingDetail.isCourseDeleted">课程已删除</view>
       <view class="info-row">
         <text class="info-label">预约编号：</text>
         <text class="info-value">{{bookingDetail.bookingId}}</text>
@@ -97,7 +101,9 @@ export default {
         remark: '',
         status: 'pending',
         paymentStatus: '',
-        createTime: ''
+        createTime: '',
+        isCourseDeleted: false,
+        courseDeletedNote: ''
       }
     }
   },
@@ -574,6 +580,17 @@ export default {
     margin-bottom: 20rpx;
   }
   
+  .course-deleted-tag {
+    display: inline-block;
+    background-color: #ff4d4f;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+  
   .info-row {
     display: flex;
     margin-bottom: 16rpx;
@@ -631,5 +648,11 @@ export default {
       }
     }
   }
+}
+
+.course-deleted {
+  color: #ff4d4f;
+  font-weight: bold;
+  margin-top: 5px;
 }
 </style> 

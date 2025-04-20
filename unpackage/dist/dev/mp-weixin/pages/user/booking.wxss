@@ -263,4 +263,13 @@
 .booking-list .booking-item .booking-footer .booking-actions .action-btn:active {
   opacity: 0.8;
 }
+.course-deleted-tag {
+  display: inline-block;
+  background-color: #ff4d4f;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  margin-top: 5px;
+}
 

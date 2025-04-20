@@ -27,6 +27,7 @@
             <view class="course-info">
               <view class="course-title">{{item.courseTitle}}</view>
               <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item)}}</view>
+              <view class="course-deleted-tag" v-if="item.isCourseDeleted">课程已删除</view>
             </view>
             
             <view class="booking-details">
@@ -1729,5 +1730,15 @@ export default {
       }
     }
   }
+}
+
+.course-deleted-tag {
+  display: inline-block;
+  background-color: #ff4d4f;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  margin-top: 5px;
 }
 </style> 

@@ -407,6 +407,9 @@ export default {
             uniIdPagesStore.userInfo = userInfo;
             uniIdPagesStore.hasLogin = true;
           }
+          
+          // 立即从服务器获取最新的用户信息（包括nickname）
+          this.fetchCompleteUserInfo(userInfo._id || userInfo.uid);
         } else {
           console.log('本地存储中没有有效的用户信息');
           
@@ -425,6 +428,9 @@ export default {
             // 同步到本地存储
             uni.setStorageSync('userInfo', uniIdPagesStore.userInfo);
             uni.setStorageSync('uni-id-pages-userInfo', uniIdPagesStore.userInfo);
+            
+            // 从服务器获取最新的用户信息（包括nickname）
+            this.fetchCompleteUserInfo(uniIdPagesStore.userInfo._id || uniIdPagesStore.userInfo.uid);
           } else {
             // 都没有，则清空用户信息
             this.userInfo = {};
@@ -486,7 +492,7 @@ export default {
         });
       }
       
-      // 直接使用nickname字段，uni-id中的昵称字段是nickname
+      // 优先使用nickname字段，uni-id中的昵称字段是nickname
       if (formattedInfo.nickname) {
         formattedInfo.nickName = formattedInfo.nickname;
         if (this.verboseLogging) console.log('使用nickname字段:', formattedInfo.nickname);
@@ -496,7 +502,7 @@ export default {
         formattedInfo.nickName = formattedInfo.username;
         if (this.verboseLogging) console.log('使用username字段:', formattedInfo.username);
       }
-      // 如果都没有，生成默认用户名
+      // 仅当nickname和username都不存在时才使用自动生成的默认用户名
       else {
         // 如果有手机号，使用手机号生成昵称
         if (formattedInfo.phoneNumber || formattedInfo.mobile) {
@@ -597,7 +603,7 @@ export default {
     updateUserInfoWithDBData(dbUserInfo) {
       if (!dbUserInfo || !dbUserInfo._id) return;
       
-      console.log('使用数据库信息更新用户信息');
+      console.log('使用数据库信息更新用户信息', dbUserInfo);
       
       // 从存储获取当前用户信息
       let currentUserInfo;
@@ -607,6 +613,15 @@ export default {
       } catch (e) {
         console.error('解析用户信息失败:', e);
         currentUserInfo = {};
+      }
+      
+      // 记录是否有重大变化需要刷新UI
+      let needRefreshUI = false;
+      
+      // 检查昵称是否有变化
+      if (dbUserInfo.nickname && dbUserInfo.nickname !== currentUserInfo.nickname) {
+        console.log('检测到昵称变化，旧值:', currentUserInfo.nickname, '新值:', dbUserInfo.nickname);
+        needRefreshUI = true;
       }
       
       // 合并数据库信息和当前信息
@@ -648,6 +663,12 @@ export default {
       // 更新组件数据
       this.userInfo = mergedInfo;
       this.hasUserInfo = true;
+      
+      // 如果检测到重大变化，强制刷新UI
+      if (needRefreshUI) {
+        this.$forceUpdate();
+        console.log('用户信息有重大变化，已强制刷新UI');
+      }
       
       // 触发更新事件
       uni.$emit('user:updated', mergedInfo);
@@ -1063,12 +1084,21 @@ export default {
 
     // 获取用户显示名称
     getUserDisplayName() {
-      if (this.userInfo.nickName) {
-        return this.userInfo.nickName;
-      } else if (this.userInfo.nickname) {
+      // 始终优先使用nickname字段，这是uni-id中存储的真实昵称
+      if (this.userInfo.nickname) {
         return this.userInfo.nickname;
-      } else {
-        return '未知用户';
+      } 
+      // 其次使用nickName字段
+      else if (this.userInfo.nickName && !this.userInfo.nickName.startsWith('用户')) {
+        return this.userInfo.nickName;
+      } 
+      // 再次尝试使用username
+      else if (this.userInfo.username) {
+        return this.userInfo.username;
+      } 
+      // 最后才使用默认用户名
+      else {
+        return this.userInfo.userId ? '用户' + this.userInfo.userId.substr(-6) : '未知用户';
       }
     },
 
