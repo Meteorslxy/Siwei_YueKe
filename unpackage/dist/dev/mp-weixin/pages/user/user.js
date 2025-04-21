@@ -161,7 +161,7 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var StudentNameModal = function StudentNameModal() {
   __webpack_require__.e(/*! require.ensure | components/common/student-name-modal */ "components/common/student-name-modal").then((function () {
-    return resolve(__webpack_require__(/*! @/components/common/student-name-modal.vue */ 397));
+    return resolve(__webpack_require__(/*! @/components/common/student-name-modal.vue */ 396));
   }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
 };
 var _default = {
@@ -1125,11 +1125,23 @@ var _default = {
         content: '确定要退出登录吗？',
         success: function success(res) {
           if (res.confirm) {
-            // 清除登录信息 - 同时清除两种方式的登录信息
-            uni.removeStorageSync('userInfo');
-            uni.removeStorageSync('uni-id-pages-userInfo');
-            uni.removeStorageSync('uni_id_token');
-            uni.removeStorageSync('uni_id_token_expired');
+            // 先调用uni-id-pages的退出登录方法
+            try {
+              // 引入和使用uni-id-pages的mutations
+              var _require = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store */ 116),
+                mutations = _require.mutations;
+              mutations.logout();
+              console.log('调用uni-id-pages登出方法成功');
+            } catch (e) {
+              console.error('调用uni-id-pages登出方法失败:', e);
+
+              // 即使上面的方法失败，也要确保清除所有相关的本地缓存
+              // 清除登录信息 - 同时清除两种方式的登录信息
+              uni.removeStorageSync('userInfo');
+              uni.removeStorageSync('uni-id-pages-userInfo');
+              uni.removeStorageSync('uni_id_token');
+              uni.removeStorageSync('uni_id_token_expired');
+            }
 
             // 重置状态
             _this8.userInfo = {};

@@ -56,8 +56,6 @@
       v-model="formData.captcha"
       @confirm="bindPhone"
     />
-    
-    <view class="test-mode-indicator" v-if="isDevMode">测试模式已开启</view>
   </view>
 </template>
 
@@ -73,13 +71,17 @@ export default {
         code: '',
         captcha: ''
       },
-      isDevMode: false,
+      countdown: 0,
       isSending: false,
-      countdown: 60,
       sendCodeText: '获取验证码',
-      timer: null,
       mobileError: false,
-      mobileErrorText: ''
+      mobileErrorText: '',
+      rules: {
+        // ... existing code ...
+      },
+      fieldErrorMsg: {
+        // ... existing code ...
+      }
     }
   },
   computed: {
@@ -90,12 +92,6 @@ export default {
   onLoad() {
     // 检查是否已经绑定手机号
     this.checkPhoneBind();
-    
-    // 测试模式下自动设置验证码
-    if (this.isDevMode) {
-      this.formData.code = '123456';
-      console.log('测试模式已激活，验证码设置为:', this.formData.code);
-    }
   },
   methods: {
     // 监听手机号输入变化
@@ -348,41 +344,6 @@ export default {
         mask: true
       });
       
-      // 测试模式下直接模拟成功
-      if (this.isDevMode && this.formData.code === '123456') {
-        setTimeout(() => {
-          uni.hideLoading();
-          
-          // 模拟成功响应
-          const mockUserInfo = {
-            ...store.userInfo,
-            mobile: this.formData.mobile,
-            mobile_confirmed: 1 // 确保设置mobile_confirmed字段
-          };
-          
-          // 更新用户信息到存储
-          uni.setStorageSync('uni-id-pages-userInfo', mockUserInfo);
-          uni.setStorageSync('userInfo', mockUserInfo);
-          
-          // 更新全局状态
-          mutations.updateUserInfo();
-          
-          // 调用API来确保手机号和mobile_confirmed字段被更新到数据库
-          this.updateUserInDatabase(this.formData.mobile);
-          
-          uni.showToast({
-            title: '测试模式：绑定成功',
-            icon: 'success'
-          });
-          
-          // 返回上一页
-          setTimeout(() => {
-            uni.navigateBack();
-          }, 1500);
-        }, 1000);
-        return;
-      }
-      
       // 正常模式下使用云对象绑定
       const uniIdCo = uniCloud.importObject("uni-id-co");
       uniIdCo.bindMobileBySms({
@@ -415,35 +376,6 @@ export default {
         // 检查验证码错误
         if (err.errCode === 'uni-id-captcha-required') {
           this.$refs.captcha.open();
-        } else if (this.isDevMode) {
-          // 测试模式下，无论出现什么错误都模拟成功
-          setTimeout(() => {
-            const mockUserInfo = {
-              ...store.userInfo,
-              mobile: this.formData.mobile,
-              mobile_confirmed: 1 // 确保设置mobile_confirmed字段
-            };
-            
-            // 更新用户信息到存储
-            uni.setStorageSync('uni-id-pages-userInfo', mockUserInfo);
-            uni.setStorageSync('userInfo', mockUserInfo);
-            
-            // 更新全局状态
-            mutations.updateUserInfo();
-            
-            // 调用API来确保手机号和mobile_confirmed字段被更新到数据库
-            this.updateUserInDatabase(this.formData.mobile);
-            
-            uni.showToast({
-              title: '测试模式：绑定成功',
-              icon: 'success'
-            });
-            
-            // 返回上一页
-            setTimeout(() => {
-              uni.navigateBack();
-            }, 1500);
-          }, 500);
         } else {
           uni.showToast({
             title: err.errMsg || '绑定失败，请稍后重试',
@@ -529,22 +461,7 @@ export default {
         title: '发送中...'
       });
       
-      if (this.isDevMode) {
-        // 测试模式直接设置验证码
-        setTimeout(() => {
-          this.formData.code = '123456';
-          uni.hideLoading();
-          uni.showToast({
-            title: '测试模式：验证码为123456',
-            icon: 'none'
-          });
-          this.startCountdown();
-        }, 1000);
-        return;
-      }
-      
-      // 调用云函数发送验证码
-      const uniIdCo = uniCloud.importObject("uni-id-co", { customUI: true });
+      const uniIdCo = uniCloud.importObject("uni-id-co");
       uniIdCo.sendSmsCode({
         mobile: this.formData.mobile,
         scene: "bind-mobile-by-sms",

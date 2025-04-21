@@ -44,20 +44,20 @@
         </view>
         <view class="menu-content">
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=all')">
-            <image class="item-icon-img" src="/static/images/my/all.png" mode="aspectFit" @error="handleImageError"></image>
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/all.png" mode="aspectFit" @error="handleImageError"></image>
             <text class="item-text">全部</text>
           </view>
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=usable')">
-            <image class="item-icon-img" src="/static/images/my/use.png" mode="aspectFit" @error="handleImageError"></image>
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/use.png" mode="aspectFit" @error="handleImageError"></image>
             <text class="item-text">可使用</text>
             <text v-if="bookingCounts.usable > 0" class="item-badge">{{bookingCounts.usable}}</text>
           </view>
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=expired')">
-            <image class="item-icon-img" src="/static/images/my/out.png" mode="aspectFit" @error="handleImageError"></image>
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/out.png" mode="aspectFit" @error="handleImageError"></image>
             <text class="item-text">已过期</text>
           </view>
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=canceled')">
-            <image class="item-icon-img" src="/static/images/my/cancal.png" mode="aspectFit" @error="handleImageError"></image>
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/cancal.png" mode="aspectFit" @error="handleImageError"></image>
             <text class="item-text">已取消</text>
           </view>
         </view>
@@ -1003,11 +1003,22 @@ export default {
         content: '确定要退出登录吗？',
         success: (res) => {
           if (res.confirm) {
-            // 清除登录信息 - 同时清除两种方式的登录信息
-            uni.removeStorageSync('userInfo')
-            uni.removeStorageSync('uni-id-pages-userInfo')
-            uni.removeStorageSync('uni_id_token')
-            uni.removeStorageSync('uni_id_token_expired')
+            // 先调用uni-id-pages的退出登录方法
+            try {
+              // 引入和使用uni-id-pages的mutations
+              const { mutations } = require('@/uni_modules/uni-id-pages/common/store')
+              mutations.logout()
+              console.log('调用uni-id-pages登出方法成功')
+            } catch (e) {
+              console.error('调用uni-id-pages登出方法失败:', e)
+              
+              // 即使上面的方法失败，也要确保清除所有相关的本地缓存
+              // 清除登录信息 - 同时清除两种方式的登录信息
+              uni.removeStorageSync('userInfo')
+              uni.removeStorageSync('uni-id-pages-userInfo')
+              uni.removeStorageSync('uni_id_token')
+              uni.removeStorageSync('uni_id_token_expired')
+            }
             
             // 重置状态
             this.userInfo = {}

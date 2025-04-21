@@ -210,9 +210,38 @@ export const mutations = {
 			console.error('注销过程出错:', logoutError);
 		}
 		
-		// 清理token
+		// 清理所有相关的本地缓存
 		uni.removeStorageSync('uni_id_token');
-		uni.setStorageSync('uni_id_token_expired', 0);
+		uni.removeStorageSync('uni_id_token_expired');
+		uni.removeStorageSync('uni-id-pages-userInfo');
+		uni.removeStorageSync('userInfo');
+		
+		// 清除其他可能存在的与用户相关的缓存
+		try {
+			let cacheKeys = [];
+			// #ifdef MP || APP-PLUS
+			cacheKeys = uni.getStorageInfoSync().keys;
+			// #endif
+			// #ifdef H5
+			for (let i = 0; i < localStorage.length; i++) {
+				cacheKeys.push(localStorage.key(i));
+			}
+			// #endif
+			
+			// 清除包含"token"或"user"的存储项
+			const userRelatedKeys = cacheKeys.filter(key => 
+				key.toLowerCase().includes('token') || 
+				key.toLowerCase().includes('user') ||
+				key.toLowerCase().includes('login')
+			);
+			
+			userRelatedKeys.forEach(key => {
+				console.log('清除用户相关缓存:', key);
+				uni.removeStorageSync(key);
+			});
+		} catch (e) {
+			console.error('清除用户缓存时出错:', e);
+		}
 		
 		// 清空store中的用户信息
 		this.setUserInfo({},{cover:true});

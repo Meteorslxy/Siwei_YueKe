@@ -70,8 +70,7 @@
 </template>
 
 <script>
-// 导入筛选选项JSON和工具类
-import filterOptions from '@/static/data/filter-options.json';
+// 导入筛选工具类
 import filterUtils from '@/api/utils/filters';
 
 export default {
@@ -80,7 +79,7 @@ export default {
       keyword: '',
       currentGrade: 'all',
       showGradeOptions: false,
-      filterOptions: filterOptions, // 从JSON文件导入的筛选选项
+      filterOptions: filterUtils.getAllFilterOptions(), // 从filters工具类获取选项
       currentSubject: '',
       schoolFilter: '',
       showSchoolFilter: false,

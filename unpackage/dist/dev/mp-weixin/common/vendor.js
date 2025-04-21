@@ -361,7 +361,7 @@ var mutations = {
   logout: function logout() {
     var _this2 = this;
     return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-      var currentUserInfo, token, tokenExpired, tabbarPages, firstTabPage;
+      var currentUserInfo, token, tokenExpired, cacheKeys, userRelatedKeys, tabbarPages, firstTabPage;
       return _regenerator.default.wrap(function _callee3$(_context3) {
         while (1) {
           switch (_context3.prev = _context3.next) {
@@ -402,9 +402,28 @@ var mutations = {
               _context3.t1 = _context3["catch"](2);
               console.error('注销过程出错:', _context3.t1);
             case 22:
-              // 清理token
+              // 清理所有相关的本地缓存
               uni.removeStorageSync('uni_id_token');
-              uni.setStorageSync('uni_id_token_expired', 0);
+              uni.removeStorageSync('uni_id_token_expired');
+              uni.removeStorageSync('uni-id-pages-userInfo');
+              uni.removeStorageSync('userInfo');
+
+              // 清除其他可能存在的与用户相关的缓存
+              try {
+                cacheKeys = [];
+                cacheKeys = uni.getStorageInfoSync().keys;
+
+                // 清除包含"token"或"user"的存储项
+                userRelatedKeys = cacheKeys.filter(function (key) {
+                  return key.toLowerCase().includes('token') || key.toLowerCase().includes('user') || key.toLowerCase().includes('login');
+                });
+                userRelatedKeys.forEach(function (key) {
+                  console.log('清除用户相关缓存:', key);
+                  uni.removeStorageSync(key);
+                });
+              } catch (e) {
+                console.error('清除用户缓存时出错:', e);
+              }
 
               // 清空store中的用户信息
               _this2.setUserInfo({}, {
@@ -439,7 +458,7 @@ var mutations = {
                   });
                 }
               }
-            case 27:
+            case 30:
             case "end":
               return _context3.stop();
           }
@@ -927,17 +946,6 @@ module.exports = _toConsumableArray, module.exports.__esModule = true, module.ex
 /***/ }),
 
 /***/ 181:
-/*!***********************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/static/data/filter-options.json ***!
-  \***********************************************************************************************************/
-/*! exports provided: gradeOptions, subjectOptions, schoolOptions, educationalStages, courseTypes, teacherTitles, statusOptions, bookingStatus, databaseFields, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"初一\",\"value\":\"初一\"},{\"label\":\"初二\",\"value\":\"初二\"},{\"label\":\"初三\",\"value\":\"初三\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"初中\",\"value\":\"初中\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
-
-/***/ }),
-
-/***/ 182:
 /*!************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/utils/filters.js ***!
   \************************************************************************************************/
@@ -947,7 +955,6 @@ module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选�
 "use strict";
 
 
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -963,45 +970,265 @@ exports.getSchoolOptions = getSchoolOptions;
 exports.getSubjectLabelByValue = getSubjectLabelByValue;
 exports.getSubjectOptions = getSubjectOptions;
 exports.isValidFilterValue = isValidFilterValue;
-var _filterOptions = _interopRequireDefault(__webpack_require__(/*! @/static/data/filter-options.json */ 181));
 /**
  * 筛选选项工具类
  * 用于统一管理和获取筛选选项数据
  */
 
+// 直接定义筛选选项数据，不再依赖外部JSON文件
+var filterOptions = {
+  "gradeOptions": {
+    "description": "年级筛选选项",
+    "options": [{
+      "label": "全部年级",
+      "value": "all"
+    }, {
+      "label": "初中",
+      "value": "初中"
+    }, {
+      "label": "初一",
+      "value": "初一"
+    }, {
+      "label": "初二",
+      "value": "初二"
+    }, {
+      "label": "初三",
+      "value": "初三"
+    }]
+  },
+  "subjectOptions": {
+    "description": "学科筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "语文",
+      "value": "语文"
+    }, {
+      "label": "数学",
+      "value": "数学"
+    }, {
+      "label": "英语",
+      "value": "英语"
+    }, {
+      "label": "物理",
+      "value": "物理"
+    }, {
+      "label": "化学",
+      "value": "化学"
+    }]
+  },
+  "schoolOptions": {
+    "description": "校区筛选选项",
+    "options": [{
+      "label": "全部校区",
+      "value": "all"
+    }, {
+      "label": "江宁万达",
+      "value": "江宁万达"
+    }, {
+      "label": "江宁黄金海岸",
+      "value": "江宁黄金海岸"
+    }, {
+      "label": "大行宫",
+      "value": "大行宫"
+    }, {
+      "label": "新街口",
+      "value": "新街口"
+    }, {
+      "label": "雨花",
+      "value": "雨花"
+    }, {
+      "label": "桥北",
+      "value": "桥北"
+    }, {
+      "label": "奥体",
+      "value": "奥体"
+    }, {
+      "label": "龙江",
+      "value": "龙江"
+    }, {
+      "label": "六合",
+      "value": "六合"
+    }]
+  },
+  "educationalStages": {
+    "description": "教育阶段筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "初中",
+      "value": "初中"
+    }]
+  },
+  "courseTypes": {
+    "description": "课程类型筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "普通课程",
+      "value": "regular"
+    }, {
+      "label": "精品小班",
+      "value": "premium"
+    }, {
+      "label": "一对一",
+      "value": "oneToOne"
+    }, {
+      "label": "线上课程",
+      "value": "online"
+    }]
+  },
+  "teacherTitles": {
+    "description": "教师职称筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "特级教师",
+      "value": "特级教师"
+    }, {
+      "label": "高级教师",
+      "value": "高级教师"
+    }, {
+      "label": "一级教师",
+      "value": "一级教师"
+    }, {
+      "label": "二级教师",
+      "value": "二级教师"
+    }]
+  },
+  "statusOptions": {
+    "description": "状态筛选选项",
+    "options": [{
+      "label": "全部状态",
+      "value": "all"
+    }, {
+      "label": "未开始",
+      "value": "pending"
+    }, {
+      "label": "进行中",
+      "value": "inProgress"
+    }, {
+      "label": "已结束",
+      "value": "completed"
+    }, {
+      "label": "已取消",
+      "value": "canceled"
+    }]
+  },
+  "bookingStatus": {
+    "description": "预约状态筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "待确认",
+      "value": "pending"
+    }, {
+      "label": "已确认",
+      "value": "confirmed"
+    }, {
+      "label": "已取消",
+      "value": "canceled"
+    }, {
+      "label": "已完成",
+      "value": "completed"
+    }]
+  },
+  "databaseFields": {
+    "description": "数据库字段名称映射",
+    "teacher": {
+      "name": "name",
+      "avatar": "avatar",
+      "avatarId": "avatarId",
+      "grade": "grade",
+      "subject": "subject",
+      "education": "education",
+      "experience": "experience",
+      "description": "description",
+      "rating": "rating",
+      "studentCount": "studentCount"
+    },
+    "course": {
+      "title": "title",
+      "description": "description",
+      "coverImage": "coverImage",
+      "teacherId": "teacherId",
+      "subject": "subject",
+      "grade": "grade",
+      "schoolId": "schoolId",
+      "location": "location",
+      "price": "price",
+      "startTime": "startTime",
+      "endTime": "endTime",
+      "maxEnroll": "maxEnroll",
+      "enrollCount": "enrollCount",
+      "status": "status"
+    },
+    "school": {
+      "name": "name",
+      "address": "address",
+      "location": "location",
+      "phone": "phone",
+      "description": "description",
+      "images": "images"
+    },
+    "booking": {
+      "userId": "userId",
+      "courseId": "courseId",
+      "status": "status",
+      "bookingTime": "bookingTime",
+      "paymentStatus": "paymentStatus"
+    },
+    "news": {
+      "title": "title",
+      "content": "content",
+      "digest": "digest",
+      "coverImage": "coverImage",
+      "publishTime": "publishTime",
+      "author": "author",
+      "source": "source",
+      "viewCount": "viewCount"
+    }
+  }
+};
+
 /**
  * 获取所有筛选选项
  */
 function getAllFilterOptions() {
-  return _filterOptions.default;
+  return filterOptions;
 }
 
 /**
  * 获取年级筛选选项
  */
 function getGradeOptions() {
-  return _filterOptions.default.gradeOptions.options;
+  return filterOptions.gradeOptions.options;
 }
 
 /**
  * 获取学科筛选选项
  */
 function getSubjectOptions() {
-  return _filterOptions.default.subjectOptions.options;
+  return filterOptions.subjectOptions.options;
 }
 
 /**
  * 获取校区筛选选项
  */
 function getSchoolOptions() {
-  return _filterOptions.default.schoolOptions.options;
+  return filterOptions.schoolOptions.options;
 }
 
 /**
  * 获取预约状态筛选选项
  */
 function getBookingStatusOptions() {
-  return _filterOptions.default.bookingStatus.options;
+  return filterOptions.bookingStatus.options;
 }
 
 /**
@@ -10766,7 +10993,7 @@ var b = "development" === "development",
   k = "true" === undefined || !0 === undefined,
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
-  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"local","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
   O = T([{"provider":"aliyun","spaceName":"siwei-chuzhong","spaceId":"mp-a876f469-bab5-46b7-8863-2e7147900fdd","clientSecret":"IhCqrULEYv+AG3PS/Z7jrw==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
@@ -18633,7 +18860,7 @@ exports.default = Zs;
 
 /***/ }),
 
-/***/ 263:
+/***/ 262:
 /*!***********************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/user.js ***!
   \***********************************************************************************************/
@@ -19329,7 +19556,7 @@ module.exports = _inherits, module.exports.__esModule = true, module.exports["de
 
 /***/ }),
 
-/***/ 312:
+/***/ 311:
 /*!******************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/common/utils/marked.min.js ***!
   \******************************************************************************************************/
@@ -19419,7 +19646,7 @@ module.exports = _possibleConstructorReturn, module.exports.__esModule = true, m
 
 /***/ }),
 
-/***/ 321:
+/***/ 320:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
   \*******************************************************************************************************************************/
@@ -19533,24 +19760,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 33:
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _getPrototypeOf(o) {
-  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _getPrototypeOf(o);
-}
-module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 330:
+/***/ 329:
 /*!**************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vuex3/dist/vuex.common.js ***!
   \**************************************************************************************/
@@ -20807,6 +21017,23 @@ module.exports = index_cjs;
 
 /***/ }),
 
+/***/ 33:
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _getPrototypeOf(o) {
+  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _getPrototypeOf(o);
+}
+module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
 /***/ 34:
 /*!****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
@@ -20848,7 +21075,7 @@ module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.expo
 
 /***/ }),
 
-/***/ 347:
+/***/ 346:
 /*!********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/register/validator.js ***!
   \********************************************************************************************************************************/
@@ -20864,7 +21091,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 348));
+var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 347));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var _default = _objectSpread({
@@ -20924,7 +21151,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 348:
+/***/ 347:
 /*!***********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/password.js ***!
   \***********************************************************************************************************************/
@@ -21390,7 +21617,7 @@ module.exports = _interopRequireDefault, module.exports.__esModule = true, modul
 
 /***/ }),
 
-/***/ 414:
+/***/ 413:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
   \*******************************************************************************************************************************/
@@ -21432,7 +21659,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 415:
+/***/ 414:
 /*!************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
   \************************************************************************************************************************************/
@@ -21447,9 +21674,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 416));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 417));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 418));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 415));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 416));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 417));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
@@ -21459,7 +21686,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 416:
+/***/ 415:
 /*!***********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
   \***********************************************************************************************************************************/
@@ -21470,7 +21697,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 417:
+/***/ 416:
 /*!****************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
   \****************************************************************************************************************************************/
@@ -21481,7 +21708,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 418:
+/***/ 417:
 /*!****************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
   \****************************************************************************************************************************************/
@@ -21492,7 +21719,7 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 
 /***/ }),
 
-/***/ 426:
+/***/ 425:
 /*!**********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/validate.js ***!
   \**********************************************************************************************************************************/
@@ -22184,7 +22411,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 427:
+/***/ 426:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/utils.js ***!
   \*******************************************************************************************************************************/
@@ -22897,7 +23124,7 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 
 /***/ }),
 
-/***/ 512:
+/***/ 511:
 /*!**************************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
   \**************************************************************************************************************************************************/
@@ -23153,7 +23380,7 @@ function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
 
 /***/ }),
 
-/***/ 520:
+/***/ 519:
 /*!***************************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
   \***************************************************************************************************************************************************/
@@ -23288,7 +23515,7 @@ function createAnimation(option, _this) {
 
 /***/ }),
 
-/***/ 526:
+/***/ 525:
 /*!*******************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
   \*******************************************************************************************************************************************/
@@ -24510,25 +24737,17 @@ function request() {
 
     // 检查uniCloud是否存在
     if (typeof uniCloud === 'undefined' || !uniCloud) {
-      console.error('uniCloud对象不存在，使用模拟数据');
-
-      // 根据不同的接口返回模拟数据
-      var mockResult = {
-        code: 0,
-        message: '模拟数据',
-        data: null
-      };
-      if (name === 'login') {
-        mockResult.data = {
-          userId: 'mock-user-id',
-          nickName: '模拟用户',
-          avatarUrl: '/static/images/default-avatar.png'
-        };
-      }
+      console.error('uniCloud对象不存在');
       if (showLoading) {
         uni.hideLoading();
       }
-      return resolve(mockResult);
+
+      // 返回错误信息
+      return resolve({
+        code: -501002,
+        message: 'uniCloud服务不可用',
+        data: null
+      });
     }
 
     // 非微信环境默认使用uniCloud

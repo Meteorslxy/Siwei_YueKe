@@ -9,19 +9,19 @@
     <view class="nav-card">
       <view class="nav-menu">
         <view class="nav-item" @click="switchTab('/pages/course/course')">
-          <image class="nav-icon" src="/static/images/icons/featured.png" mode="aspectFit"></image>
+          <image class="nav-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/featured.png" mode="aspectFit"></image>
           <text class="nav-text">精选好课</text>
         </view>
         <view class="nav-item" @click="navigateTo('/pages/course/lectures')">
-          <image class="nav-icon" src="/static/images/icons/lecture.png" mode="aspectFit"></image>
+          <image class="nav-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/lecture.png" mode="aspectFit"></image>
           <text class="nav-text">热点讲座</text>
         </view>
         <view class="nav-item" @click="navigateTo('/pages/teacher/list')">
-          <image class="nav-icon" src="/static/images/icons/teacher.png" mode="aspectFit"></image>
+          <image class="nav-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/teacher.png" mode="aspectFit"></image>
           <text class="nav-text">名师介绍</text>
         </view>
         <view class="nav-item" @click="navigateTo('/pages/school/detail')">
-          <image class="nav-icon" src="/static/images/icons/school.png" mode="aspectFit"></image>
+          <image class="nav-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/school.png" mode="aspectFit"></image>
           <text class="nav-text">校区介绍</text>
         </view>
       </view>

@@ -3,7 +3,156 @@
  * 用于统一管理和获取筛选选项数据
  */
 
-import filterOptions from '@/static/data/filter-options.json';
+// 直接定义筛选选项数据，不再依赖外部JSON文件
+const filterOptions = {
+  "gradeOptions": {
+    "description": "年级筛选选项",
+    "options": [
+      { "label": "全部年级", "value": "all" },
+      { "label": "初中", "value": "初中" },
+      { "label": "初一", "value": "初一" },
+      { "label": "初二", "value": "初二" },
+      { "label": "初三", "value": "初三" }
+    ]
+  },
+  
+  "subjectOptions": {
+    "description": "学科筛选选项",
+    "options": [
+      { "label": "全部", "value": "all" },
+      { "label": "语文", "value": "语文" },
+      { "label": "数学", "value": "数学" },
+      { "label": "英语", "value": "英语" },
+      { "label": "物理", "value": "物理" },
+      { "label": "化学", "value": "化学" }
+    ]
+  },
+
+  "schoolOptions": {
+    "description": "校区筛选选项",
+    "options": [
+      { "label": "全部校区", "value": "all" },
+      { "label": "江宁万达", "value": "江宁万达" },
+      { "label": "江宁黄金海岸", "value": "江宁黄金海岸" },
+      { "label": "大行宫", "value": "大行宫" },
+      { "label": "新街口", "value": "新街口" },
+      { "label": "雨花", "value": "雨花" },
+      { "label": "桥北", "value": "桥北" },
+      { "label": "奥体", "value": "奥体" },
+      { "label": "龙江", "value": "龙江" },
+      { "label": "六合", "value": "六合" }
+    ]
+  },
+
+  "educationalStages": {
+    "description": "教育阶段筛选选项",
+    "options": [
+      { "label": "全部", "value": "all" },
+      { "label": "初中", "value": "初中" }
+    ]
+  },
+
+  "courseTypes": {
+    "description": "课程类型筛选选项",
+    "options": [
+      { "label": "全部", "value": "all" },
+      { "label": "普通课程", "value": "regular" },
+      { "label": "精品小班", "value": "premium" },
+      { "label": "一对一", "value": "oneToOne" },
+      { "label": "线上课程", "value": "online" }
+    ]
+  },
+
+  "teacherTitles": {
+    "description": "教师职称筛选选项",
+    "options": [
+      { "label": "全部", "value": "all" },
+      { "label": "特级教师", "value": "特级教师" },
+      { "label": "高级教师", "value": "高级教师" },
+      { "label": "一级教师", "value": "一级教师" },
+      { "label": "二级教师", "value": "二级教师" }
+    ]
+  },
+
+  "statusOptions": {
+    "description": "状态筛选选项",
+    "options": [
+      { "label": "全部状态", "value": "all" },
+      { "label": "未开始", "value": "pending" },
+      { "label": "进行中", "value": "inProgress" },
+      { "label": "已结束", "value": "completed" },
+      { "label": "已取消", "value": "canceled" }
+    ]
+  },
+
+  "bookingStatus": {
+    "description": "预约状态筛选选项",
+    "options": [
+      { "label": "全部", "value": "all" },
+      { "label": "待确认", "value": "pending" },
+      { "label": "已确认", "value": "confirmed" },
+      { "label": "已取消", "value": "canceled" },
+      { "label": "已完成", "value": "completed" }
+    ]
+  },
+
+  "databaseFields": {
+    "description": "数据库字段名称映射",
+    "teacher": {
+      "name": "name",
+      "avatar": "avatar",
+      "avatarId": "avatarId",
+      "grade": "grade",
+      "subject": "subject",
+      "education": "education",
+      "experience": "experience",
+      "description": "description",
+      "rating": "rating",
+      "studentCount": "studentCount"
+    },
+    "course": {
+      "title": "title",
+      "description": "description",
+      "coverImage": "coverImage",
+      "teacherId": "teacherId",
+      "subject": "subject",
+      "grade": "grade",
+      "schoolId": "schoolId",
+      "location": "location",
+      "price": "price",
+      "startTime": "startTime",
+      "endTime": "endTime",
+      "maxEnroll": "maxEnroll",
+      "enrollCount": "enrollCount",
+      "status": "status"
+    },
+    "school": {
+      "name": "name",
+      "address": "address",
+      "location": "location",
+      "phone": "phone",
+      "description": "description",
+      "images": "images"
+    },
+    "booking": {
+      "userId": "userId",
+      "courseId": "courseId",
+      "status": "status",
+      "bookingTime": "bookingTime",
+      "paymentStatus": "paymentStatus"
+    },
+    "news": {
+      "title": "title",
+      "content": "content",
+      "digest": "digest",
+      "coverImage": "coverImage",
+      "publishTime": "publishTime",
+      "author": "author",
+      "source": "source",
+      "viewCount": "viewCount"
+    }
+  }
+};
 
 /**
  * 获取所有筛选选项

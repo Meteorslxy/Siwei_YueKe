@@ -67,28 +67,18 @@ function request(options = {}) {
     
     // 检查uniCloud是否存在
     if (typeof uniCloud === 'undefined' || !uniCloud) {
-      console.error('uniCloud对象不存在，使用模拟数据');
-      
-      // 根据不同的接口返回模拟数据
-      let mockResult = {
-        code: 0,
-        message: '模拟数据',
-        data: null
-      };
-      
-      if (name === 'login') {
-        mockResult.data = {
-          userId: 'mock-user-id',
-          nickName: '模拟用户',
-          avatarUrl: '/static/images/default-avatar.png'
-        };
-      }
+      console.error('uniCloud对象不存在');
       
       if (showLoading) {
         uni.hideLoading();
       }
       
-      return resolve(mockResult);
+      // 返回错误信息
+      return resolve({
+        code: -501002,
+        message: 'uniCloud服务不可用',
+        data: null
+      });
     }
     
     // 非微信环境默认使用uniCloud
