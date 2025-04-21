@@ -36,34 +36,38 @@ exports.main = async (event, context) => {
       filterConditions.push(`keyword=${keyword}`);
     }
     
-    // 处理年级组筛选，支持多种字段名称
+    // 处理年级组筛选
     if (educationalStages) {
-      // 使用 OR 查询以适应不同的字段名
-      condition.$or = [
-        { educationalStages: educationalStages },
-        { gradeGroup: educationalStages },
-        { grade: educationalStages }
-      ];
+      // 使用数组条件，匹配任一字段
+      condition.gradeCondition = {
+        $or: [
+          { educationalStages: educationalStages },
+          { gradeGroup: educationalStages },
+          { grade: educationalStages }
+        ]
+      };
       filterConditions.push(`教育阶段=${educationalStages}`);
     }
     
-    // 处理学科筛选，支持多种字段名称
+    // 处理学科筛选
     if (subject) {
-      condition.$or = condition.$or || [];
-      condition.$or.push(
-        { subject: subject },
-        { subjects: subject }
-      );
+      condition.subjectCondition = {
+        $or: [
+          { subject: subject },
+          { subjects: subject }
+        ]
+      };
       filterConditions.push(`学科=${subject}`);
     }
     
-    // 处理校区/地点筛选，支持多种字段名称
+    // 处理校区/地点筛选
     if (location) {
-      condition.$or = condition.$or || [];
-      condition.$or.push(
-        { location: location },
-        { schoolName: location }
-      );
+      condition.locationCondition = {
+        $or: [
+          { location: location },
+          { schoolName: location }
+        ]
+      };
       filterConditions.push(`校区=${location}`);
     }
     
@@ -74,8 +78,42 @@ exports.main = async (event, context) => {
     
     console.log('构建的查询条件:', condition, '筛选条件:', filterConditions.join(', '));
     
-    if (Object.keys(condition).length > 0) {
-      query = query.where(condition);
+    // 构建最终的查询条件
+    const finalCondition = {};
+    
+    // 基本过滤条件
+    if (category) finalCondition.category = condition.category;
+    if (keyword) finalCondition.title = condition.title;
+    if (schoolId) finalCondition.schoolId = condition.schoolId;
+    
+    // 构建 $and 条件数组，确保每个筛选条件都被满足
+    const andConditions = [];
+    
+    // 年级条件
+    if (condition.gradeCondition) {
+      andConditions.push(condition.gradeCondition);
+    }
+    
+    // 学科条件
+    if (condition.subjectCondition) {
+      andConditions.push(condition.subjectCondition);
+    }
+    
+    // 校区条件
+    if (condition.locationCondition) {
+      andConditions.push(condition.locationCondition);
+    }
+    
+    // 如果有 $and 条件，添加到最终查询中
+    if (andConditions.length > 0) {
+      finalCondition.$and = andConditions;
+    }
+    
+    console.log('最终查询条件:', JSON.stringify(finalCondition));
+    
+    // 使用最终构建的条件进行查询
+    if (Object.keys(finalCondition).length > 0) {
+      query = query.where(finalCondition);
     }
     
     // 获取总数
@@ -97,7 +135,8 @@ exports.main = async (event, context) => {
       data: list.data,
       total,
       message: '获取课程列表成功',
-      filters: filterConditions // 返回使用的筛选条件给前端，便于调试
+      filters: filterConditions, // 返回使用的筛选条件给前端，便于调试
+      query: JSON.stringify(finalCondition) // 返回最终查询条件，便于调试
     };
   } catch (error) {
     console.error('获取课程列表失败:', error);

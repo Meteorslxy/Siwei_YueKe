@@ -429,9 +429,9 @@ var _default = {
                 }; // 添加筛选条件 - 确保参数名称与后端一致
                 if (_this3.selectedGradeGroup !== 'all') {
                   params.educationalStages = _this3.selectedGradeGroup;
-                  // 同时传递grade参数，以支持新的年级筛选
-                  params.grade = _this3.selectedGradeGroup;
+                  // 后端会处理不同字段名的查询，不需要额外传递grade参数
                 }
+
                 if (_this3.selectedSchool !== 'all') {
                   params.location = _this3.selectedSchool;
                 }

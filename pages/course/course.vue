@@ -290,8 +290,7 @@ export default {
         // 添加筛选条件 - 确保参数名称与后端一致
         if (this.selectedGradeGroup !== 'all') {
           params.educationalStages = this.selectedGradeGroup;
-          // 同时传递grade参数，以支持新的年级筛选
-          params.grade = this.selectedGradeGroup;
+          // 后端会处理不同字段名的查询，不需要额外传递grade参数
         }
         
         if (this.selectedSchool !== 'all') {
