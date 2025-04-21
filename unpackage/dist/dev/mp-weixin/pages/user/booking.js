@@ -145,16 +145,18 @@ var render = function () {
     var m3 = _vm.formatCourseTime(item)
     var m4 = _vm.formatBookingTime(item.createTime)
     var m5 = _vm.showActions(item)
+    var m6 = m5 ? _vm.shouldShowContactButton(item) : null
     return {
       $orig: $orig,
       m2: m2,
       m3: m3,
       m4: m4,
       m5: m5,
+      m6: m6,
     }
   })
   var g0 = _vm.filteredBookingList.length
-  var m6 = g0 === 0 ? _vm.getEmptyTipText() : null
+  var m7 = g0 === 0 ? _vm.getEmptyTipText() : null
   if (!_vm._isMounted) {
     _vm.e0 = function ($event, item) {
       var _temp = arguments[arguments.length - 1].currentTarget.dataset,
@@ -184,7 +186,7 @@ var render = function () {
         l0: l0,
         l1: l1,
         g0: g0,
-        m6: m6,
+        m7: m7,
       },
     }
   )
@@ -238,6 +240,7 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+//
 //
 //
 //
@@ -1177,7 +1180,7 @@ var _default = {
       }
 
       // 检查支付状态
-      var hasPaid = booking.paymentStatus === 'paid' || booking.status === 'confirmed' || booking.isPaid === true;
+      var hasPaid = booking.paymentStatus === 'paid' || booking.isPaid === true;
 
       // 确认是否取消
       uni.showModal({
@@ -1816,6 +1819,16 @@ var _default = {
     // 在methods部分添加检查是否显示操作按钮的方法
     showActions: function showActions(item) {
       return item && (item.status !== 'cancelled' && item.status !== 'finished' || item.status === 'confirmed' || item.status === 'confirmed_unpaid' || item.status !== 'cancelled');
+    },
+    // 判断是否应该显示联系老师按钮
+    shouldShowContactButton: function shouldShowContactButton(item) {
+      if (!item) return false;
+
+      // 判断是否已支付
+      var isPaid = item.paymentStatus === 'paid' || item.isPaid === true;
+
+      // 只有当状态为已确认但未缴费时才显示联系老师按钮
+      return item.status === 'confirmed' && !isPaid || item.status === 'confirmed_unpaid';
     }
   }
 };

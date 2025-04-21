@@ -484,6 +484,7 @@ var mutations = {
     });
   },
   loginSuccess: function loginSuccess() {
+    var _this3 = this;
     var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     // 设置 token
     var _e$showToast = e.showToast,
@@ -513,47 +514,47 @@ var mutations = {
 
     //习惯问题，有的云端会返回 token 有的返回 accessToken 
     if (e.token || e.accessToken) {
-      var token = e.token || e.accessToken;
+      var _token = e.token || e.accessToken;
 
       // 增强的类型检查和错误处理
       // 1. 如果token是数组，取第一个有效的字符串token
-      if (Array.isArray(token)) {
+      if (Array.isArray(_token)) {
         console.log('收到token数组，尝试提取有效token');
-        var validTokens = token.filter(function (t) {
+        var validTokens = _token.filter(function (t) {
           return typeof t === 'string' && t.length > 0;
         });
         if (validTokens.length > 0) {
-          token = validTokens[0];
+          _token = validTokens[0];
           console.log('从数组中提取到有效token');
         } else {
           console.error('token数组中没有有效的token');
-          token = null;
+          _token = null;
         }
       }
       // 2. 如果token是对象但不是数组，尝试转为字符串
-      else if ((0, _typeof2.default)(token) === 'object' && token !== null) {
-        console.error('收到对象类型token，尝试转换为字符串', (0, _typeof2.default)(token));
+      else if ((0, _typeof2.default)(_token) === 'object' && _token !== null) {
+        console.error('收到对象类型token，尝试转换为字符串', (0, _typeof2.default)(_token));
         try {
-          if (token.toString && typeof token.toString === 'function' && token.toString() !== '[object Object]') {
-            token = token.toString();
+          if (_token.toString && typeof _token.toString === 'function' && _token.toString() !== '[object Object]') {
+            _token = _token.toString();
             console.log('将对象token转换为字符串');
           } else {
             console.error('无法将对象token转换为有效字符串');
-            token = null;
+            _token = null;
           }
         } catch (err) {
           console.error('转换token对象为字符串时出错:', err);
-          token = null;
+          _token = null;
         }
       }
 
       // 3. 最后检查token是否为有效字符串
-      if (typeof token === 'string' && token.length > 0) {
-        uni.setStorageSync('uni_id_token', token);
+      if (typeof _token === 'string' && _token.length > 0) {
+        uni.setStorageSync('uni_id_token', _token);
         uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
         console.log('已保存token信息到storage');
       } else {
-        console.error('token格式无效，无法保存:', (0, _typeof2.default)(token));
+        console.error('token格式无效，无法保存:', (0, _typeof2.default)(_token));
         // 创建临时token以便用户后续刷新
         if (e.uid || e.userInfo && e.userInfo._id) {
           var userId = e.uid || e.userInfo._id;
@@ -583,6 +584,33 @@ var mutations = {
         icon: 'none',
         duration: 3000
       });
+    }
+
+    // 检查是否是首次登录
+    var hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+    var isFirstLogin = !hasSetStudentName;
+
+    // 检查用户信息是否有效
+    var token = uni.getStorageSync('uni_id_token');
+    var userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+    var hasValidUserInfo = token && userInfo && userInfo._id;
+
+    // 如果是首次登录且用户信息有效，在跳转后触发学生姓名设置弹窗
+    if (isFirstLogin && hasValidUserInfo) {
+      console.log('检测到首次登录，即将展示学生姓名设置弹窗');
+      // 确保清除可能错误设置的标记
+      uni.removeStorageSync('hasSetStudentName');
+      setTimeout(function () {
+        // 再次检查登录状态，确保用户仍然登录
+        var currentToken = uni.getStorageSync('uni_id_token');
+        if (currentToken) {
+          // 强制触发学生姓名设置弹窗事件
+          console.log('强制触发学生姓名设置弹窗事件');
+          uni.$emit('show:student-name-modal');
+        } else {
+          console.log('用户已退出登录，不显示姓名设置弹窗');
+        }
+      }, 1500); // 页面跳转完成后显示弹窗
     }
 
     // 检查是否需要设置密码
@@ -640,10 +668,26 @@ var mutations = {
         }
       }
     }
+
+    // 修改：优先跳转到用户个人中心页面
     if (autoBack) {
-      this.loginBack({
-        uniIdRedirectUrl: uniIdRedirectUrl
-      });
+      // 跳转到个人中心页面
+      console.log('登录成功，跳转到个人中心页面');
+      setTimeout(function () {
+        uni.switchTab({
+          url: '/pages/user/user',
+          success: function success() {
+            console.log('跳转到个人中心成功');
+          },
+          fail: function fail(err) {
+            console.error('跳转到个人中心失败:', err);
+            // 失败时使用原有的跳转逻辑
+            _this3.loginBack({
+              uniIdRedirectUrl: uniIdRedirectUrl
+            });
+          }
+        });
+      }, 1000);
     } else if (!needSetPassword) {
       // 没有自动返回且不需要设置密码时，跳转到首页
       console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);
@@ -889,7 +933,7 @@ module.exports = _toConsumableArray, module.exports.__esModule = true, module.ex
 /*! exports provided: gradeOptions, subjectOptions, schoolOptions, educationalStages, courseTypes, teacherTitles, statusOptions, bookingStatus, databaseFields, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"高中\",\"value\":\"高中\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"},{\"label\":\"生物\",\"value\":\"生物\"},{\"label\":\"历史\",\"value\":\"历史\"},{\"label\":\"地理\",\"value\":\"地理\"},{\"label\":\"政治\",\"value\":\"政治\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"小学\",\"value\":\"小学\"},{\"label\":\"初中\",\"value\":\"初中\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
+module.exports = JSON.parse("{\"gradeOptions\":{\"description\":\"年级筛选选项\",\"options\":[{\"label\":\"全部年级\",\"value\":\"all\"},{\"label\":\"初中\",\"value\":\"初中\"},{\"label\":\"初一\",\"value\":\"初一\"},{\"label\":\"初二\",\"value\":\"初二\"},{\"label\":\"初三\",\"value\":\"初三\"}]},\"subjectOptions\":{\"description\":\"学科筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"语文\",\"value\":\"语文\"},{\"label\":\"数学\",\"value\":\"数学\"},{\"label\":\"英语\",\"value\":\"英语\"},{\"label\":\"物理\",\"value\":\"物理\"},{\"label\":\"化学\",\"value\":\"化学\"}]},\"schoolOptions\":{\"description\":\"校区筛选选项\",\"options\":[{\"label\":\"全部校区\",\"value\":\"all\"},{\"label\":\"江宁万达\",\"value\":\"江宁万达\"},{\"label\":\"江宁黄金海岸\",\"value\":\"江宁黄金海岸\"},{\"label\":\"大行宫\",\"value\":\"大行宫\"},{\"label\":\"新街口\",\"value\":\"新街口\"},{\"label\":\"雨花\",\"value\":\"雨花\"},{\"label\":\"桥北\",\"value\":\"桥北\"},{\"label\":\"奥体\",\"value\":\"奥体\"},{\"label\":\"龙江\",\"value\":\"龙江\"},{\"label\":\"六合\",\"value\":\"六合\"}]},\"educationalStages\":{\"description\":\"教育阶段筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"初中\",\"value\":\"初中\"}]},\"courseTypes\":{\"description\":\"课程类型筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"普通课程\",\"value\":\"regular\"},{\"label\":\"精品小班\",\"value\":\"premium\"},{\"label\":\"一对一\",\"value\":\"oneToOne\"},{\"label\":\"线上课程\",\"value\":\"online\"}]},\"teacherTitles\":{\"description\":\"教师职称筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"特级教师\",\"value\":\"特级教师\"},{\"label\":\"高级教师\",\"value\":\"高级教师\"},{\"label\":\"一级教师\",\"value\":\"一级教师\"},{\"label\":\"二级教师\",\"value\":\"二级教师\"}]},\"statusOptions\":{\"description\":\"状态筛选选项\",\"options\":[{\"label\":\"全部状态\",\"value\":\"all\"},{\"label\":\"未开始\",\"value\":\"pending\"},{\"label\":\"进行中\",\"value\":\"inProgress\"},{\"label\":\"已结束\",\"value\":\"completed\"},{\"label\":\"已取消\",\"value\":\"canceled\"}]},\"bookingStatus\":{\"description\":\"预约状态筛选选项\",\"options\":[{\"label\":\"全部\",\"value\":\"all\"},{\"label\":\"待确认\",\"value\":\"pending\"},{\"label\":\"已确认\",\"value\":\"confirmed\"},{\"label\":\"已取消\",\"value\":\"canceled\"},{\"label\":\"已完成\",\"value\":\"completed\"}]},\"databaseFields\":{\"description\":\"数据库字段名称映射\",\"teacher\":{\"name\":\"name\",\"avatar\":\"avatar\",\"avatarId\":\"avatarId\",\"grade\":\"grade\",\"subject\":\"subject\",\"education\":\"education\",\"experience\":\"experience\",\"description\":\"description\",\"rating\":\"rating\",\"studentCount\":\"studentCount\"},\"course\":{\"title\":\"title\",\"description\":\"description\",\"coverImage\":\"coverImage\",\"teacherId\":\"teacherId\",\"subject\":\"subject\",\"grade\":\"grade\",\"schoolId\":\"schoolId\",\"location\":\"location\",\"price\":\"price\",\"startTime\":\"startTime\",\"endTime\":\"endTime\",\"maxEnroll\":\"maxEnroll\",\"enrollCount\":\"enrollCount\",\"status\":\"status\"},\"school\":{\"name\":\"name\",\"address\":\"address\",\"location\":\"location\",\"phone\":\"phone\",\"description\":\"description\",\"images\":\"images\"},\"booking\":{\"userId\":\"userId\",\"courseId\":\"courseId\",\"status\":\"status\",\"bookingTime\":\"bookingTime\",\"paymentStatus\":\"paymentStatus\"},\"news\":{\"title\":\"title\",\"content\":\"content\",\"digest\":\"digest\",\"coverImage\":\"coverImage\",\"publishTime\":\"publishTime\",\"author\":\"author\",\"source\":\"source\",\"viewCount\":\"viewCount\"}}}");
 
 /***/ }),
 
@@ -10722,7 +10766,7 @@ var b = "development" === "development",
   k = "true" === undefined || !0 === undefined,
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
-  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7001,"debugPort":9001,"initialLaunchType":"local","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"local","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
   O = T([{"provider":"aliyun","spaceName":"siwei-chuzhong","spaceId":"mp-a876f469-bab5-46b7-8863-2e7147900fdd","clientSecret":"IhCqrULEYv+AG3PS/Z7jrw==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";

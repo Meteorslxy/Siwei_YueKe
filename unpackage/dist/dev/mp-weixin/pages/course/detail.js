@@ -381,6 +381,9 @@ var _default = {
                   if (_this2.courseInfo.teacherId) {
                     console.log('主动获取教师详情，teacherId:', _this2.courseInfo.teacherId);
                     _this2.fetchTeacherDescription(_this2.courseInfo.teacherId);
+                  } else if (_this2.courseInfo.teacherName) {
+                    console.log('通过教师名称获取教师详情:', _this2.courseInfo.teacherName);
+                    _this2.fetchTeacherByName(_this2.courseInfo.teacherName);
                   }
 
                   // 主动更新课程报名人数
@@ -755,6 +758,12 @@ var _default = {
                     console.log('使用教师introduction作为描述:', teacherData.introduction);
                   }
 
+                  // 更新教师头像
+                  if (teacherData.avatar) {
+                    console.log('从教师详情API获取到头像:', teacherData.avatar);
+                    _this3.courseInfo.teacherAvatarUrl = teacherData.avatar;
+                  }
+
                   // 添加其他可能的描述字段
                   if (!_this3.courseInfo.teacherDescription) {
                     if (teacherData.desc) {
@@ -857,6 +866,12 @@ var _default = {
                     } else {
                       // 如果都没有，尝试直接给定简介
                       _this4.courseInfo.teacherDescription = '该教师暂无详细介绍';
+                    }
+
+                    // 更新教师头像
+                    if (foundTeacher.avatar) {
+                      console.log('从教师列表API获取到头像:', foundTeacher.avatar);
+                      _this4.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
                     }
                   } else {
                     console.log('API返回的教师数据中没有找到精确匹配:', nameForSearch);
@@ -997,10 +1012,10 @@ var _default = {
                 console.log('通过名称从数据库获取教师头像:', teacherName);
 
                 // 准备查询参数，去除可能的空格
-                nameForSearch = teacherName.trim(); // 调用API获取教师信息
+                nameForSearch = teacherName.trim(); // 调用API获取教师信息，使用names参数进行精确查询
                 _context5.next = 7;
                 return _this6.$api.teacher.getTeacherList({
-                  name: nameForSearch
+                  names: [nameForSearch] // 使用names数组参数进行精确查询
                 });
               case 7:
                 result = _context5.sent;

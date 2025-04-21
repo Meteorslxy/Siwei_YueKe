@@ -41,19 +41,17 @@
     
     <!-- 学科选择 -->
     <view class="subject-tabs">
-      <scroll-view scroll-x class="scroll-view">
-        <view class="tabs-container">
-          <view 
-            v-for="(tab, index) in subjectList" 
-            :key="index" 
-            class="tab-item" 
-            :class="{ active: currentSubject === tab._id }"
-            @click="filterBySubject(tab._id)"
-          >
-            {{tab.name}}
-          </view>
+      <view class="tabs-container">
+        <view 
+          v-for="(tab, index) in subjectList" 
+          :key="index" 
+          class="tab-item" 
+          :class="{ active: currentSubject === tab._id }"
+          @click="filterBySubject(tab._id)"
+        >
+          {{tab.name}}
         </view>
-      </scroll-view>
+      </view>
     </view>
     
     <view class="content-area">
@@ -209,10 +207,14 @@ export default {
             console.log('获取学科列表结果:', res);
             
             if (res && res.code === 0 && res.data && res.data.length > 0) {
-              // 添加"全部"选项，确保_id和name字段与数据库一致
+              // 使用静态数据作为备选
               this.subjectList = [
                 { _id: 'all', name: '全部' },
-                ...res.data
+                { _id: '语文', name: '语文' },
+                { _id: '数学', name: '数学' },
+                { _id: '英语', name: '英语' },
+                { _id: '物理', name: '物理' },
+                { _id: '化学', name: '化学' }
               ];
             } else {
               // 如果获取失败，使用静态数据作为备选
@@ -235,9 +237,7 @@ export default {
               { _id: 'all', name: '全部' },
               { _id: '语文', name: '语文' },
               { _id: '数学', name: '数学' },
-              { _id: '英语', name: '英语' },
-              { _id: '物理', name: '物理' },
-              { _id: '化学', name: '化学' }
+              { _id: '英语', name: '英语' }
             ];
             resolve(); // 即使出错也解析Promise
           })
@@ -481,21 +481,18 @@ export default {
     padding: 30rpx 0 120rpx;
     margin-top: 20rpx;
     
-    .scroll-view {
-      width: 100%;
-      white-space: nowrap;
-    }
-    
     .tabs-container {
-      display: inline-flex;
-      padding: 0 20rpx;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 30rpx;
     }
     
     .tab-item {
-      padding: 10rpx 30rpx;
+      flex: 1;
+      text-align: center;
+      padding: 10rpx 0;
       font-size: 28rpx;
       color: rgba(255, 255, 255, 0.8);
-      display: inline-block;
       
       &.active {
         color: #fff;

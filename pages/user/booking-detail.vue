@@ -8,6 +8,9 @@
       <view class="status-info">
         <view class="status-text">{{statusText}}</view>
         <view class="status-desc">{{statusDesc}}</view>
+        <view class="status-desc course-deleted" v-if="bookingDetail.isCourseDeleted">
+          {{ bookingDetail.courseDeletedNote || '课程已删除' }}
+        </view>
       </view>
     </view>
     
@@ -15,6 +18,7 @@
     <view class="info-card">
       <view class="card-title">课程信息</view>
       <view class="course-title">{{bookingDetail.courseTitle}}</view>
+      <view class="course-deleted-tag" v-if="bookingDetail.isCourseDeleted">课程已删除</view>
       <view class="info-row">
         <text class="info-label">预约编号：</text>
         <text class="info-value">{{bookingDetail.bookingId}}</text>
@@ -59,7 +63,8 @@
           <view class="action-btn primary" @click="cancelBooking">取消预约</view>
         </block>
         
-        <block v-if="bookingDetail.status === 'confirmed'">
+        <!-- 已确认但未缴费时才显示联系老师按钮 -->
+        <block v-if="isNeedContactTeacher">
           <view class="action-btn primary" @click="contactTeacher">联系老师</view>
         </block>
       </view>
@@ -97,7 +102,9 @@ export default {
         remark: '',
         status: 'pending',
         paymentStatus: '',
-        createTime: ''
+        createTime: '',
+        isCourseDeleted: false,
+        courseDeletedNote: ''
       }
     }
   },
@@ -132,6 +139,18 @@ export default {
       } else {
         return this.bookingDetail.courseTime || '暂无';
       }
+    },
+    // 判断是否需要显示联系老师按钮
+    isNeedContactTeacher() {
+      // 只有当状态为已确认但未缴费时才显示联系老师按钮
+      return this.bookingDetail.status === 'confirmed' && 
+             this.bookingDetail.paymentStatus !== 'paid' &&
+             !this.isPaid;
+    },
+    // 判断是否已支付
+    isPaid() {
+      return this.bookingDetail.paymentStatus === 'paid' || 
+             this.bookingDetail.isPaid === true;
     }
   },
   methods: {
@@ -228,9 +247,8 @@ export default {
     
     // 取消预约
     cancelBooking() {
-      // 检查支付状态
+      // 检查支付状态，更准确地判断是否已支付
       const hasPaid = this.bookingDetail.paymentStatus === 'paid' || 
-                      this.bookingDetail.status === 'confirmed' ||
                       this.bookingDetail.isPaid === true;
       
       // 确认是否取消
@@ -574,6 +592,17 @@ export default {
     margin-bottom: 20rpx;
   }
   
+  .course-deleted-tag {
+    display: inline-block;
+    background-color: #ff4d4f;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+  
   .info-row {
     display: flex;
     margin-bottom: 16rpx;
@@ -631,5 +660,11 @@ export default {
       }
     }
   }
+}
+
+.course-deleted {
+  color: #ff4d4f;
+  font-weight: bold;
+  margin-top: 5px;
 }
 </style> 

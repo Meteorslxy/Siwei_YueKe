@@ -425,9 +425,10 @@ var _default = {
                   pageSize: _this3.limit
                 }; // 添加筛选条件 - 确保参数名称与后端一致
                 if (_this3.selectedGradeGroup !== 'all') {
-                  params.educationalStages = _this3.selectedGradeGroup;
-                  // 同时传递grade参数，以支持新的年级筛选
+                  // 使用grade参数作为主要年级筛选字段
                   params.grade = _this3.selectedGradeGroup;
+                  // 兼容旧版本，也传递educationalStages参数
+                  params.educationalStages = _this3.selectedGradeGroup;
                 }
                 if (_this3.selectedSchool !== 'all') {
                   params.location = _this3.selectedSchool;
@@ -581,13 +582,23 @@ var _default = {
                 }).filter(function (name, index, self) {
                   return self.indexOf(name) === index;
                 }); // 去重
-                _context2.prev = 7;
-                _context2.next = 10;
-                return _this4.$api.teacher.getTeacherList();
-              case 10:
+                console.log('需要查询的教师名称:', teacherNames);
+                if (!(teacherNames.length === 0)) {
+                  _context2.next = 11;
+                  break;
+                }
+                console.log('没有需要查询的教师名称，跳过API调用');
+                return _context2.abrupt("return", courses);
+              case 11:
+                _context2.prev = 11;
+                _context2.next = 14;
+                return _this4.$api.teacher.getTeacherList({
+                  names: teacherNames // 传递教师名称数组进行筛选
+                });
+              case 14:
                 teacherResult = _context2.sent;
                 if (!(teacherResult && teacherResult.code === 0 && teacherResult.data)) {
-                  _context2.next = 17;
+                  _context2.next = 23;
                   break;
                 }
                 teachers = teacherResult.data;
@@ -598,6 +609,7 @@ var _default = {
                 teachers.forEach(function (teacher) {
                   if (teacher.name && teacher.avatar) {
                     teacherAvatarMap[teacher.name] = teacher.avatar;
+                    console.log("\u627E\u5230\u6559\u5E08 ".concat(teacher.name, " \u7684\u5934\u50CF:"), teacher.avatar);
                   }
                 });
 
@@ -606,24 +618,28 @@ var _default = {
                   if (course.teacherName && teacherAvatarMap[course.teacherName]) {
                     course.teacherAvatarUrl = teacherAvatarMap[course.teacherName];
                     console.log("\u4E3A\u8BFE\u7A0B ".concat(course.title, " \u8BBE\u7F6E\u6559\u5E08\u5934\u50CF:"), course.teacherAvatarUrl);
+                  } else if (course.teacherName) {
+                    console.log("\u672A\u627E\u5230\u6559\u5E08 ".concat(course.teacherName, " \u7684\u5934\u50CF"));
                   }
                   return course;
                 }));
-              case 17:
-                _context2.next = 22;
-                break;
-              case 19:
-                _context2.prev = 19;
-                _context2.t0 = _context2["catch"](7);
-                console.error('获取教师头像信息失败:', _context2.t0);
-              case 22:
-                return _context2.abrupt("return", courses);
               case 23:
+                console.log('API调用成功但未返回教师数据:', teacherResult);
+                return _context2.abrupt("return", courses);
+              case 25:
+                _context2.next = 31;
+                break;
+              case 27:
+                _context2.prev = 27;
+                _context2.t0 = _context2["catch"](11);
+                console.error('获取教师头像信息失败:', _context2.t0);
+                return _context2.abrupt("return", courses);
+              case 31:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[7, 19]]);
+        }, _callee2, null, [[11, 27]]);
       }))();
     },
     // 格式化课程时间

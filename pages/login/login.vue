@@ -610,6 +610,10 @@ export default {
           
           uni.setStorageSync('userInfo', userInfo);
           
+          // 检查是否是首次登录
+          const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+          const isFirstLogin = !hasSetStudentName;
+          
           // 显示登录成功提示
           uni.showToast({
             title: '登录成功',
@@ -626,6 +630,14 @@ export default {
           // 登录成功后自动跳转到首页或指定页面
           setTimeout(() => {
             this.navigateAfterLogin();
+            
+            // 如果是首次登录，弹出学生姓名设置弹窗
+            if (isFirstLogin) {
+              console.log('检测到首次登录，将展示学生姓名设置弹窗');
+              setTimeout(() => {
+                uni.$emit('show:student-name-modal');
+              }, 500); // 等待页面跳转完成后再显示弹窗
+            }
           }, 1000);
         } catch (e) {
           console.error('保存用户信息失败:', e);
@@ -882,169 +894,58 @@ export default {
       });
     },
     
-    // 保存用户信息
-    async saveUserInfo(res) {
-      try {
-        // 保存用户信息到本地
-        console.log('保存用户信息, 原始数据:', JSON.stringify(res));
-        
-        // 确保res是对象
-        const userData = typeof res === 'string' ? JSON.parse(res) : res;
-        
-        // 保存token到storage - 支持uni-id-co和老格式
-        // uni-id-co格式通常有token属性
-        if (userData.token) {
-          uni.setStorageSync('uni_id_token', userData.token);
-          uni.setStorageSync('uni_id_token_expired', userData.tokenExpired);
-          console.log('保存了token和过期时间:', userData.tokenExpired);
-        }
-        // 传统格式可能将token放在data或result中
-        else if (userData.data && userData.data.token) {
-          uni.setStorageSync('uni_id_token', userData.data.token);
-          uni.setStorageSync('uni_id_token_expired', userData.data.tokenExpired);
-          console.log('从data字段保存token和过期时间:', userData.data.tokenExpired);
-        }
-        else if (userData.result && userData.result.token) {
-          uni.setStorageSync('uni_id_token', userData.result.token);
-          uni.setStorageSync('uni_id_token_expired', userData.result.tokenExpired);
-          console.log('从result字段保存token和过期时间:', userData.result.tokenExpired);
-        }
-        
-        // 构建完整的用户信息对象
-        let userInfo = {
-          uid: '',
-          _id: '',
-          token: uni.getStorageSync('uni_id_token') || '',
-          tokenExpired: uni.getStorageSync('uni_id_token_expired') || '',
-          username: '',
-          nickname: '',
-          mobile: '',
-          email: '',
-          avatar: '',
-          gender: 0
-        };
-        
-        // 从uni-id-co直接返回的格式提取数据
-        if (userData.uid) {
-          console.log('从uni-id-co直接返回格式提取数据');
-          userInfo.uid = userData.uid;
-          userInfo._id = userData.uid;
-          userInfo.username = userData.username || '';
-          userInfo.nickname = userData.nickname || userData.username || '';
-          userInfo.mobile = userData.mobile || '';
-          userInfo.email = userData.email || '';
-          userInfo.avatar = userData.avatar || '';
-          userInfo.gender = userData.gender || 0;
-        }
-        // 从userInfo字段提取数据
-        else if (userData.userInfo && typeof userData.userInfo === 'object') {
-          console.log('从userInfo字段提取数据');
-          userInfo.uid = userData.userInfo._id || userData.userInfo.uid || userData.uid || '';
-          userInfo._id = userData.userInfo._id || userData.userInfo.uid || userData.uid || '';
-          userInfo.username = userData.userInfo.username || userData.userInfo.nickName || '';
-          userInfo.nickname = userData.userInfo.nickname || userData.userInfo.nickName || '';
-          userInfo.mobile = userData.userInfo.mobile || '';
-          userInfo.email = userData.userInfo.email || '';
-          userInfo.avatar = userData.userInfo.avatar || userData.userInfo.avatarUrl || '';
-          userInfo.gender = userData.userInfo.gender || 0;
-        } 
-        // 从result.userInfo字段提取数据
-        else if (userData.result && userData.result.userInfo) {
-          console.log('从result.userInfo字段提取数据');
-          userInfo.uid = userData.result.userInfo._id || userData.result.userInfo.uid || userData.result.uid || '';
-          userInfo._id = userData.result.userInfo._id || userData.result.userInfo.uid || userData.result.uid || '';
-          userInfo.username = userData.result.userInfo.username || userData.result.userInfo.nickName || '';
-          userInfo.nickname = userData.result.userInfo.nickname || userData.result.userInfo.nickName || '';
-          userInfo.mobile = userData.result.userInfo.mobile || '';
-          userInfo.email = userData.result.userInfo.email || '';
-          userInfo.avatar = userData.result.userInfo.avatar || userData.result.userInfo.avatarUrl || '';
-          userInfo.gender = userData.result.userInfo.gender || 0;
-        }
-        // 从结果的data字段提取数据
-        else if (userData.data && typeof userData.data === 'object') {
-          console.log('从data字段提取数据');
-          userInfo.uid = userData.data._id || userData.data.uid || '';
-          userInfo._id = userData.data._id || userData.data.uid || '';
-          userInfo.username = userData.data.username || userData.data.nickName || '';
-          userInfo.nickname = userData.data.nickname || userData.data.nickName || '';
-          userInfo.mobile = userData.data.mobile || '';
-          userInfo.email = userData.data.email || '';
-          userInfo.avatar = userData.data.avatar || userData.data.avatarUrl || '';
-          userInfo.gender = userData.data.gender || 0;
-        } 
-        // 如果直接包含用户信息字段
-        else {
-          console.log('从顶级字段提取数据');
-          userInfo.uid = userData._id || userData.uid || '';
-          userInfo._id = userData._id || userData.uid || '';
-          userInfo.username = userData.username || userData.nickName || '';
-          userInfo.nickname = userData.nickname || userData.nickName || '';
-          userInfo.mobile = userData.mobile || '';
-          userInfo.email = userData.email || '';
-          userInfo.avatar = userData.avatar || userData.avatarUrl || '';
-          userInfo.gender = userData.gender || 0;
-        }
-        
-        // 确保昵称不为空，默认使用用户名或生成一个
-        if (!userInfo.nickname) {
-          if (userInfo.username) {
-            userInfo.nickname = userInfo.username;
-          } else if (userInfo.mobile) {
-            userInfo.nickname = '用户' + userInfo.mobile.substr(-4);
-          } else if (userInfo.uid) {
-            userInfo.nickname = '用户' + userInfo.uid.substr(-4);
-          } else {
-            userInfo.nickname = '微信用户' + Math.floor(Math.random() * 10000);
-          }
-        }
-        
-        // 确保UI显示需要的userInfo属性存在
-          userInfo.userInfo = {
-          _id: userInfo.uid || userInfo._id,
-          uid: userInfo.uid || userInfo._id,
-            username: userInfo.username,
-          nickname: userInfo.nickname,
-          avatar: userInfo.avatar
-          };
-        
-        console.log('处理后的用户信息:', JSON.stringify(userInfo));
-        
-        // 存储用户信息
-        uni.setStorageSync('userInfo', userInfo);
-        
-        // 保存到全局变量以便其他页面使用
-        getApp().globalData.userInfo = userInfo;
-        
-        // 同时保存到uni-id-pages的标准存储位置
-        uni.setStorageSync('uni-id-pages-userInfo', userInfo);
-        
-        console.log('保存用户信息成功');
-        
-        // 隐藏加载
-        uni.hideLoading();
-        
-        // 触发登录成功事件
-        uni.$emit('user:login', userInfo);
-        uni.$emit('login:success', userInfo);
-        
-        // 显示登录成功提示
-        uni.showToast({
-          title: '登录成功',
-          icon: 'success'
-        });
-        
-        // 登录成功后自动跳转到首页或指定页面
-        setTimeout(() => {
-          this.navigateAfterLogin();
-        }, 1500);
-      } catch (e) {
-        uni.hideLoading();
-        console.error('保存用户信息失败:', e);
-        uni.showToast({
-          title: '登录失败，请重试',
-          icon: 'none'
-        });
+    // 保存用户信息并处理登录成功 - 新增方法
+    saveUserInfo(result) {
+      console.log('保存用户信息:', result);
+      
+      // 确保result有正确的格式
+      const data = result.data || result.userInfo || {};
+      const token = result.token;
+      const tokenExpired = result.tokenExpired;
+      
+      // 保存token和用户信息
+      if (token) {
+        uni.setStorageSync('uni_id_token', token);
       }
+      if (tokenExpired) {
+        uni.setStorageSync('uni_id_token_expired', tokenExpired);
+      }
+      
+      // 保存用户信息
+      uni.setStorageSync('uni-id-pages-userInfo', data);
+      uni.setStorageSync('userInfo', data);
+      
+      // 更新页面状态
+      this.isLoggedIn = true;
+      this.userInfo = data;
+      
+      // 触发登录成功事件
+      uni.$emit('login:success', data);
+      uni.$emit('user:login', data);
+      
+      // 显示成功提示
+      uni.hideLoading();
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success'
+      });
+      
+      // 检查是否是首次登录
+      const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+      const isFirstLogin = !hasSetStudentName;
+      
+      // 延迟导航
+      setTimeout(() => {
+        this.navigate();
+        
+        // 如果是首次登录，弹出学生姓名设置弹窗
+        if (isFirstLogin) {
+          console.log('检测到首次登录，将展示学生姓名设置弹窗');
+          setTimeout(() => {
+            uni.$emit('show:student-name-modal');
+          }, 500); // 给页面足够的时间加载
+        }
+      }, 1500);
     },
     
     // 关闭验证码弹窗
@@ -2613,48 +2514,6 @@ export default {
         });
         return false;
       }
-    },
-    
-    // 保存用户信息并处理登录成功 - 新增方法
-    saveUserInfo(result) {
-      console.log('保存用户信息:', result);
-      
-      // 确保result有正确的格式
-      const data = result.data || result.userInfo || {};
-      const token = result.token;
-      const tokenExpired = result.tokenExpired;
-      
-      // 保存token和用户信息
-      if (token) {
-        uni.setStorageSync('uni_id_token', token);
-      }
-      if (tokenExpired) {
-        uni.setStorageSync('uni_id_token_expired', tokenExpired);
-      }
-      
-      // 保存用户信息
-      uni.setStorageSync('uni-id-pages-userInfo', data);
-      uni.setStorageSync('userInfo', data);
-      
-      // 更新页面状态
-      this.isLoggedIn = true;
-      this.userInfo = data;
-      
-      // 触发登录成功事件
-      uni.$emit('login:success', data);
-      uni.$emit('user:login', data);
-      
-      // 显示成功提示
-      uni.hideLoading();
-      uni.showToast({
-        title: '登录成功',
-        icon: 'success'
-      });
-      
-      // 延迟导航
-      setTimeout(() => {
-        this.navigate();
-      }, 1500);
     },
     
     // 获取验证码

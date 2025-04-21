@@ -323,11 +323,26 @@ var _default = {
         _this3.$api.subject.getSubjectList().then(function (res) {
           console.log('获取学科列表结果:', res);
           if (res && res.code === 0 && res.data && res.data.length > 0) {
-            // 添加"全部"选项，确保_id和name字段与数据库一致
+            // 使用静态数据作为备选
             _this3.subjectList = [{
               _id: 'all',
               name: '全部'
-            }].concat((0, _toConsumableArray2.default)(res.data));
+            }, {
+              _id: '语文',
+              name: '语文'
+            }, {
+              _id: '数学',
+              name: '数学'
+            }, {
+              _id: '英语',
+              name: '英语'
+            }, {
+              _id: '物理',
+              name: '物理'
+            }, {
+              _id: '化学',
+              name: '化学'
+            }];
           } else {
             // 如果获取失败，使用静态数据作为备选
             console.log('获取学科列表失败，使用默认数据');
@@ -367,12 +382,6 @@ var _default = {
           }, {
             _id: '英语',
             name: '英语'
-          }, {
-            _id: '物理',
-            name: '物理'
-          }, {
-            _id: '化学',
-            name: '化学'
           }];
           resolve(); // 即使出错也解析Promise
         }).finally(function () {

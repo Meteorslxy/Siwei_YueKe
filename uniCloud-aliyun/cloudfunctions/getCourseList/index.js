@@ -11,8 +11,9 @@ exports.main = async (event, context) => {
     category = '', 
     keyword = '',
     educationalStages = '', // 教育阶段/年级组
-    subject = '',           // 学科
-    location = '',          // 校区/地点
+    grade = '',            // 年级
+    subject = '',          // 学科
+    location = '',         // 校区/地点
     schoolId = ''
   } = event;
   
@@ -36,34 +37,47 @@ exports.main = async (event, context) => {
       filterConditions.push(`keyword=${keyword}`);
     }
     
+    // 修复年级和学科筛选条件的问题
+    // 创建一个AND条件数组，存放所有筛选条件
+    let andConditions = [];
+    
     // 处理年级组筛选，支持多种字段名称
-    if (educationalStages) {
-      // 使用 OR 查询以适应不同的字段名
-      condition.$or = [
-        { educationalStages: educationalStages },
-        { gradeGroup: educationalStages },
-        { grade: educationalStages }
-      ];
-      filterConditions.push(`教育阶段=${educationalStages}`);
+    if (educationalStages || grade) {
+      const gradeValue = grade || educationalStages;
+      // 创建年级筛选条件（OR条件）
+      const gradeCondition = {
+        $or: [
+          { educationalStages: gradeValue },
+          { gradeGroup: gradeValue },
+          { grade: gradeValue }
+        ]
+      };
+      andConditions.push(gradeCondition);
+      filterConditions.push(`年级=${gradeValue}`);
     }
     
-    // 处理学科筛选，支持多种字段名称
+    // 处理学科筛选
     if (subject) {
-      condition.$or = condition.$or || [];
-      condition.$or.push(
-        { subject: subject },
-        { subjects: subject }
-      );
+      // 创建学科筛选条件（OR条件）
+      const subjectCondition = {
+        $or: [
+          { subject: subject },
+          { subjects: subject }
+        ]
+      };
+      andConditions.push(subjectCondition);
       filterConditions.push(`学科=${subject}`);
     }
     
-    // 处理校区/地点筛选，支持多种字段名称
+    // 处理校区/地点筛选
     if (location) {
-      condition.$or = condition.$or || [];
-      condition.$or.push(
-        { location: location },
-        { schoolName: location }
-      );
+      const locationCondition = {
+        $or: [
+          { location: location },
+          { schoolName: location }
+        ]
+      };
+      andConditions.push(locationCondition);
       filterConditions.push(`校区=${location}`);
     }
     
@@ -72,7 +86,12 @@ exports.main = async (event, context) => {
       filterConditions.push(`schoolId=${schoolId}`);
     }
     
-    console.log('构建的查询条件:', condition, '筛选条件:', filterConditions.join(', '));
+    // 将AND条件数组添加到主条件中（只在有筛选条件时）
+    if (andConditions.length > 0) {
+      condition.$and = andConditions;
+    }
+    
+    console.log('构建的查询条件:', JSON.stringify(condition), '筛选条件:', filterConditions.join(', '));
     
     if (Object.keys(condition).length > 0) {
       query = query.where(condition);

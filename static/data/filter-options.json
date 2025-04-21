@@ -3,9 +3,10 @@
     "description": "年级筛选选项",
     "options": [
       { "label": "全部年级", "value": "all" },
-      { "label": "小学", "value": "小学" },
       { "label": "初中", "value": "初中" },
-      { "label": "高中", "value": "高中" }
+      { "label": "初一", "value": "初一" },
+      { "label": "初二", "value": "初二" },
+      { "label": "初三", "value": "初三" }
     ]
   },
   
@@ -17,11 +18,7 @@
       { "label": "数学", "value": "数学" },
       { "label": "英语", "value": "英语" },
       { "label": "物理", "value": "物理" },
-      { "label": "化学", "value": "化学" },
-      { "label": "生物", "value": "生物" },
-      { "label": "历史", "value": "历史" },
-      { "label": "地理", "value": "地理" },
-      { "label": "政治", "value": "政治" }
+      { "label": "化学", "value": "化学" }
     ]
   },
 
@@ -45,7 +42,6 @@
     "description": "教育阶段筛选选项",
     "options": [
       { "label": "全部", "value": "all" },
-      { "label": "小学", "value": "小学" },
       { "label": "初中", "value": "初中" }
     ]
   },

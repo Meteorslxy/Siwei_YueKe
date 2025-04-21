@@ -172,14 +172,42 @@ var _default = {
   methods: {
     // 打开弹窗
     open: function open() {
-      this.$refs.popup.open();
+      console.log('student-name-modal开始打开弹窗');
+
+      // 先检查用户是否已登录
+      var token = uni.getStorageSync('uni_id_token');
+      var userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+
+      // 如果没有token或用户信息，说明用户未登录，不显示弹窗
+      if (!token || !userInfo._id) {
+        console.log('用户未登录，不显示姓名设置弹窗');
+        return;
+      }
+
+      // 如果用户已经有nickname，说明是已存在于云数据库中的用户，不显示弹窗
+      if (userInfo.nickname && userInfo.nickname.trim() !== '') {
+        console.log('用户已存在于云数据库且有昵称，不需要显示姓名设置弹窗:', userInfo.nickname);
+        // 确保hasSetStudentName标记已设置
+        uni.setStorageSync('hasSetStudentName', true);
+        return;
+      }
+      if (this.$refs.popup) {
+        console.log('student-name-modal组件找到了popup引用，正在打开');
+        this.$refs.popup.open();
+      } else {
+        console.error('student-name-modal组件找不到popup引用');
+      }
     },
     // 关闭弹窗
     close: function close() {
-      this.$refs.popup.close();
+      console.log('student-name-modal关闭弹窗');
+      if (this.$refs.popup) {
+        this.$refs.popup.close();
+      }
     },
     // 确认姓名
     confirmName: function confirmName(name) {
+      console.log('学生姓名确认:', name);
       if (!name || name.trim() === '') {
         uni.showToast({
           title: '姓名不能为空',
@@ -191,40 +219,54 @@ var _default = {
       // 更新用户昵称到云数据库
       this.updateUserNickname(name);
     },
-    // 关闭弹窗回调
+    // 用户取消设置姓名
     closeDialog: function closeDialog() {
-      // 如果用户取消，也可以在这里加入一些逻辑
       console.log('用户取消设置姓名');
+      // 检查是否第一次设置姓名
+      var hasSetName = uni.getStorageSync('hasSetStudentName');
+      if (!hasSetName) {
+        console.log('用户首次登录未设置姓名，将设置临时姓名');
+        // 生成临时姓名
+        var tempName = '用户' + Math.floor(Math.random() * 1000000);
+        console.log('生成临时姓名:', tempName);
+        // 更新临时姓名到本地存储
+        this.updateUserNickname(tempName, true);
+      } else {
+        console.log('用户已设置过姓名，直接关闭弹窗');
+        this.close();
+      }
     },
     // 更新用户昵称到云数据库
     updateUserNickname: function updateUserNickname(name) {
-      var _this = this;
+      var _arguments = arguments,
+        _this = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var token, userInfo, userId, success, result, uniIdCo, res, storedUserInfo;
+        var isTemporary, token, userInfo, userId, success, result, uniIdCo, res, storedUserInfo;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.prev = 0;
+                isTemporary = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : false;
+                _context.prev = 1;
                 uni.showLoading({
                   title: '保存中...',
                   mask: true
                 });
-                console.log('准备更新用户昵称:', name);
+                console.log('准备更新用户昵称:', name, isTemporary ? '(临时姓名)' : '(正式姓名)');
                 if (!(!name || name.trim() === '')) {
-                  _context.next = 5;
+                  _context.next = 6;
                   break;
                 }
                 throw new Error('姓名不能为空');
-              case 5:
+              case 6:
                 // 获取token并传递给云函数
                 token = uni.getStorageSync('uni_id_token');
                 if (token) {
-                  _context.next = 8;
+                  _context.next = 9;
                   break;
                 }
                 throw new Error('未登录，请重新登录');
-              case 8:
+              case 9:
                 // 获取用户ID
                 userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
                 userId = userInfo._id || userInfo.uid || userInfo.userId || '';
@@ -234,10 +276,19 @@ var _default = {
                 }
 
                 // 使用多种方式进行更新，如果一种失败，尝试另一种
-                success = false; // 方法1: 使用自定义云函数
-                _context.prev = 13;
+                success = false; // 如果是临时姓名并且不需要发送到服务器，则只更新本地存储
+                if (!isTemporary) {
+                  _context.next = 19;
+                  break;
+                }
+                console.log('设置临时姓名，仅更新本地存储');
+                success = true;
+                _context.next = 45;
+                break;
+              case 19:
+                _context.prev = 19;
                 console.log('方法1: 使用自定义云函数更新昵称');
-                _context.next = 17;
+                _context.next = 23;
                 return uniCloud.callFunction({
                   name: 'updateUserInfo',
                   data: {
@@ -251,45 +302,45 @@ var _default = {
                     mobile: userInfo.mobile || userInfo.phoneNumber || ''
                   }
                 });
-              case 17:
+              case 23:
                 result = _context.sent;
                 console.log('方法1结果:', result);
                 if (result.result && result.result.code === 0) {
                   success = true;
                 }
-                _context.next = 25;
+                _context.next = 31;
                 break;
-              case 22:
-                _context.prev = 22;
-                _context.t0 = _context["catch"](13);
+              case 28:
+                _context.prev = 28;
+                _context.t0 = _context["catch"](19);
                 console.error('方法1失败:', _context.t0);
-              case 25:
+              case 31:
                 if (success) {
-                  _context.next = 39;
+                  _context.next = 45;
                   break;
                 }
-                _context.prev = 26;
+                _context.prev = 32;
                 console.log('方法2: 使用uni-id-co更新昵称');
                 uniIdCo = uniCloud.importObject('uni-id-co', {
                   customUI: true
                 });
-                _context.next = 31;
+                _context.next = 37;
                 return uniIdCo.updateUser({
                   nickname: name
                 });
-              case 31:
+              case 37:
                 res = _context.sent;
                 console.log('方法2结果:', res);
                 if (res.errCode === 0) {
                   success = true;
                 }
-                _context.next = 39;
+                _context.next = 45;
                 break;
-              case 36:
-                _context.prev = 36;
-                _context.t1 = _context["catch"](26);
+              case 42:
+                _context.prev = 42;
+                _context.t1 = _context["catch"](32);
                 console.error('方法2失败:', _context.t1);
-              case 39:
+              case 45:
                 // 无论云端是否更新成功，都更新本地存储
                 // 更新本地存储
                 storedUserInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
@@ -302,36 +353,38 @@ var _default = {
 
                 // 触发用户信息更新事件
                 uni.$emit('user:updated', storedUserInfo);
-                uni.showToast({
-                  title: success ? '保存成功' : '本地保存成功',
-                  icon: 'success'
-                });
+                if (!isTemporary) {
+                  uni.showToast({
+                    title: success ? '保存成功' : '本地保存成功',
+                    icon: 'success'
+                  });
+                }
 
                 // 记录已设置姓名
                 uni.setStorageSync('hasSetStudentName', true);
 
                 // 关闭弹窗
                 _this.close();
-                _context.next = 54;
+                _context.next = 60;
                 break;
-              case 50:
-                _context.prev = 50;
-                _context.t2 = _context["catch"](0);
+              case 56:
+                _context.prev = 56;
+                _context.t2 = _context["catch"](1);
                 console.error('更新用户昵称失败:', _context.t2);
                 uni.showToast({
                   title: '保存失败: ' + (_context.t2.message || '未知错误'),
                   icon: 'none'
                 });
-              case 54:
-                _context.prev = 54;
+              case 60:
+                _context.prev = 60;
                 uni.hideLoading();
-                return _context.finish(54);
-              case 57:
+                return _context.finish(60);
+              case 63:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[0, 50, 54, 57], [13, 22], [26, 36]]);
+        }, _callee, null, [[1, 56, 60, 63], [19, 28], [32, 42]]);
       }))();
     }
   }

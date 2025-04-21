@@ -453,12 +453,20 @@ export default {
       
       console.log('检查用户是否需要设置学生姓名');
       
-      // 如果用户已有昵称并且不是默认昵称（如"微信用户"或包含用户ID的昵称），则认为已设置
-      if (currentUserInfo.nickname && 
-          currentUserInfo.nickname !== '微信用户' && 
-          !currentUserInfo.nickname.startsWith('用户') && 
-          !currentUserInfo.nickname.startsWith('wx_user')) {
-        console.log('用户已设置有效昵称:', currentUserInfo.nickname);
+      // 如果用户已有昵称，说明已存在于云数据库，不需要再次设置姓名
+      if (currentUserInfo.nickname && currentUserInfo.nickname.trim() !== '') {
+        console.log('用户已有昵称，说明已存在于云数据库:', currentUserInfo.nickname);
+        // 记录已设置姓名
+        uni.setStorageSync('hasSetStudentName', true);
+        return;
+      }
+      
+      // 也检查nickName字段（一些API可能使用这个字段）
+      if (currentUserInfo.nickName && currentUserInfo.nickName.trim() !== '' && 
+          currentUserInfo.nickName !== '微信用户' && 
+          !currentUserInfo.nickName.startsWith('用户') && 
+          !currentUserInfo.nickName.startsWith('wx_user')) {
+        console.log('用户已设置有效昵称(nickName字段):', currentUserInfo.nickName);
         // 记录已设置姓名
         uni.setStorageSync('hasSetStudentName', true);
         return;

@@ -117,10 +117,68 @@ exports.main = async (event, context) => {
     
     console.log(`查询到${bookings.length}条记录`);
     
+    // 检查关联课程是否存在
+    const processedBookings = [];
+    
+    // 从所有预约中获取唯一的课程ID列表
+    const courseIds = [...new Set(bookings.filter(booking => booking.courseId).map(booking => booking.courseId))];
+    
+    // 批量查询这些课程是否存在
+    let existingCourseIds = [];
+    if (courseIds.length > 0) {
+      console.log(`检查${courseIds.length}个关联课程是否存在`);
+      
+      // 由于可能有很多课程ID，我们使用in条件来一次性查询
+      const coursesResult = await db.collection('courses')
+        .where({
+          _id: dbCmd.in(courseIds)
+        })
+        .field({ _id: true })
+        .get();
+      
+      existingCourseIds = coursesResult.data.map(course => course._id);
+      console.log(`找到${existingCourseIds.length}个有效课程`);
+    }
+    
+    // 处理每个预约，检查其关联的课程是否存在
+    for (const booking of bookings) {
+      const processedBooking = { ...booking };
+      
+      // 如果有课程ID但该课程不存在
+      if (processedBooking.courseId && !existingCourseIds.includes(processedBooking.courseId)) {
+        console.log(`预约(${processedBooking._id})关联的课程(${processedBooking.courseId})不存在，标记为已取消`);
+        
+        // 更新状态为已取消
+        processedBooking.status = 'cancelled';
+        processedBooking.paymentStatus = 'cancelled';
+        
+        // 添加标记，表示课程已删除
+        processedBooking.isCourseDeleted = true;
+        processedBooking.courseDeletedNote = '课程已删除';
+        
+        // 如果可以，我们可以将此信息保存到数据库
+        try {
+          await db.collection('bookings').doc(processedBooking._id).update({
+            status: 'cancelled',
+            paymentStatus: 'cancelled',
+            isCourseDeleted: true,
+            courseDeletedNote: '课程已删除',
+            updateTime: new Date()
+          });
+          console.log(`已更新预约(${processedBooking._id})状态为已取消`);
+        } catch (updateErr) {
+          console.error(`更新预约(${processedBooking._id})状态失败:`, updateErr);
+          // 继续处理，不影响返回结果
+        }
+      }
+      
+      processedBookings.push(processedBooking);
+    }
+    
     return {
       code: 0,
       success: true,
-      data: bookings,
+      data: processedBookings,
       total: total,
       message: '获取预约记录成功'
     };
