@@ -76,8 +76,14 @@
               <text>{{item.title}}</text>
             </view>
             <view class="course-info">
-              <text class="course-location">{{item.location || item.schoolName}}</text>
-              <text class="course-time">{{item.startTime && item.endTime ? `${item.startTime}-${item.endTime}` : ''}}</text>
+              <view class="course-location">
+                <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/map.png"></image>
+                <text class="location-text">{{item.location || item.schoolName}}</text>
+              </view>
+              <view class="course-time" v-if="item.startTime && item.endTime">
+                <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/time.png"></image>
+                <text class="time-text">{{item.startTime}}-{{item.endTime}}</text>
+              </view>
             </view>
             <view class="course-teacher">
               <image class="teacher-avatar" :src="getTeacherAvatar(item)" mode="aspectFill"></image>
@@ -825,6 +831,23 @@ export default {
           margin-bottom: 16rpx;
           font-size: 24rpx;
           color: $text-color-grey;
+          flex-direction: column;
+          
+          .course-location, .course-time {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10rpx;
+            
+            .icon-image {
+              width: 24rpx;
+              height: 24rpx;
+              margin-right: 8rpx;
+            }
+            
+            .location-text, .time-text {
+              color: $text-color-grey;
+            }
+          }
           
           .course-location {
             margin-right: 30rpx;

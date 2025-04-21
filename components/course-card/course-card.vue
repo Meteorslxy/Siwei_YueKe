@@ -8,11 +8,11 @@
       <view class="course-info">
         <view class="course-title">{{course.title}}</view>
         <view class="course-location" v-if="course.location">
-          <image class="icon-image" src="/static/images/icons/map.png"></image>
+          <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/map.png"></image>
           <text class="location-text">{{course.location}}</text>
         </view>
         <view class="course-time" v-if="course.startTime">
-          <image class="icon-image" src="/static/images/icons/time.png"></image>
+          <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/time.png"></image>
           <text class="time-text">{{formatTime(course.startTime, course.endTime)}}</text>
         </view>
       </view>

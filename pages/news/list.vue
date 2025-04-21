@@ -21,7 +21,7 @@
       
       <!-- 空状态 -->
       <view class="empty-state" v-else-if="newsList.length === 0">
-        <image class="empty-icon" src="/static/images/icons/empty.png" mode="aspectFit"></image>
+        <image class="empty-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/empty.png" mode="aspectFit"></image>
         <text class="empty-text">暂无通知信息</text>
         <button class="refresh-btn" @click="refreshList">刷新</button>
       </view>

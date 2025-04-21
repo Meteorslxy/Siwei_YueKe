@@ -283,6 +283,20 @@
   margin-bottom: 16rpx;
   font-size: 24rpx;
   color: var(--text-color-grey);
+  flex-direction: column;
+}
+.course-section .course-list .course-item .course-content .course-info .course-location, .course-section .course-list .course-item .course-content .course-info .course-time {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+.course-section .course-list .course-item .course-content .course-info .course-location .icon-image, .course-section .course-list .course-item .course-content .course-info .course-time .icon-image {
+  width: 24rpx;
+  height: 24rpx;
+  margin-right: 8rpx;
+}
+.course-section .course-list .course-item .course-content .course-info .course-location .location-text, .course-section .course-list .course-item .course-content .course-info .course-location .time-text, .course-section .course-list .course-item .course-content .course-info .course-time .location-text, .course-section .course-list .course-item .course-content .course-info .course-time .time-text {
+  color: var(--text-color-grey);
 }
 .course-section .course-list .course-item .course-content .course-info .course-location {
   margin-right: 30rpx;

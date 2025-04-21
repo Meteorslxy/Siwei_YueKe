@@ -197,20 +197,39 @@ export const mutations = {
 			const token = uni.getStorageSync('uni_id_token');
 			const tokenExpired = uni.getStorageSync('uni_id_token_expired');
 			
-			if (token && typeof token === 'string' && tokenExpired && tokenExpired > Date.now()) {
+			// 增强token有效性检查：确保token格式正确、非空且未过期
+			const isTokenValid = token && 
+			    typeof token === 'string' && 
+			    token.length > 10 && // 确保token不是空字符串或过短
+			    tokenExpired && 
+			    tokenExpired > Date.now(); // 确保token未过期
+			
+			if (isTokenValid) {
 				try{
-					await uniIdCo.logout();
+					console.log('token有效，调用logout云函数');
+					// 使用customUI参数创建uniIdCo对象，禁止自动显示错误提示
+					const uniIdCoCustom = uniCloud.importObject("uni-id-co", {
+						customUI: true,
+						// 完全禁用错误提示
+						errorOptions: {
+							type: 'none' 
+						}
+					});
+					await uniIdCoCustom.logout();
+					console.log('logout云函数调用成功');
 				}catch(e){
-					console.error('注销时发生错误:', e);
+					// 完全静默处理错误，仅记录日志
+					console.log('注销时发生错误，已捕获并忽略:', e.message || e);
 				}
 			} else {
-				console.log('token无效或已过期，跳过服务端注销');
+				console.log('token无效或已过期，跳过调用logout云函数');
 			}
 		} catch (logoutError) {
-			console.error('注销过程出错:', logoutError);
+			console.log('注销过程处理错误:', logoutError.message || logoutError);
 		}
 		
 		// 清理所有相关的本地缓存
+		console.log('清理本地存储的token和用户信息');
 		uni.removeStorageSync('uni_id_token');
 		uni.removeStorageSync('uni_id_token_expired');
 		uni.removeStorageSync('uni-id-pages-userInfo');
@@ -245,6 +264,19 @@ export const mutations = {
 		
 		// 清空store中的用户信息
 		this.setUserInfo({},{cover:true});
+		
+		// 在全局应用对象中设置防止自动重新登录的标志
+		try {
+			const app = getApp();
+			if (app && app.globalData) {
+				console.log('设置全局防止自动登录标志');
+				app.globalData.preventAutoLogin = true;
+				app.globalData.logoutTime = Date.now();
+				app.globalData.userInfo = null;
+			}
+		} catch (e) {
+			console.log('设置全局防止自动登录标志失败:', e);
+		}
 		
 		// 通知其他组件登录状态改变
 		uni.$emit('uni-id-pages-logout');
@@ -435,13 +467,42 @@ export const mutations = {
 				// 再次检查登录状态，确保用户仍然登录
 				const currentToken = uni.getStorageSync('uni_id_token');
 				if (currentToken) {
-					// 强制触发学生姓名设置弹窗事件
-					console.log('强制触发学生姓名设置弹窗事件');
-					uni.$emit('show:student-name-modal');
+					console.log('触发App全局方法检查学生姓名设置状态');
+					try {
+						// 获取App实例
+						const app = getApp();
+						if (app && app.checkStudentNameStatus) {
+							// 使用App中的方法进行更完整的检查
+							app.checkStudentNameStatus(userInfo, true);
+						} else {
+							// 如果获取不到App实例或方法不存在，则直接触发弹窗
+							console.log('无法获取App实例或方法不存在，直接触发学生姓名设置弹窗');
+							uni.$emit('show:student-name-modal');
+						}
+					} catch (e) {
+						console.error('触发学生姓名设置检查失败:', e);
+						// 出错时直接触发弹窗
+						uni.$emit('show:student-name-modal');
+					}
 				} else {
 					console.log('用户已退出登录，不显示姓名设置弹窗');
 				}
 			}, 1500); // 页面跳转完成后显示弹窗
+		} else if (hasValidUserInfo) {
+			console.log('非首次登录或已设置过学生姓名，但仍检查一次云端数据');
+			// 即使不是首次登录，也调用一次检查方法，以确保与云端数据一致
+			try {
+				// 获取App实例
+				const app = getApp();
+				if (app && app.checkStudentNameStatus) {
+					// 延迟执行，确保页面跳转完成
+					setTimeout(() => {
+						app.checkStudentNameStatus(userInfo, false);
+					}, 1800);
+				}
+			} catch (e) {
+				console.error('非首次登录检查学生姓名设置状态失败:', e);
+			}
 		}
 		
 		// 检查是否需要设置密码
