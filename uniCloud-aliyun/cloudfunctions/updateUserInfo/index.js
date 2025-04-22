@@ -133,6 +133,15 @@ exports.main = async (event, context) => {
     if (nickname) {
       console.log('设置昵称:', nickname);
       updateData.nickname = nickname;
+      
+      // 检查是否是真实姓名设置，如果是，将nickname作为真实姓名使用
+      if (event.isRealName || event.real_name) {
+        console.log('设置真实姓名到nickname字段');
+        updateData.nickname = nickname;
+        
+        // 同时将real_name字段更新为真实姓名
+        updateData.real_name = nickname;
+      }
     }
     
     if (avatar) {

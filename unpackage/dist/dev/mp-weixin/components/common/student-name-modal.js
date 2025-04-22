@@ -162,6 +162,8 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 //
 //
 //
+//
+//
 var _default = {
   name: 'StudentNameModal',
   data: function data() {
@@ -236,24 +238,25 @@ var _default = {
           title: '姓名不能为空',
           icon: 'none'
         });
+
+        // 姓名为空时不关闭弹窗，继续等待输入
         return;
       }
 
       // 更新用户昵称到云数据库
       this.updateUserNickname(name);
     },
-    // 用户取消设置姓名
+    // 用户取消设置姓名 - 禁用了取消按钮，但保留此方法以防意外调用
     closeDialog: function closeDialog() {
-      console.log('用户取消设置姓名');
-      // 无论是否第一次设置姓名，都清除标记，确保下次仍弹出
-      uni.removeStorageSync('hasSetStudentName');
-      console.log('清除姓名设置标记，确保下次登录时仍弹出设置窗口');
+      console.log('用户试图取消设置姓名，但此操作被禁止');
+      // 提示用户必须设置姓名
+      uni.showToast({
+        title: '请输入学生真实姓名',
+        icon: 'none'
+      });
 
-      // 生成临时姓名
-      var tempName = '用户' + Math.floor(Math.random() * 1000000);
-      console.log('生成临时姓名:', tempName);
-      // 更新临时姓名到本地存储，但不标记为已设置
-      this.updateUserNickname(tempName, true);
+      // 不执行任何关闭操作，保持弹窗打开状态
+      return;
     },
     // 更新用户昵称到云数据库
     updateUserNickname: function updateUserNickname(name) {
@@ -318,7 +321,10 @@ var _default = {
                     userId: userId,
                     uid: userId,
                     _id: userId,
-                    mobile: userInfo.mobile || userInfo.phoneNumber || ''
+                    mobile: userInfo.mobile || userInfo.phoneNumber || '',
+                    isRealName: true,
+                    // 标记这是真实姓名
+                    real_name: name // 同时设置real_name字段
                   }
                 });
               case 23:
@@ -345,7 +351,8 @@ var _default = {
                 });
                 _context.next = 37;
                 return uniIdCo.updateUser({
-                  nickname: name
+                  nickname: name,
+                  real_name: name // 同时更新真实姓名字段
                 });
               case 37:
                 res = _context.sent;
@@ -409,6 +416,15 @@ var _default = {
         }, _callee, null, [[1, 55, 59, 62], [19, 28], [32, 42]]);
       }))();
     }
+  },
+  mounted: function mounted() {
+    var _this3 = this;
+    // 配置弹窗不可点击关闭
+    this.$nextTick(function () {
+      if (_this3.$refs.popup) {
+        _this3.$refs.popup.maskClick = false;
+      }
+    });
   }
 };
 exports.default = _default;

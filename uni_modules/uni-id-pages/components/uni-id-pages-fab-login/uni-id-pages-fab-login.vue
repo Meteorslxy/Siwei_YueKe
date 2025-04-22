@@ -445,6 +445,90 @@
 						phoneCode: options.phoneNumberCode
 					}, type)
 				}
+				
+				// 对于微信登录，询问是否授权获取头像昵称
+				if (type === 'weixin') {
+					// 询问用户是否授权获取微信头像和昵称
+					try {
+						const modalRes = await new Promise((resolve) => {
+							uni.showModal({
+								title: '授权提示',
+								content: '是否授权获取微信昵称和头像？授权后将用于个人资料显示',
+								cancelText: '不授权',
+								confirmText: '授权',
+								success: (res) => {
+									resolve(res);
+								}
+							});
+						});
+						
+						// 如果用户确认，则尝试获取用户信息
+						let userInfo = null;
+						
+						if (modalRes.confirm) {
+							try {
+								// #ifdef MP-WEIXIN
+								// 使用getUserProfile获取用户信息
+								const profileRes = await uni.getUserProfile({
+									desc: '用于完善会员资料' 
+								});
+								
+								if (profileRes && profileRes.userInfo) {
+									userInfo = profileRes.userInfo;
+									console.log('获取微信用户信息成功:', userInfo);
+								}
+								// #endif
+								
+								// #ifdef APP-PLUS
+								const getUserInfoRes = await this.getUserInfo({
+									provider: 'weixin'
+								});
+								
+								if (getUserInfoRes && getUserInfoRes.userInfo) {
+									userInfo = getUserInfoRes.userInfo;
+									console.log('APP获取微信用户信息成功:', userInfo);
+								}
+								// #endif
+							} catch (e) {
+								console.error('获取用户信息失败:', e);
+								uni.showToast({
+									title: '获取用户信息失败',
+									icon: 'none'
+								});
+							}
+						} else {
+							console.log('用户拒绝授权获取头像昵称');
+						}
+						
+						// 继续执行登录流程，传递userInfo（如果有）
+						uni.login({
+							"provider": type,
+							"onlyAuthorize": true,
+							// #ifdef APP
+							"univerifyStyle": this.univerifyStyle,
+							// #endif
+							success: async e => {
+								this.login({
+									code: e.code,
+									userInfo: userInfo
+								}, type);
+							},
+							fail: async (err) => {
+								console.error(JSON.stringify(err));
+								uni.showModal({
+									content: `登录失败; code: ${err.errCode || -1}`,
+									confirmText: "知道了",
+									showCancel: false
+								});
+								uni.hideLoading()
+							}
+						});
+						
+						return; // 使用自定义流程，不执行后续代码
+					} catch (e) {
+						console.error('授权询问失败:', e);
+					}
+				}
 
 				uni.login({
 					"provider": type,

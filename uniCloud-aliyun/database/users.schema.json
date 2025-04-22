@@ -35,6 +35,10 @@
       "bsonType": "string",
       "description": "用户昵称"
     },
+    "wx_nickname": {
+      "bsonType": "string",
+      "description": "微信原始昵称"
+    },
     "avatarUrl": {
       "bsonType": "string",
       "description": "用户头像"

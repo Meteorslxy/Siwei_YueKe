@@ -26,15 +26,20 @@
           <view class="booking-main">
             <view class="course-info">
               <view class="course-title">{{item.courseTitle || item.title}}</view>
+              <!-- 支付倒计时显示，和未缴费状态放在同一行 -->
+              <view class="payment-status-row" v-if="shouldShowCountdown(item)">
               <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item)}}</view>
+                <view class="payment-countdown">
+                  <text class="countdown-label">支付倒计时：</text>
+                  <text class="countdown-time">{{formatCountdown(getPaymentCountdown(item))}}</text>
+                </view>
+              </view>
+              <!-- 如果不需要显示倒计时，则只显示状态 -->
+              <view class="payment-status-row" v-else>
+                <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item)}}</view>
+              </view>
               <view class="course-deleted-tag" v-if="item.isCourseDeleted">课程已删除</view>
               <view class="auto-cancel-tag" v-if="showAutoCancelTag(item)">超时未支付自动取消</view>
-            </view>
-            
-            <!-- 支付倒计时显示 -->
-            <view class="payment-countdown" v-if="shouldShowCountdown(item)">
-              <text class="countdown-label">支付倒计时：</text>
-              <text class="countdown-time">{{formatCountdown(getPaymentCountdown(item))}}</text>
             </view>
             
             <view class="booking-details">
@@ -48,8 +53,8 @@
                   <text class="detail-value">{{formatCourseTime(item)}}</text>
                 </view>
                 <view class="detail-row">
-                  <text class="detail-label">校区地点</text>
-                  <text class="detail-value">{{item.schoolName || '未知'}}</text>
+                  <text class="detail-label">课程日期</text>
+                  <text class="detail-value">{{formatDateRange(item)}}</text>
                 </view>
               </view>
               
@@ -61,6 +66,10 @@
                 <view class="detail-row">
                   <text class="detail-label">联系电话</text>
                   <text class="detail-value">{{item.contactPhone || '暂无'}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">校区地点</text>
+                  <text class="detail-value">{{item.schoolName || '未知'}}</text>
                 </view>
               </view>
             </view>
@@ -205,7 +214,11 @@ export default {
         this.initAllCountdowns();
         
         // 重新检查并标记自动取消的预约
-        this.ensureAutoCancelTagsDisplayed();
+        if (typeof this.ensureAutoCancelTagsDisplayed === 'function') {
+          this.ensureAutoCancelTagsDisplayed();
+        } else {
+          console.log('ensureAutoCancelTagsDisplayed方法未定义，跳过执行');
+        }
       }, 500);
     });
   },
@@ -246,7 +259,11 @@ export default {
         // 加载完成后初始化倒计时
         setTimeout(() => {
           this.initAllCountdowns();
-          this.ensureAutoCancelTagsDisplayed();
+          if (typeof this.ensureAutoCancelTagsDisplayed === 'function') {
+            this.ensureAutoCancelTagsDisplayed();
+          } else {
+            console.log('ensureAutoCancelTagsDisplayed方法未定义，跳过执行');
+          }
         }, 500);
       });
       // 重置标记
@@ -255,7 +272,11 @@ export default {
       // 即使没有变更，也重新初始化倒计时
       console.log('页面显示，重新初始化倒计时');
       this.initAllCountdowns();
-      this.ensureAutoCancelTagsDisplayed();
+      if (typeof this.ensureAutoCancelTagsDisplayed === 'function') {
+        this.ensureAutoCancelTagsDisplayed();
+      } else {
+        console.log('ensureAutoCancelTagsDisplayed方法未定义，跳过执行');
+      }
     }
   },
   onHide() {
@@ -2059,6 +2080,50 @@ export default {
       }
       
       return false;
+    },
+    
+    // 在methods中添加格式化日期范围的方法
+    formatDateRange(item) {
+      // 如果没有日期数据，返回"暂无"
+      if (!item.startDate && !item.endDate) {
+        return '暂无';
+      }
+      
+      // 格式化单个日期
+      const formatDate = (dateStr) => {
+        try {
+          if (!dateStr) return '';
+          
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) {
+            return dateStr;
+          }
+          
+          return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        } catch (e) {
+          return dateStr;
+        }
+      };
+      
+      // 如果有开始和结束日期，显示范围
+      if (item.startDate && item.endDate) {
+        return `${formatDate(item.startDate)}-${formatDate(item.endDate)}`;
+      } else if (item.startDate) {
+        return formatDate(item.startDate);
+      } else if (item.endDate) {
+        return formatDate(item.endDate);
+      }
+      
+      // 尝试使用courseStartDate和courseEndDate作为备选
+      if (item.courseStartDate && item.courseEndDate) {
+        return `${formatDate(item.courseStartDate)}-${formatDate(item.courseEndDate)}`;
+      } else if (item.courseStartDate) {
+        return formatDate(item.courseStartDate);
+      } else if (item.courseEndDate) {
+        return formatDate(item.courseEndDate);
+      }
+      
+      return '暂无';
     }
   }
 }
@@ -2147,71 +2212,56 @@ export default {
       
       .booking-main {
         .course-info {
-          display: flex;
-          margin-bottom: 16rpx;
-          align-items: flex-start;
+          flex: 1;
           
           .course-title {
-            flex: 3;
-            font-size: 30rpx;
+            font-size: 32rpx;
             font-weight: bold;
-            color: $text-color;
-            margin-right: 15rpx;
-            line-height: 1.4;
-            word-break: break-word;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            overflow: hidden;
+            margin-bottom: 10rpx;
+            color: #333;
           }
           
-          .booking-status {
-            flex: 1;
-            font-size: 24rpx;
-            padding: 6rpx 16rpx;
-            border-radius: 20rpx;
-            text-align: center;
-            white-space: nowrap;
-            align-self: flex-start;
-            
-            &.status-pending {
-              background-color: #FFF3E0;
-              color: #FF9800;
-            }
-            
-            &.status-confirmed, &.status-confirmed_unpaid {
-              background-color: #E0F7FA;
-              color: #00BCD4;
-            }
-            
-            &.status-finished {
-              background-color: #E8F5E9;
-              color: #4CAF50;
-            }
-            
-            &.status-cancelled, &.status-cancel {
-              background-color: #EEEEEE;
-              color: #9E9E9E;
-            }
+          /* 移除booking-status的样式设置，避免冲突 */
+          
+          .course-deleted-tag {
+            display: inline-block;
+            font-size: 22rpx;
+            padding: 4rpx 12rpx;
+            background-color: #EEEEEE;
+            color: #9E9E9E;
+            border-radius: 16rpx;
+            margin-right: 10rpx;
+          }
+          
+          .auto-cancel-tag {
+            display: inline-block;
+            font-size: 22rpx;
+            padding: 4rpx 12rpx;
+            background-color: #ffecec;
+            color: #ff6464;
+            border-radius: 16rpx;
           }
         }
         
-        .payment-countdown {
-          background-color: rgba(255, 87, 51, 0.1);
-          border-radius: 8rpx;
-          padding: 8rpx 16rpx;
+        /* 新增支付状态行样式 */
+        .payment-status-row {
+          display: flex;
+          align-items: center;
           margin: 10rpx 0;
-          display: inline-block;
           
-          .countdown-label {
-            font-size: 24rpx;
-            color: #FF5733;
+          .booking-status {
+            margin-right: 16rpx;
+            flex-shrink: 0;
           }
           
-          .countdown-time {
-            font-size: 26rpx;
+          .payment-countdown {
+            font-size: 24rpx;
             color: #FF5733;
-            font-weight: bold;
+            
+            .countdown-time {
+              color: #FF5733;
+              font-weight: bold;
+            }
           }
         }
         
@@ -2356,6 +2406,36 @@ export default {
     font-size: 26rpx;
     color: #FF5733;
     font-weight: bold;
+  }
+}
+
+// 添加预约状态样式
+.booking-status {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  text-align: center;
+  white-space: nowrap;
+  display: inline-block;
+  
+  &.status-pending {
+    background-color: #FFF3E0;
+    color: #FF9800;
+  }
+  
+  &.status-confirmed, &.status-confirmed_unpaid {
+    background-color: #E0F7FA;
+    color: #00BCD4;
+  }
+  
+  &.status-finished {
+    background-color: #E8F5E9;
+    color: #4CAF50;
+  }
+  
+  &.status-cancelled, &.status-cancel {
+    background-color: #EEEEEE;
+    color: #9E9E9E;
   }
 }
 </style> 

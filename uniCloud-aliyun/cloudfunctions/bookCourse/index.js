@@ -162,6 +162,8 @@ exports.main = async (event, context) => {
       courseTitle: course.title || '',
       courseStartTime: course.startTime || '',
       courseEndTime: course.endTime || '',
+      startDate: course.startDate || '', // 添加课程开始日期
+      endDate: course.endDate || '',     // 添加课程结束日期
       schoolName: course.schoolName || course.location || '未知校区',
       studentName: studentName,
       contactPhone: contactPhone,

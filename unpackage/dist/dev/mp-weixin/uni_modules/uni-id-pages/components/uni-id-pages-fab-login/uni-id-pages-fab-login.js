@@ -326,22 +326,22 @@ var _default = {
     login_before: function login_before(type) {
       var _arguments = arguments,
         _this2 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
         var _config$agreements2;
-        var navigateBack, options, needAgreements, agreementsRef, closeUniverify, univerifyManager, clickAnotherButtons, onButtonsClickFn;
-        return _regenerator.default.wrap(function _callee6$(_context6) {
+        var navigateBack, options, needAgreements, agreementsRef, closeUniverify, univerifyManager, clickAnotherButtons, onButtonsClickFn, modalRes, userInfo, profileRes;
+        return _regenerator.default.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 navigateBack = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : true;
                 options = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : {};
                 console.log(type, options);
                 //提示空实现
                 if (!["qq", "xiaomi", "sinaweibo", "taobao", "facebook", "google", "alipay", "douyin"].includes(type)) {
-                  _context6.next = 5;
+                  _context8.next = 5;
                   break;
                 }
-                return _context6.abrupt("return", uni.showToast({
+                return _context8.abrupt("return", uni.showToast({
                   title: '该登录方式暂未实现，欢迎提交pr',
                   icon: 'none',
                   duration: 3000
@@ -353,10 +353,10 @@ var _default = {
                 //非app端使用了，app特有登录方式
 
                 ["univerify", "apple"].includes(type)) {
-                  _context6.next = 8;
+                  _context8.next = 8;
                   break;
                 }
-                return _context6.abrupt("return", uni.showToast({
+                return _context8.abrupt("return", uni.showToast({
                   title: '当前设备不支持此登录，请选择其他登录方式',
                   icon: 'none',
                   duration: 3000
@@ -365,11 +365,11 @@ var _default = {
                 //判断是否需要弹出隐私协议授权框
                 needAgreements = ((_config.default === null || _config.default === void 0 ? void 0 : (_config$agreements2 = _config.default.agreements) === null || _config$agreements2 === void 0 ? void 0 : _config$agreements2.scope) || []).includes('register');
                 if (!(type != 'univerify' && needAgreements && !_this2.agree)) {
-                  _context6.next = 12;
+                  _context8.next = 12;
                   break;
                 }
                 agreementsRef = _this2.getParentComponent().$refs.agreements;
-                return _context6.abrupt("return", agreementsRef.popup(function () {
+                return _context8.abrupt("return", agreementsRef.popup(function () {
                   _this2.login_before(type, navigateBack, options);
                 }));
               case 12:
@@ -378,7 +378,7 @@ var _default = {
                   mask: true
                 });
                 if (!(type == 'univerify')) {
-                  _context6.next = 21;
+                  _context8.next = 21;
                   break;
                 }
                 closeUniverify = function closeUniverify() {
@@ -439,7 +439,7 @@ var _default = {
                 }();
                 univerifyManager.onButtonsClick(onButtonsClickFn);
                 // 调用一键登录弹框
-                return _context6.abrupt("return", univerifyManager.login({
+                return _context8.abrupt("return", univerifyManager.login({
                   "univerifyStyle": _this2.univerifyStyle,
                   success: function success(res) {
                     _this2.login(res.authResult, 'univerify');
@@ -482,40 +482,80 @@ var _default = {
                 }));
               case 21:
                 if (!(type === 'weixinMobile' || type === 'huaweiMobile')) {
-                  _context6.next = 23;
+                  _context8.next = 23;
                   break;
                 }
-                return _context6.abrupt("return", _this2.login({
+                return _context8.abrupt("return", _this2.login({
                   phoneCode: options.phoneNumberCode
                 }, type));
               case 23:
+                if (!(type === 'weixin')) {
+                  _context8.next = 51;
+                  break;
+                }
+                _context8.prev = 24;
+                _context8.next = 27;
+                return new Promise(function (resolve) {
+                  uni.showModal({
+                    title: '授权提示',
+                    content: '是否授权获取微信昵称和头像？授权后将用于个人资料显示',
+                    cancelText: '不授权',
+                    confirmText: '授权',
+                    success: function success(res) {
+                      resolve(res);
+                    }
+                  });
+                });
+              case 27:
+                modalRes = _context8.sent;
+                // 如果用户确认，则尝试获取用户信息
+                userInfo = null;
+                if (!modalRes.confirm) {
+                  _context8.next = 43;
+                  break;
+                }
+                _context8.prev = 30;
+                _context8.next = 33;
+                return uni.getUserProfile({
+                  desc: '用于完善会员资料'
+                });
+              case 33:
+                profileRes = _context8.sent;
+                if (profileRes && profileRes.userInfo) {
+                  userInfo = profileRes.userInfo;
+                  console.log('获取微信用户信息成功:', userInfo);
+                }
+                _context8.next = 41;
+                break;
+              case 37:
+                _context8.prev = 37;
+                _context8.t0 = _context8["catch"](30);
+                console.error('获取用户信息失败:', _context8.t0);
+                uni.showToast({
+                  title: '获取用户信息失败',
+                  icon: 'none'
+                });
+              case 41:
+                _context8.next = 44;
+                break;
+              case 43:
+                console.log('用户拒绝授权获取头像昵称');
+              case 44:
+                // 继续执行登录流程，传递userInfo（如果有）
                 uni.login({
                   "provider": type,
                   "onlyAuthorize": true,
                   success: function () {
                     var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(e) {
-                      var res;
                       return _regenerator.default.wrap(function _callee4$(_context4) {
                         while (1) {
                           switch (_context4.prev = _context4.next) {
                             case 0:
-                              if (!(type == 'apple')) {
-                                _context4.next = 6;
-                                break;
-                              }
-                              _context4.next = 3;
-                              return _this2.getUserInfo({
-                                provider: "apple"
-                              });
-                            case 3:
-                              res = _context4.sent;
-                              Object.assign(e.authResult, res.userInfo);
-                              uni.hideLoading();
-                            case 6:
-                              _this2.login(['huawei', 'weixin'].includes(type) ? {
-                                code: e.code
-                              } : e.authResult, type);
-                            case 7:
+                              _this2.login({
+                                code: e.code,
+                                userInfo: userInfo
+                              }, type);
+                            case 1:
                             case "end":
                               return _context4.stop();
                           }
@@ -553,12 +593,82 @@ var _default = {
                     return fail;
                   }()
                 });
-              case 24:
+                return _context8.abrupt("return");
+              case 48:
+                _context8.prev = 48;
+                _context8.t1 = _context8["catch"](24);
+                console.error('授权询问失败:', _context8.t1);
+              case 51:
+                uni.login({
+                  "provider": type,
+                  "onlyAuthorize": true,
+                  success: function () {
+                    var _success2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(e) {
+                      var res;
+                      return _regenerator.default.wrap(function _callee6$(_context6) {
+                        while (1) {
+                          switch (_context6.prev = _context6.next) {
+                            case 0:
+                              if (!(type == 'apple')) {
+                                _context6.next = 6;
+                                break;
+                              }
+                              _context6.next = 3;
+                              return _this2.getUserInfo({
+                                provider: "apple"
+                              });
+                            case 3:
+                              res = _context6.sent;
+                              Object.assign(e.authResult, res.userInfo);
+                              uni.hideLoading();
+                            case 6:
+                              _this2.login(['huawei', 'weixin'].includes(type) ? {
+                                code: e.code
+                              } : e.authResult, type);
+                            case 7:
+                            case "end":
+                              return _context6.stop();
+                          }
+                        }
+                      }, _callee6);
+                    }));
+                    function success(_x5) {
+                      return _success2.apply(this, arguments);
+                    }
+                    return success;
+                  }(),
+                  fail: function () {
+                    var _fail2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7(err) {
+                      return _regenerator.default.wrap(function _callee7$(_context7) {
+                        while (1) {
+                          switch (_context7.prev = _context7.next) {
+                            case 0:
+                              console.error(JSON.stringify(err));
+                              uni.showModal({
+                                content: "\u767B\u5F55\u5931\u8D25; code: ".concat(err.errCode || -1),
+                                confirmText: "知道了",
+                                showCancel: false
+                              });
+                              uni.hideLoading();
+                            case 3:
+                            case "end":
+                              return _context7.stop();
+                          }
+                        }
+                      }, _callee7);
+                    }));
+                    function fail(_x6) {
+                      return _fail2.apply(this, arguments);
+                    }
+                    return fail;
+                  }()
+                });
+              case 52:
               case "end":
-                return _context6.stop();
+                return _context8.stop();
             }
           }
-        }, _callee6);
+        }, _callee8, null, [[24, 48], [30, 37]]);
       }))();
     },
     login: function login(params, type) {
@@ -594,12 +704,12 @@ var _default = {
       });
     },
     getUserInfo: function getUserInfo(e) {
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
-        return _regenerator.default.wrap(function _callee7$(_context7) {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
+        return _regenerator.default.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
-                return _context7.abrupt("return", new Promise(function (resolve, reject) {
+                return _context9.abrupt("return", new Promise(function (resolve, reject) {
                   uni.getUserInfo(_objectSpread(_objectSpread({}, e), {}, {
                     success: function success(res) {
                       resolve(res);
@@ -615,10 +725,10 @@ var _default = {
                 }));
               case 1:
               case "end":
-                return _context7.stop();
+                return _context9.stop();
             }
           }
-        }, _callee7);
+        }, _callee9);
       }))();
     }
   }

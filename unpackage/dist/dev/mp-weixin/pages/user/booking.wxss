@@ -142,62 +142,50 @@
 .booking-list .booking-item .booking-content {
   padding: 16rpx;
 }
+.booking-list .booking-item .booking-content .booking-main {
+  /* 新增支付状态行样式 */
+}
 .booking-list .booking-item .booking-content .booking-main .course-info {
-  display: flex;
-  margin-bottom: 16rpx;
-  align-items: flex-start;
+  flex: 1;
+  /* 移除booking-status的样式设置，避免冲突 */
 }
 .booking-list .booking-item .booking-content .booking-main .course-info .course-title {
-  flex: 3;
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: bold;
-  color: var(--text-color);
-  margin-right: 15rpx;
-  line-height: 1.4;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+  margin-bottom: 10rpx;
+  color: #333;
 }
-.booking-list .booking-item .booking-content .booking-main .course-info .booking-status {
-  flex: 1;
-  font-size: 24rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 20rpx;
-  text-align: center;
-  white-space: nowrap;
-  align-self: flex-start;
-}
-.booking-list .booking-item .booking-content .booking-main .course-info .booking-status.status-pending {
-  background-color: #FFF3E0;
-  color: #FF9800;
-}
-.booking-list .booking-item .booking-content .booking-main .course-info .booking-status.status-confirmed, .booking-list .booking-item .booking-content .booking-main .course-info .booking-status.status-confirmed_unpaid {
-  background-color: #E0F7FA;
-  color: #00BCD4;
-}
-.booking-list .booking-item .booking-content .booking-main .course-info .booking-status.status-finished {
-  background-color: #E8F5E9;
-  color: #4CAF50;
-}
-.booking-list .booking-item .booking-content .booking-main .course-info .booking-status.status-cancelled, .booking-list .booking-item .booking-content .booking-main .course-info .booking-status.status-cancel {
+.booking-list .booking-item .booking-content .booking-main .course-info .course-deleted-tag {
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
   background-color: #EEEEEE;
   color: #9E9E9E;
+  border-radius: 16rpx;
+  margin-right: 10rpx;
 }
-.booking-list .booking-item .booking-content .booking-main .payment-countdown {
-  background-color: rgba(255, 87, 51, 0.1);
-  border-radius: 8rpx;
-  padding: 8rpx 16rpx;
-  margin: 10rpx 0;
+.booking-list .booking-item .booking-content .booking-main .course-info .auto-cancel-tag {
   display: inline-block;
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  background-color: #ffecec;
+  color: #ff6464;
+  border-radius: 16rpx;
 }
-.booking-list .booking-item .booking-content .booking-main .payment-countdown .countdown-label {
+.booking-list .booking-item .booking-content .booking-main .payment-status-row {
+  display: flex;
+  align-items: center;
+  margin: 10rpx 0;
+}
+.booking-list .booking-item .booking-content .booking-main .payment-status-row .booking-status {
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+.booking-list .booking-item .booking-content .booking-main .payment-status-row .payment-countdown {
   font-size: 24rpx;
   color: #FF5733;
 }
-.booking-list .booking-item .booking-content .booking-main .payment-countdown .countdown-time {
-  font-size: 26rpx;
+.booking-list .booking-item .booking-content .booking-main .payment-status-row .payment-countdown .countdown-time {
   color: #FF5733;
   font-weight: bold;
 }
@@ -333,4 +321,28 @@ to {
   font-size: 26rpx;
   color: #FF5733;
   font-weight: bold;
+}
+.booking-status {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  text-align: center;
+  white-space: nowrap;
+  display: inline-block;
+}
+.booking-status.status-pending {
+  background-color: #FFF3E0;
+  color: #FF9800;
+}
+.booking-status.status-confirmed, .booking-status.status-confirmed_unpaid {
+  background-color: #E0F7FA;
+  color: #00BCD4;
+}
+.booking-status.status-finished {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+}
+.booking-status.status-cancelled, .booking-status.status-cancel {
+  background-color: #EEEEEE;
+  color: #9E9E9E;
 }

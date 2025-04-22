@@ -568,6 +568,7 @@ exports.main = async (event, context) => {
           // 如果有微信昵称和头像，同时更新用户信息
           if (userInfo && userInfo.nickName) {
             updateData.nickname = userInfo.nickName;
+            updateData.wx_nickname = userInfo.nickName; // 使用wx_nickname字段存储微信原始昵称
             updateData.username = userInfo.nickName; // 同时更新username
           }
           
@@ -600,7 +601,8 @@ exports.main = async (event, context) => {
               nickname: updateData.nickname || user.nickname || '微信用户',
               avatar: updateData.avatar || user.avatar || '',
               gender: updateData.gender !== undefined ? updateData.gender : (user.gender || 0),
-              wx_openid: { 'mp-weixin': wxOpenid }
+              wx_openid: { 'mp-weixin': wxOpenid },
+              wx_nickname: updateData.wx_nickname || user.nickname || '微信用户'
             }
           };
         } else {
@@ -617,6 +619,7 @@ exports.main = async (event, context) => {
             wx_openid: {
               'mp-weixin': wxOpenid
             },
+            wx_nickname: userInfo.nickName || '微信用户', // 使用wx_nickname字段存储微信原始昵称
             register_date: new Date(),
             register_ip: CLIENTIP,
             last_login_date: new Date(),
@@ -649,7 +652,8 @@ exports.main = async (event, context) => {
               nickname: newUser.nickname,
               avatar: newUser.avatar,
               gender: newUser.gender,
-              wx_openid: { 'mp-weixin': wxOpenid }
+              wx_openid: { 'mp-weixin': wxOpenid },
+              wx_nickname: newUser.wx_nickname
             }
           };
         }
@@ -819,6 +823,7 @@ exports.main = async (event, context) => {
         wx_openid: {
           'mp-weixin': wxOpenid
         },
+        wx_nickname: userInfo.nickName || '微信用户', // 使用wx_nickname字段存储微信原始昵称
         register_date: Date.now(),
         register_ip: CLIENTIP,
         last_login_date: Date.now(),
@@ -860,7 +865,8 @@ exports.main = async (event, context) => {
           avatar: userInfo.avatarUrl || '',
           wx_openid: {
             'mp-weixin': wxOpenid
-          }
+          },
+          wx_nickname: userInfo.nickName || '微信用户'
         };
         
         return {
@@ -1212,10 +1218,12 @@ async function createUserInDb(openid, userInfo) {
       wx_openid: {
         'mp-weixin': openid
       },
+      wx_nickname: nickname, // 使用wx_nickname字段存储微信原始昵称
       register_date: timestamp,
       register_ip: CLIENTIP || '',
       last_login_date: timestamp,
-      last_login_ip: CLIENTIP || ''
+      last_login_ip: CLIENTIP || '',
+      status: 0
     };
     
     console.log('要创建的用户数据:', userData);
@@ -1252,7 +1260,8 @@ async function createUserInDb(openid, userInfo) {
         avatar: avatar,
         wx_openid: {
           'mp-weixin': openid
-        }
+        },
+        wx_nickname: nickname
       };
       
       // 返回用户信息和token
@@ -1310,6 +1319,7 @@ async function loginWithOpenid(openid, userInfo, platform, appid) {
       // 如果有微信昵称和头像，同时更新用户信息
       if (userInfo && userInfo.nickName) {
         updateData.nickname = userInfo.nickName;
+        updateData.wx_nickname = userInfo.nickName; // 使用wx_nickname字段存储微信原始昵称
         updateData.username = userInfo.nickName; // 同时更新username
       }
       
@@ -1342,7 +1352,8 @@ async function loginWithOpenid(openid, userInfo, platform, appid) {
           nickname: updateData.nickname || user.nickname || '微信用户',
           avatar: updateData.avatar || user.avatar || '',
           gender: updateData.gender !== undefined ? updateData.gender : (user.gender || 0),
-          wx_openid: { 'mp-weixin': openid }
+          wx_openid: { 'mp-weixin': openid },
+          wx_nickname: updateData.wx_nickname || user.nickname || '微信用户'
         }
       };
     } else {
@@ -1359,6 +1370,7 @@ async function loginWithOpenid(openid, userInfo, platform, appid) {
         wx_openid: {
           'mp-weixin': openid
         },
+        wx_nickname: userInfo.nickName || '微信用户', // 使用wx_nickname字段存储微信原始昵称
         register_date: new Date(),
         register_ip: CLIENTIP,
         last_login_date: new Date(),
@@ -1392,7 +1404,8 @@ async function loginWithOpenid(openid, userInfo, platform, appid) {
           nickname: newUser.nickname,
           avatar: newUser.avatar,
           gender: newUser.gender,
-          wx_openid: { 'mp-weixin': openid }
+          wx_openid: { 'mp-weixin': openid },
+          wx_nickname: newUser.wx_nickname
         }
       };
     }
@@ -1464,12 +1477,6 @@ async function handleWechatLogin(code, openid, userInfo, platform, clientIp, {de
           wxUserInfo = wxUser.userInfo;
           console.log('从code获取到的微信openid:', wxOpenid);
           console.log('从code获取到的微信用户信息:', wxUserInfo);
-        } else {
-          return {
-            code: -1,
-            success: false,
-            message: '无法获取微信openid'
-          };
         }
       } catch (wxErr) {
         console.error('通过code获取微信用户信息失败:', wxErr);
@@ -1518,7 +1525,7 @@ async function handleWechatLogin(code, openid, userInfo, platform, clientIp, {de
       if (combinedUserInfo) {
         if (combinedUserInfo.nickName && (!existUser.nickname || existUser.nickname.startsWith('微信用户'))) {
           updateData.nickname = combinedUserInfo.nickName;
-          // 同时更新username字段为微信用户昵称
+          updateData.wx_nickname = combinedUserInfo.nickName; // 使用wx_nickname字段存储微信原始昵称
           updateData.username = combinedUserInfo.nickName;
         }
         if (combinedUserInfo.avatarUrl && !existUser.avatar) {
@@ -1569,6 +1576,7 @@ async function handleWechatLogin(code, openid, userInfo, platform, clientIp, {de
         nickname: nickname,
         avatar: avatar,
         gender: gender,
+        wx_nickname: nickname, // 使用wx_nickname字段存储微信原始昵称
         register_date: serverDate,
         register_ip: clientIp || serverDate,
         last_login_date: serverDate,
@@ -1634,10 +1642,7 @@ async function handleWechatLogin(code, openid, userInfo, platform, clientIp, {de
 
 // 新增手机号登录处理函数
 async function handlePhoneLogin(phone, wxCode, userInfo, platform, appid, clientIp, real_name) {
-  console.log('处理手机号登录:', phone);
-  console.log('用户信息:', userInfo);
-  console.log('微信code:', wxCode);
-  console.log('真实姓名:', real_name);
+  console.log('处理手机号登录:', { phone, wxCode, userInfo });
   
   if (!phone) {
     return {
@@ -1647,161 +1652,135 @@ async function handlePhoneLogin(phone, wxCode, userInfo, platform, appid, client
     };
   }
   
-  // 验证手机号格式
-  if (!/^1\d{10}$/.test(phone)) {
-    return {
-      code: -1,
-      success: false,
-      message: '手机号格式不正确'
-    };
-  }
-  
-  const serverDate = new Date();
-  
   try {
-    // 查询用户是否存在 - 修改为使用uni-id-users集合
-    let userResult = await db.collection('uni-id-users')
+    const phoneNumber = phone; // 统一使用phoneNumber变量名
+    
+    // 根据手机号查询用户信息
+    const userResult = await db.collection('uni-id-users')
       .where({
-        mobile: phone  // 在uni-id-users集合中，手机号字段是mobile而不是phoneNumber
+        mobile: phoneNumber
       })
+      .limit(1)
       .get();
     
+    // 服务器当前时间
+    const serverDate = new Date();
     let userId;
     let isNewUser = false;
     
-    // 如果有微信code，尝试获取openid并关联
-    let wxOpenid = null;
-    let wxUserInfo = null;
-    if (wxCode) {
-      try {
-        const wxUser = await checkWxUser(wxCode);
-        if (wxUser && wxUser.openid) {
-          wxOpenid = wxUser.openid;
-          wxUserInfo = wxUser.userInfo;
-          console.log('获取到微信openid:', wxOpenid);
-        }
-      } catch (wxErr) {
-        console.error('获取微信openid失败:', wxErr);
-        // 继续处理，不影响主流程
+    // 提取用户头像昵称信息
+    const nickName = userInfo && userInfo.nickName || '微信用户';
+    const avatarUrl = userInfo && userInfo.avatarUrl || '';
+    
+    console.log('用户信息:', { nickName, avatarUrl });
+    
+    if (userResult.data.length === 0) {
+      // 用户不存在，注册
+      isNewUser = true;
+      
+      console.log('用户不存在，创建新用户');
+      
+      // 生成用户名
+      const username = `user_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 5)}`;
+      
+      // 创建新用户
+      const insertData = {
+        username,
+        mobile: phoneNumber,
+        mobile_confirmed: 1,
+        nickname: nickName,
+        wx_nickname: nickName,  // 特别保存到wx_nickname字段
+        avatar: avatarUrl,      // 保存头像到avatar字段
+        register_date: serverDate,
+        register_ip: clientIp || '127.0.0.1',
+        last_login_date: serverDate,
+        last_login_ip: clientIp || '127.0.0.1',
+        login_cnt: 1,
+        status: 0, // 正常状态
+        register_source: platform
+      };
+      
+      // 如果提供了真实姓名，也保存
+      if (real_name) {
+        insertData.realname_verified = 1;
+        insertData.realname = real_name;
       }
-    }
-    
-    // 合并用户信息，优先使用传入的userInfo
-    const combinedUserInfo = {
-      ...(wxUserInfo || {}),
-      ...(userInfo || {})
-    };
-    
-    if (userResult.data && userResult.data.length > 0) {
-      // 用户已存在，更新用户信息
+      
+      const insertResult = await db.collection('uni-id-users').add(insertData);
+      userId = insertResult.id;
+      
+      console.log('新用户创建成功，ID:', userId);
+    } else {
+      // 用户已存在，登录
       const existUser = userResult.data[0];
       userId = existUser._id;
       
+      console.log('用户已存在，更新信息:', userId);
+      
+      // 准备更新的用户数据
       const updateData = {
         last_login_date: serverDate,
-        last_login_ip: clientIp || serverDate
+        last_login_ip: clientIp || '127.0.0.1',
+        login_cnt: dbCmd.inc(1)
       };
       
-      // 如果有微信openid，更新用户的openid
-      if (wxOpenid) {
-        updateData['wx_openid.mp'] = wxOpenid;  // 在uni-id-users中，微信小程序的openid字段是wx_openid.mp
+      // 如果有微信信息，并且用户之前没有设置过这些信息，则更新
+      if (userInfo) {
+        // 仅当用户信息为空或是系统默认值时更新
+        if (nickName && (!existUser.nickname || existUser.nickname === '微信用户')) {
+          updateData.nickname = nickName;
+        }
+        
+        // 保存到wx_nickname，无论是否存在
+        if (nickName) {
+          updateData.wx_nickname = nickName;
+        }
+        
+        // 仅当用户头像为空时更新
+        if (avatarUrl && !existUser.avatar) {
+          updateData.avatar = avatarUrl;
+        }
+      }
+      
+      // 如果提供了真实姓名，也保存
+      if (real_name && !existUser.realname) {
+        updateData.realname_verified = 1;
+        updateData.realname = real_name;
       }
       
       // 更新用户信息
-      if (combinedUserInfo.nickName) {
-        updateData.nickname = combinedUserInfo.nickName;
-        // 同时更新username字段为微信用户昵称
-        updateData.username = combinedUserInfo.nickName;
-      }
-      
-      if (combinedUserInfo.avatarUrl) {
-        updateData.avatar = combinedUserInfo.avatarUrl;
-      }
-      
-      if (combinedUserInfo.gender !== undefined) {
-        updateData.gender = combinedUserInfo.gender;
-      }
-      
-      // 如果提供了real_name，保存到real_name字段
-      if (real_name) {
-        updateData.real_name = real_name;
-        console.log('保存用户真实姓名:', real_name);
-      }
-      
-      // 更新用户登录时间和其他信息
-      await db.collection('uni-id-users')
-        .doc(userId)
-        .update(updateData);
-      
-      // 获取最新用户信息
-      userResult = await db.collection('uni-id-users')
-        .doc(userId)
-        .get();
-    } else {
-      // 用户不存在，创建新用户
-      isNewUser = true;
-      
-      // 创建用户 - 适配uni-id-users集合的字段
-      const newUser = {
-        mobile: phone,  // 手机号字段改为mobile
-        mobile_confirmed: 1,  // 标记手机号已验证
-        nickname: combinedUserInfo.nickName || ('用户' + phone.substr(phone.length - 4)),
-        avatar: combinedUserInfo.avatarUrl || '',
-        gender: combinedUserInfo.gender || 0,
-        // 使用uni-id-users的标准字段
-        register_date: serverDate,
-        register_ip: clientIp || serverDate,
-        last_login_date: serverDate,
-        last_login_ip: clientIp || serverDate,
-        status: 0,  // 正常状态
-        dcloud_appid: [appid || '']
-      };
-      
-      // 如果有微信openid，添加到用户信息中
-      if (wxOpenid) {
-        newUser.wx_openid = {
-          mp: wxOpenid  // 在uni-id-users中，微信小程序的openid字段是wx_openid.mp
-        };
-      }
-      
-      console.log('创建新用户:', newUser);
-      
-      // 如果提供了real_name，保存到real_name字段
-      if (real_name) {
-        newUser.real_name = real_name;
-        console.log('新用户保存真实姓名:', real_name);
-      }
-      
-      // 添加用户到uni-id-users数据库
-      const result = await db.collection('uni-id-users')
-        .add(newUser);
-      
-      userId = result.id;
-      
-      // 获取创建后的用户信息
-      userResult = await db.collection('uni-id-users')
-        .doc(userId)
-        .get();
+      await db.collection('uni-id-users').doc(userId).update(updateData);
     }
     
-    // 过滤敏感信息，只返回前端需要的数据
-    const filteredData = filterUserData(userResult.data[0]);
-    
     // 生成token
+    const tokenExpired = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7天有效期
     const token = generateToken(userId);
     
+    // 获取用户完整信息
+    const userData = await db.collection('uni-id-users')
+      .doc(userId)
+      .field({
+        password: 0,
+        token: 0
+      })
+      .get()
+      .then(res => {
+        return res.data[0];
+      });
+    
+    // 组装返回数据
     return {
       code: 0,
       success: true,
-      message: isNewUser ? '用户注册成功' : '登录成功',
-      data: filteredData,
-      userInfo: filteredData,
-      token: token,
-      tokenExpired: new Date().getTime() + 7 * 24 * 60 * 60 * 1000, // 7天有效期
-      isNewUser
+      message: isNewUser ? '注册并登录成功' : '登录成功',
+      uid: userId,
+      token,
+      tokenExpired,
+      userInfo: userData, // 兼容旧版返回格式
+      data: userData      // 新版返回格式
     };
   } catch (error) {
-    console.error('手机号登录出错:', error);
+    console.error('手机号登录处理失败:', error);
     return {
       code: -1,
       success: false,

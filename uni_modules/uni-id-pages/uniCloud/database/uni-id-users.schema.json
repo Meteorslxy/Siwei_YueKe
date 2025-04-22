@@ -213,6 +213,16 @@
 				"write": "doc._id == auth.uid || 'CREATE_UNI_ID_USERS' in auth.permission || 'UPDATE_UNI_ID_USERS' in auth.permission"
 			}
 		},
+		"wx_nickname": {
+			"bsonType": "string",
+			"description": "微信原始昵称",
+			"title": "微信昵称",
+			"trim": "both",
+			"permission": {
+				"read": "doc._id == auth.uid || 'READ_UNI_ID_USERS' in auth.permission",
+				"write": "doc._id == auth.uid || 'CREATE_UNI_ID_USERS' in auth.permission || 'UPDATE_UNI_ID_USERS' in auth.permission"
+			}
+		},
 		"password": {
 			"bsonType": "password",
 			"description": "密码，加密存储",

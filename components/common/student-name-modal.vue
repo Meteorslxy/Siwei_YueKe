@@ -4,11 +4,13 @@
       ref="inputDialog"
       mode="input"
       title="学员姓名设置"
-      placeholder="请输入您的真实姓名"
+      placeholder="请输入学生的真实姓名"
       :value="studentName"
       @confirm="confirmName"
       @close="closeDialog"
       :focus="false"
+      :closeOnClickOverlay="false"
+      :showClose="false"
     ></uni-popup-dialog>
   </uni-popup>
 </template>
@@ -94,6 +96,8 @@ export default {
           title: '姓名不能为空',
           icon: 'none'
         })
+        
+        // 姓名为空时不关闭弹窗，继续等待输入
         return
       }
       
@@ -101,18 +105,17 @@ export default {
       this.updateUserNickname(name)
     },
     
-    // 用户取消设置姓名
+    // 用户取消设置姓名 - 禁用了取消按钮，但保留此方法以防意外调用
     closeDialog() {
-      console.log('用户取消设置姓名')
-      // 无论是否第一次设置姓名，都清除标记，确保下次仍弹出
-      uni.removeStorageSync('hasSetStudentName')
-      console.log('清除姓名设置标记，确保下次登录时仍弹出设置窗口')
+      console.log('用户试图取消设置姓名，但此操作被禁止')
+      // 提示用户必须设置姓名
+      uni.showToast({
+        title: '请输入学生真实姓名',
+        icon: 'none'
+      })
       
-      // 生成临时姓名
-      const tempName = '用户' + Math.floor(Math.random() * 1000000)
-      console.log('生成临时姓名:', tempName)
-      // 更新临时姓名到本地存储，但不标记为已设置
-      this.updateUserNickname(tempName, true)
+      // 不执行任何关闭操作，保持弹窗打开状态
+      return
     },
     
     // 更新用户昵称到云数据库
@@ -165,7 +168,9 @@ export default {
                 userId: userId,
                 uid: userId,
                 _id: userId,
-                mobile: userInfo.mobile || userInfo.phoneNumber || ''
+                mobile: userInfo.mobile || userInfo.phoneNumber || '',
+                isRealName: true, // 标记这是真实姓名
+                real_name: name   // 同时设置real_name字段
               }
             })
             
@@ -183,7 +188,10 @@ export default {
             try {
               console.log('方法2: 使用uni-id-co更新昵称')
               const uniIdCo = uniCloud.importObject('uni-id-co', { customUI: true })
-              const res = await uniIdCo.updateUser({ nickname: name })
+              const res = await uniIdCo.updateUser({ 
+                nickname: name,
+                real_name: name // 同时更新真实姓名字段
+              })
               
               console.log('方法2结果:', res)
               
@@ -234,6 +242,14 @@ export default {
         uni.hideLoading()
       }
     }
+  },
+  mounted() {
+    // 配置弹窗不可点击关闭
+    this.$nextTick(() => {
+      if (this.$refs.popup) {
+        this.$refs.popup.maskClick = false
+      }
+    })
   }
 }
 </script>

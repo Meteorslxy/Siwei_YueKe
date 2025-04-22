@@ -1685,7 +1685,7 @@ var _default = {
                   setTimeout(function () {
                     uni.showModal({
                       title: '支付提醒',
-                      content: '您需要在1分钟内完成支付，否则预约将被自动取消',
+                      content: '您需要在7天内完成支付，否则预约将被自动取消',
                       showCancel: false,
                       success: function success() {
                         // 预约成功后，跳转到预约详情页

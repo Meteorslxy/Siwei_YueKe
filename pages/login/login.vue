@@ -49,14 +49,15 @@
       
       <!-- 登录按钮 -->
       <view class="auth-buttons">
+        <!-- 一键授权登录按钮 - 先获取手机号 -->
         <button class="auth-btn wechat-btn" open-type="getPhoneNumber" @getphonenumber="onGetPhoneNumber">
           <image src="../../static/images/wechat.png" mode="aspectFit" class="btn-icon"></image>
           一键授权登录/注册
         </button>
+        
         <button class="auth-btn other-login-btn" @click="showLoginOptions">
           其他登录方式
         </button>
-        <!-- 调试按钮已隐藏 -->
       </view>
       
       <!-- 用户协议 -->
@@ -116,6 +117,34 @@
         <!-- 其他登录方式 -->
         </view>
     </view>
+    
+    <!-- 添加微信用户信息授权弹窗 -->
+    <view class="user-profile-modal" v-if="showUserProfileModal">
+      <view class="modal-mask" @click="cancelUserProfile"></view>
+      <view class="modal-content">
+        <view class="modal-title">完善个人信息</view>
+        <view class="modal-subtitle">请允许授权获取您的微信头像和昵称</view>
+        
+        <view class="user-info-form">
+          <!-- 头像选择 -->
+          <view class="avatar-wrapper">
+            <image class="avatar-preview" :src="userProfileData.avatarUrl || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+            <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">选择头像</button>
+          </view>
+          
+          <!-- 昵称输入 -->
+          <view class="nickname-wrapper">
+            <text class="input-label">昵称：</text>
+            <input type="nickname" v-model="userProfileData.nickName" placeholder="请输入您的昵称" @change="onNicknameChange" />
+          </view>
+        </view>
+        
+        <view class="modal-actions">
+          <button class="cancel-btn" @click="cancelUserProfile">取消</button>
+          <button class="confirm-btn" @click="confirmUserProfile">确认</button>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -141,8 +170,11 @@ export default {
       loginState: {
         code: '', // 微信登录code
         openid: '', // 用户openid
-        sessionKey: '' // 会话密钥
+        sessionKey: '', // 会话密钥
+        userInfo: null, // 微信用户信息
+        phoneNumber: '', // 存储获取到的手机号，用于后续步骤
       },
+      hasWxUserInfo: false, // 是否已获取微信用户信息
       selectedLoginMethod: "", // 用户选择的登录方式
       userInfo: null, // 用户信息
       providerList: [
@@ -150,6 +182,14 @@ export default {
         // 添加更多登录方式
       ],
       isLoggedIn: false, // 登录状态
+      
+      // 添加用户信息弹窗相关数据
+      showUserProfileModal: false,
+      userProfileData: {
+        nickName: '',
+        avatarUrl: '',
+        gender: 0
+      }
     }
   },
   onLoad(options) {
@@ -162,13 +202,44 @@ export default {
       this.redirectUrl = decodeURIComponent(options.redirect);
     }
     
+    // 重置微信信息状态
+    this.hasWxUserInfo = false;
+    this.loginState.userInfo = null;
+    
     // 检查是否支持一键登录
     this.checkSupport();
     
     // 页面加载时自动尝试静默登录
     this.silentLogin();
+    
+    // 提前获取微信登录code，为授权做准备
+    this.getWxLoginCode();
   },
   methods: {
+    // 新增：获取微信登录code
+    async getWxLoginCode() {
+      // 检查是否为微信环境
+      // #ifdef MP-WEIXIN
+      try {
+        console.log('获取微信登录code');
+        const loginRes = await new Promise((resolve, reject) => {
+          uni.login({
+            provider: 'weixin',
+            success: res => resolve(res),
+            fail: err => reject(err)
+          });
+        });
+        
+        if (loginRes && loginRes.code) {
+          console.log('获取微信登录code成功:', loginRes.code);
+          this.loginState.code = loginRes.code;
+        }
+      } catch (err) {
+        console.error('获取微信登录code失败:', err);
+      }
+      // #endif
+    },
+    
     // 检查是否支持一键登录
     checkSupport() {
       // 获取服务商
@@ -1337,13 +1408,29 @@ export default {
     async wxLogin() {
       console.log('开始微信登录流程');
       
-      this.showLoginLoading = true;
-      uni.showLoading({
-        title: '登录中...',
-        mask: true
-      });
-      
+      // 先询问用户是否授权获取微信头像昵称
       try {
+        const modalResult = await new Promise((resolve) => {
+          uni.showModal({
+            title: '授权提示',
+            content: '是否授权获取微信昵称和头像？授权后将用于个人资料显示',
+            cancelText: '不授权',
+            confirmText: '授权',
+            success: (res) => {
+              resolve(res);
+            }
+          });
+        });
+        
+        const needUserInfo = modalResult.confirm;
+        console.log('用户选择:', needUserInfo ? '授权获取头像昵称' : '不获取头像昵称');
+        
+        this.showLoginLoading = true;
+        uni.showLoading({
+          title: '登录中...',
+          mask: true
+        });
+        
         // 获取设备信息用于唯一标识
         const deviceInfo = await this.getDeviceInfo();
         const uuid = await this.getStoredUUID();
@@ -1380,21 +1467,33 @@ export default {
         // 保存code
         this.loginState.code = loginRes.code;
         
-        // 获取用户信息
+        // 获取用户信息（如果用户授权）
         let userInfo = {};
         
-        try {
-          // 新版微信小程序，使用getUserProfile
-          const [profileError, profileRes] = await uni.getUserProfile({
-            desc: '用于完善会员资料'
-          });
-          
-          if (!profileError && profileRes.userInfo) {
-            console.log('获取用户资料成功:', profileRes.userInfo);
-            userInfo = profileRes.userInfo;
+        if (needUserInfo) {
+          try {
+            // 新版微信小程序，使用getUserProfile
+            const [profileError, profileRes] = await uni.getUserProfile({
+              desc: '用于完善会员资料'
+            });
+            
+            if (!profileError && profileRes.userInfo) {
+              console.log('获取用户资料成功:', profileRes.userInfo);
+              userInfo = profileRes.userInfo;
+            } else {
+              console.warn('获取用户信息失败:', profileError);
+              uni.showToast({
+                title: '获取用户信息失败',
+                icon: 'none',
+                duration: 2000
+              });
+            }
+          } catch (e) {
+            console.warn('获取用户信息失败，将使用默认用户信息:', e);
+            userInfo = { nickName: '微信用户', avatarUrl: '', gender: 0 };
           }
-        } catch (e) {
-          console.warn('获取用户信息失败，将使用默认用户信息');
+        } else {
+          console.log('用户选择不授权获取头像昵称，使用默认值');
           userInfo = { nickName: '微信用户', avatarUrl: '', gender: 0 };
         }
         
@@ -1406,11 +1505,7 @@ export default {
             data: {
               loginType: 'wechat',
               code: loginRes.code,
-              userInfo: {
-                nickName: userInfo.nickName || '微信用户',
-                avatarUrl: userInfo.avatarUrl || '',
-                gender: userInfo.gender || 0
-              },
+              userInfo: needUserInfo ? userInfo : null, // 只有授权时才传递userInfo
               // 传递额外信息用于开发环境生成稳定openid
               deviceInfo: deviceInfo,
               uuid: uuid
@@ -2724,8 +2819,15 @@ export default {
             const phoneNumber = result.result.phoneNumber;
             console.log('获取到的手机号:', phoneNumber);
             
-            // 使用手机号登录或注册
-            this.loginOrRegisterWithPhone(phoneNumber);
+            // 储存手机号，用于后续步骤
+            this.loginState.phoneNumber = phoneNumber;
+            
+            // 隐藏加载提示
+            uni.hideLoading();
+            
+            // 显示用户信息授权弹窗
+            this.showUserProfileModal = true;
+            
           } else {
             throw new Error(result.result?.message || '获取手机号失败');
           }
@@ -2754,20 +2856,80 @@ export default {
       }
     },
     
-    // 新增：使用手机号登录或注册
-    async loginOrRegisterWithPhone(phoneNumber) {
-      console.log('使用手机号登录或注册:', phoneNumber);
+    // 新增：获取微信用户信息（用户点击模态框确认后调用）
+    async getWxUserProfile() {
+      console.log('尝试获取微信用户信息');
+      
+      uni.showLoading({
+        title: '授权中...',
+        mask: true
+      });
       
       try {
-        // 获取微信用户信息
-        let userInfo = {};
-        if (this.loginState && this.loginState.userInfo) {
-          userInfo = {
-            nickName: this.loginState.userInfo.nickName || '微信用户',
-            avatarUrl: this.loginState.userInfo.avatarUrl || '',
-            gender: this.loginState.userInfo.gender || 0
-          };
+        // 判断如果当前环境支持getUserProfile
+        if (uni.canIUse('getUserProfile')) {
+          console.log('当前环境支持getUserProfile');
+          
+          // 使用getUserProfile获取用户信息
+          const profileRes = await new Promise((resolve, reject) => {
+            uni.getUserProfile({
+              desc: '用于完善用户资料',
+              success: res => resolve(res),
+              fail: err => reject(err)
+            });
+          });
+          
+          console.log('获取用户信息成功:', profileRes);
+          this.loginState.userInfo = profileRes.userInfo;
+          this.hasWxUserInfo = true;
+          
+          // 获取信息成功后，使用手机号和微信信息登录
+          if (this.loginState.phoneNumber) {
+            this.loginOrRegisterWithPhone(this.loginState.phoneNumber);
+          }
+        } else {
+          console.log('当前环境不支持getUserProfile，尝试getUserInfo');
+          
+          // 传统方式获取用户信息
+          const infoRes = await new Promise((resolve, reject) => {
+            uni.getUserInfo({
+              success: res => resolve(res),
+              fail: err => reject(err)
+            });
+          });
+          
+          console.log('获取用户信息成功:', infoRes);
+          this.loginState.userInfo = infoRes.userInfo;
+          this.hasWxUserInfo = true;
+          
+          // 获取信息成功后，使用手机号和微信信息登录
+          if (this.loginState.phoneNumber) {
+            this.loginOrRegisterWithPhone(this.loginState.phoneNumber);
+          }
         }
+      } catch (wxErr) {
+        console.warn('获取微信用户信息失败:', wxErr);
+        // 即使获取微信信息失败，仍然使用手机号登录
+        if (this.loginState.phoneNumber) {
+          this.loginOrRegisterWithPhone(this.loginState.phoneNumber);
+        }
+      } finally {
+        uni.hideLoading();
+      }
+    },
+    
+    // 新增：使用手机号登录或注册
+    async loginOrRegisterWithPhone(phoneNumber, userInfo = {}) {
+      console.log('使用手机号登录或注册:', phoneNumber, '用户信息:', userInfo);
+      
+      uni.showLoading({
+        title: '登录中...',
+        mask: true
+      });
+      
+      try {
+        // 获取微信登录时的code
+        let wxCode = this.loginState.code || '';
         
         // 调用登录云函数
         const loginResult = await uniCloud.callFunction({
@@ -2776,9 +2938,12 @@ export default {
             loginType: 'phone',
             phone: phoneNumber,
             // 传递微信code，可用于关联微信openid
-            wxCode: this.loginState.code,
+            wxCode: wxCode,
             // 传递用户信息
-            userInfo: userInfo
+            userInfo: userInfo,
+            // 特别指定这些字段，确保它们被保存到数据库中的正确位置
+            wx_nickname: userInfo.nickName,
+            avatar: userInfo.avatarUrl
           }
         });
         
@@ -2903,6 +3068,93 @@ export default {
           title: '登录数据丢失，请重试',
           icon: 'none'
         });
+      }
+    },
+    
+    // 微信用户信息获取回调
+    async onGetUserInfo(e) {
+      console.log('获取微信用户信息回调:', e);
+      
+      if (e.detail.errMsg.includes('ok')) {
+        // 用户同意获取信息
+        console.log('获取微信用户信息成功:', e.detail.userInfo);
+        
+        // 保存用户信息
+        this.loginState.userInfo = e.detail.userInfo;
+        this.hasWxUserInfo = true;
+        
+        uni.showToast({
+          title: '获取成功，请继续授权手机号',
+          icon: 'none',
+          duration: 1500
+        });
+      } else {
+        // 用户拒绝
+        console.log('用户拒绝授权微信信息');
+        uni.showToast({
+          title: '您已拒绝授权微信信息',
+          icon: 'none'
+        });
+      }
+    },
+    
+    // 添加头像选择回调
+    onChooseAvatar(e) {
+      console.log('选择头像回调:', e);
+      if (e.detail && e.detail.avatarUrl) {
+        this.userProfileData.avatarUrl = e.detail.avatarUrl;
+        console.log('选择的头像URL:', this.userProfileData.avatarUrl);
+      }
+    },
+    
+    // 添加昵称输入回调
+    onNicknameChange(e) {
+      console.log('昵称输入回调:', e);
+      if (e.detail && e.detail.value) {
+        this.userProfileData.nickName = e.detail.value;
+        console.log('输入的昵称:', this.userProfileData.nickName);
+      }
+    },
+    
+    // 添加取消用户信息授权方法
+    cancelUserProfile() {
+      console.log('用户取消授权个人信息');
+      this.showUserProfileModal = false;
+      
+      // 如果用户取消授权，则仅使用手机号登录
+      if (this.loginState.phoneNumber) {
+        uni.showModal({
+          title: '提示',
+          content: '您已取消授权个人信息，将使用默认头像和昵称',
+          showCancel: false,
+          success: () => {
+            this.loginOrRegisterWithPhone(this.loginState.phoneNumber, {
+              nickName: '微信用户',
+              avatarUrl: ''
+            });
+          }
+        });
+      }
+    },
+    
+    // 添加确认用户信息授权方法
+    confirmUserProfile() {
+      console.log('用户确认授权个人信息');
+      
+      // 验证用户信息
+      if (!this.userProfileData.nickName) {
+        uni.showToast({
+          title: '请输入您的昵称',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      this.showUserProfileModal = false;
+      
+      // 使用手机号和用户信息登录
+      if (this.loginState.phoneNumber) {
+        this.loginOrRegisterWithPhone(this.loginState.phoneNumber, this.userProfileData);
       }
     }
   }
@@ -3377,6 +3629,122 @@ export default {
     .modal-footer {
       display: flex;
       justify-content: space-between;
+
+      .cancel-btn, .confirm-btn {
+        flex: 1;
+        height: 80rpx;
+        line-height: 80rpx;
+        border-radius: 40rpx;
+        font-size: 30rpx;
+        margin: 0 10rpx;
+      }
+
+      .cancel-btn {
+        background-color: #f5f5f5;
+        color: #666;
+      }
+
+      .confirm-btn {
+        background-color: #47c76d;
+        color: #fff;
+      }
+    }
+  }
+}
+
+/* 用户信息授权弹窗样式 */
+.user-profile-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .modal-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-content {
+    background-color: #fff;
+    padding: 30rpx;
+    border-radius: 12rpx;
+    width: 80%;
+    position: relative;
+
+    .modal-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      margin-bottom: 20rpx;
+    }
+
+    .modal-subtitle {
+      font-size: 28rpx;
+      color: #666;
+      margin-bottom: 30rpx;
+    }
+
+    .user-info-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .avatar-wrapper {
+        margin-bottom: 30rpx;
+
+        .avatar-preview {
+          width: 120rpx;
+          height: 120rpx;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        .avatar-btn {
+          background-color: #07C160;
+          color: #fff;
+          border: none;
+          border-radius: 40rpx;
+          padding: 10rpx 20rpx;
+          font-size: 28rpx;
+          margin-top: 10rpx;
+        }
+      }
+
+      .nickname-wrapper {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30rpx;
+
+        .input-label {
+          font-size: 28rpx;
+          color: #333;
+          margin-right: 10rpx;
+        }
+
+        input[type="nickname"] {
+          width: 200rpx;
+          height: 80rpx;
+          border: 1px solid #ddd;
+          border-radius: 40rpx;
+          padding: 0 20rpx;
+          font-size: 28rpx;
+        }
+      }
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30rpx;
 
       .cancel-btn, .confirm-btn {
         flex: 1;
