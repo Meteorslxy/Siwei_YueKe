@@ -168,6 +168,7 @@ exports.main = async (event, context) => {
       remark: remark,
       status: 'pending', // 初始状态为待确认（未缴费）
       paymentStatus: 'unpaid', // 支付状态：未支付
+      bookingId: bookingNumber, // 确保有预约编号
       createTime: new Date(),
       updateTime: new Date()
     };

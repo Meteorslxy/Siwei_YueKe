@@ -7,9 +7,22 @@
       </view>
       <view class="status-info">
         <view class="status-text">{{statusText}}</view>
+        
+        <!-- 支付倒计时 - 放在状态文本下方立即显示，增加显示条件 -->
+        <view class="status-countdown" v-if="bookingDetail.status === 'pending'" style="margin-top: 10rpx;">
+          <text v-if="paymentCountdown > 0">
+            <text class="countdown-label">支付倒计时：</text>
+            <text class="countdown-time">{{formatCountdown(paymentCountdown)}}</text>
+          </text>
+          <text v-else class="countdown-time">正在加载支付时限...</text>
+        </view>
+        
         <view class="status-desc">{{statusDesc}}</view>
         <view class="status-desc course-deleted" v-if="bookingDetail.isCourseDeleted">
           {{ bookingDetail.courseDeletedNote || '课程已删除' }}
+        </view>
+        <view class="status-desc auto-cancel" v-if="bookingDetail.status === 'cancelled' && bookingDetail.autoCancel">
+          {{ bookingDetail.cancelReason || '超时未支付，系统自动取消' }}
         </view>
       </view>
     </view>
@@ -93,7 +106,6 @@ export default {
         bookingId: '',
         courseId: '',
         courseTitle: '',
-        courseTime: '',
         courseStartTime: '',
         courseEndTime: '',
         schoolName: '',
@@ -105,13 +117,25 @@ export default {
         createTime: '',
         isCourseDeleted: false,
         courseDeletedNote: ''
-      }
+      },
+      // 倒计时相关
+      paymentCountdown: 0, // 支付倒计时（秒）
+      countdownTimer: null // 倒计时定时器
     }
   },
   onLoad(options) {
+    console.log('booking-detail页面加载，参数:', options);
     if (options.id) {
       this.bookingId = options.id
       this.fetchBookingDetail()
+      
+      // 立即开始倒计时检查，不等待fetchBookingDetail完成
+      if (this.bookingId) {
+        console.log('预约详情页面加载后立即检查支付状态');
+        setTimeout(() => {
+          this.checkPaymentTimeout();
+        }, 500); // 稍微延迟一下，确保页面已渲染
+      }
     } else {
       uni.showToast({
         title: '参数错误',
@@ -121,6 +145,28 @@ export default {
         uni.navigateBack()
       }, 1500)
     }
+  },
+  onShow() {
+    // 页面显示时，立即检查所有预约状态
+    if (this.bookingDetail && this.bookingDetail._id) {
+      console.log('页面显示时，检查预约状态:', this.bookingDetail.status);
+      
+      // 对所有待确认预约，始终检查支付状态
+      if (this.bookingDetail.status === 'pending') {
+        console.log('页面显示：发现pending状态预约，强制检查支付超时');
+        this.checkPaymentTimeout();
+      }
+    } else if (this.bookingId) {
+      // 如果预约详情还没加载但有ID，尝试直接检查
+      console.log('页面显示：预约详情未加载，直接检查ID:', this.bookingId);
+      setTimeout(() => {
+        this.checkPaymentTimeout();
+      }, 300);
+    }
+  },
+  onUnload() {
+    // 在页面卸载时清除定时器
+    this.clearCountdownTimer();
   },
   computed: {
     statusIcon() {
@@ -189,6 +235,18 @@ export default {
             userPhoneNumber: res.result.data.userPhoneNumber || ''
           }
           console.log('获取到预约详情:', this.bookingDetail)
+          
+          // 确保支付状态字段存在
+          if (!this.bookingDetail.paymentStatus) {
+            console.log('预约记录缺少paymentStatus字段，设置为默认值unpaid');
+            this.bookingDetail.paymentStatus = 'unpaid';
+          }
+          
+          // 对于所有待确认状态的预约，无论支付状态如何，都检查倒计时
+          if (this.bookingDetail.status === 'pending') {
+            console.log('发现待确认预约，立即检查倒计时');
+            this.checkPaymentTimeout();
+          }
         } else {
           console.error('获取预约详情失败:', res.result)
           uni.showToast({
@@ -488,6 +546,170 @@ export default {
           return '';
       }
     },
+    
+    // 检查支付超时
+    async checkPaymentTimeout() {
+      try {
+        // 取两个ID中任何一个有效的
+        const bookingId = this.bookingDetail._id || this.bookingId;
+        console.log('开始检查支付超时...预约ID:', bookingId);
+        
+        if (!bookingId) {
+          console.error('没有有效的预约ID，无法检查支付超时');
+          return;
+        }
+        
+        // 直接调用云函数强制检查
+        const res = await uniCloud.callFunction({
+          name: 'autoExpireBooking',
+          data: {
+            forceCheck: true,
+            bookingId: bookingId
+          }
+        });
+        
+        console.log('强制检查预约超时结果:', JSON.stringify(res.result));
+        
+        // 如果云函数成功取消了预约，则刷新预约详情
+        if (res.result && res.result.updatedBookingIds && res.result.updatedBookingIds.includes(bookingId)) {
+          console.log('预约已被自动取消，刷新详情');
+          this.fetchBookingDetail();
+          
+          // 显示提示
+          uni.showToast({
+            title: '预约已超时未支付，自动取消',
+            icon: 'none',
+            duration: 2000
+          });
+          
+          // 标记预约状态已变更，通知列表页刷新
+          uni.setStorageSync('booking_changed', 'true');
+          return;
+        }
+        
+        // 检查时间计算
+        await this.calculateTimeManually();
+      } catch (err) {
+        console.error('检查支付超时异常:', err);
+        // 发生异常时，尝试本地计算
+        this.calculateTimeManually();
+      }
+    },
+    
+    // 手动计算支付剩余时间（备用方案）
+    calculateTimeManually() {
+      try {
+        if (!this.bookingDetail || !this.bookingDetail.createTime) {
+          console.error('无法手动计算时间：无效的预约数据');
+          this.paymentCountdown = 60; // 默认设置60秒
+          this.startCountdown();
+          return;
+        }
+        
+        // 转换创建时间
+        let createTime = new Date(this.bookingDetail.createTime);
+        if (isNaN(createTime.getTime())) {
+          console.error('无效的创建时间，使用当前时间:', this.bookingDetail.createTime);
+          // 如果时间无效，使用当前时间减去30秒作为创建时间
+          createTime = new Date();
+          createTime.setSeconds(createTime.getSeconds() - 30);
+        }
+        
+        const now = new Date();
+        
+        // 计算已经过去的时间（毫秒）
+        const elapsedMs = now.getTime() - createTime.getTime();
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        
+        console.log(`手动计算：预约创建于 ${createTime.toISOString()}`);
+        console.log(`已经过去 ${elapsedSeconds} 秒`);
+        
+        if (elapsedSeconds >= 60) {
+          // 已超过1分钟，自动取消
+          console.log('预约已超过1分钟，应自动取消');
+          
+          // 更新本地状态
+          this.bookingDetail.status = 'cancelled';
+          this.bookingDetail.paymentStatus = 'cancelled';
+          this.bookingDetail.cancelReason = '超时未支付，系统自动取消';
+          this.bookingDetail.autoCancel = true;
+          
+          // 清除倒计时
+          this.clearCountdownTimer();
+          
+          // 显示提示
+          uni.showToast({
+            title: '预约已超时未支付，自动取消',
+            icon: 'none',
+            duration: 2000
+          });
+          
+          // 标记状态变更
+          uni.setStorageSync('booking_changed', 'true');
+        } else {
+          // 未超时，设置倒计时
+          const remainingSeconds = 60 - elapsedSeconds;
+          console.log(`预约未超时，剩余 ${remainingSeconds} 秒`);
+          
+          this.paymentCountdown = remainingSeconds;
+          this.startCountdown();
+        }
+      } catch (e) {
+        console.error('手动计算支付时间异常:', e);
+        // 出错时设置默认倒计时
+        this.paymentCountdown = 30; 
+        this.startCountdown();
+      }
+    },
+    
+    // 更新已超时预约的状态
+    async updateExpiredStatus() {
+      try {
+        if (!this.bookingDetail._id) return;
+        
+        console.log('尝试更新已超时预约状态:', this.bookingDetail._id);
+        const res = await uniCloud.callFunction({
+          name: 'autoExpireBooking',
+          data: { forceCheck: true }
+        });
+        
+        console.log('更新超时预约状态结果:', res.result);
+      } catch (e) {
+        console.error('更新超时预约状态失败:', e);
+      }
+    },
+    
+    // 开始倒计时
+    startCountdown() {
+      // 先清除可能存在的定时器
+      this.clearCountdownTimer();
+      
+      // 创建新的定时器
+      this.countdownTimer = setInterval(() => {
+        if (this.paymentCountdown > 0) {
+          this.paymentCountdown--;
+        } else {
+          // 倒计时结束，重新检查状态
+          this.clearCountdownTimer();
+          this.fetchBookingDetail();
+        }
+      }, 1000);
+    },
+    
+    // 清除倒计时定时器
+    clearCountdownTimer() {
+      if (this.countdownTimer) {
+        clearInterval(this.countdownTimer);
+        this.countdownTimer = null;
+      }
+    },
+    
+    // 格式化倒计时显示
+    formatCountdown(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      return `${min}:${sec.toString().padStart(2, '0')}`;
+    },
   }
 }
 </script>
@@ -662,9 +884,52 @@ export default {
   }
 }
 
+/* 课程删除标记 */
 .course-deleted {
   color: #ff4d4f;
   font-weight: bold;
-  margin-top: 5px;
+}
+
+/* 自动取消提示 */
+.auto-cancel {
+  color: #ff7a45;
+  font-weight: bold;
+  margin-top: 10rpx;
+}
+
+/* 倒计时样式 */
+.status-countdown {
+  margin-top: 15rpx;
+  background-color: rgba(255, 0, 0, 0.15);
+  padding: 10rpx 15rpx;
+  border-radius: 10rpx;
+  display: inline-block;
+  border: 2px solid rgba(255, 0, 0, 0.4);
+  animation: pulse 1s infinite;
+  font-weight: bold;
+  box-shadow: 0 0 10rpx rgba(255, 0, 0, 0.3);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10rpx rgba(255, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+  }
+}
+
+.countdown-label {
+  font-size: 28rpx;
+  color: #ff0000;
+}
+
+.countdown-time {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff0000;
 }
 </style> 

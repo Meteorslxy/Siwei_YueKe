@@ -18,16 +18,23 @@
       <view 
         class="booking-item" 
         v-for="(item, index) in filteredBookingList" 
-        :key="index"
+        :key="item._id || index"
         @click="viewDetail(item, $event)"
         :data-booking-id="item._id"
         :data-course-id="item.courseId">
         <view class="booking-content">
           <view class="booking-main">
             <view class="course-info">
-              <view class="course-title">{{item.courseTitle}}</view>
+              <view class="course-title">{{item.courseTitle || item.title}}</view>
               <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item)}}</view>
               <view class="course-deleted-tag" v-if="item.isCourseDeleted">课程已删除</view>
+              <view class="auto-cancel-tag" v-if="showAutoCancelTag(item)">超时未支付自动取消</view>
+            </view>
+            
+            <!-- 支付倒计时显示 -->
+            <view class="payment-countdown" v-if="shouldShowCountdown(item)">
+              <text class="countdown-label">支付倒计时：</text>
+              <text class="countdown-time">{{formatCountdown(getPaymentCountdown(item))}}</text>
             </view>
             
             <view class="booking-details">
@@ -42,7 +49,7 @@
                 </view>
                 <view class="detail-row">
                   <text class="detail-label">校区地点</text>
-                  <text class="detail-value">{{item.schoolName}}</text>
+                  <text class="detail-value">{{item.schoolName || '未知'}}</text>
                 </view>
               </view>
               
@@ -59,7 +66,7 @@
             </view>
             
             <view class="booking-time">
-              {{formatBookingTime(item.createTime)}}
+              {{formatBookingTime(item.createTime || item.create_time)}}
             </view>
           </view>
         </view>
@@ -117,7 +124,11 @@ export default {
       },
       
       // 是否已加载本地取消记录
-      localCancelledLoaded: false
+      localCancelledLoaded: false,
+      
+      // 支付倒计时数据
+      countdownTimers: {}, // 存储每个预约的倒计时定时器
+      countdownValues: {} // 存储每个预约的倒计时值
     }
   },
   computed: {
@@ -157,6 +168,10 @@ export default {
   onLoad(options) {
     console.log('booking页面加载，参数:', options);
     
+    // 先获取自动取消的预约ID列表，用于后续渲染
+    const autoCancelIds = this.getAutoCancelledBookingIds();
+    console.log('加载时找到自动取消预约IDs:', autoCancelIds);
+    
     // 处理特殊状态
     if (options.status) {
       // 处理booked状态（表示已预约的课程，包括待确认和已确认）
@@ -183,7 +198,43 @@ export default {
     this.loadLocalCancelledCount();
     
     // 加载预约记录
-    this.loadBookingList();
+    this.loadBookingList().then(() => {
+      // 加载完成后初始化倒计时
+      console.log('预约记录加载完成，初始化倒计时');
+      setTimeout(() => {
+        this.initAllCountdowns();
+        
+        // 重新检查并标记自动取消的预约
+        this.ensureAutoCancelTagsDisplayed();
+      }, 500);
+    });
+  },
+  
+  // 确保自动取消标签正确显示
+  ensureAutoCancelTagsDisplayed() {
+    const autoCancelIds = this.getAutoCancelledBookingIds();
+    
+    if (autoCancelIds.length > 0) {
+      console.log('重新检查自动取消标记，找到:', autoCancelIds);
+      
+      // 更新bookingList中对应ID的预约
+      let updatedCount = 0;
+      this.bookingList.forEach(booking => {
+        if (booking && booking._id && autoCancelIds.includes(booking._id)) {
+          if (!booking.autoCancel || !booking.cancelReason) {
+            console.log(`强制更新预约 ${booking.bookingId} 的自动取消标记`);
+            booking.autoCancel = true;
+            booking.cancelReason = '超时未支付，系统自动取消';
+            updatedCount++;
+          }
+        }
+      });
+      
+      if (updatedCount > 0) {
+        console.log(`更新了 ${updatedCount} 个预约的自动取消标记状态`);
+        this.$forceUpdate();
+      }
+    }
   },
   onShow() {
     // 检查是否有预约状态变更
@@ -191,10 +242,29 @@ export default {
     if (hasBookingChanged) {
       console.log('检测到预约状态变更，刷新列表');
       this.resetList();
-      this.loadBookingList();
+      this.loadBookingList().then(() => {
+        // 加载完成后初始化倒计时
+        setTimeout(() => {
+          this.initAllCountdowns();
+          this.ensureAutoCancelTagsDisplayed();
+        }, 500);
+      });
       // 重置标记
       uni.setStorageSync('booking_changed', 'false');
+    } else {
+      // 即使没有变更，也重新初始化倒计时
+      console.log('页面显示，重新初始化倒计时');
+      this.initAllCountdowns();
+      this.ensureAutoCancelTagsDisplayed();
     }
+  },
+  onHide() {
+    // 页面隐藏时清除所有定时器
+    this.clearAllCountdowns();
+  },
+  onUnload() {
+    // 页面卸载时清除所有定时器
+    this.clearAllCountdowns();
   },
   onPullDownRefresh() {
     this.resetList()
@@ -264,46 +334,46 @@ export default {
     
     // 加载预约记录列表
     async loadBookingList() {
-      this.loadMoreStatus = 'loading'
+      this.loadMoreStatus = 'loading';
       
       try {
-        const userInfoStr = uni.getStorageSync('userInfo')
+        const userInfoStr = uni.getStorageSync('userInfo');
         if (!userInfoStr) {
-          console.log('用户未登录，无法获取预约记录')
+          console.log('用户未登录，无法获取预约记录');
           uni.showToast({
             title: '请先登录',
             icon: 'none'
-          })
+          });
           setTimeout(() => {
-            uni.redirectTo({ url: '/pages/user/user' })
-          }, 1500)
-          return Promise.resolve()
+            uni.redirectTo({ url: '/pages/user/user' });
+          }, 1500);
+          return Promise.resolve();
         }
         
-        let userData = null
+        let userData = null;
         try {
           // 检查是否已经是对象
           userData = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
-          console.log('解析到的用户信息:', userData)
+          console.log('解析到的用户信息:', userData);
         } catch (e) {
-          console.error('解析用户信息失败:', e)
+          console.error('解析用户信息失败:', e);
           uni.showToast({
             title: '用户数据异常',
             icon: 'none'
-          })
-          return Promise.resolve()
+          });
+          return Promise.resolve();
         }
         
         const userId = userData.userId || userData._id || userData.uid || 
                        (userData.userInfo && userData.userInfo._id) ||
                        (userData.userInfo && userData.userInfo.uid) || '';
         if (!userId) {
-          console.error('未找到有效的用户ID')
+          console.error('未找到有效的用户ID');
           uni.showToast({
             title: '用户ID不存在',
             icon: 'none'
-          })
-          return Promise.resolve()
+          });
+          return Promise.resolve();
         }
         
         // 如果是已取消标签，先检查本地存储中是否有取消记录
@@ -353,16 +423,16 @@ export default {
             limit: this.limit * 5, // 增加获取数量以确保足够多的记录用于筛选
             skip: 0 // 从0开始获取以确保全部记录都获取到
           }
-        })
+        });
         
-        console.log('getBookings原始返回结果:', res.result)
+        console.log('getBookings原始返回结果:', res.result);
         
         if (res.result && res.result.success) {
           // 过滤掉undefined和null值
           let allBookings = (res.result.data || []).filter(item => item && item._id);
           const totalCount = res.result.total || 0;
           
-          console.log(`API获取到${allBookings.length}条预约记录，总数: ${totalCount}`)
+          console.log(`API获取到${allBookings.length}条预约记录，总数: ${totalCount}`);
           
           // 更新总计数
           this.statusCounts.all = allBookings.length;
@@ -396,6 +466,19 @@ export default {
           // 确保每个预约都有_id字段
           allBookings = allBookings.filter(item => item && item._id);
           
+          // 更新自动取消标记信息
+          allBookings.forEach(booking => {
+            if (booking.status === 'cancelled') {
+              // 检查本地存储中是否为自动取消
+              const isAutoCancel = this.isAutoCancelBookingFromStorage(booking._id);
+              if (isAutoCancel) {
+                console.log(`更新预约 ${booking.bookingId || booking._id} 的自动取消标记`);
+                booking.autoCancel = true;
+                booking.cancelReason = '超时未支付，系统自动取消';
+              }
+            }
+          });
+          
           // 更新列表
           this.bookingList = allBookings;
           this.total = allBookings.length;
@@ -404,6 +487,12 @@ export default {
           
           // 更新加载状态
           this.loadMoreStatus = 'noMore'; // 已获取全部数据
+          
+          // 日志显示有多少pending状态的预约
+          const pendingCount = allBookings.filter(item => 
+            item && item.status === 'pending'
+          ).length;
+          console.log(`获取到${pendingCount}条待支付预约记录`);
           
           // 在前端根据状态筛选
           if (useClientFiltering) {
@@ -453,12 +542,12 @@ export default {
             }
           }
         } else {
-          console.error('获取预约记录API返回失败:', res.result)
+          console.error('获取预约记录API返回失败:', res.result);
           // 显示错误提示
           uni.showToast({
             title: '获取预约记录失败',
             icon: 'none'
-          })
+          });
           
           // 错误情况下，尝试从本地加载已取消预约
           if (this.currentStatus === 'cancelled') {
@@ -481,18 +570,18 @@ export default {
           }
         }
       } catch (e) {
-        console.error('获取预约记录失败:', e)
+        console.error('获取预约记录失败:', e);
         // 显示错误提示
         uni.showToast({
           title: '获取预约记录失败',
           icon: 'none'
-        })
+        });
       }
       
       // 更新UI显示
       this.$forceUpdate();
       
-      return Promise.resolve()
+      return Promise.resolve();
     },
     
     // 从本地存储获取已取消的预约记录
@@ -554,6 +643,12 @@ export default {
               // 确保有取消时间
               if (!booking.cancelTime) {
                 booking.cancelTime = new Date().toISOString();
+              }
+              
+              // 检查并设置自动取消标记
+              if (booking.cancelReason === '超时未支付，系统自动取消' && !booking.autoCancel) {
+                booking.autoCancel = true;
+                console.log(`设置预约 ${id} 的自动取消标记`);
               }
               
               // 确保有课程标题
@@ -1305,7 +1400,26 @@ export default {
         
         // 确保booking有完整的信息
         bookingCopy.status = 'cancelled';
+        
+        // 设置cancelTime
         bookingCopy.cancelTime = bookingCopy.cancelTime || new Date().toISOString();
+        
+        // 保留或设置取消原因
+        if (!bookingCopy.cancelReason && bookingCopy.autoCancel) {
+          bookingCopy.cancelReason = '超时未支付，系统自动取消';
+        }
+        
+        // 如果有cancelReason但没有autoCancel标记，设置标记
+        if (bookingCopy.cancelReason === '超时未支付，系统自动取消' && !bookingCopy.autoCancel) {
+          bookingCopy.autoCancel = true;
+        }
+        
+        console.log('准备保存已取消预约:', JSON.stringify({
+          _id: bookingCopy._id,
+          status: bookingCopy.status,
+          autoCancel: bookingCopy.autoCancel,
+          cancelReason: bookingCopy.cancelReason
+        }));
         
         // 构建存储键名
         const key = `cancelled_booking_${bookingCopy._id}`;
@@ -1356,6 +1470,9 @@ export default {
               this.switchToCancelledTab();
             }
           }
+        } else {
+          // 即使已存在，仍然更新信息确保autoCancel和cancelReason正确
+          console.log('更新已存在的已取消预约数据:', bookingCopy._id);
         }
       } catch (e) {
         console.error('保存已取消预约数据失败:', e);
@@ -1399,6 +1516,41 @@ export default {
     getTabCount(status) {
       // 使用缓存的数量
       return this.statusCounts[status] || 0;
+    },
+    
+    // 辅助方法：检查存储中是否存在特定自动取消的预约ID
+    getAutoCancelledBookingIds() {
+      try {
+        // 获取已取消预约ID列表
+        let cancelledIds = uni.getStorageSync('cancelled_booking_ids') || '[]';
+        cancelledIds = typeof cancelledIds === 'string' ? JSON.parse(cancelledIds) : cancelledIds;
+        if (!Array.isArray(cancelledIds) || !cancelledIds.length) {
+          return [];
+        }
+        
+        // 筛选出自动取消的预约ID
+        const autoCancelIds = [];
+        for (const id of cancelledIds) {
+          try {
+            const key = `cancelled_booking_${id}`;
+            const bookingStr = uni.getStorageSync(key);
+            if (bookingStr) {
+              const booking = typeof bookingStr === 'string' ? JSON.parse(bookingStr) : bookingStr;
+              if (booking.autoCancel === true || booking.cancelReason === '超时未支付，系统自动取消') {
+                autoCancelIds.push(id);
+              }
+            }
+          } catch (e) {
+            console.error(`获取预约 ${id} 自动取消状态失败:`, e);
+          }
+        }
+        
+        console.log(`找到 ${autoCancelIds.length} 个自动取消的预约ID`);
+        return autoCancelIds;
+      } catch (e) {
+        console.error('获取自动取消预约ID列表失败:', e);
+        return [];
+      }
     },
     
     // 加载本地已取消记录数量
@@ -1510,6 +1662,403 @@ export default {
       // 只有当状态为已确认但未缴费时才显示联系老师按钮
       return (item.status === 'confirmed' && !isPaid) || 
              item.status === 'confirmed_unpaid';
+    },
+    
+    // 判断是否应该显示倒计时
+    shouldShowCountdown(booking) {
+      if (!booking || !booking._id) return false;
+      
+      // 检查状态是否为待支付
+      const isPendingPayment = booking.status === 'pending' || 
+                              (booking.status === 'pending' && booking.paymentStatus === 'unpaid') ||
+                              booking.status === 'confirmed_unpaid';
+      
+      // 获取倒计时值
+      const countdown = this.getPaymentCountdown(booking);
+      
+      // 调试日志
+      console.log(`预约ID: ${booking.bookingId}, 状态: ${booking.status}, 支付状态: ${booking.paymentStatus}, 倒计时: ${countdown}秒`);
+      
+      return isPendingPayment && countdown > 0;
+    },
+    
+    // 初始化所有倒计时
+    initAllCountdowns() {
+      // 清除之前的所有定时器
+      this.clearAllCountdowns();
+      
+      console.log('开始初始化所有倒计时, 预约数量:', this.bookingList.length);
+      
+      // 初始化所有待支付状态的预约倒计时
+      if (Array.isArray(this.bookingList)) {
+        let initCount = 0;
+        this.bookingList.forEach(booking => {
+          if (booking && (booking.status === 'pending' || booking.status === 'confirmed_unpaid')) {
+            console.log('初始化预约倒计时:', booking.bookingId || booking._id);
+            this.initCountdown(booking);
+            initCount++;
+          }
+        });
+        console.log(`成功初始化 ${initCount} 个预约的倒计时`);
+      }
+      
+      // 强制更新视图
+      this.$forceUpdate();
+    },
+    
+    // 初始化单个预约的倒计时
+    initCountdown(booking) {
+      if (!booking || !booking._id || (booking.status !== 'pending' && booking.status !== 'confirmed_unpaid')) {
+        return;
+      }
+      
+      console.log(`开始初始化预约 ${booking.bookingId || booking._id} 的倒计时`);
+      
+      try {
+        // 清除可能存在的定时器
+        this.clearCountdown(booking._id);
+        
+        // 计算倒计时初始值（秒）
+        const countdownValue = this.calculateRemainingTime(booking);
+        console.log(`计算得到倒计时初始值: ${countdownValue}秒`);
+        
+        if (countdownValue <= 0) {
+          // 已超时，设置为0并自动取消
+          this.handleExpiredBooking(booking);
+          return;
+        }
+        
+        // 设置初始倒计时值
+        this.countdownValues[booking._id] = countdownValue;
+        
+        // 根据剩余时间设置更新频率（秒）
+        let updateInterval = this.getUpdateInterval(countdownValue);
+        
+        // 云端检查频率（毫秒）- 每小时检查一次
+        const cloudCheckInterval = 3600 * 1000; 
+        
+        // 最后一次云端检查时间
+        let lastCloudCheck = Date.now();
+        
+        // 创建定时器 - 使用单一定时器处理UI更新和云端检查
+        this.countdownTimers[booking._id] = setInterval(() => {
+          // 更新倒计时
+          if (this.countdownValues[booking._id] > 0) {
+            this.countdownValues[booking._id] -= updateInterval;
+            
+            // 检查是否需要调整更新频率
+            const newInterval = this.getUpdateInterval(this.countdownValues[booking._id]);
+            if (newInterval !== updateInterval) {
+              console.log(`预约 ${booking.bookingId} 调整更新频率: ${updateInterval}秒 -> ${newInterval}秒`);
+              clearInterval(this.countdownTimers[booking._id]);
+              updateInterval = newInterval;
+              this.countdownTimers[booking._id] = setInterval(arguments.callee, updateInterval * 1000);
+            }
+            
+            // 记录日志 - 在更新频率变化点或每小时记录一次
+            if (this.countdownValues[booking._id] % 3600 === 0 || 
+                this.countdownValues[booking._id] === 7200 || // 剩余2小时
+                this.countdownValues[booking._id] === 3600 ||  // 剩余1小时
+                this.countdownValues[booking._id] === 120) {   // 剩余2分钟
+              console.log(`预约 ${booking.bookingId} 剩余支付时间: ${this.formatCountdown(this.countdownValues[booking._id])}`);
+            }
+            
+            // 检查是否需要进行云端检查（每小时）
+            const now = Date.now();
+            if (now - lastCloudCheck >= cloudCheckInterval) {
+              console.log(`预约 ${booking.bookingId} 执行每小时云端检查`);
+              this.checkBookingStatusFromCloud(booking._id);
+              lastCloudCheck = now;
+            }
+            
+            // 强制更新视图
+            this.$forceUpdate();
+          } else {
+            // 倒计时结束，处理超时
+            this.handleExpiredBooking(booking);
+          }
+        }, updateInterval * 1000); // 转换为毫秒
+      } catch (e) {
+        console.error('初始化倒计时异常:', e);
+      }
+    },
+    
+    // 根据剩余时间获取适当的更新间隔（秒）
+    getUpdateInterval(remainingSeconds) {
+      if (remainingSeconds > 7200) {
+        // 大于2小时：每10分钟更新一次
+        return 600;
+      } else if (remainingSeconds > 3600) {
+        // 1-2小时：每5分钟更新一次
+        return 300;
+      } else if (remainingSeconds > 120) {
+        // 2分钟-1小时：每分钟更新一次
+        return 60;
+      } else {
+        // 最后2分钟：每10秒更新一次
+        return 10;
+      }
+    },
+    
+    // 处理超时预约
+    handleExpiredBooking(booking) {
+      if (!booking || !booking._id) return;
+      
+      console.log(`预约 ${booking.bookingId || booking._id} 已超时，自动取消`);
+      
+      // 清除定时器
+      this.clearCountdown(booking._id);
+      
+      // 设置倒计时为0
+      this.countdownValues[booking._id] = 0;
+      
+      // 检查当前状态，避免重复处理
+      if (booking.status === 'cancelled') {
+        console.log('预约已经是取消状态，不再处理');
+        return;
+      }
+      
+      // 更新预约状态为已取消（超时）
+      booking.status = 'cancelled';
+      booking.autoCancel = true;
+      booking.cancelReason = '超时未支付，系统自动取消';
+      
+      // 更新列表中的状态
+      this.updateBookingStatus(booking._id, 'cancelled');
+      
+      // 保存到本地存储
+      this.storeCancelledBooking(booking);
+      
+      // 显示提示
+      uni.showToast({
+        title: '预约已超时未支付，自动取消',
+        icon: 'none',
+        duration: 2000
+      });
+      
+      // 标记预约状态已变更
+      this.markBookingChanged();
+      
+      // 将超时状态同步到云端（限制频率）
+      this.syncExpiredBookingToCloud(booking._id);
+      
+      // 刷新列表
+      this.resetList();
+      this.loadBookingList();
+    },
+    
+    // 从云端检查预约状态
+    async checkBookingStatusFromCloud(bookingId) {
+      try {
+        console.log(`从云端检查预约状态: ${bookingId}`);
+        
+        // 调用云函数获取预约的最新状态
+        const result = await uniCloud.callFunction({
+          name: 'getBookingStatus',
+          data: { bookingId }
+        });
+        
+        if (result.result && result.result.success) {
+          const serverBooking = result.result.data;
+          console.log(`云端返回预约状态:`, serverBooking);
+          
+          // 如果云端状态已更改，更新本地状态
+          if (serverBooking && serverBooking.status) {
+            const localBooking = this.bookingList.find(b => b._id === bookingId);
+            if (localBooking && localBooking.status !== serverBooking.status) {
+              console.log(`更新本地预约状态: ${localBooking.status} -> ${serverBooking.status}`);
+              this.updateBookingStatus(bookingId, serverBooking.status);
+              
+              // 如果状态为已取消，停止倒计时
+              if (serverBooking.status === 'cancelled') {
+                this.clearCountdown(bookingId);
+              }
+              
+              // 刷新UI
+              this.$forceUpdate();
+            }
+          }
+        }
+      } catch (error) {
+        console.error('从云端检查预约状态失败:', error);
+      }
+    },
+    
+    // 将超时状态同步到云端（限制频率）
+    async syncExpiredBookingToCloud(bookingId) {
+      // 检查是否已经同步过
+      const key = `synced_expired_${bookingId}`;
+      const isSynced = uni.getStorageSync(key);
+      
+      if (isSynced) {
+        console.log(`预约 ${bookingId} 已经同步过超时状态，跳过`);
+        return;
+      }
+      
+      try {
+        console.log(`同步预约 ${bookingId} 的超时状态到云端`);
+        
+        // 调用云函数更新预约状态
+        const result = await uniCloud.callFunction({
+          name: 'forceUpdateBooking',
+          data: {
+            bookingId,
+            status: 'cancelled',
+            autoCancel: true,
+            cancelReason: '超时未支付，系统自动取消',
+            updateCourseCount: true
+          }
+        });
+        
+        if (result.result && result.result.success) {
+          console.log(`同步预约 ${bookingId} 超时状态成功`);
+          // 标记为已同步
+          uni.setStorageSync(key, 'true');
+        } else {
+          console.error(`同步预约 ${bookingId} 超时状态失败:`, result.result);
+        }
+      } catch (error) {
+        console.error(`同步预约 ${bookingId} 超时状态出错:`, error);
+      }
+    },
+    
+    // 格式化倒计时显示 - 根据时间长度调整显示格式
+    formatCountdown(seconds) {
+      if (seconds <= 0) return '已超时';
+      
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      
+      // 根据剩余时间调整显示格式
+      if (days > 0) {
+        // 超过1天显示"x天y小时"
+        return `${days}天${hours}小时`;
+      } else if (hours > 0) {
+        // 小于1天但超过1小时显示"x小时y分钟"
+        return `${hours}小时${minutes}分钟`;
+      } else if (minutes > 0) {
+        // 小于1小时但超过1分钟显示"x分y秒"
+        return `${minutes}分${secs}秒`;
+      } else {
+        // 小于1分钟只显示秒
+        return `${secs}秒`;
+      }
+    },
+    
+    // 计算剩余时间（秒）
+    calculateRemainingTime(booking) {
+      try {
+        if (!booking || !booking.createTime) {
+          return 0;
+        }
+        
+        // 转换创建时间 - 修复时区问题
+        let createTime = new Date(booking.createTime);
+        if (isNaN(createTime.getTime())) {
+          console.error('无效的创建时间:', booking.createTime);
+          return 0;
+        }
+        
+        const now = new Date();
+        
+        // 计算已经过去的时间（毫秒）
+        const elapsedMs = now.getTime() - createTime.getTime();
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        
+        console.log('预约创建时间:', createTime.toLocaleString());
+        console.log('当前时间:', now.toLocaleString());
+        console.log('已过去秒数:', elapsedSeconds);
+        
+        // 支付时限为7天
+        const timeLimit = 604800 ;
+        
+        if (elapsedSeconds >= timeLimit) {
+          console.log('预约已超过支付时限');
+          
+          // 如果超时，立即将预约标记为已取消并设置自动取消标记
+          if (booking.status === 'pending') {
+            booking.status = 'cancelled';
+            booking.autoCancel = true;
+            booking.cancelReason = '超时未支付，系统自动取消';
+            
+            // 保存到本地存储
+            this.storeCancelledBooking(booking);
+            console.log('预约已自动取消:', booking.bookingId);
+          }
+          
+          return 0; // 已超时
+        } else {
+          const remaining = timeLimit - elapsedSeconds;
+          console.log('剩余支付时间(秒):', remaining);
+          return remaining; // 剩余秒数
+        }
+      } catch (e) {
+        console.error('计算剩余时间异常:', e);
+        return 0;
+      }
+    },
+    
+    // 获取预约的倒计时值
+    getPaymentCountdown(booking) {
+      if (!booking || !booking._id) return 0;
+      return this.countdownValues[booking._id] || 0;
+    },
+    
+    // 清除单个预约的倒计时
+    clearCountdown(bookingId) {
+      if (this.countdownTimers[bookingId]) {
+        clearInterval(this.countdownTimers[bookingId]);
+        delete this.countdownTimers[bookingId];
+      }
+    },
+    
+    // 清除所有倒计时
+    clearAllCountdowns() {
+      Object.keys(this.countdownTimers).forEach(bookingId => {
+        this.clearCountdown(bookingId);
+      });
+      this.countdownTimers = {};
+    },
+    
+    // 判断是否应该显示"超时未支付自动取消"标签
+    showAutoCancelTag(item) {
+      if (!item || !item._id || item.status !== 'cancelled') return false;
+      
+      // 检查预约对象本身的属性
+      if (item.autoCancel === true || item.cancelReason === '超时未支付，系统自动取消') {
+        return true;
+      }
+      
+      // 检查本地存储中是否为自动取消的预约
+      const isAutoCancel = this.isAutoCancelBookingFromStorage(item._id);
+      if (isAutoCancel) {
+        // 更新当前数据，确保属性同步
+        item.autoCancel = true;
+        item.cancelReason = '超时未支付，系统自动取消';
+      }
+      
+      return isAutoCancel;
+    },
+    
+    // 检查预约在本地存储中是否为自动取消
+    isAutoCancelBookingFromStorage(bookingId) {
+      if (!bookingId) return false;
+      
+      try {
+        const key = `cancelled_booking_${bookingId}`;
+        const bookingStr = uni.getStorageSync(key);
+        
+        if (bookingStr) {
+          const booking = typeof bookingStr === 'string' ? JSON.parse(bookingStr) : bookingStr;
+          return booking.autoCancel === true || booking.cancelReason === '超时未支付，系统自动取消';
+        }
+      } catch (e) {
+        console.error('检查预约自动取消状态失败:', e);
+      }
+      
+      return false;
     }
   }
 }
@@ -1647,6 +2196,25 @@ export default {
           }
         }
         
+        .payment-countdown {
+          background-color: rgba(255, 87, 51, 0.1);
+          border-radius: 8rpx;
+          padding: 8rpx 16rpx;
+          margin: 10rpx 0;
+          display: inline-block;
+          
+          .countdown-label {
+            font-size: 24rpx;
+            color: #FF5733;
+          }
+          
+          .countdown-time {
+            font-size: 26rpx;
+            color: #FF5733;
+            font-weight: bold;
+          }
+        }
+        
         .booking-details {
           display: flex;
           
@@ -1751,5 +2319,43 @@ export default {
   border-radius: 4px;
   font-size: 10px;
   margin-top: 5px;
+}
+
+.auto-cancel-tag {
+  display: inline-block;
+  background-color: #ff4d4f;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-top: 5px;
+  font-weight: bold;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 支付倒计时样式 */
+.payment-countdown {
+  background-color: rgba(255, 87, 51, 0.1);
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+  margin: 10rpx 0;
+  display: inline-block;
+  
+  .countdown-label {
+    font-size: 24rpx;
+    color: #FF5733;
+  }
+  
+  .countdown-time {
+    font-size: 26rpx;
+    color: #FF5733;
+    font-weight: bold;
+  }
 }
 </style> 

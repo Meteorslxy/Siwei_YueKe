@@ -1680,6 +1680,26 @@ var _default = {
                     // 重新加载页面（彻底解决显示问题）
                     _this13.reloadPage();
                   }, 1000);
+
+                  // 预约成功后显示支付时间限制提示
+                  setTimeout(function () {
+                    uni.showModal({
+                      title: '支付提醒',
+                      content: '您需要在1分钟内完成支付，否则预约将被自动取消',
+                      showCancel: false,
+                      success: function success() {
+                        // 预约成功后，跳转到预约详情页
+                        if (res.result.bookingId) {
+                          uni.navigateTo({
+                            url: '/pages/user/booking-detail?id=' + res.result.bookingId
+                          });
+                        } else {
+                          // 改为reloadPage函数，这个函数是存在的
+                          _this13.reloadPage();
+                        }
+                      }
+                    });
+                  }, 1500);
                 } else {
                   console.error('预约失败:', res.result);
                   uni.showToast({

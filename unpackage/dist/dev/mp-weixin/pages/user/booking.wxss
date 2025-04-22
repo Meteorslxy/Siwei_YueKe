@@ -185,6 +185,22 @@
   background-color: #EEEEEE;
   color: #9E9E9E;
 }
+.booking-list .booking-item .booking-content .booking-main .payment-countdown {
+  background-color: rgba(255, 87, 51, 0.1);
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+  margin: 10rpx 0;
+  display: inline-block;
+}
+.booking-list .booking-item .booking-content .booking-main .payment-countdown .countdown-label {
+  font-size: 24rpx;
+  color: #FF5733;
+}
+.booking-list .booking-item .booking-content .booking-main .payment-countdown .countdown-time {
+  font-size: 26rpx;
+  color: #FF5733;
+  font-weight: bold;
+}
 .booking-list .booking-item .booking-content .booking-main .booking-details {
   display: flex;
 }
@@ -271,4 +287,50 @@
   border-radius: 4px;
   font-size: 10px;
   margin-top: 5px;
+}
+.auto-cancel-tag {
+  display: inline-block;
+  background-color: #ff4d4f;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-top: 5px;
+  font-weight: bold;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  -webkit-animation: fadeIn 0.3s ease-in-out;
+          animation: fadeIn 0.3s ease-in-out;
+}
+@-webkit-keyframes fadeIn {
+from {
+    opacity: 0;
+}
+to {
+    opacity: 1;
+}
+}
+@keyframes fadeIn {
+from {
+    opacity: 0;
+}
+to {
+    opacity: 1;
+}
+}
+/* 支付倒计时样式 */
+.payment-countdown {
+  background-color: rgba(255, 87, 51, 0.1);
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+  margin: 10rpx 0;
+  display: inline-block;
+}
+.payment-countdown .countdown-label {
+  font-size: 24rpx;
+  color: #FF5733;
+}
+.payment-countdown .countdown-time {
+  font-size: 26rpx;
+  color: #FF5733;
+  font-weight: bold;
 }

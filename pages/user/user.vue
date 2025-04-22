@@ -54,7 +54,7 @@
           </view>
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=expired')">
             <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/out.png" mode="aspectFit" @error="handleImageError"></image>
-            <text class="item-text">已过期</text>
+            <text class="item-text">已完成</text>
           </view>
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=canceled')">
             <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/cancal.png" mode="aspectFit" @error="handleImageError"></image>

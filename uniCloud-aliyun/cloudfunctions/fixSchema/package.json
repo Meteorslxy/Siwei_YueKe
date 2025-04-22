@@ -1,8 +1,0 @@
-{
-  "name": "fixSchema",
-  "version": "1.0.0",
-  "description": "修复和验证集合 Schema",
-  "main": "index.js",
-  "author": "YueKe",
-  "license": "ISC"
-} 
