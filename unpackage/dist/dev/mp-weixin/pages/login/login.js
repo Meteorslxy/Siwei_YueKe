@@ -3047,7 +3047,7 @@ var _default = {
   }), (0, _defineProperty2.default)(_methods, "onGetPhoneNumber", function onGetPhoneNumber(e) {
     var _this32 = this;
     return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
-      var result, phoneNumber, _result$result2;
+      var result, phoneNumber, checkUserResult, _result$result2;
       return _regenerator.default.wrap(function _callee9$(_context9) {
         while (1) {
           switch (_context9.prev = _context9.next) {
@@ -3058,7 +3058,7 @@ var _default = {
                 mask: true
               });
               if (!e.detail.code) {
-                _context9.next = 27;
+                _context9.next = 39;
                 break;
               }
               // 获取手机号的code成功
@@ -3075,7 +3075,7 @@ var _default = {
               result = _context9.sent;
               console.log('获取手机号结果:', result);
               if (!(result.result && result.result.code === 0 && result.result.phoneNumber)) {
-                _context9.next = 17;
+                _context9.next = 29;
                 break;
               }
               // 获取手机号成功
@@ -3088,28 +3088,60 @@ var _default = {
               // 隐藏加载提示
               uni.hideLoading();
 
-              // 显示用户信息授权弹窗
-              _this32.showUserProfileModal = true;
-              _context9.next = 18;
-              break;
+              // 查询用户是否已存在，及wx_nickname是否已设置
+              _context9.prev = 14;
+              _context9.next = 17;
+              return uniCloud.callFunction({
+                name: 'login',
+                data: {
+                  action: 'checkUserWxNickname',
+                  phone: phoneNumber
+                }
+              });
             case 17:
-              throw new Error(((_result$result2 = result.result) === null || _result$result2 === void 0 ? void 0 : _result$result2.message) || '获取手机号失败');
-            case 18:
-              _context9.next = 25;
+              checkUserResult = _context9.sent;
+              console.log('查询用户结果:', checkUserResult);
+              if (checkUserResult.result && checkUserResult.result.userExists && checkUserResult.result.hasValidWxNickname) {
+                // 用户已存在且wx_nickname已设置且不为默认值，直接登录
+                console.log('用户已存在且wx_nickname已有效设置，直接登录');
+                uni.hideLoading();
+                _this32.loginOrRegisterWithPhone(phoneNumber);
+              } else {
+                // 用户不存在或wx_nickname未设置，显示用户信息授权弹窗
+                console.log('需要完善用户信息');
+                uni.hideLoading();
+                _this32.showUserProfileModal = true;
+              }
+              _context9.next = 27;
               break;
-            case 20:
-              _context9.prev = 20;
-              _context9.t0 = _context9["catch"](4);
-              console.error('获取手机号过程中出错:', _context9.t0);
+            case 22:
+              _context9.prev = 22;
+              _context9.t0 = _context9["catch"](14);
+              console.error('查询用户信息失败:', _context9.t0);
+              // 查询失败，走默认流程显示弹窗
+              uni.hideLoading();
+              _this32.showUserProfileModal = true;
+            case 27:
+              _context9.next = 30;
+              break;
+            case 29:
+              throw new Error(((_result$result2 = result.result) === null || _result$result2 === void 0 ? void 0 : _result$result2.message) || '获取手机号失败');
+            case 30:
+              _context9.next = 37;
+              break;
+            case 32:
+              _context9.prev = 32;
+              _context9.t1 = _context9["catch"](4);
+              console.error('获取手机号过程中出错:', _context9.t1);
               uni.hideLoading();
               uni.showToast({
                 title: '获取手机号失败，请重试',
                 icon: 'none'
               });
-            case 25:
-              _context9.next = 28;
+            case 37:
+              _context9.next = 40;
               break;
-            case 27:
+            case 39:
               if (e.detail.errMsg && e.detail.errMsg.indexOf('deny') > -1) {
                 // 用户拒绝授权
                 uni.hideLoading();
@@ -3125,12 +3157,12 @@ var _default = {
                   icon: 'none'
                 });
               }
-            case 28:
+            case 40:
             case "end":
               return _context9.stop();
           }
         }
-      }, _callee9, null, [[4, 20]]);
+      }, _callee9, null, [[4, 32], [14, 22]]);
     }))();
   }), (0, _defineProperty2.default)(_methods, "getWxUserProfile", function getWxUserProfile() {
     var _this33 = this;

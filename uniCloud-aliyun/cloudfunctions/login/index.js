@@ -22,12 +22,18 @@ exports.main = async (event, context) => {
     deviceInfo, // 设备信息
     uuid,       // 设备uuid
     token,      // 新增token参数，用于token验证
-    real_name   // 新增real_name参数，用于保存用户真实姓名
+    real_name,   // 新增real_name参数，用于保存用户真实姓名
+    action      // 新增action参数，用于区分不同的操作
   } = event;
   
   console.log('登录函数调用，参数:', event);
   console.log('登录上下文:', { PLATFORM, APPID, CLIENTIP });
   console.log('登录类型:', loginType, '平台:', PLATFORM, '是否仅检查:', checkOnly);
+  
+  // 如果指定了action，执行对应的操作
+  if (action === 'checkUserWxNickname') {
+    return await checkUserWxNickname(phone || phoneNumber);
+  }
   
   // 检查基本参数
   if (!loginType) {
@@ -1888,6 +1894,80 @@ async function handleTokenVerify(token, clientIp) {
       code: -1,
       success: false,
       message: 'token校验未通过: ' + error.message
+    };
+  }
+}
+
+/**
+ * 检查用户是否存在，以及wx_nickname是否设置且不为默认值
+ * @param {string} phone - 手机号
+ * @returns {object} 检查结果
+ */
+async function checkUserWxNickname(phone) {
+  console.log('检查用户wx_nickname:', phone);
+  
+  if (!phone) {
+    return {
+      code: -1,
+      success: false,
+      message: '手机号不能为空',
+      userExists: false,
+      hasValidWxNickname: false
+    };
+  }
+  
+  try {
+    // 查询用户信息
+    const userResult = await db.collection('uni-id-users')
+      .where({
+        mobile: phone
+      })
+      .field({
+        _id: true,
+        wx_nickname: true
+      })
+      .limit(1)
+      .get();
+    
+    console.log('查询用户结果:', JSON.stringify(userResult));
+    
+    // 检查用户是否存在
+    const userExists = userResult.data && userResult.data.length > 0;
+    
+    // 检查wx_nickname是否有值且不为默认值
+    let hasValidWxNickname = false;
+    
+    if (userExists) {
+      const user = userResult.data[0];
+      const wxNickname = user.wx_nickname;
+      
+      // 检查wx_nickname是否有值且不为默认值，默认值可能是"微信用户"或为空
+      hasValidWxNickname = wxNickname && 
+                          wxNickname.trim() !== '' && 
+                          wxNickname !== '微信用户' &&
+                          !/^用户\d+$/.test(wxNickname);
+      
+      console.log('wx_nickname检查结果:', {
+        wxNickname,
+        hasValidWxNickname
+      });
+    }
+    
+    return {
+      code: 0,
+      success: true,
+      message: '检查完成',
+      userExists,
+      hasValidWxNickname
+    };
+  } catch (error) {
+    console.error('检查用户wx_nickname失败:', error);
+    return {
+      code: -1,
+      success: false,
+      message: '检查用户失败',
+      userExists: false,
+      hasValidWxNickname: false
     };
   }
 } 

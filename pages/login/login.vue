@@ -2860,9 +2860,37 @@ export default {
             // 隐藏加载提示
             uni.hideLoading();
             
-            // 显示用户信息授权弹窗
-            this.showUserProfileModal = true;
-            
+            // 查询用户是否已存在，及wx_nickname是否已设置
+            try {
+              const checkUserResult = await uniCloud.callFunction({
+                name: 'login',
+                data: {
+                  action: 'checkUserWxNickname',
+                  phone: phoneNumber
+                }
+              });
+              
+              console.log('查询用户结果:', checkUserResult);
+              
+              if (checkUserResult.result && 
+                  checkUserResult.result.userExists && 
+                  checkUserResult.result.hasValidWxNickname) {
+                // 用户已存在且wx_nickname已设置且不为默认值，直接登录
+                console.log('用户已存在且wx_nickname已有效设置，直接登录');
+                uni.hideLoading();
+                this.loginOrRegisterWithPhone(phoneNumber);
+              } else {
+                // 用户不存在或wx_nickname未设置，显示用户信息授权弹窗
+                console.log('需要完善用户信息');
+                uni.hideLoading();
+                this.showUserProfileModal = true;
+              }
+            } catch (error) {
+              console.error('查询用户信息失败:', error);
+              // 查询失败，走默认流程显示弹窗
+              uni.hideLoading();
+              this.showUserProfileModal = true;
+            }
           } else {
             throw new Error(result.result?.message || '获取手机号失败');
           }
