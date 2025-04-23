@@ -39,26 +39,26 @@
       </view>
       
       <view class="info-item">
-        <text class="item-icon iconfont icon-teacher"></text>
+        <image class="item-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/授课老师.png" mode="aspectFit"></image>
         <text class="item-label">授课老师：</text>
         <text class="item-value">{{courseInfo.teacherName}}</text>
         <text class="teacher-title">{{courseInfo.teacherTitle}}</text>
       </view>
       
       <view class="info-item">
-        <text class="item-icon iconfont icon-location"></text>
+        <image class="item-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/授课地点.png" mode="aspectFit"></image>
         <text class="item-label">授课地点：</text>
         <text class="item-value">{{courseInfo.location || courseInfo.schoolName || '未指定'}}</text>
       </view>
       
       <view class="info-item">
-        <text class="item-icon iconfont icon-time"></text>
+        <image class="item-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/授课时间.png" mode="aspectFit"></image>
         <text class="item-label">课程时间：</text>
         <text class="item-value">{{formatCourseDateAndTime(courseInfo.startDate, courseInfo.endDate, courseInfo.startTime, courseInfo.endTime)}}</text>
       </view>
       
       <view class="info-item">
-        <text class="item-icon iconfont icon-student"></text>
+        <image class="item-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/招生人数.png" mode="aspectFit"></image>
         <text class="item-label">招生人数：</text>
         <text class="item-value">{{courseInfo.courseCapacity || courseInfo.courseCount || courseInfo.capacity || 20}}人 (已报名{{courseInfo.bookingCount || 0}}人，剩余{{calculateRemainingSeats()}}人)</text>
       </view>
@@ -111,7 +111,7 @@
     <!-- 底部栏 -->
     <view class="footer">
       <view class="contact-btn" @click="contactTeacher">
-        <text class="btn-icon iconfont icon-contact"></text>
+        <image class="btn-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/联系老师.png" mode="aspectFit"></image>
         <text>联系老师</text>
       </view>
       <button class="book-btn" 
@@ -2149,6 +2149,8 @@ export default {
       font-size: 32rpx;
       color: $theme-color;
       margin-right: 10rpx;
+      width: 36rpx;
+      height: 36rpx;
     }
     
     .item-label {
@@ -2337,6 +2339,9 @@ export default {
     .btn-icon {
       font-size: 36rpx;
       color: $text-color-grey;
+      width: 42rpx;
+      height: 42rpx;
+      margin-bottom: 4rpx;
     }
     
     text {
