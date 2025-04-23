@@ -286,6 +286,21 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -305,7 +320,9 @@ var _default = {
         paymentStatus: '',
         createTime: '',
         isCourseDeleted: false,
-        courseDeletedNote: ''
+        courseDeletedNote: '',
+        teacherName: '',
+        teacherPhone: ''
       },
       // 倒计时相关
       paymentCountdown: 0,
@@ -427,7 +444,10 @@ var _default = {
                   // 合并返回的数据
                   _this3.bookingDetail = _objectSpread(_objectSpread(_objectSpread({}, _this3.bookingDetail), res.result.data), {}, {
                     courseTime: res.result.data.courseTime || _this3.formatCourseTimeFromFields(res.result.data),
-                    userPhoneNumber: res.result.data.userPhoneNumber || ''
+                    userPhoneNumber: res.result.data.userPhoneNumber || '',
+                    // 确保teacherName有默认值
+                    teacherName: res.result.data.teacherName || '暂无指定教师',
+                    teacherPhone: res.result.data.teacherPhone || ''
                   });
                   console.log('获取到预约详情:', _this3.bookingDetail);
 
@@ -686,7 +706,7 @@ var _default = {
     // 联系老师
     contactTeacher: function contactTeacher() {
       // 检查是否有联系电话
-      var phoneNumber = this.bookingDetail.userPhoneNumber || this.bookingDetail.teacherPhone || '';
+      var phoneNumber = this.bookingDetail.teacherPhone || this.bookingDetail.userPhoneNumber || '';
       if (!phoneNumber) {
         uni.showToast({
           title: '暂无联系方式',
@@ -696,6 +716,25 @@ var _default = {
       }
       uni.makePhoneCall({
         phoneNumber: phoneNumber,
+        fail: function fail() {
+          uni.showToast({
+            title: '拨打电话失败',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    // 直接拨打教师电话
+    callTeacher: function callTeacher() {
+      if (!this.bookingDetail.teacherPhone) {
+        uni.showToast({
+          title: '暂无教师电话',
+          icon: 'none'
+        });
+        return;
+      }
+      uni.makePhoneCall({
+        phoneNumber: this.bookingDetail.teacherPhone,
         fail: function fail() {
           uni.showToast({
             title: '拨打电话失败',

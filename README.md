@@ -128,4 +128,25 @@ npm run build:h5
 
 ## 项目截图
 
-(这里可以放一些项目截图) 
+(这里可以放一些项目截图)
+
+# 微信用户信息获取说明
+
+## 当前处理方式
+
+1. 登录流程：
+   - 使用 `uni.getUserProfile` 方法获取用户微信信息
+   - 微信昵称仅保存到 `wx_nickname` 字段中
+   - 不再将微信昵称保存到 `nickname` 字段，使用默认值"微信用户"
+   - 这样确保系统能够弹出学生姓名设置弹窗
+
+## 修改文件
+
+1. `uniCloud-aliyun/cloudfunctions/login/index.js`
+   - 微信登录处理函数 `handleWechatLogin`
+   - 手机号登录处理函数 `handlePhoneLogin`
+   - 已修改为只更新wx_nickname，不更新nickname字段
+
+## 变更说明
+
+系统只将微信授权的昵称保存到wx_nickname字段，nickname字段保持默认值"微信用户"，确保学生姓名设置弹窗能够正常显示，引导用户设置真实姓名。 

@@ -41,8 +41,20 @@
         <text class="info-value">{{formattedCourseTime}}</text>
       </view>
       <view class="info-row">
+        <text class="info-label">课程日期：</text>
+        <text class="info-value">{{bookingDetail.startDate}} 至 {{bookingDetail.endDate}}</text>
+      </view>
+      <view class="info-row">
         <text class="info-label">校区地点：</text>
         <text class="info-value">{{bookingDetail.schoolName}}</text>
+      </view>
+      <view class="info-row teacher-info">
+        <text class="info-label">任课教师：</text>
+        <text class="info-value teacher-name">{{bookingDetail.teacherName || '暂无指定教师'}}</text>
+        <text class="phone-link" v-if="bookingDetail.teacherPhone" @click="callTeacher">
+          {{bookingDetail.teacherPhone}}
+          <text class="iconfont icon-phone"></text>
+        </text>
       </view>
       <view class="info-row">
         <text class="info-label">预约时间：</text>
@@ -66,6 +78,9 @@
         <text class="info-value">{{bookingDetail.remark}}</text>
       </view>
     </view>
+    
+    <!-- 底部空白区域，防止内容被操作按钮遮挡 -->
+    <view class="bottom-space"></view>
     
     <!-- 操作区域 -->
     <view class="action-area">
@@ -116,7 +131,9 @@ export default {
         paymentStatus: '',
         createTime: '',
         isCourseDeleted: false,
-        courseDeletedNote: ''
+        courseDeletedNote: '',
+        teacherName: '',
+        teacherPhone: ''
       },
       // 倒计时相关
       paymentCountdown: 0, // 支付倒计时（秒）
@@ -232,7 +249,10 @@ export default {
             ...this.bookingDetail,
             ...res.result.data,
             courseTime: res.result.data.courseTime || this.formatCourseTimeFromFields(res.result.data),
-            userPhoneNumber: res.result.data.userPhoneNumber || ''
+            userPhoneNumber: res.result.data.userPhoneNumber || '',
+            // 确保teacherName有默认值
+            teacherName: res.result.data.teacherName || '暂无指定教师',
+            teacherPhone: res.result.data.teacherPhone || ''
           }
           console.log('获取到预约详情:', this.bookingDetail)
           
@@ -460,7 +480,7 @@ export default {
     // 联系老师
     contactTeacher() {
       // 检查是否有联系电话
-      const phoneNumber = this.bookingDetail.userPhoneNumber || this.bookingDetail.teacherPhone || '';
+      const phoneNumber = this.bookingDetail.teacherPhone || this.bookingDetail.userPhoneNumber || '';
       
       if (!phoneNumber) {
         uni.showToast({
@@ -472,6 +492,27 @@ export default {
       
       uni.makePhoneCall({
         phoneNumber: phoneNumber,
+        fail: () => {
+          uni.showToast({
+            title: '拨打电话失败',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    
+    // 直接拨打教师电话
+    callTeacher() {
+      if (!this.bookingDetail.teacherPhone) {
+        uni.showToast({
+          title: '暂无教师电话',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      uni.makePhoneCall({
+        phoneNumber: this.bookingDetail.teacherPhone,
         fail: () => {
           uni.showToast({
             title: '拨打电话失败',
@@ -793,7 +834,8 @@ export default {
 /* 信息卡片 */
 .info-card {
   margin: 20rpx;
-  padding: 30rpx;
+  padding: 40rpx;
+  margin-bottom: 30rpx;
   background-color: #fff;
   border-radius: 12rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
@@ -811,7 +853,9 @@ export default {
     font-size: 36rpx;
     font-weight: bold;
     color: $text-color;
-    margin-bottom: 20rpx;
+    margin-bottom: 30rpx;
+    line-height: 1.4;
+    word-break: break-all;
   }
   
   .course-deleted-tag {
@@ -827,14 +871,15 @@ export default {
   
   .info-row {
     display: flex;
-    margin-bottom: 16rpx;
+    margin-bottom: 24rpx;
+    padding: 8rpx 0;
     
     &:last-child {
       margin-bottom: 0;
     }
     
     .info-label {
-      width: 160rpx;
+      width: 180rpx;
       font-size: 28rpx;
       color: $text-color-grey;
     }
@@ -843,8 +888,28 @@ export default {
       flex: 1;
       font-size: 28rpx;
       color: $text-color;
+      word-break: break-all;
+    }
+    
+    // 教师信息样式
+    &.teacher-info {
+      background-color: rgba(255, 107, 0, 0.08);
+      border-radius: 8rpx;
+      padding: 16rpx 20rpx;
+      margin: 12rpx 0;
+      
+      .teacher-name {
+        color: #FF6B00;
+        font-weight: bold;
+        font-size: 30rpx;
+      }
     }
   }
+}
+
+/* 底部空白区域，防止内容被操作按钮遮挡 */
+.bottom-space {
+  height: 150rpx;
 }
 
 /* 操作区域 */
@@ -931,5 +996,32 @@ export default {
   font-size: 32rpx;
   font-weight: bold;
   color: #ff0000;
+}
+
+.phone-link {
+  margin-left: 20rpx;
+  font-size: 26rpx;
+  color: #007aff;
+  display: inline-flex;
+  align-items: center;
+  
+  .iconfont {
+    margin-left: 8rpx;
+    font-size: 30rpx;
+  }
+}
+
+.teacher-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  
+  .info-label, .info-value {
+    margin-right: 10rpx;
+  }
+  
+  .teacher-name {
+    font-weight: 500;
+  }
 }
 </style> 

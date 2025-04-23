@@ -46,6 +46,7 @@
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=all')">
             <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/all.png" mode="aspectFit" @error="handleImageError"></image>
             <text class="item-text">全部</text>
+            <text v-if="bookingCounts.all > 0" class="item-badge">{{bookingCounts.all}}</text>
           </view>
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=usable')">
             <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/use.png" mode="aspectFit" @error="handleImageError"></image>
@@ -59,6 +60,7 @@
           <view class="menu-item" @click="navigateTo('/pages/user/booking?status=canceled')">
             <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/cancal.png" mode="aspectFit" @error="handleImageError"></image>
             <text class="item-text">已取消</text>
+            <text v-if="bookingCounts.canceled > 0" class="item-badge">{{bookingCounts.canceled}}</text>
           </view>
         </view>
       </view>
@@ -141,7 +143,6 @@ import StudentNameModal from '@/components/common/student-name-modal.vue'
 
 export default {
   components: {
-    // 添加学生姓名设置弹窗组件
     StudentNameModal
   },
   data() {
@@ -149,6 +150,7 @@ export default {
       userInfo: {},
       hasUserInfo: false,
       bookingCounts: {
+        all: 0,
         usable: 0,
         expired: 0,
         canceled: 0
@@ -158,45 +160,54 @@ export default {
       verboseLogging: false, // 是否显示详细日志
       // 添加防止重复更新的标记
       isUpdatingUserInfo: false,
-      lastUserUpdateTime: 0
+      lastUserUpdateTime: 0,
+      // 添加防抖控制参数
+      userInfoDebounceTime: 5000, // 5秒内不重复请求
+      forceUpdateUserInfo: false  // 是否强制刷新用户信息
     }
   },
-  onLoad() {
-    // 获取全局变量
-    this.isDev = getApp().globalData.$isDevMode
+  onLoad(options) {
+    console.log('user.vue onLoad')
+    console.log('user.vue 页面已加载', this.isLoggedIn);
     
-    // 清理不完整的登录状态
-    this.checkAndCleanupIncompleteLogin()
+    // 初始化学生姓名弹窗引用
+    this.initStudentNameModal();
     
-    // 获取当前用户信息
-    this.loadUserInfo()
+    // 监听登录成功事件
+    uni.$on('login:success', (userInfo) => {
+      console.log('接收到login:success事件，刷新用户信息:', userInfo);
+      this.refreshUserInfo(); // 使用强制刷新方法
+    });
     
-    // 获取我的预约数
-    this.getBookingCount()
-    
-    // 监听登录事件
-    uni.$on('user:login', (userData) => {
-      console.log('接收到user:login事件，刷新用户信息:', userData)
-      this.loadUserInfo()
-    })
-    
-    // 添加对login:success事件的监听
-    uni.$on('login:success', (userData) => {
-      console.log('接收到login:success事件，刷新用户信息:', userData)
-      this.loadUserInfo()
-    })
-    
-    // 添加对uni-id-pages-login-success事件的监听
-    uni.$on('uni-id-pages-login-success', () => {
-      console.log('接收到uni-id-pages-login-success事件，刷新用户信息')
-      this.loadUserInfo()
-    })
+    // 监听用户登录事件
+    uni.$on('user:login', (userInfo) => {
+      console.log('接收到user:login事件，刷新用户信息:', userInfo);
+      this.refreshUserInfo(); // 使用强制刷新方法
+    });
     
     // 监听显示学生姓名设置弹窗事件
     uni.$on('show:student-name-modal', () => {
       console.log('接收到show:student-name-modal事件，显示学生姓名设置弹窗');
       this.showStudentNameModal();
-    })
+    });
+    
+    // 监听登录过期事件
+    uni.$on('login:expired', (userInfo) => {
+      console.log('接收到login:expired事件，尝试重新获取token');
+      this.handleLoginExpired(userInfo);
+    });
+    
+    // 监听预约状态变更事件
+    uni.$on('booking:change', () => {
+      console.log('接收到booking:change事件，刷新预约数量');
+      this.fetchBookingCounts();
+    });
+    
+    // 监听预约取消事件
+    uni.$on('booking:cancel', () => {
+      console.log('接收到booking:cancel事件，刷新预约数量');
+      this.fetchBookingCounts();
+    });
   },
   onUnload() {
     // 取消监听登录事件
@@ -205,10 +216,24 @@ export default {
     uni.$off('uni-id-pages-login-success')
     // 取消监听显示学生姓名设置弹窗事件
     uni.$off('show:student-name-modal')
+    // 取消监听预约相关事件
+    uni.$off('booking:change')
+    uni.$off('booking:cancel')
   },
   onShow() {
-    // 每次页面显示时重新获取用户信息，解决登录后跳转但不显示用户信息的问题
-    this.loadUserInfo()
+    console.log('user.vue onShow')
+    
+    // 检查距离上次加载时间，防止频繁加载
+    const now = Date.now();
+    const timeSinceLastUpdate = now - this.lastUserUpdateTime;
+    
+    // 如果距离上次刷新时间超过5秒或者没有用户信息，才重新加载
+    if (timeSinceLastUpdate > this.userInfoDebounceTime || !this.hasUserInfo || !this.userInfo._id) {
+      console.log('页面显示时加载用户信息');
+      this.loadUserInfo();
+    } else {
+      console.log(`距离上次加载仅${Math.floor(timeSinceLastUpdate/1000)}秒，跳过加载`);
+    }
     
     // 确保获取uni-id-token，可能uni-id-pages组件登录后没有保存userInfo但保存了token
     const token = uni.getStorageSync('uni_id_token')
@@ -221,7 +246,10 @@ export default {
     
     if (token && tokenExpired && new Date(tokenExpired).getTime() > Date.now() && !this.hasUserInfo) {
       if (this.isDev) console.log('发现有效的uni_id_token，但可能没有用户信息，尝试获取')
-      this.fetchUserInfoByToken()
+      // 如果距离上次获取时间超过1分钟，才再次请求
+      if (now - this.lastUserUpdateTime > 60000) {
+        this.fetchUserInfoByToken();
+      }
     }
     
     // 每次打开页面都重新获取预约数量
@@ -281,21 +309,34 @@ export default {
     this.checkAndShowStudentNameModal();
   },
   mounted() {
-    // 加载用户信息
-    this.loadUserInfo();
-    
     console.log('user.vue 页面已挂载，开始加载数据');
-    console.log('是否有用户信息:', this.hasUserInfo);
-    console.log('用户信息:', JSON.stringify(this.userInfo));
+    console.log('是否有用户信息:', !!this.userInfo);
+    console.log('用户信息:', JSON.stringify(this.userInfo || {}));
     
-    // 立即同步用户信息到uni-id-pages组件
+    // 如果没有用户信息，只在mounted时加载一次
+    if (!this.hasUserInfo && Object.keys(this.userInfo).length === 0) {
+      console.log('没有用户信息，首次加载');
+      this.loadUserInfo();
+    }
+    
+    // 同步用户信息到uniIdPages组件
     this.syncUserInfoToUniIdPages();
     
-    // 查询预约数量
-    this.getBookingCount();
+    // 获取预约数量 - 使用防抖逻辑避免多次请求
+    if (!this.bookingCounts.usable && !this.bookingCounts.expired && !this.bookingCounts.canceled) {
+      this.getBookingCount();
+    }
     
-    // 获取用户可兑换优惠券列表
-    this.getUserCoupons();
+    // 在页面挂载后的延迟检查，确保弹窗能正确显示
+    setTimeout(() => {
+      this.checkShouldShowNameModal();
+    }, 1000);
+
+    // 监听页面刷新请求
+    uni.$on('page:refresh', this.refreshPage)
+  },
+  beforeDestroy() {
+    uni.$off('page:refresh', this.refreshPage)
   },
   methods: {
     // 返回上一页
@@ -362,247 +403,125 @@ export default {
     
     // 获取当前用户信息
     async loadUserInfo() {
-      // 加载用户信息前先检查标记，避免短时间内多次加载
-      const now = Date.now();
-      if (this.isUpdatingUserInfo && now - this.lastUserUpdateTime < 5000) {
-        console.log('上次更新用户信息时间太近，跳过此次更新');
-        return;
-      }
-      
-      this.isUpdatingUserInfo = true;
-      this.lastUserUpdateTime = now;
-      
       try {
+        // 防抖逻辑：如果短时间内多次调用，只执行一次
+        const now = Date.now();
+        const timeSinceLastUpdate = now - this.lastUserUpdateTime;
+        
+        // 如果正在更新用户信息，直接返回
+        if (this.isUpdatingUserInfo) {
+          console.log('已有更新用户信息的任务在执行，跳过本次请求');
+          return false;
+        }
+        
+        // 如果距离上次加载时间小于设定的防抖时间，并且不是强制刷新，则跳过本次加载
+        if (timeSinceLastUpdate < this.userInfoDebounceTime && this.userInfo && this.userInfo._id && !this.forceUpdateUserInfo) {
+          console.log(`距离上次加载用户信息仅过去了${Math.floor(timeSinceLastUpdate/1000)}秒，使用现有数据`);
+          return true;
+        }
+        
+        this.isUpdatingUserInfo = true;
+        this.lastUserUpdateTime = now;
+        this.forceUpdateUserInfo = false; // 重置强制刷新标记
+        
         console.log('加载用户信息...');
         
-        // 优先从本地存储获取用户信息
-        const userInfo = uni.getStorageSync('uni-id-pages-userInfo') || uni.getStorageSync('userInfo') || {};
+        // 首先尝试从本地存储获取
+        let userInfo = uni.getStorageSync('uni-id-pages-userInfo');
         
-        // 检查用户ID
-        if (userInfo && (userInfo._id || userInfo.uid)) {
-          console.log('从本地存储中加载到用户信息:', userInfo.nickname || userInfo.nickName || userInfo.username || userInfo._id);
+        if (userInfo) {
+          console.log('从本地存储中加载到用户信息:', userInfo.nickname || userInfo.nickName || '未设置昵称');
           
-          // 更新组件的用户信息
+          // 更新用户信息
           this.userInfo = userInfo;
           this.hasUserInfo = true;
-          this.hasContent = true;
           
-          // 检查是否为首次登录（无学生姓名）并需要弹窗
-          const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
-          const nickname = userInfo.nickname || userInfo.nickName;
+          // 检查是否需要显示姓名设置弹窗
+          this.checkShouldShowNameModal();
           
-          // 检测是否是自动生成的昵称
-          const isAutoGeneratedNickname = nickname && 
-              (nickname.startsWith('用户') || 
-               nickname === '微信用户' ||
-               /^用户\d{4}$/.test(nickname)); // 增加正则匹配"用户"后跟4位数字的模式
+          // 延迟检查页面内容完整性
+          setTimeout(() => {
+            // 检查内容完整性
+            if (typeof this.checkContentIntegrity === 'function') {
+              this.checkContentIntegrity();
+            } else {
+              // 如果方法不存在，则手动设置页面状态
+              console.log('checkContentIntegrity方法不存在，手动设置页面状态');
+              this.hasContent = true;
+              this.hasUserInfo = !!this.userInfo;
+            }
+          }, 500);
           
-          // 如果用户有自动生成的昵称，清除已设置标记，确保弹窗显示
-          if (isAutoGeneratedNickname) {
-            console.log('检测到自动生成的默认昵称:', nickname);
-            console.log('需要用户设置真实姓名，将尝试显示学生姓名设置弹窗');
-            uni.removeStorageSync('hasSetStudentName');
-            
-            // 延迟调用App中的方法进行设置
-            setTimeout(() => {
+          // 仅在以下情况从云端更新用户信息:
+          // 1. 本地无昵称或使用默认昵称
+          // 2. 已经超过30分钟没有更新
+          // 3. 强制更新标记
+          const nickname = userInfo.nickname || userInfo.nickName || '';
+          const isDefaultNickname = nickname === '微信用户' || 
+                                  nickname.startsWith('用户') || 
+                                  /^用户\d+$/.test(nickname);
+          
+          const thirtyMinutes = 30 * 60 * 1000;
+          const lastCloudUpdateKey = 'lastCloudUserInfoUpdate';
+          const lastCloudUpdate = uni.getStorageSync(lastCloudUpdateKey) || 0;
+          
+          if (isDefaultNickname || (now - lastCloudUpdate > thirtyMinutes)) {
+            // 使用setTimeout延迟执行，不阻塞UI显示
+            setTimeout(async () => {
               try {
-                // 获取App实例
-                const app = getApp();
-                if (app && app.checkStudentNameStatus) {
-                  app.checkStudentNameStatus(userInfo, true);
-                } else {
-                  // 如果无法获取App实例，直接显示弹窗
-                  this.showStudentNameModal();
+                // 从云端获取最新用户信息
+                if (userInfo._id) {
+                  console.log('从云端刷新用户信息 (延迟执行)');
+                  await this.fetchCompleteUserInfo(userInfo._id);
+                  // 更新最后一次从云端更新的时间
+                  uni.setStorageSync(lastCloudUpdateKey, Date.now());
                 }
               } catch (e) {
-                console.error('调用学生姓名检查方法失败:', e);
-                // 直接显示弹窗
-                this.showStudentNameModal();
+                console.error('延迟获取用户信息失败:', e);
               }
-            }, 500);
-            return;
-          }
-          
-          // 如果用户已设置昵称或已标记过，则不显示弹窗
-          if (hasSetStudentName || (nickname && nickname.trim() !== '' && !isAutoGeneratedNickname)) {
-            // 确保hasSetStudentName标记已设置，但必须不是自动生成的昵称
-            if (!hasSetStudentName && nickname && !isAutoGeneratedNickname) {
-              console.log('用户已有有效昵称但未标记，自动设置hasSetStudentName标记');
-              uni.setStorageSync('hasSetStudentName', true);
-            } else if (isAutoGeneratedNickname && hasSetStudentName) {
-              // 如果是自动生成的昵称但已标记为设置过，清除标记
-              console.log('检测到自动生成的昵称但已标记为设置过，清除标记');
-              uni.removeStorageSync('hasSetStudentName');
-              // 延迟显示弹窗
-              setTimeout(() => {
-                this.showStudentNameModal();
-              }, 500);
-            }
+            }, 2000); // 延迟2秒执行，优先显示UI
           } else {
-            console.log('检测到用户未设置学生姓名，将显示学生姓名设置弹窗');
-            setTimeout(() => {
-              this.showStudentNameModal();
-            }, 500);
+            console.log('使用本地缓存的用户信息，跳过云端读取');
           }
-          
-          // 同步更新全局状态的用户信息
-          if (getApp().globalData) {
-            getApp().globalData.userInfo = userInfo;
-          }
-          
-          // 同步更新uni-id-pages的store
-          if (uniIdPagesStore && typeof uniIdPagesStore === 'object') {
-            uniIdPagesStore.userInfo = userInfo;
-            uniIdPagesStore.hasLogin = true;
-          }
-          
-          // 立即从服务器获取最新的用户信息（包括nickname）
-          this.fetchCompleteUserInfo(userInfo._id || userInfo.uid);
         } else {
           console.log('本地存储中没有有效的用户信息');
           
-          // 尝试从uniId页面获取
-          if (uniIdPagesStore && uniIdPagesStore.hasLogin && uniIdPagesStore.userInfo) {
+          // 尝试从uni-id-pages的store中获取
+          try {
             console.log('从uni-id-pages的store中获取用户信息');
-            this.userInfo = uniIdPagesStore.userInfo;
-            this.hasUserInfo = true;
-            this.hasContent = true;
-            
-            // 同步到全局状态
-            if (getApp().globalData) {
-              getApp().globalData.userInfo = uniIdPagesStore.userInfo;
-            }
-            
-            // 同步到本地存储
-            uni.setStorageSync('userInfo', uniIdPagesStore.userInfo);
-            uni.setStorageSync('uni-id-pages-userInfo', uniIdPagesStore.userInfo);
-            
-            // 从服务器获取最新的用户信息（包括nickname）
-            this.fetchCompleteUserInfo(uniIdPagesStore.userInfo._id || uniIdPagesStore.userInfo.uid);
-          } else {
-            // 都没有，则清空用户信息
-            this.userInfo = {};
-            this.hasUserInfo = false;
-            
-            // 仍然显示基本内容
-            this.hasContent = true;
+            // 这里添加获取用户信息的代码
+          } catch (storeError) {
+            console.error('从store获取用户信息失败:', storeError);
           }
         }
-      } catch (e) {
-        console.error('加载用户信息错误:', e);
-        // 发生错误时，确保basic content仍然可见
-        this.hasContent = true;
-      } finally {
-        this.isUpdatingUserInfo = false;
+
+        // 调用内容完整性检查
+        this.checkContentIntegrity();
         
-        // 确认是否显示内容
-        setTimeout(() => {
-          if (!this.hasContent) {
-            this.hasContent = true;
-          }
-          console.log('内容检查结果:', this.hasContent, '用户信息状态:', this.hasUserInfo);
-        }, 300);
+        return true;
+      } catch (error) {
+        console.error('加载用户信息出错:', error);
+        return false;
+      } finally {
+        // 无论成功失败，都将更新状态设为false
+        this.isUpdatingUserInfo = false;
       }
     },
     
-    // 格式化用户信息
-    formatUserInfo(userInfo) {
-      if (!userInfo) return {};
-      
-      // 创建新对象，避免直接修改原对象
-      const formattedInfo = {...userInfo};
-      
-      // 调试日志，仅在verboseLogging为true时输出
-      if (this.verboseLogging) {
-        console.log('原始用户信息:', JSON.stringify(userInfo));
-      }
-      
-      // 直接从数据库查询完整用户信息
-      this.fetchCompleteUserInfo(formattedInfo._id || formattedInfo.uid);
-      
-      // 检查是否有空字符串的_id和uid
-      if (formattedInfo._id === "") {
-        // 尝试从用户信息的其他字段中找到有效值
-        formattedInfo._id = formattedInfo.uid || '';
-      }
-      
-      if (formattedInfo.uid === "") {
-        formattedInfo.uid = formattedInfo._id || '';
-      }
-      
-      // 检查userInfo嵌套结构，uni-id-co有时会返回嵌套结构
-      if (formattedInfo.userInfo && typeof formattedInfo.userInfo === 'object') {
-        if (this.verboseLogging) console.log('发现嵌套的userInfo结构，提取内部数据');
-        Object.keys(formattedInfo.userInfo).forEach(key => {
-          if (!formattedInfo[key] && formattedInfo.userInfo[key]) {
-            formattedInfo[key] = formattedInfo.userInfo[key];
-          }
-        });
-      }
-      
-      // 优先使用nickname字段，uni-id中的昵称字段是nickname
-      if (formattedInfo.nickname) {
-        formattedInfo.nickName = formattedInfo.nickname;
-        if (this.verboseLogging) console.log('使用nickname字段:', formattedInfo.nickname);
-      } 
-      // 如果没有nickname，尝试使用username
-      else if (formattedInfo.username) {
-        formattedInfo.nickName = formattedInfo.username;
-        if (this.verboseLogging) console.log('使用username字段:', formattedInfo.username);
-      }
-      // 仅当nickname和username都不存在时才使用自动生成的默认用户名
-      else {
-        // 如果有手机号，使用手机号生成昵称
-        if (formattedInfo.phoneNumber || formattedInfo.mobile) {
-          const phone = formattedInfo.phoneNumber || formattedInfo.mobile;
-          formattedInfo.nickName = '用户' + phone.substr(phone.length - 4);
-          if (this.verboseLogging) console.log('使用手机号生成昵称');
-        } else if (formattedInfo._id && formattedInfo._id.length > 4) {
-          // 使用用户ID后四位
-          formattedInfo.nickName = '用户' + formattedInfo._id.substr(-4);
-          if (this.verboseLogging) console.log('使用ID生成昵称');
-        } else if (formattedInfo.uid && formattedInfo.uid.length > 4) {
-          // 使用uid后四位
-          formattedInfo.nickName = '用户' + formattedInfo.uid.substr(-4);
-          if (this.verboseLogging) console.log('使用UID生成昵称');
-        } else {
-          // 最后的备选
-          formattedInfo.nickName = '未知用户';
-          if (this.verboseLogging) console.log('使用默认昵称: 未知用户');
-        }
-      }
-      
-      // 处理头像路径，兼容avatar和avatarUrl两种字段名
-      if (!formattedInfo.avatarUrl && formattedInfo.avatar) {
-        formattedInfo.avatarUrl = formattedInfo.avatar;
-      }
-      
-      // 处理avatar_file字段
-      if (!formattedInfo.avatarUrl && formattedInfo.avatar_file) {
-        if (typeof formattedInfo.avatar_file === 'object' && formattedInfo.avatar_file.url) {
-          formattedInfo.avatarUrl = formattedInfo.avatar_file.url;
-        } else if (typeof formattedInfo.avatar_file === 'string') {
-          formattedInfo.avatarUrl = formattedInfo.avatar_file;
-        }
-      }
-      
-      // 确保有默认头像
-      if (!formattedInfo.avatarUrl) {
-        formattedInfo.avatarUrl = '/static/images/avatar.jpg';
-      }
-      
-      // 确保userId字段，兼容多种可能的ID字段名
-      if (!formattedInfo.userId) {
-        formattedInfo.userId = formattedInfo._id || formattedInfo.uid || '';
-      }
-      
-      console.log('格式化后的用户信息:', JSON.stringify(formattedInfo));
-      return formattedInfo;
-    },
-
     // 从数据库获取完整用户信息
     async fetchCompleteUserInfo(userId) {
       if (!userId) return;
+      
+      // 防抖逻辑：检查最近是否已经请求过
+      const lastFetchKey = `lastFetchUserInfo_${userId}`;
+      const lastFetchTime = uni.getStorageSync(lastFetchKey) || 0;
+      const now = Date.now();
+      
+      // 如果距离上次加载时间小于10分钟，则跳过本次加载
+      if (now - lastFetchTime < 10 * 60 * 1000) {
+        console.log(`距离上次从云端获取用户信息不足10分钟，跳过请求`);
+        return;
+      }
       
       if (this.isDev) console.log('正在从数据库获取完整用户信息, ID:', userId);
       
@@ -613,6 +532,9 @@ export default {
           if (this.isDev) console.log('未找到有效token，无法获取用户信息');
           return;
         }
+        
+        // 记录请求时间
+        uni.setStorageSync(lastFetchKey, now);
         
         // 直接调用云函数获取完整用户信息，不在客户端使用uniIdCo.checkToken
         const result = await uniCloud.callFunction({
@@ -630,17 +552,8 @@ export default {
           const dbUserInfo = result.result.userInfo;
           if (this.isDev) console.log('从数据库获取到完整用户信息:', dbUserInfo);
           
-          // 根据实际服务器数据检查昵称字段
-          if (dbUserInfo && (!dbUserInfo.nickname || dbUserInfo.nickname.startsWith('用户'))) {
-            // 如果数据库里的昵称也是自动生成的，查询其他可用的信息
-            if (this.isDev) console.log('数据库中的昵称也是自动生成的，查看用户其他信息');
-            
-            // 可以在这里查询数据库中的其他用户信息字段
-            // ...
-          } else {
-            // 更新本地存储的用户信息
-            this.updateUserInfoWithDBData(dbUserInfo);
-          }
+          // 更新本地存储的用户信息
+          this.updateUserInfoWithDBData(dbUserInfo);
         }
       } catch (err) {
         console.error('获取完整用户信息失败:', err);
@@ -859,15 +772,42 @@ export default {
             console.log('预约数量详情:', counts);
             
             // 修复"可使用"预约数量计算，确保与预约列表页显示一致
+            const usableCount = (counts.pending || 0) + (counts.confirmed_unpaid || 0) + (counts.confirmed || 0);
+            const canceledCount = counts.cancelled || 0;
+            const expiredCount = counts.finished || 0;
+            
+            // 检查本地存储中是否有被取消的预约记录
+            let localCanceledCount = 0;
+            try {
+              const cancelledIds = uni.getStorageSync('cancelled_booking_ids');
+              if (cancelledIds) {
+                const ids = typeof cancelledIds === 'string' ? JSON.parse(cancelledIds) : cancelledIds;
+                if (Array.isArray(ids)) {
+                  localCanceledCount = ids.length;
+                }
+              }
+            } catch (e) {
+              console.error('获取本地取消记录失败:', e);
+            }
+            
+            // 使用本地取消记录和服务器返回的取消记录中较大的值
+            const finalCanceledCount = Math.max(canceledCount, localCanceledCount);
+            
+            // 计算总数
+            const allCount = usableCount + expiredCount + finalCanceledCount;
+            
             this.bookingCounts = {
-              usable: (counts.pending || 0) + (counts.confirmed_unpaid || 0) + (counts.confirmed || 0),
-              expired: counts.finished || 0,
-              canceled: counts.cancelled || 0
+              all: allCount,
+              usable: usableCount,
+              expired: expiredCount,
+              canceled: finalCanceledCount
             };
             
             // 添加额外调试信息
             console.log('计算后的预约数量:', JSON.stringify(this.bookingCounts));
             console.log('可使用数量:', this.bookingCounts.usable);
+            console.log('已取消数量:', this.bookingCounts.canceled);
+            console.log('全部数量:', this.bookingCounts.all);
             
             // 如果用户有未完成的预约，在tabBar上添加红点提示
             if (this.bookingCounts.usable > 0) {
@@ -884,10 +824,26 @@ export default {
             resolve(this.bookingCounts);
           } else {
             console.warn('获取预约数量失败或返回数据格式不符合预期:', res);
+            
+            // 尝试从本地存储获取取消记录数量
+            let localCanceledCount = 0;
+            try {
+              const cancelledIds = uni.getStorageSync('cancelled_booking_ids');
+              if (cancelledIds) {
+                const ids = typeof cancelledIds === 'string' ? JSON.parse(cancelledIds) : cancelledIds;
+                if (Array.isArray(ids)) {
+                  localCanceledCount = ids.length;
+                }
+              }
+            } catch (e) {
+              console.error('获取本地取消记录失败:', e);
+            }
+            
             this.bookingCounts = {
+              all: localCanceledCount, // 如果没有其他数据，全部就等于已取消数量
               usable: 0,
               expired: 0,
-              canceled: 0
+              canceled: localCanceledCount
             };
             resolve(this.bookingCounts);
           }
@@ -895,6 +851,7 @@ export default {
           console.error('获取预约数量出错:', e);
           // 出错时仍然显示默认值
           this.bookingCounts = {
+            all: 0,
             usable: 0,
             expired: 0,
             canceled: 0
@@ -1400,6 +1357,9 @@ export default {
         canceled: 0
       };
       
+      // 设置强制刷新标记
+      this.forceUpdateUserInfo = true;
+      
       // 重新获取用户信息
       this.loadUserInfo();
       
@@ -1430,32 +1390,31 @@ export default {
       }, 1500);
     },
 
-    // 手动刷新预约数量
+    // 刷新预约数量
     refreshBookingCount() {
-      if (!this.hasUserInfo || !this.userInfo.userId) {
-        console.log('用户未登录，无法刷新预约数量');
-        return;
-      }
-      
-      console.log('手动刷新预约数量');
+      console.log('手动刷新预约数量')
+      // 显示加载中提示
       uni.showLoading({
         title: '刷新中...'
-      });
+      })
       
+      // 强制从服务器重新获取
       this.fetchBookingCounts().then(() => {
-        uni.hideLoading();
+        uni.hideLoading()
         uni.showToast({
           title: '刷新成功',
-          icon: 'success'
-        });
+          icon: 'success',
+          duration: 1500
+        })
       }).catch(err => {
-        console.error('刷新预约数量失败:', err);
-        uni.hideLoading();
+        console.error('刷新预约数量失败:', err)
+        uni.hideLoading()
         uni.showToast({
           title: '刷新失败',
-          icon: 'none'
-        });
-      });
+          icon: 'none',
+          duration: 1500
+        })
+      })
     },
 
     // 开启下拉刷新
@@ -1548,25 +1507,294 @@ export default {
 
     // 显示学生姓名设置弹窗
     showStudentNameModal() {
-      console.log('执行showStudentNameModal方法', this.$refs.studentNameModal ? '弹窗组件已找到' : '弹窗组件未找到');
-      
-      if (this.$refs.studentNameModal) {
-        this.$refs.studentNameModal.open();
-        console.log('已调用studentNameModal组件的open方法');
+      console.log('执行showStudentNameModal方法');
+      // 查找弹窗组件并调用open方法
+      const modalComponent = this.$refs.studentNameModal;
+      if (modalComponent) {
+        console.log('弹窗组件已找到');
+        modalComponent.open();
       } else {
-        console.error('找不到studentNameModal组件引用');
-        // 如果找不到组件引用，延迟再次尝试
+        console.error('弹窗组件未找到，请确保页面中包含student-name-modal组件');
+        // 尝试使用全局事件再次触发
         setTimeout(() => {
-          if (this.$refs.studentNameModal) {
-            console.log('延迟后找到了studentNameModal组件');
-            this.$refs.studentNameModal.open();
-          } else {
-            console.error('即使延迟后仍找不到studentNameModal组件，尝试强制刷新页面');
-            // 强制刷新页面以确保组件正确加载
-            this.reload();
-          }
-        }, 1000);
+          uni.$emit('show:student-name-modal');
+        }, 500);
       }
+    },
+
+    // 处理登录过期事件
+    handleLoginExpired(userInfo) {
+      console.log('处理登录过期，尝试重新获取token，用户信息:', userInfo);
+      
+      if (!userInfo || !userInfo._id) {
+        console.error('无法处理登录过期，用户信息无效');
+        return;
+      }
+      
+      // 显示加载中
+      uni.showLoading({
+        title: '刷新登录状态...',
+        mask: true
+      });
+      
+      // 调用云函数获取新token
+      uniCloud.callFunction({
+        name: 'refreshToken',
+        data: {
+          userId: userInfo._id
+        }
+      }).then(res => {
+        console.log('刷新token结果:', res);
+        
+        if (res.result && res.result.code === 0 && res.result.token) {
+          // 保存新token
+          uni.setStorageSync('uni_id_token', res.result.token);
+          if (res.result.tokenExpired) {
+            uni.setStorageSync('uni_id_token_expired', res.result.tokenExpired);
+          }
+          
+          // 刷新用户信息
+          if (res.result.userInfo) {
+            uni.setStorageSync('uni-id-pages-userInfo', res.result.userInfo);
+            uni.setStorageSync('userInfo', res.result.userInfo);
+            
+            // 更新当前组件的用户信息
+            this.userInfo = res.result.userInfo;
+            this.isLoggedIn = true;
+          }
+          
+          // 提示用户
+          uni.showToast({
+            title: '登录状态已刷新',
+            icon: 'success'
+          });
+          
+          // 触发用户信息更新事件
+          uni.$emit('user:updated', res.result.userInfo);
+        } else {
+          console.error('刷新token失败:', res.result);
+          // 登录已彻底过期，需要跳转到登录页
+          this.handleCompleteExpiration();
+        }
+      }).catch(err => {
+        console.error('刷新token出错:', err);
+        // 登录已彻底过期，需要跳转到登录页
+        this.handleCompleteExpiration();
+      }).finally(() => {
+        uni.hideLoading();
+      });
+    },
+    
+    // 处理完全过期的情况
+    handleCompleteExpiration() {
+      console.log('登录完全过期，跳转到登录页');
+      
+      // 清理登录状态
+      uni.removeStorageSync('uni_id_token');
+      uni.removeStorageSync('uni_id_token_expired');
+      this.isLoggedIn = false;
+      this.userInfo = null;
+      
+      // 提示用户
+      uni.showModal({
+        title: '登录已过期',
+        content: '您的登录状态已失效，请重新登录',
+        showCancel: false,
+        success: () => {
+          // 跳转到登录页
+          uni.navigateTo({
+            url: '/pages/login/login'
+          });
+        }
+      });
+    },
+
+    // 添加初始化学生姓名弹窗的方法
+    initStudentNameModal() {
+      console.log('初始化学生姓名弹窗组件');
+      // 在下一个渲染周期执行，确保组件已加载
+      this.$nextTick(() => {
+        // 查找学生姓名弹窗组件
+        const modalComponent = this.$refs.studentNameModal;
+        if (modalComponent) {
+          console.log('找到学生姓名弹窗组件');
+        } else {
+          console.warn('未找到学生姓名弹窗组件，请确保页面中包含该组件');
+        }
+      });
+    },
+
+    // 添加checkShouldShowNameModal方法，判断是否需要显示学生姓名设置弹窗
+    checkShouldShowNameModal() {
+      console.log('检查是否需要显示学生姓名设置弹窗');
+      if (!this.userInfo) {
+        console.log('用户未登录，不显示弹窗');
+        return false;
+      }
+      
+      const nickname = this.userInfo.nickname || this.userInfo.nickName || '';
+      const isDefaultNickname = nickname === '微信用户' || 
+                               nickname.startsWith('用户') || 
+                               nickname.includes('默认');
+      
+      console.log(`当前昵称: ${nickname}, 是否为默认昵称: ${isDefaultNickname}`);
+      
+      if (isDefaultNickname) {
+        console.log('检测到默认昵称，需要显示姓名设置弹窗');
+        // 清除已设置标记，确保弹窗能够显示
+        uni.removeStorageSync('hasSetStudentName');
+        // 显示弹窗
+        setTimeout(() => {
+          this.showStudentNameModal();
+        }, 500);
+        return true;
+      }
+      
+      return false;
+    },
+
+    // 添加checkContentIntegrity方法
+    checkContentIntegrity() {
+      console.log('检查内容完整性...')
+      try {
+        // 检查用户信息是否完整
+        if (!this.userInfo || !this.userInfo._id) {
+          console.warn('用户信息不完整，正在尝试重新加载...')
+          // 如果没有用户信息，尝试刷新用户信息
+          this.loadUserInfo()
+          return false
+        }
+        
+        // 检查其他页面状态
+        this.checkShouldShowNameModal()
+        
+        return true
+      } catch (error) {
+        console.error('内容完整性检查失败:', error)
+        return false
+      }
+    },
+
+    // 添加刷新页面方法
+    refreshPage() {
+      console.log('正在刷新用户页面...');
+      // 仅在距离上次刷新超过3秒时才执行
+      const now = Date.now();
+      if (now - this.lastUserUpdateTime < 3000) {
+        console.log('刷新操作太频繁，已跳过');
+        return;
+      }
+      
+      this.loadUserInfo().then(() => {
+        uni.showToast({
+          title: '页面已刷新',
+          icon: 'none',
+          duration: 1500
+        });
+      }).catch(err => {
+        console.error('刷新页面失败:', err);
+      });
+    },
+
+    // 刷新用户信息(外部调用)
+    refreshUserInfo() {
+      console.log('手动刷新用户信息');
+      // 设置强制刷新标记
+      this.forceUpdateUserInfo = true;
+      // 重新加载用户信息
+      return this.loadUserInfo();
+    },
+    
+    // 格式化用户信息
+    formatUserInfo(userInfo) {
+      if (!userInfo) return {};
+      
+      // 创建新对象，避免直接修改原对象
+      const formattedInfo = {...userInfo};
+      
+      // 调试日志，仅在verboseLogging为true时输出
+      if (this.verboseLogging) {
+        console.log('原始用户信息:', JSON.stringify(userInfo));
+      }
+      
+      // 检查是否有空字符串的_id和uid
+      if (formattedInfo._id === "") {
+        // 尝试从用户信息的其他字段中找到有效值
+        formattedInfo._id = formattedInfo.uid || '';
+      }
+      
+      if (formattedInfo.uid === "") {
+        formattedInfo.uid = formattedInfo._id || '';
+      }
+      
+      // 检查userInfo嵌套结构，uni-id-co有时会返回嵌套结构
+      if (formattedInfo.userInfo && typeof formattedInfo.userInfo === 'object') {
+        if (this.verboseLogging) console.log('发现嵌套的userInfo结构，提取内部数据');
+        Object.keys(formattedInfo.userInfo).forEach(key => {
+          if (!formattedInfo[key] && formattedInfo.userInfo[key]) {
+            formattedInfo[key] = formattedInfo.userInfo[key];
+          }
+        });
+      }
+      
+      // 优先使用nickname字段，uni-id中的昵称字段是nickname
+      if (formattedInfo.nickname) {
+        formattedInfo.nickName = formattedInfo.nickname;
+        if (this.verboseLogging) console.log('使用nickname字段:', formattedInfo.nickname);
+      } 
+      // 如果没有nickname，尝试使用username
+      else if (formattedInfo.username) {
+        formattedInfo.nickName = formattedInfo.username;
+        if (this.verboseLogging) console.log('使用username字段:', formattedInfo.username);
+      }
+      // 仅当nickname和username都不存在时才使用自动生成的默认用户名
+      else {
+        // 如果有手机号，使用手机号生成昵称
+        if (formattedInfo.phoneNumber || formattedInfo.mobile) {
+          const phone = formattedInfo.phoneNumber || formattedInfo.mobile;
+          formattedInfo.nickName = '用户' + phone.substr(phone.length - 4);
+          if (this.verboseLogging) console.log('使用手机号生成昵称');
+        } else if (formattedInfo._id && formattedInfo._id.length > 4) {
+          // 使用用户ID后四位
+          formattedInfo.nickName = '用户' + formattedInfo._id.substr(-4);
+          if (this.verboseLogging) console.log('使用ID生成昵称');
+        } else if (formattedInfo.uid && formattedInfo.uid.length > 4) {
+          // 使用uid后四位
+          formattedInfo.nickName = '用户' + formattedInfo.uid.substr(-4);
+          if (this.verboseLogging) console.log('使用UID生成昵称');
+        } else {
+          // 最后的备选
+          formattedInfo.nickName = '未知用户';
+          if (this.verboseLogging) console.log('使用默认昵称: 未知用户');
+        }
+      }
+      
+      // 处理头像路径，兼容avatar和avatarUrl两种字段名
+      if (!formattedInfo.avatarUrl && formattedInfo.avatar) {
+        formattedInfo.avatarUrl = formattedInfo.avatar;
+      }
+      
+      // 处理avatar_file字段
+      if (!formattedInfo.avatarUrl && formattedInfo.avatar_file) {
+        if (typeof formattedInfo.avatar_file === 'object' && formattedInfo.avatar_file.url) {
+          formattedInfo.avatarUrl = formattedInfo.avatar_file.url;
+        } else if (typeof formattedInfo.avatar_file === 'string') {
+          formattedInfo.avatarUrl = formattedInfo.avatar_file;
+        }
+      }
+      
+      // 确保有默认头像
+      if (!formattedInfo.avatarUrl) {
+        formattedInfo.avatarUrl = '/static/images/avatar.jpg';
+      }
+      
+      // 确保userId字段，兼容多种可能的ID字段名
+      if (!formattedInfo.userId) {
+        formattedInfo.userId = formattedInfo._id || formattedInfo.uid || '';
+      }
+      
+      console.log('格式化后的用户信息:', JSON.stringify(formattedInfo));
+      return formattedInfo;
     }
   }
 }
@@ -1720,40 +1948,41 @@ export default {
     
     .menu-content {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 20rpx 0;
       
       .menu-item {
         display: flex;
         flex-direction: column;
         align-items: center;
-        position: relative;
         width: 25%;
-        
-        .item-icon-img {
-          width: 56rpx;
-          height: 56rpx;
-          margin-bottom: 10rpx;
-        }
-        
-        .item-text {
-          font-size: 26rpx;
-          color: $text-color;
-        }
+        position: relative;
         
         .item-badge {
           position: absolute;
-          top: -10rpx;
-          right: 20rpx;
-          background-color: #FF3B30;
+          top: -6rpx;
+          right: 10rpx;
+          min-width: 32rpx;
+          height: 32rpx;
+          line-height: 32rpx;
+          padding: 0 8rpx;
+          background-color: #FF6B00;
           color: #fff;
           font-size: 20rpx;
-          height: 32rpx;
-          min-width: 32rpx;
           border-radius: 16rpx;
-          padding: 0 8rpx;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          text-align: center;
+          z-index: 1;
+        }
+        
+        .item-icon-img {
+          width: 60rpx;
+          height: 60rpx;
+          margin-bottom: 10rpx;
+        }
+
+        .item-text {
+          font-size: 24rpx;
+          color: $text-color;
         }
       }
     }

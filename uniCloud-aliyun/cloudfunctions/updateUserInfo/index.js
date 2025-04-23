@@ -172,6 +172,20 @@ exports.main = async (event, context) => {
     
     console.log('数据库更新成功');
     
+    // 生成新token
+    const newToken = generateToken(userId);
+    const tokenExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天有效期
+    
+    // 更新用户token
+    await db.collection('uni-id-users')
+      .doc(userId)
+      .update({
+        token: [newToken],
+        token_expired: new Date(tokenExpired)
+      });
+    
+    console.log('生成并更新了新token');
+    
     // 获取更新后的用户信息
     const userInfo = await db.collection('uni-id-users')
       .doc(userId)
@@ -191,7 +205,9 @@ exports.main = async (event, context) => {
     return {
       code: 0,
       message: '更新成功',
-      data: filteredData
+      data: filteredData,
+      token: newToken,
+      tokenExpired: tokenExpired
     };
   } catch (error) {
     console.error('更新用户信息失败:', error);
@@ -226,4 +242,11 @@ function filterUserData(userData) {
   filteredData.phoneNumber = filteredData.mobile;
   
   return filteredData;
+}
+
+// 生成token函数
+function generateToken(userId) {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 10);
+  return `token_${userId}_${timestamp}_${random}`;
 } 

@@ -1,0 +1,8 @@
+{
+  "name": "refreshToken",
+  "version": "1.0.0",
+  "description": "刷新用户登录token",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
+} 

@@ -126,6 +126,27 @@ exports.main = async (event, context) => {
       };
     }
     
+    // 获取教师信息
+    let teacherName = course.teacherName || '';
+    let teacherPhone = course.teacherPhone || '';
+    
+    // 如果课程中有教师ID但没有教师名称，尝试从teachers集合获取
+    if (course.teacherId && !teacherName) {
+      try {
+        console.log('从teachers集合获取教师信息:', course.teacherId);
+        const teacherResult = await db.collection('teachers').doc(course.teacherId).get();
+        if (teacherResult.data) {
+          const teacher = teacherResult.data[0] || teacherResult.data;
+          teacherName = teacher.name || teacher.fullName || '';
+          teacherPhone = teacher.phone || teacher.phoneNumber || teacher.mobile || '';
+          console.log('获取到教师信息:', teacherName, teacherPhone);
+        }
+      } catch (err) {
+        console.error('获取教师信息失败:', err);
+        // 继续执行，不影响预约流程
+      }
+    }
+    
     // 检查用户是否已经预约过该课程
     console.log('检查用户是否已预约过该课程');
     
@@ -172,7 +193,9 @@ exports.main = async (event, context) => {
       paymentStatus: 'unpaid', // 支付状态：未支付
       bookingId: bookingNumber, // 确保有预约编号
       createTime: new Date(),
-      updateTime: new Date()
+      updateTime: new Date(),
+      teacherName: teacherName,
+      teacherPhone: teacherPhone
     };
     
     console.log('准备创建预约记录:', bookingData);

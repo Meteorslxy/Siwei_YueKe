@@ -34,7 +34,7 @@ exports.main = async (event, context) => {
     
     const userId = USERID;
     
-    // 查询预约详情
+    // 查询预约详情 - 确保返回所有字段
     const bookingResult = await db.collection('bookings')
       .doc(bookingId)
       .get();
@@ -61,6 +61,14 @@ exports.main = async (event, context) => {
       };
     }
     
+    // 记录预约中教师信息（如果存在）
+    const originalTeacherName = booking.teacherName || '';
+    const originalTeacherPhone = booking.teacherPhone || '';
+    console.log('数据库原始教师信息:', { 
+      teacherName: originalTeacherName, 
+      teacherPhone: originalTeacherPhone 
+    });
+    
     // 获取用户手机号
     let userPhoneNumber = '';
     try {
@@ -84,6 +92,8 @@ exports.main = async (event, context) => {
     let courseTime = '';
     let isCourseDeleted = false;
     let courseDeletedNote = '';
+    let courseTeacherName = '';
+    let courseTeacherPhone = '';
     
     if (booking.courseId) {
       try {
@@ -94,6 +104,17 @@ exports.main = async (event, context) => {
         
         if (courseResult.data) {
           console.log('获取到课程详情，补充预约记录信息');
+          // 保存课程中的教师信息
+          if (courseResult.data.teacherName) {
+            courseTeacherName = courseResult.data.teacherName;
+            console.log('从课程获取到教师名称:', courseTeacherName);
+          }
+          
+          if (courseResult.data.teacherPhone) {
+            courseTeacherPhone = courseResult.data.teacherPhone;
+            console.log('从课程获取到教师电话:', courseTeacherPhone);
+          }
+          
           // 补充课程信息
           if (!booking.courseTitle && courseResult.data.title) {
             booking.courseTitle = courseResult.data.title;
@@ -188,6 +209,9 @@ exports.main = async (event, context) => {
       schoolName: booking.schoolName || '未知校区',
       studentName: booking.studentName || '未知学生',
       contactPhone: booking.contactPhone || '',
+      // 优先使用预约记录中的教师信息，然后是课程中的教师信息
+      teacherName: originalTeacherName || courseTeacherName || booking.teacherName || '',
+      teacherPhone: originalTeacherPhone || courseTeacherPhone || booking.teacherPhone || '',
       // 添加用户手机号
       userPhoneNumber: userPhoneNumber,
       remark: booking.remark || '',
@@ -202,6 +226,11 @@ exports.main = async (event, context) => {
       isCourseDeleted: booking.isCourseDeleted || isCourseDeleted,
       courseDeletedNote: booking.courseDeletedNote || courseDeletedNote
     };
+    
+    console.log('返回的教师信息:', {
+      teacherName: bookingDetail.teacherName,
+      teacherPhone: bookingDetail.teacherPhone
+    });
     
     return {
       code: 0,

@@ -3,12 +3,12 @@
     <view class="booking-info">
       <view class="course-name">{{booking.courseName}}</view>
       <view class="booking-meta">
-        <text class="booking-id">预约号: {{booking.bookingId || '--'}}</text>
-        <text class="booking-date">{{booking.bookingDate || '待确认'}}</text>
+        <text class="booking-id">预约编号：{{booking.bookingId}}</text>
+        <text class="booking-time">{{booking.bookingTime}}</text>
       </view>
       <view class="school-info">
         <text class="school-name">{{booking.schoolName}}</text>
-        <text class="teacher-name">{{booking.teacherName}}老师</text>
+        <text class="teacher-name">{{booking.teacherName ? (booking.teacherName + ' 老师') : '暂无教师'}}</text>
       </view>
     </view>
     <view class="booking-status" :style="{color: statusColor}">
@@ -62,11 +62,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
   background-color: #fff;
-  border-radius: 8rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.08);
   
   .booking-info {
     flex: 1;
@@ -76,7 +76,7 @@ export default {
       font-size: 32rpx;
       font-weight: 500;
       color: #333;
-      margin-bottom: 10rpx;
+      margin-bottom: 15rpx;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -86,7 +86,7 @@ export default {
       display: flex;
       font-size: 24rpx;
       color: #999;
-      margin-bottom: 10rpx;
+      margin-bottom: 15rpx;
       
       .booking-id {
         margin-right: 20rpx;
@@ -96,9 +96,24 @@ export default {
     .school-info {
       font-size: 26rpx;
       color: #666;
+      margin-top: 12rpx;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
       
       .school-name {
         margin-right: 20rpx;
+        margin-bottom: 8rpx;
+      }
+      
+      .teacher-name {
+        color: #FF6B00;
+        font-weight: 500;
+        background-color: rgba(255, 107, 0, 0.1);
+        padding: 6rpx 12rpx;
+        border-radius: 8rpx;
+        display: inline-block;
+        margin-bottom: 8rpx;
       }
     }
   }

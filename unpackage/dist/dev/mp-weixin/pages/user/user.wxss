@@ -198,38 +198,39 @@
 }
 .menu-section .menu-group .menu-content {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 20rpx 0;
 }
 .menu-section .menu-group .menu-content .menu-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
   width: 25%;
-}
-.menu-section .menu-group .menu-content .menu-item .item-icon-img {
-  width: 56rpx;
-  height: 56rpx;
-  margin-bottom: 10rpx;
-}
-.menu-section .menu-group .menu-content .menu-item .item-text {
-  font-size: 26rpx;
-  color: var(--text-color);
+  position: relative;
 }
 .menu-section .menu-group .menu-content .menu-item .item-badge {
   position: absolute;
-  top: -10rpx;
-  right: 20rpx;
-  background-color: #FF3B30;
+  top: -6rpx;
+  right: 10rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  line-height: 32rpx;
+  padding: 0 8rpx;
+  background-color: #FF6B00;
   color: #fff;
   font-size: 20rpx;
-  height: 32rpx;
-  min-width: 32rpx;
   border-radius: 16rpx;
-  padding: 0 8rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  z-index: 1;
+}
+.menu-section .menu-group .menu-content .menu-item .item-icon-img {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 10rpx;
+}
+.menu-section .menu-group .menu-content .menu-item .item-text {
+  font-size: 24rpx;
+  color: var(--text-color);
 }
 .menu-section .menu-group .menu-list .menu-list-item {
   display: flex;

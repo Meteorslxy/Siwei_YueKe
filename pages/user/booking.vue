@@ -71,6 +71,10 @@
                   <text class="detail-label">校区地点</text>
                   <text class="detail-value">{{item.schoolName || '未知'}}</text>
                 </view>
+                <view class="detail-row teacher-row" v-if="item.teacherName">
+                  <text class="detail-label">任课教师</text>
+                  <text class="detail-value teacher-name">{{item.teacherName}}</text>
+                </view>
               </view>
             </view>
             
@@ -2436,6 +2440,18 @@ export default {
   &.status-cancelled, &.status-cancel {
     background-color: #EEEEEE;
     color: #9E9E9E;
+  }
+}
+
+.detail-row.teacher-row {
+  background-color: rgba(255, 107, 0, 0.08);
+  border-radius: 8rpx;
+  padding: 4rpx 8rpx;
+  margin: 8rpx 0;
+  
+  .teacher-name {
+    color: #FF6B00;
+    font-weight: 500;
   }
 }
 </style> 

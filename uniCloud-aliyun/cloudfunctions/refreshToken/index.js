@@ -1,65 +1,97 @@
 'use strict';
 
-// 云函数入口
+// 阿里云云函数入口文件
+const db = uniCloud.database();
+
+// 云函数入口函数
 exports.main = async (event, context) => {
+	console.log('刷新token云函数调用:', event);
+	
 	const { userId } = event;
-	const db = uniCloud.database();
-	
-	console.log('开始刷新token，用户ID:', userId);
-	
-	// 如果没有提供userId，返回错误
 	if (!userId) {
 		return {
 			code: -1,
-			message: '缺少必要参数：userId'
+			message: '缺少用户ID'
 		};
 	}
 	
 	try {
-		// 直接查询数据库确认用户是否存在
-		const userResult = await db.collection('uni-id-users').doc(userId).get();
+		// 查询用户信息
+		const userInfo = await db.collection('uni-id-users')
+			.doc(userId)
+			.get();
 		
-		if (!userResult.data || userResult.data.length === 0) {
+		if (!userInfo.data || userInfo.data.length === 0) {
 			return {
-				code: -2,
-				message: '未找到用户'
+				code: -1,
+				message: '用户不存在'
 			};
 		}
 		
-		// 获取用户信息
-		const userInfo = userResult.data[0] || userResult.data;
+		const userData = userInfo.data[0];
 		
-		// 生成新的token
-		// 这里使用简单格式: ${userId}_${timestamp}_${randomPart}
-		const timestamp = Date.now();
-		const randomPart = Math.random().toString(36).substring(2, 10);
-		const newToken = `${userId}_${timestamp}_${randomPart}`;
+		// 生成新token
+		const token = generateToken(userId);
+		const tokenExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天有效期
 		
-		// 生成token过期时间，这里设置为7天后
-		const tokenExpired = timestamp + 7 * 24 * 60 * 60 * 1000;
+		// 更新用户token
+		await db.collection('uni-id-users')
+			.doc(userId)
+			.update({
+				token: [token],
+				token_expired: new Date(tokenExpired)
+			});
 		
-		console.log('生成新token:', newToken);
-		
-		// 可选：将token更新到用户信息中
-		/* 如果需要更新用户表中的token信息，取消这段代码的注释
-		await db.collection('uni-id-users').doc(userId).update({
-			token: newToken,
-			token_expired: tokenExpired
-		});
-		*/
+		// 过滤敏感信息，返回前端需要的数据
+		const filteredData = filterUserData(userData);
 		
 		return {
 			code: 0,
-			message: '刷新token成功',
-			token: newToken,
-			tokenExpired: tokenExpired
+			message: 'token刷新成功',
+			token,
+			tokenExpired,
+			userInfo: filteredData
 		};
 	} catch (error) {
 		console.error('刷新token失败:', error);
 		return {
-			code: -3,
-			message: error.message || '刷新token失败',
-			error: JSON.stringify(error)
+			code: -1,
+			message: '刷新token失败: ' + error.message
 		};
 	}
-}; 
+};
+
+// 生成token函数
+function generateToken(userId) {
+	const timestamp = Date.now();
+	const random = Math.random().toString(36).substring(2, 10);
+	return `token_${userId}_${timestamp}_${random}`;
+}
+
+// 过滤用户数据
+function filterUserData(userData) {
+	if (!userData) return {};
+	
+	// 创建新对象，避免修改原有数据
+	const filteredData = {
+		_id: userData._id || '',
+		uid: userData._id || '',  // 使用_id作为uid确保一致性
+		nickname: userData.nickname || '',
+		username: userData.username || '',
+		mobile: userData.mobile || '',
+		email: userData.email || '',
+		avatar: userData.avatar || '',
+		gender: userData.gender || 0,
+		status: userData.status || 0,
+		wx_nickname: userData.wx_nickname || '',
+		real_name: userData.real_name || ''
+	};
+	
+	// 确保兼容性：添加前端可能使用的其他字段名
+	filteredData.userId = filteredData._id;
+	filteredData.nickName = filteredData.nickname;
+	filteredData.avatarUrl = filteredData.avatar;
+	filteredData.phoneNumber = filteredData.mobile;
+	
+	return filteredData;
+} 
