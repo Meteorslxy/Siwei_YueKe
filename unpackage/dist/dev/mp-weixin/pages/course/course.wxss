@@ -73,121 +73,238 @@
   width: 100%;
   background-color: #EC7A49;
   /* 与用户页面一致的颜色 */
-  padding-bottom: 120rpx;
+  padding-bottom: 50rpx;
 }
-/* 筛选区域 */
-.filter-section {
-  padding: 40rpx 30rpx 30rpx;
+/* 应用标题 */
+.app-title {
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  padding: 20rpx 0;
+}
+/* 顶部城市和年级选择栏 */
+.sub-header {
   display: flex;
-  gap: 20rpx;
+  justify-content: space-between;
+  padding: 10rpx 30rpx 20rpx;
 }
-.filter-section .filter-dropdown {
-  position: relative;
-  flex: 1;
-}
-.filter-section .filter-dropdown .filter-item {
-  height: 70rpx;
+/* 城市选择 */
+.city-selector {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 20rpx;
 }
-.filter-section .filter-dropdown .filter-item .filter-text {
+.city-name {
   font-size: 28rpx;
+  color: #fff;
   font-weight: bold;
-  margin-right: 6rpx;
-  color: #fff !important;
-  /* 强制使用白色 */
 }
-.filter-section .filter-dropdown .filter-item .arrow-icon {
+/* 年级选择 */
+.grade-selector {
+  display: flex;
+  align-items: center;
+}
+.grade-name {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+  margin-right: 10rpx;
+}
+/* 年级选择下拉面板 */
+.grade-dropdown {
+  position: absolute;
+  top: 120rpx;
+  right: 30rpx;
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  width: 200rpx;
+}
+.dropdown-options {
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+.dropdown-option {
+  padding: 20rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+.dropdown-option.active {
+  color: #EC7A49;
+  font-weight: bold;
+}
+/* 筛选下拉内容 */
+.dropdown-content {
+  position: absolute;
+  top: 70rpx;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+/* 箭头图标 */
+.arrow-icon {
   width: 0;
   height: 0;
   border-left: 10rpx solid transparent;
   border-right: 10rpx solid transparent;
   border-top: 10rpx solid #fff;
-  /* 箭头颜色设为白色 */
-  margin-left: 0;
   transition: -webkit-transform 0.3s;
   transition: transform 0.3s;
   transition: transform 0.3s, -webkit-transform 0.3s;
 }
-.filter-section .filter-dropdown .filter-item .arrow-icon.arrow-up {
+.arrow-icon.arrow-up {
   -webkit-transform: rotate(180deg);
           transform: rotate(180deg);
 }
-.filter-section .filter-dropdown .filter-dropdown-content {
-  position: absolute;
-  top: 80rpx;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  border-radius: 12rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
-  z-index: 100;
+/* 筛选区域 */
+.filter-section {
+  display: flex;
+  justify-content: space-around;
+  padding: 40rpx 20rpx 20rpx;
 }
-.filter-section .filter-dropdown .filter-dropdown-content .dropdown-title {
-  height: 70rpx;
-  line-height: 70rpx;
-  text-align: center;
+.filter-dropdown {
+  flex: 1;
+}
+.filter-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.filter-text {
   font-size: 28rpx;
+  color: #fff;
+  margin-right: 10rpx;
+}
+.filter-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.filter-icon {
+  width: 32rpx;
+  height: 32rpx;
+  /* 使用纯CSS替代图片 */
+  position: relative;
+  margin-right: 8rpx;
+  border: 2rpx solid #fff;
+  border-radius: 4rpx;
+}
+.filter-icon::before {
+  content: "";
+  position: absolute;
+  top: 8rpx;
+  left: 6rpx;
+  width: 16rpx;
+  height: 2rpx;
+  background-color: #fff;
+  box-shadow: 0 6rpx 0 #fff, 0 12rpx 0 #fff;
+}
+.filter-button-text {
+  font-size: 28rpx;
+  color: #fff;
+}
+/* 筛选面板 */
+.filter-panel {
+  position: absolute;
+  top: 220rpx;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  z-index: 100;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  padding: 30rpx;
+  -webkit-transform: translateY(-100%);
+          transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+.filter-panel.show {
+  -webkit-transform: translateY(0);
+          transform: translateY(0);
+  opacity: 1;
+}
+.filter-panel-header,
+.filter-panel-section {
+  margin-bottom: 40rpx;
+}
+.filter-section-title {
+  font-size: 28rpx;
+  font-weight: bold;
   color: #333;
-  /* 下拉菜单标题保持黑色 */
-  border-bottom: 1rpx solid #eee;
+  margin-bottom: 20rpx;
 }
-.filter-section .filter-dropdown .filter-dropdown-content .dropdown-options {
-  max-height: 350rpx;
-  overflow-y: auto;
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
 }
-.filter-section .filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option {
+.filter-option-item {
+  padding: 15rpx 30rpx;
+  font-size: 26rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+}
+.filter-option-item.active {
+  background-color: #EC7A49;
+  color: #fff;
+}
+.filter-section-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 26rpx;
+  color: #666;
+}
+.arrow-icon-right {
+  width: 15rpx;
+  height: 26rpx;
+  /* 使用纯CSS替代图片 */
+  position: relative;
+}
+.arrow-icon-right::before {
+  content: "";
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  border-top: 2rpx solid #666;
+  border-right: 2rpx solid #666;
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  top: 8rpx;
+  right: 6rpx;
+}
+.filter-panel-buttons {
+  display: flex;
+  margin-top: 40rpx;
+}
+.reset-button {
+  flex: 1;
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
   font-size: 28rpx;
-  color: #333;
-  /* 下拉选项保持黑色 */
+  color: #666;
 }
-.filter-section .filter-dropdown .filter-dropdown-content .dropdown-options .dropdown-option.active {
-  color: #EC7A49;
-  /* 选中项使用主题色 */
-  font-weight: bold;
-}
-/* 学科选项卡 - 修改为均匀分布 */
-.subject-tabs {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 20rpx;
-  margin-top: 20rpx;
-}
-.subject-tabs .subject-item {
-  flex: 1;
+.apply-button {
+  flex: 2;
+  height: 80rpx;
+  line-height: 80rpx;
   text-align: center;
-  padding: 0 10rpx;
-  height: 70rpx;
-  line-height: 70rpx;
   font-size: 28rpx;
-  position: relative;
-  color: rgba(255, 255, 255, 0.8);
-}
-.subject-tabs .subject-item.active {
   color: #fff;
-  font-weight: bold;
-}
-.subject-tabs .subject-item.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-          transform: translateX(-50%);
-  width: 30rpx;
-  height: 4rpx;
-  background-color: #fff;
-  border-radius: 2rpx;
+  background-color: #1989FA;
+  border-radius: 8rpx;
 }
 /* 课程列表 */
 .course-list {
   padding: 30rpx 30rpx 30rpx;
-  margin-top: -100rpx;
   position: relative;
   z-index: 10;
 }
@@ -297,4 +414,14 @@
 }
 .course-list .course-item:first-child {
   margin-top: 10rpx;
+}
+/* 遮罩层 */
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 90;
 }

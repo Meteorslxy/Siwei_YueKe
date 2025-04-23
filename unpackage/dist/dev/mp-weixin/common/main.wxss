@@ -1000,6 +1000,20 @@ text {
   overflow: hidden;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
 }
+.course-card.course-full {
+  background-color: #f5f5f5;
+  opacity: 0.8;
+}
+.course-card.course-full .course-title,
+.course-card.course-full .location-text,
+.course-card.course-full .time-text,
+.course-card.course-full .teacher-name,
+.course-card.course-full .teacher-title {
+  color: #999;
+}
+.course-card.course-full .price-value {
+  color: #999;
+}
 .card-upper {
   display: flex;
   padding: 20rpx;
@@ -1027,6 +1041,24 @@ text {
   padding: 4rpx 8rpx;
   border-radius: 0 6rpx 6rpx 0;
 }
+.course-full-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(150, 150, 150, 0.9);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+  padding: 8rpx 16rpx;
+  -webkit-transform: rotate(-45deg) translate(-20rpx, -10rpx);
+          transform: rotate(-45deg) translate(-20rpx, -10rpx);
+  -webkit-transform-origin: left top;
+          transform-origin: left top;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  z-index: 5;
+  width: 120rpx;
+  text-align: center;
+}
 .course-info {
   flex: 1;
   display: flex;
@@ -1047,6 +1079,18 @@ text {
   margin-bottom: 8rpx;
   display: flex;
   align-items: center;
+}
+.enrollment-status {
+  font-size: 22rpx;
+  margin-top: 8rpx;
+  display: flex;
+  align-items: center;
+}
+.enrollment-text {
+  color: #FF6B00;
+}
+.course-card.course-full .enrollment-text {
+  color: #999;
 }
 .icon-image {
   width: 24rpx;

@@ -1,61 +1,164 @@
 <template>
-  <view class="course-container">
+  <view class="course-container" @click="closeAllDropdowns">
     <!-- 顶部背景 -->
     <view class="header-background" :style="{ paddingTop: statusBarHeight + 'px' }">
-      <!-- 筛选区域 -->
-      <view class="filter-section">
-        <!-- 多选筛选 -->
-        <view class="filter-dropdown">
-          <view class="filter-item" @click="toggleGradeFilter">
-            <text class="filter-text">{{selectedGradeText}}</text>
-            <view class="arrow-icon" :class="{ 'arrow-up': isGradeFilterShow }"></view>
-          </view>
-          <view class="filter-dropdown-content" v-if="isGradeFilterShow">
-            <view class="dropdown-title">选择年级</view>
-            <view class="dropdown-options">
-              <view 
-                class="dropdown-option" 
-                v-for="(grade, index) in gradeGroups" 
-                :key="index"
-                :class="{ active: selectedGradeGroup === grade.value }"
-                @click="selectGradeGroup(grade.value)">
-                {{grade.label}}
-              </view>
-            </view>
-          </view>
+      <!-- 顶部标题 -->
+      <view class="app-title">四维工作室</view>
+      
+      <!-- 顶部城市选择和年级选择栏 -->
+      <view class="sub-header">
+        <view class="city-selector">
+          <text class="city-name">南京</text>
         </view>
-
-        <view class="filter-dropdown">
-          <view class="filter-item" @click="toggleSchoolFilter">
-            <text class="filter-text">{{selectedSchoolText}}</text>
-            <view class="arrow-icon" :class="{ 'arrow-up': isSchoolFilterShow }"></view>
-          </view>
-          <view class="filter-dropdown-content" v-if="isSchoolFilterShow">
-            <view class="dropdown-title">选择校区</view>
-            <view class="dropdown-options">
-              <view 
-                class="dropdown-option" 
-                v-for="(school, index) in schoolOptions" 
-                :key="index"
-                :class="{ active: selectedSchool === school.value }"
-                @click="selectSchool(school.value)">
-                {{school.label}}
-              </view>
-            </view>
+        
+        <view class="grade-selector" @click.stop="toggleGradeFilter">
+          <text class="grade-name">{{selectedGradeText}}</text>
+          <view class="arrow-icon" :class="{ 'arrow-up': isGradeFilterShow }"></view>
+        </view>
+      </view>
+      
+      <!-- 年级选择面板 -->
+      <view class="grade-dropdown" v-if="isGradeFilterShow" @click.stop>
+        <view class="dropdown-options">
+          <view 
+            class="dropdown-option" 
+            v-for="(grade, index) in gradeGroups" 
+            :key="index"
+            :class="{ active: selectedGradeGroup === grade.value }"
+            @click="selectGradeGroup(grade.value)">
+            {{grade.label}}
           </view>
         </view>
       </view>
-
-      <!-- 学科选项卡 -->
-      <view class="subject-tabs">
-        <view 
-          class="subject-item" 
-          v-for="(subject, index) in subjectOptions" 
-          :key="index"
-          :class="{ active: selectedSubject === subject.value }"
-          @click="selectSubject(subject.value)">
-          {{subject.label}}
+      
+      <!-- 筛选区域 -->
+      <view class="filter-section">
+        <!-- 科目筛选 -->
+        <view class="filter-dropdown">
+          <view class="filter-item" @click.stop="toggleSubjectFilter">
+            <text class="filter-text">{{selectedSubject === 'all' ? '科目' : getSubjectLabel(selectedSubject)}}</text>
+            <view class="arrow-icon" :class="{ 'arrow-up': isSubjectFilterShow }"></view>
+          </view>
+          
+          <!-- 科目下拉选项 -->
+          <view class="dropdown-content" v-if="isSubjectFilterShow" @click.stop>
+            <view 
+              class="dropdown-option" 
+              v-for="(subject, index) in subjectOptions" 
+              :key="index"
+              :class="{ active: selectedSubject === subject.value }"
+              @click="selectSubject(subject.value)">
+              {{subject.label}}
+            </view>
+          </view>
         </view>
+        
+        <!-- 学期筛选 -->
+        <view class="filter-dropdown">
+          <view class="filter-item" @click.stop="toggleTermFilter">
+            <text class="filter-text">{{selectedTerm === 'all' ? '学期' : getTermLabel(selectedTerm)}}</text>
+            <view class="arrow-icon" :class="{ 'arrow-up': isTermFilterShow }"></view>
+          </view>
+          
+          <!-- 学期下拉选项 -->
+          <view class="dropdown-content" v-if="isTermFilterShow" @click.stop>
+            <view 
+              class="dropdown-option" 
+              v-for="(term, index) in termOptions" 
+              :key="index"
+              :class="{ active: selectedTerm === term.value }"
+              @click="selectTerm(term.value)">
+              {{term.label}}
+            </view>
+          </view>
+        </view>
+        
+        <!-- 班型筛选 -->
+        <view class="filter-dropdown">
+          <view class="filter-item" @click.stop="toggleClassTypeFilter">
+            <text class="filter-text">{{selectedCourseType === 'all' ? '班型' : getClassTypeLabel(selectedCourseType)}}</text>
+            <view class="arrow-icon" :class="{ 'arrow-up': isClassTypeFilterShow }"></view>
+          </view>
+          
+          <!-- 班型下拉选项 -->
+          <view class="dropdown-content" v-if="isClassTypeFilterShow" @click.stop>
+            <view 
+              class="dropdown-option" 
+              v-for="(type, index) in courseTypes" 
+              :key="index"
+              :class="{ active: selectedCourseType === type.value }"
+              @click="selectCourseType(type.value)">
+              {{type.label}}
+            </view>
+          </view>
+        </view>
+        
+        <!-- 筛选按钮 -->
+        <view class="filter-button" @click.stop="showFilterPanel">
+          <view class="filter-icon"></view>
+          <text class="filter-button-text">筛选</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 遮罩层 -->
+    <view class="mask" v-if="isFilterPanelShow" @click="hideFilterPanel"></view>
+    
+    <!-- 筛选面板 -->
+    <view class="filter-panel" v-if="isFilterPanelShow" :class="{ 'show': isFilterPanelShow }" @click.stop>
+      <view class="filter-panel-header">
+        <view class="filter-section-title">类型</view>
+        <view class="filter-options">
+          <view class="filter-option-item" 
+            v-for="(type, index) in courseTypes" 
+            :key="index"
+            :class="{ active: selectedCourseType === type.value }"
+            @click="selectCourseType(type.value)">
+            {{type.label}}
+          </view>
+        </view>
+      </view>
+      
+      <view class="filter-panel-section">
+        <view class="filter-section-title">时间</view>
+        <view class="filter-options">
+          <view class="filter-option-item" 
+            v-for="(time, index) in timeOptions" 
+            :key="index"
+            :class="{ active: selectedTime === time.value }"
+            @click="selectTime(time.value)">
+            {{time.label}}
+          </view>
+        </view>
+      </view>
+      
+      <view class="filter-panel-section">
+        <view class="filter-section-title">校区</view>
+        <view class="filter-section-action" @click="toggleAllLocations">
+          <text>不限</text>
+          <view class="arrow-icon-right"></view>
+        </view>
+      </view>
+      
+      <view class="filter-panel-section">
+        <view class="filter-section-title">教师</view>
+        <view class="filter-section-action" @click="toggleAllTeachers">
+          <text>不限</text>
+          <view class="arrow-icon-right"></view>
+        </view>
+      </view>
+      
+      <view class="filter-panel-section">
+        <view class="filter-section-title">班主任</view>
+        <view class="filter-section-action" @click="toggleAllClassTeachers">
+          <text>不限</text>
+          <view class="arrow-icon-right"></view>
+        </view>
+      </view>
+      
+      <view class="filter-panel-buttons">
+        <view class="reset-button" @click="resetFilters">重置</view>
+        <view class="apply-button" @click="applyFilters">完成</view>
       </view>
     </view>
     
@@ -83,6 +186,7 @@
 import CourseCard from '@/components/course-card/course-card.vue'
 import LoadMore from '@/components/load-more/load-more.vue'
 import EmptyTip from '@/components/empty-tip/empty-tip.vue'
+import filterUtils from '@/api/utils/filters'
 
 export default {
   components: {
@@ -95,33 +199,48 @@ export default {
       // 状态栏高度
       statusBarHeight: 0,
       
+      // 筛选面板显示状态
+      isFilterPanelShow: false,
+      
+      // 筛选项显示状态
+      isSubjectFilterShow: false,
+      isTermFilterShow: false,
+      isClassTypeFilterShow: false,
+      
       // 年级筛选相关
       isGradeFilterShow: false,
       selectedGradeGroup: 'all',
-      gradeGroups: [
-        { label: '全部年级', value: 'all' },
-        { label: '初一', value: '初一' },
-        { label: '初二', value: '初二' },
-        { label: '初三', value: '初三' }
-      ],
+      gradeGroups: [], // 从grades数据库获取
       
       // 校区筛选相关
       isSchoolFilterShow: false,
       selectedSchool: 'all',
-      schoolOptions: [
-        { label: '全部校区', value: 'all' }
+      schoolOptions: [], // 从locations数据库获取
+      
+      // 课程类型筛选相关
+      selectedCourseType: 'all',
+      courseTypes: [], // 从course_classtype数据库获取
+      
+      // 学期筛选相关
+      selectedTerm: 'all',
+      termOptions: [], // 从course_term数据库获取
+      
+      // 时间筛选相关
+      selectedTime: 'all',
+      timeOptions: [
+        { label: '不限', value: 'all' },
+        { label: '周三', value: 'wednesday' },
+        { label: '周四', value: 'thursday' },
+        { label: '周五', value: 'friday' },
+        { label: '周六', value: 'saturday' },
+        { label: '周日', value: 'sunday' },
+        { label: '二期', value: 'secondPhase' },
+        { label: '三期', value: 'thirdPhase' }
       ],
       
       // 学科筛选相关
       selectedSubject: 'all',
-      subjectOptions: [
-        { label: '全部', value: 'all' },
-        { label: '语文', value: '语文' },
-        { label: '数学', value: '数学' },
-        { label: '英语', value: '英语' },
-        { label: '物理', value: '物理' },
-        { label: '化学', value: '化学' }
-      ],
+      subjectOptions: [], // 从subjects数据库获取
       
       // 课程列表相关
       courseList: [],
@@ -147,9 +266,28 @@ export default {
   },
   onLoad() {
     this.getStatusBarHeight()
-    // 加载校区数据
-    this.getLocationList()
-    this.loadCourseList()
+    
+    // 获取筛选选项数据的Promise数组
+    const promises = [
+      this.getGradeOptions(),
+      this.getSubjectOptions(),
+      this.getTermOptions(),
+      this.getClassTypeOptions(),
+      this.getLocationOptions()
+    ];
+    
+    // 等待所有数据加载完成后再加载课程列表
+    Promise.all(promises)
+      .then(() => {
+        console.log('所有筛选选项加载完成');
+        console.log('班型选项:', this.courseTypes);
+        this.loadCourseList();
+      })
+      .catch(error => {
+        console.error('筛选选项加载失败:', error);
+        // 即使失败也尝试加载课程列表
+        this.loadCourseList();
+      });
   },
   onPullDownRefresh() {
     this.resetList()
@@ -172,6 +310,88 @@ export default {
         console.error('获取状态栏高度失败:', e)
         this.statusBarHeight = 20
       }
+    },
+    
+    // 切换科目筛选
+    toggleSubjectFilter() {
+      this.isSubjectFilterShow = !this.isSubjectFilterShow
+      this.isTermFilterShow = false
+      this.isClassTypeFilterShow = false
+    },
+    
+    // 切换学期筛选
+    toggleTermFilter() {
+      this.isTermFilterShow = !this.isTermFilterShow
+      this.isSubjectFilterShow = false
+      this.isClassTypeFilterShow = false
+    },
+    
+    // 切换班型筛选
+    toggleClassTypeFilter() {
+      this.isClassTypeFilterShow = !this.isClassTypeFilterShow
+      this.isSubjectFilterShow = false
+      this.isTermFilterShow = false
+    },
+    
+    // 显示筛选面板
+    showFilterPanel() {
+      this.isFilterPanelShow = true
+    },
+    
+    // 隐藏筛选面板
+    hideFilterPanel() {
+      this.isFilterPanelShow = false
+    },
+    
+    // 选择课程类型
+    selectCourseType(type) {
+      if (this.selectedCourseType === type) return;
+      
+      this.selectedCourseType = type;
+      this.isClassTypeFilterShow = false;
+      this.resetList();
+      this.loadCourseList();
+    },
+    
+    // 选择时间
+    selectTime(time) {
+      if (this.selectedTime === time) return;
+      
+      this.selectedTime = time;
+      this.resetList();
+      this.loadCourseList();
+    },
+    
+    // 切换所有地点
+    toggleAllLocations() {
+      // 实现切换所有地点的逻辑
+    },
+    
+    // 切换所有教师
+    toggleAllTeachers() {
+      // 实现切换所有教师的逻辑
+    },
+    
+    // 切换所有班主任
+    toggleAllClassTeachers() {
+      // 实现切换所有班主任的逻辑
+    },
+    
+    // 重置筛选条件
+    resetFilters() {
+      this.selectedCourseType = 'all'
+      this.selectedTime = 'all'
+      this.selectedTerm = 'all'
+      this.selectedSchool = 'all'
+      this.selectedSubject = 'all'
+      this.selectedGradeGroup = 'all'
+    },
+    
+    // 应用筛选条件
+    applyFilters() {
+      this.hideFilterPanel()
+      this.resetList()
+      this.loadCourseList()
     },
     
     // 切换年级筛选下拉框
@@ -215,6 +435,7 @@ export default {
       if (this.selectedSubject === subject) return
       
       this.selectedSubject = subject
+      this.isSubjectFilterShow = false
       this.resetList()
       this.loadCourseList()
     },
@@ -275,6 +496,8 @@ export default {
         年级: this.selectedGradeGroup,
         校区: this.selectedSchool,
         学科: this.selectedSubject,
+        学期: this.selectedTerm,
+        班型: this.selectedCourseType,
         页码: this.page,
         数量限制: this.limit
       });
@@ -288,10 +511,7 @@ export default {
         
         // 添加筛选条件 - 确保参数名称与后端一致
         if (this.selectedGradeGroup !== 'all') {
-          // 使用grade参数作为主要年级筛选字段
           params.grade = this.selectedGradeGroup;
-          // 兼容旧版本，也传递educationalStages参数
-          params.educationalStages = this.selectedGradeGroup;
         }
         
         if (this.selectedSchool !== 'all') {
@@ -300,6 +520,14 @@ export default {
         
         if (this.selectedSubject !== 'all') {
           params.subject = this.selectedSubject;
+        }
+        
+        if (this.selectedTerm !== 'all') {
+          params.term = this.selectedTerm;
+        }
+        
+        if (this.selectedCourseType !== 'all') {
+          params.classType = this.selectedCourseType;
         }
         
         console.log('发送到后端的查询参数:', params);
@@ -503,8 +731,188 @@ export default {
       uni.navigateTo({ url });
     },
     
-    // 获取校区列表
-    async getLocationList() {
+    // 获取年级选项
+    async getGradeOptions() {
+      try {
+        const result = await this.$api.common.getGradeOptions();
+        console.log('获取年级选项结果:', result);
+        
+        if (result && result.data && result.data.length > 0) {
+          // 格式化年级数据
+          const grades = result.data.map(item => {
+            return {
+              label: item.name || item.label,
+              value: item._id || item.value
+            };
+          });
+          
+          // 添加"全部"选项
+          this.gradeGroups = [
+            { label: '全部年级', value: 'all' },
+            ...grades
+          ];
+          
+          console.log('更新后的年级选项:', this.gradeGroups);
+        } else {
+          console.warn('未获取到年级数据，使用默认值');
+          this.gradeGroups = [
+            { label: '全部年级', value: 'all' },
+            { label: '初一', value: '初一' },
+            { label: '初二', value: '初二' },
+            { label: '初三', value: '初三' }
+          ];
+        }
+      } catch (e) {
+        console.error('获取年级选项失败:', e);
+        this.gradeGroups = [
+          { label: '全部年级', value: 'all' },
+          { label: '初一', value: '初一' },
+          { label: '初二', value: '初二' },
+          { label: '初三', value: '初三' }
+        ];
+      }
+    },
+    
+    // 获取学科选项
+    async getSubjectOptions() {
+      try {
+        const result = await this.$api.common.getSubjectOptions();
+        console.log('获取学科选项结果:', result);
+        
+        if (result && result.data && result.data.length > 0) {
+          // 格式化学科数据
+          const subjects = result.data.map(item => {
+            return {
+              label: item.name || item.label,
+              value: item._id || item.value
+            };
+          });
+          
+          // 添加"全部"选项
+          this.subjectOptions = [
+            { label: '全部', value: 'all' },
+            ...subjects
+          ];
+          
+          console.log('更新后的学科选项:', this.subjectOptions);
+        } else {
+          console.warn('未获取到学科数据，使用默认值');
+          this.subjectOptions = [
+            { label: '全部', value: 'all' },
+            { label: '语文', value: '语文' },
+            { label: '数学', value: '数学' },
+            { label: '英语', value: '英语' },
+            { label: '物理', value: '物理' },
+            { label: '化学', value: '化学' }
+          ];
+        }
+      } catch (e) {
+        console.error('获取学科选项失败:', e);
+        this.subjectOptions = [
+          { label: '全部', value: 'all' },
+          { label: '语文', value: '语文' },
+          { label: '数学', value: '数学' },
+          { label: '英语', value: '英语' },
+          { label: '物理', value: '物理' },
+          { label: '化学', value: '化学' }
+        ];
+      }
+    },
+    
+    // 获取学期选项
+    async getTermOptions() {
+      try {
+        const result = await this.$api.common.getTermOptions();
+        console.log('获取学期选项结果:', result);
+        
+        if (result && result.data && result.data.length > 0) {
+          // 格式化学期数据
+          const terms = result.data.map(item => {
+            return {
+              label: item.name || item.label,
+              value: item._id || item.value
+            };
+          });
+          
+          // 添加"全部"选项
+          this.termOptions = [
+            { label: '全部', value: 'all' },
+            ...terms
+          ];
+          
+          console.log('更新后的学期选项:', this.termOptions);
+        } else {
+          console.warn('未获取到学期数据，使用默认值');
+          this.termOptions = [
+            { label: '全部', value: 'all' },
+            { label: '春季班', value: 'spring' },
+            { label: '秋季班', value: 'autumn' },
+            { label: '暑假班', value: 'summer' },
+            { label: '寒假班', value: 'winter' }
+          ];
+        }
+      } catch (e) {
+        console.error('获取学期选项失败:', e);
+        this.termOptions = [
+          { label: '全部', value: 'all' },
+          { label: '春季班', value: 'spring' },
+          { label: '秋季班', value: 'autumn' },
+          { label: '暑假班', value: 'summer' },
+          { label: '寒假班', value: 'winter' }
+        ];
+      }
+    },
+    
+    // 获取班型选项
+    async getClassTypeOptions() {
+      try {
+        console.log('开始获取班型选项...');
+        const result = await this.$api.common.getClassTypeOptions();
+        console.log('获取班型选项API返回结果:', result);
+        
+        if (result && result.data && result.data.length > 0) {
+          // 格式化班型数据
+          const classTypes = result.data.map(item => {
+            const option = {
+              label: item.name || item.label,
+              value: item._id || item.value
+            };
+            console.log('格式化班型选项:', option);
+            return option;
+          });
+          
+          // 添加"不限"选项
+          this.courseTypes = [
+            { label: '不限', value: 'all' },
+            ...classTypes
+          ];
+          
+          console.log('更新后的班型选项:', this.courseTypes);
+        } else {
+          console.warn('未获取到班型数据或数据为空，使用默认值');
+          this.setDefaultClassTypes();
+        }
+      } catch (e) {
+        console.error('获取班型选项失败，具体错误:', e);
+        this.setDefaultClassTypes();
+      }
+      
+      return Promise.resolve(); // 确保Promise总是resolved
+    },
+    
+    // 设置默认班型选项
+    setDefaultClassTypes() {
+      console.log('设置默认班型选项');
+      this.courseTypes = [
+        { label: '不限', value: 'all' },
+        { label: '线下', value: 'offline' },
+        { label: '自学', value: 'selfStudy' },
+        { label: '大课堂', value: 'largeClass' }
+      ];
+    },
+    
+    // 获取校区选项
+    async getLocationOptions() {
       try {
         const result = await this.$api.location.getLocationList();
         console.log('获取校区列表结果:', result);
@@ -514,7 +922,7 @@ export default {
           const locations = result.data.map(item => {
             return {
               label: item.name,
-              value: item.name
+              value: item._id || item.name
             };
           });
           
@@ -527,15 +935,64 @@ export default {
           console.log('更新后的校区选项:', this.schoolOptions);
         } else {
           console.warn('未获取到校区数据，使用默认值');
+          this.schoolOptions = [
+            { label: '全部校区', value: 'all' },
+            { label: '江宁校区', value: 'jiangning' },
+            { label: '鼓楼校区', value: 'gulou' },
+            { label: '浦口校区', value: 'pukou' }
+          ];
         }
       } catch (e) {
         console.error('获取校区列表失败:', e);
-        uni.showToast({
-          title: '获取校区列表失败',
-          icon: 'none'
-        });
+        this.schoolOptions = [
+          { label: '全部校区', value: 'all' },
+          { label: '江宁校区', value: 'jiangning' },
+          { label: '鼓楼校区', value: 'gulou' },
+          { label: '浦口校区', value: 'pukou' }
+        ];
       }
-    }
+    },
+    
+    // 选择学期
+    selectTerm(term) {
+      if (this.selectedTerm === term) return
+      
+      this.selectedTerm = term
+      this.isTermFilterShow = false
+      this.resetList()
+      this.loadCourseList()
+    },
+    
+    // 获取校区列表
+    async getLocationList() {
+      // 已被 getLocationOptions 方法替代
+    },
+    
+    // 关闭所有下拉框
+    closeAllDropdowns() {
+      this.isGradeFilterShow = false;
+      this.isSubjectFilterShow = false;
+      this.isTermFilterShow = false;
+      this.isClassTypeFilterShow = false;
+    },
+    
+    // 获取学科标签
+    getSubjectLabel(value) {
+      const subject = this.subjectOptions.find(item => item.value === value);
+      return subject ? subject.label : '科目';
+    },
+    
+    // 获取学期标签
+    getTermLabel(value) {
+      const term = this.termOptions.find(item => item.value === value);
+      return term ? term.label : '学期';
+    },
+    
+    // 获取班型标签
+    getClassTypeLabel(value) {
+      const classType = this.courseTypes.find(item => item.value === value);
+      return classType ? classType.label : '班型';
+    },
   }
 }
 </script>
@@ -550,128 +1007,267 @@ export default {
 .header-background {
   width: 100%;
   background-color: #EC7A49; /* 与用户页面一致的颜色 */
-  padding-bottom: 120rpx;
+  padding-bottom: 50rpx;
+}
+
+/* 应用标题 */
+.app-title {
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  padding: 20rpx 0;
+}
+
+/* 顶部城市和年级选择栏 */
+.sub-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 30rpx 20rpx;
+}
+
+/* 城市选择 */
+.city-selector {
+  display: flex;
+  align-items: center;
+}
+
+.city-name {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* 年级选择 */
+.grade-selector {
+  display: flex;
+  align-items: center;
+}
+
+.grade-name {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+  margin-right: 10rpx;
+}
+
+/* 年级选择下拉面板 */
+.grade-dropdown {
+  position: absolute;
+  top: 120rpx;
+  right: 30rpx;
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  width: 200rpx;
+}
+
+.dropdown-options {
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.dropdown-option {
+  padding: 20rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #333;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.dropdown-option.active {
+  color: #EC7A49;
+  font-weight: bold;
+}
+
+/* 筛选下拉内容 */
+.dropdown-content {
+  position: absolute;
+  top: 70rpx;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+/* 箭头图标 */
+.arrow-icon {
+  width: 0;
+  height: 0;
+  border-left: 10rpx solid transparent;
+  border-right: 10rpx solid transparent;
+  border-top: 10rpx solid #fff;
+  transition: transform 0.3s;
+}
+
+.arrow-icon.arrow-up {
+  transform: rotate(180deg);
 }
 
 /* 筛选区域 */
 .filter-section {
-  padding: 40rpx 30rpx 30rpx;
   display: flex;
-  gap: 20rpx;
-  
-  .filter-dropdown {
-    position: relative;
-    flex: 1;
-    
-    .filter-item {
-      height: 70rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 20rpx;
-      
-      .filter-text {
-        font-size: 28rpx;
-        font-weight: bold;
-        margin-right: 6rpx;
-        color: #fff !important; /* 强制使用白色 */
-      }
-      
-      .arrow-icon {
-        width: 0;
-        height: 0;
-        border-left: 10rpx solid transparent;
-        border-right: 10rpx solid transparent;
-        border-top: 10rpx solid #fff; /* 箭头颜色设为白色 */
-        margin-left: 0;
-        transition: transform 0.3s;
-        
-        &.arrow-up {
-          transform: rotate(180deg);
-        }
-      }
-    }
-    
-    .filter-dropdown-content {
-      position: absolute;
-      top: 80rpx;
-      left: 0;
-      width: 100%;
-      background-color: #fff;
-      border-radius: 12rpx;
-      box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
-      z-index: 100;
-      
-      .dropdown-title {
-        height: 70rpx;
-        line-height: 70rpx;
-        text-align: center;
-        font-size: 28rpx;
-        color: #333; /* 下拉菜单标题保持黑色 */
-        border-bottom: 1rpx solid #eee;
-      }
-      
-      .dropdown-options {
-        max-height: 350rpx;
-        overflow-y: auto;
-        
-        .dropdown-option {
-          height: 80rpx;
-          line-height: 80rpx;
-          text-align: center;
-          font-size: 28rpx;
-          color: #333; /* 下拉选项保持黑色 */
-          
-          &.active {
-            color: #EC7A49; /* 选中项使用主题色 */
-            font-weight: bold;
-          }
-        }
-      }
-    }
-  }
+  justify-content: space-around;
+  padding: 40rpx 20rpx 20rpx;
 }
 
-/* 学科选项卡 - 修改为均匀分布 */
-.subject-tabs {
+.filter-dropdown {
+  flex: 1;
+}
+
+.filter-item {
   display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-text {
+  font-size: 28rpx;
+  color: #fff;
+  margin-right: 10rpx;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-icon {
+  width: 32rpx;
+  height: 32rpx;
+  /* 使用纯CSS替代图片 */
+  position: relative;
+  margin-right: 8rpx;
+  border: 2rpx solid #fff;
+  border-radius: 4rpx;
+}
+
+.filter-icon::before {
+  content: "";
+  position: absolute;
+  top: 8rpx;
+  left: 6rpx;
+  width: 16rpx;
+  height: 2rpx;
+  background-color: #fff;
+  box-shadow: 0 6rpx 0 #fff, 0 12rpx 0 #fff;
+}
+
+.filter-button-text {
+  font-size: 28rpx;
+  color: #fff;
+}
+
+/* 筛选面板 */
+.filter-panel {
+  position: absolute;
+  top: 220rpx;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  z-index: 100;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  padding: 30rpx;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.filter-panel.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.filter-panel-header,
+.filter-panel-section {
+  margin-bottom: 40rpx;
+}
+
+.filter-section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.filter-option-item {
+  padding: 15rpx 30rpx;
+  font-size: 26rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+}
+
+.filter-option-item.active {
+  background-color: #EC7A49;
+  color: #fff;
+}
+
+.filter-section-action {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 0 20rpx;
-  margin-top: 20rpx;
-  
-  .subject-item {
-    flex: 1;
-    text-align: center;
-    padding: 0 10rpx;
-    height: 70rpx;
-    line-height: 70rpx;
-    font-size: 28rpx;
-    position: relative;
-    color: rgba(255,255,255,0.8);
-    
-    &.active {
-      color: #fff;
-      font-weight: bold;
-      
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 30rpx;
-        height: 4rpx;
-        background-color: #fff;
-        border-radius: 2rpx;
-      }
-    }
-  }
+  font-size: 26rpx;
+  color: #666;
+}
+
+.arrow-icon-right {
+  width: 15rpx;
+  height: 26rpx;
+  /* 使用纯CSS替代图片 */
+  position: relative;
+}
+
+.arrow-icon-right::before {
+  content: "";
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  border-top: 2rpx solid #666;
+  border-right: 2rpx solid #666;
+  transform: rotate(45deg);
+  top: 8rpx;
+  right: 6rpx;
+}
+
+.filter-panel-buttons {
+  display: flex;
+  margin-top: 40rpx;
+}
+
+.reset-button {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.apply-button {
+  flex: 2;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #fff;
+  background-color: #1989FA;
+  border-radius: 8rpx;
 }
 
 /* 课程列表 */
 .course-list {
   padding: 30rpx 30rpx 30rpx;
-  margin-top: -100rpx;
   position: relative;
   z-index: 10;
   
@@ -801,5 +1397,16 @@ export default {
   .course-item:first-child {
     margin-top: 10rpx;
   }
+}
+
+/* 遮罩层 */
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 90;
 }
 </style> 

@@ -3,5 +3,7 @@
   "navigationBarBackgroundColor": "#ffffff",
   "navigationBarTextStyle": "white",
   "navigationStyle": "custom",
-  "usingComponents": {}
+  "usingComponents": {
+    "course-card": "/components/course-card/course-card"
+  }
 }

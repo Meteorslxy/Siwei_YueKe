@@ -45,8 +45,8 @@
             <view class="booking-details">
               <view class="details-column left-column">
                 <view class="detail-row">
-                  <text class="detail-label">预约编号</text>
-                  <text class="detail-value">{{item.bookingId}}</text>
+                  <text class="detail-label">校区地点</text>
+                  <text class="detail-value">{{item.schoolName || '未知'}}</text>
                 </view>
                 <view class="detail-row">
                   <text class="detail-label">课程时间</text>
@@ -67,10 +67,7 @@
                   <text class="detail-label">联系电话</text>
                   <text class="detail-value">{{item.contactPhone || '暂无'}}</text>
                 </view>
-                <view class="detail-row">
-                  <text class="detail-label">校区地点</text>
-                  <text class="detail-value">{{item.schoolName || '未知'}}</text>
-                </view>
+
                 <view class="detail-row teacher-row" v-if="item.teacherName">
                   <text class="detail-label">任课教师</text>
                   <text class="detail-value teacher-name">{{item.teacherName}}</text>

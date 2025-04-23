@@ -64,48 +64,24 @@
       </view>
       
       <view class="course-list">
-        <view 
-          class="course-item" 
+        <course-card 
           v-for="(item, index) in recommendCourses" 
           :key="index"
-          @click="navigateTo(`/pages/course/detail?id=${item._id}`)">
-          <image class="course-image" :src="item.coverImage" mode="aspectFill"></image>
-          <view class="course-content">
-            <view class="course-title">
-              <text v-if="item.school" class="school-tag">[{{item.school}}]</text>
-              <text>{{item.title}}</text>
-            </view>
-            <view class="course-info">
-              <view class="course-location">
-                <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/map.png"></image>
-                <text class="location-text">{{item.location || item.schoolName}}</text>
-              </view>
-              <view class="course-time" v-if="item.startTime && item.endTime">
-                <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/time.png"></image>
-                <text class="time-text">{{item.startTime}}-{{item.endTime}}</text>
-              </view>
-            </view>
-            <view class="course-teacher">
-              <image class="teacher-avatar" :src="getTeacherAvatar(item)" mode="aspectFill"></image>
-              <text class="teacher-name">{{item.teacherName}}</text>
-              <text class="teacher-title">{{item.teacherTitle}}</text>
-            </view>
-            <view class="course-bottom">
-              <text class="course-price">¥{{item.price}}</text>
-              <view class="course-status">
-                <text class="max-students">名额 {{item.bookingCount}}/{{item.courseCapacity || item.courseCount || item.maxEnroll}}</text>
-                <text class="lesson-count">{{item.startDate && item.endDate ? `${item.startDate}-${item.endDate}` : '日期待定'}}</text>
-              </view>
-            </view>
-          </view>
-        </view>
+          :course="item"
+          @click="navigateTo(`/pages/course/detail?id=${item._id}`)"
+        ></course-card>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import CourseCard from '@/components/course-card/course-card.vue'
+
 export default {
+  components: {
+    CourseCard
+  },
   data() {
     return {
       newsList: [],
@@ -797,120 +773,6 @@ export default {
   
   .course-list {
     padding: 0 30rpx;
-    
-    .course-item {
-      margin-bottom: 30rpx;
-      background-color: #fff;
-      border-radius: 12rpx;
-      overflow: hidden;
-      box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-      
-      .course-image {
-        width: 100%;
-        height: 300rpx;
-      }
-      
-      .course-content {
-        padding: 20rpx;
-        
-        .course-title {
-          font-size: 32rpx;
-          font-weight: bold;
-          color: $text-color;
-          margin-bottom: 16rpx;
-          display: flex;
-          
-          .school-tag {
-            color: $theme-color;
-            margin-right: 10rpx;
-          }
-        }
-        
-        .course-info {
-          display: flex;
-          margin-bottom: 16rpx;
-          font-size: 24rpx;
-          color: $text-color-grey;
-          flex-direction: column;
-          
-          .course-location, .course-time {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10rpx;
-            
-            .icon-image {
-              width: 24rpx;
-              height: 24rpx;
-              margin-right: 8rpx;
-            }
-            
-            .location-text, .time-text {
-              color: $text-color-grey;
-            }
-          }
-          
-          .course-location {
-            margin-right: 30rpx;
-          }
-        }
-        
-        .course-teacher {
-          display: flex;
-          align-items: center;
-          margin-bottom: 16rpx;
-          
-          .teacher-avatar {
-            width: 60rpx;
-            height: 60rpx;
-            border-radius: 50%;
-            margin-right: 16rpx;
-          }
-          
-          .teacher-name {
-            font-size: 28rpx;
-            color: $text-color;
-            margin-right: 16rpx;
-          }
-          
-          .teacher-title {
-            font-size: 24rpx;
-            color: $text-color-light;
-          }
-        }
-        
-        .course-bottom {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          
-          .course-price {
-            font-size: 36rpx;
-            font-weight: bold;
-            color: #FF3B30;
-          }
-          
-          .course-status {
-            font-size: 24rpx;
-            color: $text-color-light;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            
-            .max-students {
-              margin-bottom: 8rpx;
-              color: $theme-color;
-            }
-            
-            .lesson-count {
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              max-width: 320rpx;
-            }
-          }
-        }
-      }
-    }
   }
 }
 </style> 

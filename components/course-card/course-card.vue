@@ -1,9 +1,10 @@
 <template>
-  <view class="course-card" @click="onClick">
+  <view class="course-card" @click="onClick" :class="{ 'course-full': isFull }">
     <view class="card-upper">
       <view class="course-image">
         <image :src="course.coverImage || '/static/images/course-default.jpg'" mode="aspectFill" @error="handleImageError"></image>
         <view class="course-tag" v-if="course.tag">{{course.tag}}</view>
+        <view class="course-full-tag" v-if="isFull">已约满</view>
       </view>
       <view class="course-info">
         <view class="course-title">{{course.title}}</view>
@@ -14,6 +15,9 @@
         <view class="course-time" v-if="course.startTime">
           <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/time.png"></image>
           <text class="time-text">{{formatTime(course.startTime, course.endTime)}}</text>
+        </view>
+        <view class="enrollment-status" v-if="course.maxEnroll || course.courseCapacity">
+          <text class="enrollment-text">名额 {{getEnrollmentStatus()}}</text>
         </view>
       </view>
     </view>
@@ -42,6 +46,13 @@ export default {
       default: () => ({})
     }
   },
+  computed: {
+    isFull() {
+      const maxEnroll = this.course.maxEnroll || this.course.courseCapacity || this.course.capacity || 10;
+      const bookingCount = this.course.bookingCount || this.course.enrolled || 0;
+      return bookingCount >= maxEnroll;
+    }
+  },
   methods: {
     onClick() {
       this.$emit('click', this.course)
@@ -49,24 +60,27 @@ export default {
     onBookClick() {
       this.$emit('book', this.course)
     },
+    getEnrollmentStatus() {
+      const maxEnroll = this.course.maxEnroll || this.course.courseCapacity || this.course.capacity || 10;
+      const bookingCount = this.course.bookingCount || this.course.enrolled || 0;
+      return `${bookingCount}/${maxEnroll}`;
+    },
     formatTime(startTime, endTime) {
       if (!startTime) return '';
       
       try {
-        // 处理日期时间分离的情况
         let startDate = startTime;
         let startTimeOnly = '';
         let endDate = endTime;
         let endTimeOnly = '';
         
-        // 处理日期时间组合格式
         if (startTime.includes(' ') || startTime.includes('T')) {
           const date = new Date(startTime);
           if (!isNaN(date.getTime())) {
             startDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
             startTimeOnly = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
           } else {
-            return startTime; // 无法解析时返回原值
+            return startTime;
           }
         }
         
@@ -78,48 +92,39 @@ export default {
           }
         }
         
-        // 格式化日期部分
         if (startDate && endDate) {
           return `${startDate} 至 ${endDate}`;
         } else if (startDate) {
           return startDate;
         }
         
-        return startTime; // 如果无法处理，返回原始时间
+        return startTime;
       } catch (e) {
         console.error('时间格式化错误:', e, startTime, endTime);
-        return startTime || '时间待定'; // 发生错误时返回原值或默认值
+        return startTime || '时间待定';
       }
     },
     getTeacherAvatar(course) {
-      // 如果没有教师信息，返回默认头像
       if (!course.teacherName) {
         return '/static/images/default-avatar.png';
       }
       
-      // 教师头像优先级：teacherAvatarUrl > teacherAvatar > avatar > 默认头像
-      // teacherAvatarUrl是从数据库获取的，优先使用
       if (course.teacherAvatarUrl) {
         return course.teacherAvatarUrl;
       }
       
-      // 如果数据库中没有获取到头像，则尝试使用传入的本地头像
       if (course.teacherAvatar) {
-        // 检查teacherAvatar是否为完整URL
         if (course.teacherAvatar.startsWith('http://') || course.teacherAvatar.startsWith('https://')) {
           return course.teacherAvatar;
         }
         
-        // 检查是否为本地资源路径
         if (course.teacherAvatar.startsWith('/')) {
           return course.teacherAvatar;
         }
         
-        // 可能是文件ID，尝试使用完整路径
         return course.teacherAvatar;
       }
       
-      // 如果课程中有avatar字段，也可能是教师头像
       if (course.avatar) {
         if (course.avatar.startsWith('http://') || course.avatar.startsWith('https://')) {
           return course.avatar;
@@ -132,21 +137,16 @@ export default {
         return course.avatar;
       }
       
-      // 最后返回默认头像
       return '/static/images/default-avatar.png';
     },
     handleImageError(e) {
-      // 处理课程封面图片加载错误
       console.log('课程封面图片加载失败，使用默认图片');
-      // 使用base64默认图片或CDN上的默认图片
       if (e.target) {
         e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-course.jpg';
       }
     },
     handleAvatarError(e) {
-      // 处理教师头像加载错误
       console.log('教师头像加载失败，使用默认头像');
-      // 使用base64默认头像或CDN上的默认头像
       if (e.target) {
         e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-avatar.jpg';
       }
@@ -162,6 +162,23 @@ export default {
   border-radius: 12rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+}
+
+.course-card.course-full {
+  background-color: #f5f5f5;
+  opacity: 0.8;
+}
+
+.course-card.course-full .course-title,
+.course-card.course-full .location-text,
+.course-card.course-full .time-text,
+.course-card.course-full .teacher-name,
+.course-card.course-full .teacher-title {
+  color: #999;
+}
+
+.course-card.course-full .price-value {
+  color: #999;
 }
 
 .card-upper {
@@ -195,6 +212,23 @@ export default {
   border-radius: 0 6rpx 6rpx 0;
 }
 
+.course-full-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(150, 150, 150, 0.9);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+  padding: 8rpx 16rpx;
+  transform: rotate(-45deg) translate(-20rpx, -10rpx);
+  transform-origin: left top;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  z-index: 5;
+  width: 120rpx;
+  text-align: center;
+}
+
 .course-info {
   flex: 1;
   display: flex;
@@ -217,6 +251,21 @@ export default {
   margin-bottom: 8rpx;
   display: flex;
   align-items: center;
+}
+
+.enrollment-status {
+  font-size: 22rpx;
+  margin-top: 8rpx;
+  display: flex;
+  align-items: center;
+}
+
+.enrollment-text {
+  color: #FF6B00;
+}
+
+.course-card.course-full .enrollment-text {
+  color: #999;
 }
 
 .icon-image {

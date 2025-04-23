@@ -1514,13 +1514,18 @@ var render = function () {
   var m0 = _vm.course.startTime
     ? _vm.formatTime(_vm.course.startTime, _vm.course.endTime)
     : null
-  var m1 = _vm.getTeacherAvatar(_vm.course)
+  var m1 =
+    _vm.course.maxEnroll || _vm.course.courseCapacity
+      ? _vm.getEnrollmentStatus()
+      : null
+  var m2 = _vm.getTeacherAvatar(_vm.course)
   _vm.$mp.data = Object.assign(
     {},
     {
       $root: {
         m0: m0,
         m1: m1,
+        m2: m2,
       },
     }
   )
@@ -1596,6 +1601,10 @@ exports.default = void 0;
 //
 //
 //
+//
+//
+//
+//
 var _default2 = {
   name: 'course-card',
   props: {
@@ -1606,6 +1615,13 @@ var _default2 = {
       }
     }
   },
+  computed: {
+    isFull: function isFull() {
+      var maxEnroll = this.course.maxEnroll || this.course.courseCapacity || this.course.capacity || 10;
+      var bookingCount = this.course.bookingCount || this.course.enrolled || 0;
+      return bookingCount >= maxEnroll;
+    }
+  },
   methods: {
     onClick: function onClick() {
       this.$emit('click', this.course);
@@ -1613,26 +1629,27 @@ var _default2 = {
     onBookClick: function onBookClick() {
       this.$emit('book', this.course);
     },
+    getEnrollmentStatus: function getEnrollmentStatus() {
+      var maxEnroll = this.course.maxEnroll || this.course.courseCapacity || this.course.capacity || 10;
+      var bookingCount = this.course.bookingCount || this.course.enrolled || 0;
+      return "".concat(bookingCount, "/").concat(maxEnroll);
+    },
     formatTime: function formatTime(startTime, endTime) {
       if (!startTime) return '';
       try {
-        // 处理日期时间分离的情况
         var startDate = startTime;
         var startTimeOnly = '';
         var endDate = endTime;
         var endTimeOnly = '';
-
-        // 处理日期时间组合格式
         if (startTime.includes(' ') || startTime.includes('T')) {
           var date = new Date(startTime);
           if (!isNaN(date.getTime())) {
             startDate = "".concat(date.getFullYear(), "-").concat((date.getMonth() + 1).toString().padStart(2, '0'), "-").concat(date.getDate().toString().padStart(2, '0'));
             startTimeOnly = "".concat(date.getHours().toString().padStart(2, '0'), ":").concat(date.getMinutes().toString().padStart(2, '0'));
           } else {
-            return startTime; // 无法解析时返回原值
+            return startTime;
           }
         }
-
         if (endTime && (endTime.includes(' ') || endTime.includes('T'))) {
           var _date = new Date(endTime);
           if (!isNaN(_date.getTime())) {
@@ -1640,48 +1657,33 @@ var _default2 = {
             endTimeOnly = "".concat(_date.getHours().toString().padStart(2, '0'), ":").concat(_date.getMinutes().toString().padStart(2, '0'));
           }
         }
-
-        // 格式化日期部分
         if (startDate && endDate) {
           return "".concat(startDate, " \u81F3 ").concat(endDate);
         } else if (startDate) {
           return startDate;
         }
-        return startTime; // 如果无法处理，返回原始时间
+        return startTime;
       } catch (e) {
         console.error('时间格式化错误:', e, startTime, endTime);
-        return startTime || '时间待定'; // 发生错误时返回原值或默认值
+        return startTime || '时间待定';
       }
     },
     getTeacherAvatar: function getTeacherAvatar(course) {
-      // 如果没有教师信息，返回默认头像
       if (!course.teacherName) {
         return '/static/images/default-avatar.png';
       }
-
-      // 教师头像优先级：teacherAvatarUrl > teacherAvatar > avatar > 默认头像
-      // teacherAvatarUrl是从数据库获取的，优先使用
       if (course.teacherAvatarUrl) {
         return course.teacherAvatarUrl;
       }
-
-      // 如果数据库中没有获取到头像，则尝试使用传入的本地头像
       if (course.teacherAvatar) {
-        // 检查teacherAvatar是否为完整URL
         if (course.teacherAvatar.startsWith('http://') || course.teacherAvatar.startsWith('https://')) {
           return course.teacherAvatar;
         }
-
-        // 检查是否为本地资源路径
         if (course.teacherAvatar.startsWith('/')) {
           return course.teacherAvatar;
         }
-
-        // 可能是文件ID，尝试使用完整路径
         return course.teacherAvatar;
       }
-
-      // 如果课程中有avatar字段，也可能是教师头像
       if (course.avatar) {
         if (course.avatar.startsWith('http://') || course.avatar.startsWith('https://')) {
           return course.avatar;
@@ -1691,22 +1693,16 @@ var _default2 = {
         }
         return course.avatar;
       }
-
-      // 最后返回默认头像
       return '/static/images/default-avatar.png';
     },
     handleImageError: function handleImageError(e) {
-      // 处理课程封面图片加载错误
       console.log('课程封面图片加载失败，使用默认图片');
-      // 使用base64默认图片或CDN上的默认图片
       if (e.target) {
         e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-course.jpg';
       }
     },
     handleAvatarError: function handleAvatarError(e) {
-      // 处理教师头像加载错误
       console.log('教师头像加载失败，使用默认头像');
-      // 使用base64默认头像或CDN上的默认头像
       if (e.target) {
         e.target.src = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/default-avatar.jpg';
       }
