@@ -131,6 +131,8 @@
   font-size: 32rpx;
   color: var(--theme-color);
   margin-right: 10rpx;
+  width: 36rpx;
+  height: 36rpx;
 }
 .info-card .info-item .item-label {
   font-size: 28rpx;
@@ -294,6 +296,9 @@
 .footer .contact-btn .btn-icon {
   font-size: 36rpx;
   color: var(--text-color-grey);
+  width: 42rpx;
+  height: 42rpx;
+  margin-bottom: 4rpx;
 }
 .footer .contact-btn text {
   font-size: 22rpx;

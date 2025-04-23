@@ -149,3 +149,4 @@
 .booking-create .footer .submit-btn.disabled {
   background-color: #ccc;
 }
+

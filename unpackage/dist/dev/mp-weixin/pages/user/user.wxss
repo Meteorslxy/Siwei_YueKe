@@ -87,7 +87,7 @@
 }
 .user-info-section .user-bg .back-button {
   position: absolute;
-  top: 80rpx;
+  top: 30rpx;
   left: 30rpx;
   width: 60rpx;
   height: 60rpx;
@@ -105,7 +105,7 @@
 }
 .user-info-section .user-bg .refresh-button {
   position: absolute;
-  top: 80rpx;
+  top: 30rpx;
   right: 30rpx;
   width: 60rpx;
   height: 60rpx;
@@ -131,6 +131,8 @@
   height: 240rpx;
   background-color: #fff;
   border-radius: 12rpx;
+  border-top-left-radius: 50rpx;
+  border-top-right-radius: 50rpx;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -162,7 +164,7 @@
   color: var(--text-color);
 }
 .user-info-section .user-info .user-detail .login-btn {
-  margin-top: 20rpx;
+  margin-top: 50rpx;
   font-size: 32rpx;
   background-color: var(--theme-color);
   color: #fff;
@@ -224,8 +226,8 @@
   z-index: 1;
 }
 .menu-section .menu-group .menu-content .menu-item .item-icon-img {
-  width: 60rpx;
-  height: 60rpx;
+  width: 72rpx;
+  height: 72rpx;
   margin-bottom: 10rpx;
 }
 .menu-section .menu-group .menu-content .menu-item .item-text {
@@ -244,6 +246,11 @@
 .menu-section .menu-group .menu-list .menu-list-item .list-icon {
   font-size: 36rpx;
   color: var(--theme-color);
+  margin-right: 20rpx;
+}
+.menu-section .menu-group .menu-list .menu-list-item .list-icon-img {
+  width: 42rpx;
+  height: 42rpx;
   margin-right: 20rpx;
 }
 .menu-section .menu-group .menu-list .menu-list-item .list-text {
@@ -315,3 +322,4 @@
   height: 80rpx;
   line-height: 80rpx;
 }
+

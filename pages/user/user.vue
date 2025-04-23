@@ -3,7 +3,7 @@
     <!-- 用户信息区域 -->
     <view class="user-info-section">
       <view class="user-bg">
-        <!-- 使用箭头字符代替 < 符号 -->
+        <!-- 返回按钮 -->
         <view class="back-button" @click="goBack">
           <text>←</text>
         </view>
@@ -70,31 +70,25 @@
         <view class="menu-title">我的服务</view>
         <view class="menu-list">
           <view class="menu-list-item" @click="navigateTo('/pages/user/favorite/index')">
-            <text class="list-icon iconfont icon-favorite"></text>
+            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/我的收藏-c.png" mode="aspectFit"></image>
             <text class="list-text">我的收藏</text>
             <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item" @click="openFeedback">
-            <text class="list-icon iconfont icon-feedback"></text>
+            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/意见反馈-c.png" mode="aspectFit"></image>
             <text class="list-text">意见反馈</text>
             <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item" @click="navigateTo('/pages/user/about/index')">
-            <text class="list-icon iconfont icon-about"></text>
+            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/关于我们-c.png" mode="aspectFit"></image>
             <text class="list-text">关于我们</text>
             <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item" @click="navigateTo('/pages/user/setting/index')">
-            <text class="list-icon iconfont icon-setting"></text>
+            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/设置-c.png" mode="aspectFit"></image>
             <text class="list-text">设置</text>
             <text class="list-arrow">></text>
           </view>
-          <!-- 图片上传 -->
-          <!-- <view class="menu-list-item" @click="navigateTo('/pages/user/upload-image')">
-            <text class="list-icon iconfont icon-upload"></text>
-            <text class="list-text">图片上传</text>
-            <text class="list-arrow">></text>
-          </view> -->
         </view>
       </view>
       
@@ -1824,7 +1818,7 @@ export default {
     /* 返回按钮样式 */
     .back-button {
       position: absolute;
-      top: 80rpx;
+      top: 30rpx;
       left: 30rpx;
       width: 60rpx;
       height: 60rpx;
@@ -1844,7 +1838,7 @@ export default {
     /* 刷新按钮样式 */
     .refresh-button {
       position: absolute;
-      top: 80rpx;
+      top: 30rpx;
       right: 30rpx;
       width: 60rpx;
       height: 60rpx;
@@ -1872,6 +1866,8 @@ export default {
     height: 240rpx;
     background-color: #fff;
     border-radius: 12rpx;
+    border-top-left-radius: 50rpx;
+    border-top-right-radius: 50rpx;
     box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
@@ -1906,7 +1902,7 @@ export default {
       }
       
       .login-btn {
-        margin-top: 20rpx;
+        margin-top: 50rpx;
         font-size: 32rpx;
         background-color: $theme-color;
         color: #fff;
@@ -1975,8 +1971,8 @@ export default {
         }
         
         .item-icon-img {
-          width: 60rpx;
-          height: 60rpx;
+          width: 72rpx;
+          height: 72rpx;
           margin-bottom: 10rpx;
         }
 
@@ -2001,6 +1997,12 @@ export default {
         .list-icon {
           font-size: 36rpx;
           color: $theme-color;
+          margin-right: 20rpx;
+        }
+        
+        .list-icon-img {
+          width: 42rpx;
+          height: 42rpx;
           margin-right: 20rpx;
         }
         
