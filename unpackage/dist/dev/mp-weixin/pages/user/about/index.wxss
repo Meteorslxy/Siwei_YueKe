@@ -154,4 +154,3 @@
   color: var(--theme-color);
   flex: 1;
 }
-

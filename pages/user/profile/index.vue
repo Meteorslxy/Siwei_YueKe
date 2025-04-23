@@ -22,7 +22,7 @@
       </view>
       
       <view class="form-item" @click="editField('nickname')">
-        <text class="item-label">昵称</text>
+        <text class="item-label">学生姓名</text>
         <view class="item-content">
           <text class="item-value">{{userInfo.nickname || '未设置'}}</text>
           <text class="item-arrow iconfont icon-right"></text>

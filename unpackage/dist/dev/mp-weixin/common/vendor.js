@@ -67,6 +67,366 @@ module.exports = _nonIterableRest, module.exports.__esModule = true, module.expo
 
 /***/ }),
 
+/***/ 108:
+/*!************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/utils/filters.js ***!
+  \************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+exports.getAllFilterOptions = getAllFilterOptions;
+exports.getBookingStatusLabelByValue = getBookingStatusLabelByValue;
+exports.getBookingStatusOptions = getBookingStatusOptions;
+exports.getGradeLabelByValue = getGradeLabelByValue;
+exports.getGradeOptions = getGradeOptions;
+exports.getLabelByValue = getLabelByValue;
+exports.getSchoolLabelByValue = getSchoolLabelByValue;
+exports.getSchoolOptions = getSchoolOptions;
+exports.getSubjectLabelByValue = getSubjectLabelByValue;
+exports.getSubjectOptions = getSubjectOptions;
+exports.isValidFilterValue = isValidFilterValue;
+/**
+ * 筛选选项工具类
+ * 用于统一管理和获取筛选选项数据
+ */
+
+// 直接定义筛选选项数据，不再依赖外部JSON文件
+var filterOptions = {
+  "gradeOptions": {
+    "description": "年级筛选选项",
+    "options": [{
+      "label": "全部年级",
+      "value": "all"
+    }, {
+      "label": "初中",
+      "value": "初中"
+    }, {
+      "label": "初一",
+      "value": "初一"
+    }, {
+      "label": "初二",
+      "value": "初二"
+    }, {
+      "label": "初三",
+      "value": "初三"
+    }]
+  },
+  "subjectOptions": {
+    "description": "学科筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "语文",
+      "value": "语文"
+    }, {
+      "label": "数学",
+      "value": "数学"
+    }, {
+      "label": "英语",
+      "value": "英语"
+    }, {
+      "label": "物理",
+      "value": "物理"
+    }, {
+      "label": "化学",
+      "value": "化学"
+    }]
+  },
+  "schoolOptions": {
+    "description": "校区筛选选项",
+    "options": [{
+      "label": "全部校区",
+      "value": "all"
+    }, {
+      "label": "江宁万达",
+      "value": "江宁万达"
+    }, {
+      "label": "江宁黄金海岸",
+      "value": "江宁黄金海岸"
+    }, {
+      "label": "大行宫",
+      "value": "大行宫"
+    }, {
+      "label": "新街口",
+      "value": "新街口"
+    }, {
+      "label": "雨花",
+      "value": "雨花"
+    }, {
+      "label": "桥北",
+      "value": "桥北"
+    }, {
+      "label": "奥体",
+      "value": "奥体"
+    }, {
+      "label": "龙江",
+      "value": "龙江"
+    }, {
+      "label": "六合",
+      "value": "六合"
+    }]
+  },
+  "educationalStages": {
+    "description": "教育阶段筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "初中",
+      "value": "初中"
+    }]
+  },
+  "courseTypes": {
+    "description": "课程类型筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "普通课程",
+      "value": "regular"
+    }, {
+      "label": "精品小班",
+      "value": "premium"
+    }, {
+      "label": "一对一",
+      "value": "oneToOne"
+    }, {
+      "label": "线上课程",
+      "value": "online"
+    }]
+  },
+  "teacherTitles": {
+    "description": "教师职称筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "特级教师",
+      "value": "特级教师"
+    }, {
+      "label": "高级教师",
+      "value": "高级教师"
+    }, {
+      "label": "一级教师",
+      "value": "一级教师"
+    }, {
+      "label": "二级教师",
+      "value": "二级教师"
+    }]
+  },
+  "statusOptions": {
+    "description": "状态筛选选项",
+    "options": [{
+      "label": "全部状态",
+      "value": "all"
+    }, {
+      "label": "未开始",
+      "value": "pending"
+    }, {
+      "label": "进行中",
+      "value": "inProgress"
+    }, {
+      "label": "已结束",
+      "value": "completed"
+    }, {
+      "label": "已取消",
+      "value": "canceled"
+    }]
+  },
+  "bookingStatus": {
+    "description": "预约状态筛选选项",
+    "options": [{
+      "label": "全部",
+      "value": "all"
+    }, {
+      "label": "待确认",
+      "value": "pending"
+    }, {
+      "label": "已确认",
+      "value": "confirmed"
+    }, {
+      "label": "已取消",
+      "value": "canceled"
+    }, {
+      "label": "已完成",
+      "value": "completed"
+    }]
+  },
+  "databaseFields": {
+    "description": "数据库字段名称映射",
+    "teacher": {
+      "name": "name",
+      "avatar": "avatar",
+      "avatarId": "avatarId",
+      "grade": "grade",
+      "subject": "subject",
+      "education": "education",
+      "experience": "experience",
+      "description": "description",
+      "rating": "rating",
+      "studentCount": "studentCount"
+    },
+    "course": {
+      "title": "title",
+      "description": "description",
+      "coverImage": "coverImage",
+      "teacherId": "teacherId",
+      "subject": "subject",
+      "grade": "grade",
+      "schoolId": "schoolId",
+      "location": "location",
+      "price": "price",
+      "startTime": "startTime",
+      "endTime": "endTime",
+      "maxEnroll": "maxEnroll",
+      "enrollCount": "enrollCount",
+      "status": "status"
+    },
+    "school": {
+      "name": "name",
+      "address": "address",
+      "location": "location",
+      "phone": "phone",
+      "description": "description",
+      "images": "images"
+    },
+    "booking": {
+      "userId": "userId",
+      "courseId": "courseId",
+      "status": "status",
+      "bookingTime": "bookingTime",
+      "paymentStatus": "paymentStatus"
+    },
+    "news": {
+      "title": "title",
+      "content": "content",
+      "digest": "digest",
+      "coverImage": "coverImage",
+      "publishTime": "publishTime",
+      "author": "author",
+      "source": "source",
+      "viewCount": "viewCount"
+    }
+  }
+};
+
+/**
+ * 获取所有筛选选项
+ */
+function getAllFilterOptions() {
+  return filterOptions;
+}
+
+/**
+ * 获取年级筛选选项
+ */
+function getGradeOptions() {
+  return filterOptions.gradeOptions.options;
+}
+
+/**
+ * 获取学科筛选选项
+ */
+function getSubjectOptions() {
+  return filterOptions.subjectOptions.options;
+}
+
+/**
+ * 获取校区筛选选项
+ */
+function getSchoolOptions() {
+  return filterOptions.schoolOptions.options;
+}
+
+/**
+ * 获取预约状态筛选选项
+ */
+function getBookingStatusOptions() {
+  return filterOptions.bookingStatus.options;
+}
+
+/**
+ * 通过值获取选项标签
+ * @param {Array} options - 选项数组
+ * @param {String} value - 选项值
+ * @returns {String} 选项标签
+ */
+function getLabelByValue(options, value) {
+  var option = options.find(function (opt) {
+    return opt.value === value;
+  });
+  return option ? option.label : '';
+}
+
+/**
+ * 通过年级值获取年级标签
+ * @param {String} value - 年级值
+ * @returns {String} 年级标签
+ */
+function getGradeLabelByValue(value) {
+  return getLabelByValue(getGradeOptions(), value);
+}
+
+/**
+ * 通过学科值获取学科标签
+ * @param {String} value - 学科值
+ * @returns {String} 学科标签
+ */
+function getSubjectLabelByValue(value) {
+  return getLabelByValue(getSubjectOptions(), value);
+}
+
+/**
+ * 通过校区值获取校区标签
+ * @param {String} value - 校区值
+ * @returns {String} 校区标签
+ */
+function getSchoolLabelByValue(value) {
+  return getLabelByValue(getSchoolOptions(), value);
+}
+
+/**
+ * 通过预约状态值获取预约状态标签
+ * @param {String} value - 预约状态值
+ * @returns {String} 预约状态标签
+ */
+function getBookingStatusLabelByValue(value) {
+  return getLabelByValue(getBookingStatusOptions(), value);
+}
+
+/**
+ * 判断筛选值是否有效（不是'all'且不为空）
+ * @param {String} value - 筛选值
+ * @returns {Boolean} 是否为有效的筛选值
+ */
+function isValidFilterValue(value) {
+  return value && value !== 'all';
+}
+var _default = {
+  getAllFilterOptions: getAllFilterOptions,
+  getGradeOptions: getGradeOptions,
+  getSubjectOptions: getSubjectOptions,
+  getSchoolOptions: getSchoolOptions,
+  getBookingStatusOptions: getBookingStatusOptions,
+  getLabelByValue: getLabelByValue,
+  getGradeLabelByValue: getGradeLabelByValue,
+  getSubjectLabelByValue: getSubjectLabelByValue,
+  getSchoolLabelByValue: getSchoolLabelByValue,
+  getBookingStatusLabelByValue: getBookingStatusLabelByValue,
+  isValidFilterValue: isValidFilterValue
+};
+exports.default = _default;
+
+/***/ }),
+
 /***/ 11:
 /*!***************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/defineProperty.js ***!
@@ -93,10 +453,10 @@ module.exports = _defineProperty, module.exports.__esModule = true, module.expor
 
 /***/ }),
 
-/***/ 116:
-/*!****************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/common/store.js ***!
-  \****************************************************************************************************/
+/***/ 117:
+/*!********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/store.js ***!
+  \********************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -999,366 +1359,6 @@ function _toConsumableArray(arr) {
   return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
 }
 module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 181:
-/*!********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/utils/filters.js ***!
-  \********************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-exports.getAllFilterOptions = getAllFilterOptions;
-exports.getBookingStatusLabelByValue = getBookingStatusLabelByValue;
-exports.getBookingStatusOptions = getBookingStatusOptions;
-exports.getGradeLabelByValue = getGradeLabelByValue;
-exports.getGradeOptions = getGradeOptions;
-exports.getLabelByValue = getLabelByValue;
-exports.getSchoolLabelByValue = getSchoolLabelByValue;
-exports.getSchoolOptions = getSchoolOptions;
-exports.getSubjectLabelByValue = getSubjectLabelByValue;
-exports.getSubjectOptions = getSubjectOptions;
-exports.isValidFilterValue = isValidFilterValue;
-/**
- * 筛选选项工具类
- * 用于统一管理和获取筛选选项数据
- */
-
-// 直接定义筛选选项数据，不再依赖外部JSON文件
-var filterOptions = {
-  "gradeOptions": {
-    "description": "年级筛选选项",
-    "options": [{
-      "label": "全部年级",
-      "value": "all"
-    }, {
-      "label": "初中",
-      "value": "初中"
-    }, {
-      "label": "初一",
-      "value": "初一"
-    }, {
-      "label": "初二",
-      "value": "初二"
-    }, {
-      "label": "初三",
-      "value": "初三"
-    }]
-  },
-  "subjectOptions": {
-    "description": "学科筛选选项",
-    "options": [{
-      "label": "全部",
-      "value": "all"
-    }, {
-      "label": "语文",
-      "value": "语文"
-    }, {
-      "label": "数学",
-      "value": "数学"
-    }, {
-      "label": "英语",
-      "value": "英语"
-    }, {
-      "label": "物理",
-      "value": "物理"
-    }, {
-      "label": "化学",
-      "value": "化学"
-    }]
-  },
-  "schoolOptions": {
-    "description": "校区筛选选项",
-    "options": [{
-      "label": "全部校区",
-      "value": "all"
-    }, {
-      "label": "江宁万达",
-      "value": "江宁万达"
-    }, {
-      "label": "江宁黄金海岸",
-      "value": "江宁黄金海岸"
-    }, {
-      "label": "大行宫",
-      "value": "大行宫"
-    }, {
-      "label": "新街口",
-      "value": "新街口"
-    }, {
-      "label": "雨花",
-      "value": "雨花"
-    }, {
-      "label": "桥北",
-      "value": "桥北"
-    }, {
-      "label": "奥体",
-      "value": "奥体"
-    }, {
-      "label": "龙江",
-      "value": "龙江"
-    }, {
-      "label": "六合",
-      "value": "六合"
-    }]
-  },
-  "educationalStages": {
-    "description": "教育阶段筛选选项",
-    "options": [{
-      "label": "全部",
-      "value": "all"
-    }, {
-      "label": "初中",
-      "value": "初中"
-    }]
-  },
-  "courseTypes": {
-    "description": "课程类型筛选选项",
-    "options": [{
-      "label": "全部",
-      "value": "all"
-    }, {
-      "label": "普通课程",
-      "value": "regular"
-    }, {
-      "label": "精品小班",
-      "value": "premium"
-    }, {
-      "label": "一对一",
-      "value": "oneToOne"
-    }, {
-      "label": "线上课程",
-      "value": "online"
-    }]
-  },
-  "teacherTitles": {
-    "description": "教师职称筛选选项",
-    "options": [{
-      "label": "全部",
-      "value": "all"
-    }, {
-      "label": "特级教师",
-      "value": "特级教师"
-    }, {
-      "label": "高级教师",
-      "value": "高级教师"
-    }, {
-      "label": "一级教师",
-      "value": "一级教师"
-    }, {
-      "label": "二级教师",
-      "value": "二级教师"
-    }]
-  },
-  "statusOptions": {
-    "description": "状态筛选选项",
-    "options": [{
-      "label": "全部状态",
-      "value": "all"
-    }, {
-      "label": "未开始",
-      "value": "pending"
-    }, {
-      "label": "进行中",
-      "value": "inProgress"
-    }, {
-      "label": "已结束",
-      "value": "completed"
-    }, {
-      "label": "已取消",
-      "value": "canceled"
-    }]
-  },
-  "bookingStatus": {
-    "description": "预约状态筛选选项",
-    "options": [{
-      "label": "全部",
-      "value": "all"
-    }, {
-      "label": "待确认",
-      "value": "pending"
-    }, {
-      "label": "已确认",
-      "value": "confirmed"
-    }, {
-      "label": "已取消",
-      "value": "canceled"
-    }, {
-      "label": "已完成",
-      "value": "completed"
-    }]
-  },
-  "databaseFields": {
-    "description": "数据库字段名称映射",
-    "teacher": {
-      "name": "name",
-      "avatar": "avatar",
-      "avatarId": "avatarId",
-      "grade": "grade",
-      "subject": "subject",
-      "education": "education",
-      "experience": "experience",
-      "description": "description",
-      "rating": "rating",
-      "studentCount": "studentCount"
-    },
-    "course": {
-      "title": "title",
-      "description": "description",
-      "coverImage": "coverImage",
-      "teacherId": "teacherId",
-      "subject": "subject",
-      "grade": "grade",
-      "schoolId": "schoolId",
-      "location": "location",
-      "price": "price",
-      "startTime": "startTime",
-      "endTime": "endTime",
-      "maxEnroll": "maxEnroll",
-      "enrollCount": "enrollCount",
-      "status": "status"
-    },
-    "school": {
-      "name": "name",
-      "address": "address",
-      "location": "location",
-      "phone": "phone",
-      "description": "description",
-      "images": "images"
-    },
-    "booking": {
-      "userId": "userId",
-      "courseId": "courseId",
-      "status": "status",
-      "bookingTime": "bookingTime",
-      "paymentStatus": "paymentStatus"
-    },
-    "news": {
-      "title": "title",
-      "content": "content",
-      "digest": "digest",
-      "coverImage": "coverImage",
-      "publishTime": "publishTime",
-      "author": "author",
-      "source": "source",
-      "viewCount": "viewCount"
-    }
-  }
-};
-
-/**
- * 获取所有筛选选项
- */
-function getAllFilterOptions() {
-  return filterOptions;
-}
-
-/**
- * 获取年级筛选选项
- */
-function getGradeOptions() {
-  return filterOptions.gradeOptions.options;
-}
-
-/**
- * 获取学科筛选选项
- */
-function getSubjectOptions() {
-  return filterOptions.subjectOptions.options;
-}
-
-/**
- * 获取校区筛选选项
- */
-function getSchoolOptions() {
-  return filterOptions.schoolOptions.options;
-}
-
-/**
- * 获取预约状态筛选选项
- */
-function getBookingStatusOptions() {
-  return filterOptions.bookingStatus.options;
-}
-
-/**
- * 通过值获取选项标签
- * @param {Array} options - 选项数组
- * @param {String} value - 选项值
- * @returns {String} 选项标签
- */
-function getLabelByValue(options, value) {
-  var option = options.find(function (opt) {
-    return opt.value === value;
-  });
-  return option ? option.label : '';
-}
-
-/**
- * 通过年级值获取年级标签
- * @param {String} value - 年级值
- * @returns {String} 年级标签
- */
-function getGradeLabelByValue(value) {
-  return getLabelByValue(getGradeOptions(), value);
-}
-
-/**
- * 通过学科值获取学科标签
- * @param {String} value - 学科值
- * @returns {String} 学科标签
- */
-function getSubjectLabelByValue(value) {
-  return getLabelByValue(getSubjectOptions(), value);
-}
-
-/**
- * 通过校区值获取校区标签
- * @param {String} value - 校区值
- * @returns {String} 校区标签
- */
-function getSchoolLabelByValue(value) {
-  return getLabelByValue(getSchoolOptions(), value);
-}
-
-/**
- * 通过预约状态值获取预约状态标签
- * @param {String} value - 预约状态值
- * @returns {String} 预约状态标签
- */
-function getBookingStatusLabelByValue(value) {
-  return getLabelByValue(getBookingStatusOptions(), value);
-}
-
-/**
- * 判断筛选值是否有效（不是'all'且不为空）
- * @param {String} value - 筛选值
- * @returns {Boolean} 是否为有效的筛选值
- */
-function isValidFilterValue(value) {
-  return value && value !== 'all';
-}
-var _default = {
-  getAllFilterOptions: getAllFilterOptions,
-  getGradeOptions: getGradeOptions,
-  getSubjectOptions: getSubjectOptions,
-  getSchoolOptions: getSchoolOptions,
-  getBookingStatusOptions: getBookingStatusOptions,
-  getLabelByValue: getLabelByValue,
-  getGradeLabelByValue: getGradeLabelByValue,
-  getSubjectLabelByValue: getSubjectLabelByValue,
-  getSchoolLabelByValue: getSchoolLabelByValue,
-  getBookingStatusLabelByValue: getBookingStatusLabelByValue,
-  isValidFilterValue: isValidFilterValue
-};
-exports.default = _default;
 
 /***/ }),
 
@@ -18918,9 +18918,9 @@ exports.default = Zs;
 /***/ }),
 
 /***/ 262:
-/*!*******************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/modules/user.js ***!
-  \*******************************************************************************/
+/*!***********************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/user.js ***!
+  \***********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19614,9 +19614,9 @@ module.exports = _inherits, module.exports.__esModule = true, module.exports["de
 /***/ }),
 
 /***/ 311:
-/*!**************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/common/utils/marked.min.js ***!
-  \**************************************************************************************/
+/*!******************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/common/utils/marked.min.js ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19704,9 +19704,9 @@ module.exports = _possibleConstructorReturn, module.exports.__esModule = true, m
 /***/ }),
 
 /***/ 320:
-/*!***************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
-  \***************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
+  \*******************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19719,7 +19719,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 116);
+var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 117);
 var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -21133,9 +21133,9 @@ module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.expo
 /***/ }),
 
 /***/ 346:
-/*!****************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/pages/register/validator.js ***!
-  \****************************************************************************************************************/
+/*!********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/register/validator.js ***!
+  \********************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21209,9 +21209,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 347:
-/*!*******************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/common/password.js ***!
-  \*******************************************************************************************************/
+/*!***********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/password.js ***!
+  \***********************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21324,9 +21324,9 @@ module.exports = _isNativeFunction, module.exports.__esModule = true, module.exp
 /***/ }),
 
 /***/ 36:
-/*!***************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/pages.json?{"type":"origin-pages-json"} ***!
-  \***************************************************************************************************/
+/*!*******************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json?{"type":"origin-pages-json"} ***!
+  \*******************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21627,9 +21627,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 37:
-/*!**************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/pages.json?{"type":"stat"} ***!
-  \**************************************************************************************/
+/*!******************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json?{"type":"stat"} ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21648,9 +21648,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 38:
-/*!**********************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/pages.json ***!
-  \**********************************************************************/
+/*!**************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json ***!
+  \**************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -21675,9 +21675,9 @@ module.exports = _interopRequireDefault, module.exports.__esModule = true, modul
 /***/ }),
 
 /***/ 413:
-/*!***************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
-  \***************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
+  \*******************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21717,9 +21717,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 414:
-/*!********************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
-  \********************************************************************************************************************/
+/*!************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
+  \************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -21744,9 +21744,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 415:
-/*!*******************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
-  \*******************************************************************************************************************/
+/*!***********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
+  \***********************************************************************************************************************************/
 /*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
 /***/ (function(module) {
 
@@ -21755,9 +21755,9 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\
 /***/ }),
 
 /***/ 416:
-/*!************************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
-  \************************************************************************************************************************/
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
+  \****************************************************************************************************************************************/
 /*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
 /***/ (function(module) {
 
@@ -21766,9 +21766,9 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 /***/ }),
 
 /***/ 417:
-/*!************************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
-  \************************************************************************************************************************/
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
+  \****************************************************************************************************************************************/
 /*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
 /***/ (function(module) {
 
@@ -21777,9 +21777,9 @@ module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\
 /***/ }),
 
 /***/ 425:
-/*!******************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/validate.js ***!
-  \******************************************************************************************************************/
+/*!**********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/validate.js ***!
+  \**********************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22469,9 +22469,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 426:
-/*!***************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/utils.js ***!
-  \***************************************************************************************************************/
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/utils.js ***!
+  \*******************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -22937,9 +22937,9 @@ function normalizeComponent (
 /***/ }),
 
 /***/ 45:
-/*!********************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/init.js ***!
-  \********************************************************************************************/
+/*!************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/init.js ***!
+  \************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23074,9 +23074,9 @@ function _ref() {
 /***/ }),
 
 /***/ 46:
-/*!**********************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/config.js ***!
-  \**********************************************************************************************/
+/*!**************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/config.js ***!
+  \**************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23120,9 +23120,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 47:
-/*!********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/components/global.js ***!
-  \********************************************************************************/
+/*!************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/components/global.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23182,9 +23182,9 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 /***/ }),
 
 /***/ 511:
-/*!**********************************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
-  \**********************************************************************************************************************************/
+/*!**************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
+  \**************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23438,9 +23438,9 @@ function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
 /***/ }),
 
 /***/ 519:
-/*!***********************************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
-  \***********************************************************************************************************************************/
+/*!***************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
+  \***************************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -23573,9 +23573,9 @@ function createAnimation(option, _this) {
 /***/ }),
 
 /***/ 525:
-/*!***************************************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
-  \***************************************************************************************************************************/
+/*!*******************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
+  \*******************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -24169,9 +24169,9 @@ module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exp
 /***/ }),
 
 /***/ 90:
-/*!************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/index.js ***!
-  \************************************************************************/
+/*!****************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/index.js ***!
+  \****************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -24196,6 +24196,50 @@ var baseURL = '';
 var debugAPI = function debugAPI(name, result) {
   console.log("API\u8C03\u7528: ".concat(name), result);
   return result;
+};
+
+// 通用API选项相关方法
+var commonApi = {
+  // 获取学期选项
+  getTermOptions: function getTermOptions() {
+    console.log('调用getTermOptions');
+    return (0, _request.default)({
+      name: 'getTermOptions',
+      data: {}
+    }).then(function (res) {
+      return debugAPI('getTermOptions返回', res);
+    });
+  },
+  // 获取班型选项
+  getClassTypeOptions: function getClassTypeOptions() {
+    console.log('调用getClassTypeOptions');
+    return (0, _request.default)({
+      name: 'getClassTypeOptions',
+      data: {}
+    }).then(function (res) {
+      return debugAPI('getClassTypeOptions返回', res);
+    });
+  },
+  // 获取年级选项
+  getGradeOptions: function getGradeOptions() {
+    console.log('调用getGradeOptions');
+    return (0, _request.default)({
+      name: 'getGradeOptions',
+      data: {}
+    }).then(function (res) {
+      return debugAPI('getGradeOptions返回', res);
+    });
+  },
+  // 获取学科选项
+  getSubjectOptions: function getSubjectOptions() {
+    console.log('调用getSubjectOptions');
+    return (0, _request.default)({
+      name: 'getSubjectOptions',
+      data: {}
+    }).then(function (res) {
+      return debugAPI('getSubjectOptions返回', res);
+    });
+  }
 };
 
 // 校区相关API
@@ -24705,7 +24749,8 @@ var _default = {
   teacher: teacherApi,
   lecture: lectureApi,
   subject: _subject.default,
-  file: fileApi
+  file: fileApi,
+  common: commonApi
 };
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
@@ -24713,9 +24758,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 91:
-/*!**************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/request.js ***!
-  \**************************************************************************/
+/*!******************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/request.js ***!
+  \******************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -24944,9 +24989,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 92:
-/*!**********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/modules/subject.js ***!
-  \**********************************************************************************/
+/*!**************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/subject.js ***!
+  \**************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -24982,9 +25027,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 93:
-/*!*********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/utils/cloud-config.js ***!
-  \*********************************************************************************/
+/*!*************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/utils/cloud-config.js ***!
+  \*************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 

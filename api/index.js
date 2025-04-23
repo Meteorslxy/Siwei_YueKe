@@ -10,6 +10,45 @@ const debugAPI = (name, result) => {
   return result;
 }
 
+// 通用API选项相关方法
+const commonApi = {
+  // 获取学期选项
+  getTermOptions() {
+    console.log('调用getTermOptions');
+    return request({
+      name: 'getTermOptions',
+      data: {}
+    }).then(res => debugAPI('getTermOptions返回', res));
+  },
+  
+  // 获取班型选项
+  getClassTypeOptions() {
+    console.log('调用getClassTypeOptions');
+    return request({
+      name: 'getClassTypeOptions',
+      data: {}
+    }).then(res => debugAPI('getClassTypeOptions返回', res));
+  },
+  
+  // 获取年级选项
+  getGradeOptions() {
+    console.log('调用getGradeOptions');
+    return request({
+      name: 'getGradeOptions',
+      data: {}
+    }).then(res => debugAPI('getGradeOptions返回', res));
+  },
+  
+  // 获取学科选项
+  getSubjectOptions() {
+    console.log('调用getSubjectOptions');
+    return request({
+      name: 'getSubjectOptions',
+      data: {}
+    }).then(res => debugAPI('getSubjectOptions返回', res));
+  }
+}
+
 // 校区相关API
 const locationApi = {
   // 获取校区列表
@@ -495,5 +534,6 @@ export default {
   teacher: teacherApi,
   lecture: lectureApi,
   subject: subjectApi,
-  file: fileApi
+  file: fileApi,
+  common: commonApi
 } 

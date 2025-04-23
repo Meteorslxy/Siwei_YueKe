@@ -86,7 +86,7 @@
           </view>
           <view class="menu-list-item" @click="navigateTo('/pages/user/setting/index')">
             <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/设置-c.png" mode="aspectFit"></image>
-            <text class="list-text">设置</text>
+            <text class="list-text">编辑资料</text>
             <text class="list-arrow">></text>
           </view>
         </view>

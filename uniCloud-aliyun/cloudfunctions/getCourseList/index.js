@@ -14,7 +14,10 @@ exports.main = async (event, context) => {
     grade = '',            // 年级
     subject = '',          // 学科
     location = '',         // 校区/地点
-    schoolId = ''
+    schoolId = '',
+    term = '',             // 学期
+    classType = '',        // 班型
+    classTime = ''         // 上课时间
   } = event;
   
   try {
@@ -58,6 +61,7 @@ exports.main = async (event, context) => {
     
     // 处理学科筛选
     if (subject) {
+      // 确保使用学科名称而不是ID进行查询
       // 创建学科筛选条件（OR条件）
       const subjectCondition = {
         $or: [
@@ -67,6 +71,7 @@ exports.main = async (event, context) => {
       };
       andConditions.push(subjectCondition);
       filterConditions.push(`学科=${subject}`);
+      console.log('添加学科筛选条件:', subject);
     }
     
     // 处理校区/地点筛选
@@ -79,6 +84,34 @@ exports.main = async (event, context) => {
       };
       andConditions.push(locationCondition);
       filterConditions.push(`校区=${location}`);
+    }
+    
+    // 处理学期筛选
+    if (term) {
+      // 明确匹配term字段
+      const termCondition = { term: term };
+      andConditions.push(termCondition);
+      filterConditions.push(`学期=${term}`);
+      console.log('添加学期筛选条件:', term);
+    }
+    
+    // 处理班型筛选
+    if (classType) {
+      const classTypeCondition = { classType: classType };
+      andConditions.push(classTypeCondition);
+      filterConditions.push(`班型=${classType}`);
+      console.log('添加班型筛选条件:', classType);
+    }
+    
+    // 处理上课时间筛选
+    if (classTime) {
+      // classTime是数组字段，需要使用数组查询操作符
+      const classTimeCondition = { 
+        classTime: db.command.all([classTime]) 
+      };
+      andConditions.push(classTimeCondition);
+      filterConditions.push(`上课时间=${classTime}`);
+      console.log('添加上课时间筛选条件:', classTime);
     }
     
     if (schoolId) {

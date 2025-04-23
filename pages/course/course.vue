@@ -7,18 +7,19 @@
       
       <!-- 顶部城市选择和年级选择栏 -->
       <view class="sub-header">
-        <view class="city-selector">
-          <text class="city-name">南京</text>
-        </view>
-        
-        <view class="grade-selector" @click.stop="toggleGradeFilter">
+        <view class="city-selector" @click.stop="toggleGradeFilter">
           <text class="grade-name">{{selectedGradeText}}</text>
           <view class="arrow-icon" :class="{ 'arrow-up': isGradeFilterShow }"></view>
+        </view>
+        
+        <view class="grade-selector" @click.stop="toggleSchoolFilter">
+          <text class="city-name">{{selectedSchoolText}}</text>
+          <view class="arrow-icon" :class="{ 'arrow-up': isSchoolFilterShow }"></view>
         </view>
       </view>
       
       <!-- 年级选择面板 -->
-      <view class="grade-dropdown" v-if="isGradeFilterShow" @click.stop>
+      <view class="grade-dropdown-panel" v-if="isGradeFilterShow" @click.stop>
         <view class="dropdown-options">
           <view 
             class="dropdown-option" 
@@ -27,6 +28,20 @@
             :class="{ active: selectedGradeGroup === grade.value }"
             @click="selectGradeGroup(grade.value)">
             {{grade.label}}
+          </view>
+        </view>
+      </view>
+      
+      <!-- 校区选择面板 -->
+      <view class="grade-dropdown" v-if="isSchoolFilterShow" @click.stop>
+        <view class="dropdown-options">
+          <view 
+            class="dropdown-option" 
+            v-for="(school, index) in schoolOptions" 
+            :key="index"
+            :class="{ active: selectedSchool === school.value }"
+            @click="selectSchool(school.value)">
+            {{school.label}}
           </view>
         </view>
       </view>
@@ -134,23 +149,20 @@
       
       <view class="filter-panel-section">
         <view class="filter-section-title">校区</view>
-        <view class="filter-section-action" @click="toggleAllLocations">
-          <text>不限</text>
-          <view class="arrow-icon-right"></view>
+        <view class="filter-options">
+          <view class="filter-option-item" 
+            v-for="(location, index) in schoolOptions" 
+            :key="index"
+            :class="{ active: selectedSchool === location.value }"
+            @click="selectSchool(location.value)">
+            {{location.label}}
+          </view>
         </view>
       </view>
       
       <view class="filter-panel-section">
         <view class="filter-section-title">教师</view>
         <view class="filter-section-action" @click="toggleAllTeachers">
-          <text>不限</text>
-          <view class="arrow-icon-right"></view>
-        </view>
-      </view>
-      
-      <view class="filter-panel-section">
-        <view class="filter-section-title">班主任</view>
-        <view class="filter-section-action" @click="toggleAllClassTeachers">
           <text>不限</text>
           <view class="arrow-icon-right"></view>
         </view>
@@ -362,19 +374,9 @@ export default {
       this.loadCourseList();
     },
     
-    // 切换所有地点
-    toggleAllLocations() {
-      // 实现切换所有地点的逻辑
-    },
-    
     // 切换所有教师
     toggleAllTeachers() {
       // 实现切换所有教师的逻辑
-    },
-    
-    // 切换所有班主任
-    toggleAllClassTeachers() {
-      // 实现切换所有班主任的逻辑
     },
     
     // 重置筛选条件
@@ -399,6 +401,9 @@ export default {
       this.isGradeFilterShow = !this.isGradeFilterShow
       if (this.isGradeFilterShow) {
         this.isSchoolFilterShow = false
+        this.isSubjectFilterShow = false
+        this.isTermFilterShow = false
+        this.isClassTypeFilterShow = false
       }
     },
     
@@ -407,6 +412,9 @@ export default {
       this.isSchoolFilterShow = !this.isSchoolFilterShow
       if (this.isSchoolFilterShow) {
         this.isGradeFilterShow = false
+        this.isSubjectFilterShow = false
+        this.isTermFilterShow = false
+        this.isClassTypeFilterShow = false
       }
     },
     
@@ -511,7 +519,7 @@ export default {
         
         // 添加筛选条件 - 确保参数名称与后端一致
         if (this.selectedGradeGroup !== 'all') {
-          params.grade = this.selectedGradeGroup;
+          params.grade = this.selectedGradeGroup; // 直接使用年级name作为查询条件
         }
         
         if (this.selectedSchool !== 'all') {
@@ -528,6 +536,10 @@ export default {
         
         if (this.selectedCourseType !== 'all') {
           params.classType = this.selectedCourseType;
+        }
+        
+        if (this.selectedTime !== 'all') {
+          params.classTime = this.selectedTime;
         }
         
         console.log('发送到后端的查询参数:', params);
@@ -738,15 +750,10 @@ export default {
         console.log('获取年级选项结果:', result);
         
         if (result && result.data && result.data.length > 0) {
-          // 格式化年级数据
-          const grades = result.data.map(item => {
-            return {
-              label: item.name || item.label,
-              value: item._id || item.value
-            };
-          });
+          // 直接使用从数据库获取的年级数据，不进行转换
+          const grades = result.data;
           
-          // 添加"全部"选项
+          // 添加"全部年级"选项
           this.gradeGroups = [
             { label: '全部年级', value: 'all' },
             ...grades
@@ -780,13 +787,8 @@ export default {
         console.log('获取学科选项结果:', result);
         
         if (result && result.data && result.data.length > 0) {
-          // 格式化学科数据
-          const subjects = result.data.map(item => {
-            return {
-              label: item.name || item.label,
-              value: item._id || item.value
-            };
-          });
+          // 直接使用从数据库获取的科目数据
+          const subjects = result.data;
           
           // 添加"全部"选项
           this.subjectOptions = [
@@ -837,7 +839,11 @@ export default {
           // 添加"全部"选项
           this.termOptions = [
             { label: '全部', value: 'all' },
-            ...terms
+            { label: '春季班', value: '春季班' },
+            { label: '夏季班', value: '夏季班' },
+            { label: '秋季班', value: '秋季班' },
+            { label: '冬季班', value: '冬季班' },
+            { label: '短期班', value: '短期班' }
           ];
           
           console.log('更新后的学期选项:', this.termOptions);
@@ -845,20 +851,22 @@ export default {
           console.warn('未获取到学期数据，使用默认值');
           this.termOptions = [
             { label: '全部', value: 'all' },
-            { label: '春季班', value: 'spring' },
-            { label: '秋季班', value: 'autumn' },
-            { label: '暑假班', value: 'summer' },
-            { label: '寒假班', value: 'winter' }
+            { label: '春季班', value: '春季班' },
+            { label: '夏季班', value: '夏季班' },
+            { label: '秋季班', value: '秋季班' },
+            { label: '冬季班', value: '冬季班' },
+            { label: '短期班', value: '短期班' }
           ];
         }
       } catch (e) {
         console.error('获取学期选项失败:', e);
         this.termOptions = [
           { label: '全部', value: 'all' },
-          { label: '春季班', value: 'spring' },
-          { label: '秋季班', value: 'autumn' },
-          { label: '暑假班', value: 'summer' },
-          { label: '寒假班', value: 'winter' }
+          { label: '春季班', value: '春季班' },
+          { label: '夏季班', value: '夏季班' },
+          { label: '秋季班', value: '秋季班' },
+          { label: '冬季班', value: '冬季班' },
+          { label: '短期班', value: '短期班' }
         ];
       }
     },
@@ -875,7 +883,7 @@ export default {
           const classTypes = result.data.map(item => {
             const option = {
               label: item.name || item.label,
-              value: item._id || item.value
+              value: item.classType || item.value
             };
             console.log('格式化班型选项:', option);
             return option;
@@ -905,9 +913,9 @@ export default {
       console.log('设置默认班型选项');
       this.courseTypes = [
         { label: '不限', value: 'all' },
-        { label: '线下', value: 'offline' },
-        { label: '自学', value: 'selfStudy' },
-        { label: '大课堂', value: 'largeClass' }
+        { label: 'S', value: 'S' },
+        { label: 'A+', value: 'Aplus' },
+        { label: 'S+', value: 'Splus' }
       ];
     },
     
@@ -918,11 +926,12 @@ export default {
         console.log('获取校区列表结果:', result);
         
         if (result && result.data && result.data.length > 0) {
-          // 将校区数据转换为下拉选项格式
+          // 将校区数据转换为下拉选项格式，使用name作为value
           const locations = result.data.map(item => {
             return {
               label: item.name,
-              value: item._id || item.name
+              value: item.name, // 使用校区名称作为value，而不是ID
+              _id: item._id // 保留ID供其他用途
             };
           });
           
@@ -937,18 +946,18 @@ export default {
           console.warn('未获取到校区数据，使用默认值');
           this.schoolOptions = [
             { label: '全部校区', value: 'all' },
-            { label: '江宁校区', value: 'jiangning' },
-            { label: '鼓楼校区', value: 'gulou' },
-            { label: '浦口校区', value: 'pukou' }
+            { label: '江宁校区', value: '江宁校区' },
+            { label: '鼓楼校区', value: '鼓楼校区' },
+            { label: '浦口校区', value: '浦口校区' }
           ];
         }
       } catch (e) {
         console.error('获取校区列表失败:', e);
         this.schoolOptions = [
           { label: '全部校区', value: 'all' },
-          { label: '江宁校区', value: 'jiangning' },
-          { label: '鼓楼校区', value: 'gulou' },
-          { label: '浦口校区', value: 'pukou' }
+          { label: '江宁校区', value: '江宁校区' },
+          { label: '鼓楼校区', value: '鼓楼校区' },
+          { label: '浦口校区', value: '浦口校区' }
         ];
       }
     },
@@ -1036,6 +1045,7 @@ export default {
   font-size: 28rpx;
   color: #fff;
   font-weight: bold;
+  margin-right: 10rpx;
 }
 
 /* 年级选择 */
@@ -1052,33 +1062,36 @@ export default {
 }
 
 /* 年级选择下拉面板 */
-.grade-dropdown {
+.grade-dropdown-panel {
   position: absolute;
   top: 120rpx;
-  right: 30rpx;
+  left: 0;
+  width: 100%;
   background-color: #fff;
-  border-radius: 10rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
   z-index: 100;
-  width: 200rpx;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-options {
-  max-height: 400rpx;
+  padding: 20rpx 0;
+  max-height: 500rpx;
   overflow-y: auto;
 }
 
 .dropdown-option {
-  padding: 20rpx;
-  text-align: center;
+  padding: 20rpx 30rpx;
   font-size: 28rpx;
   color: #333;
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .dropdown-option.active {
   color: #EC7A49;
-  font-weight: bold;
+  background-color: #f7f7f7;
+}
+
+.dropdown-option:last-child {
+  border-bottom: none;
 }
 
 /* 筛选下拉内容 */
