@@ -22,87 +22,80 @@
         @click="viewDetail(item, $event)"
         :data-booking-id="item._id"
         :data-course-id="item.courseId">
+        <!-- 顶部：课程标题 -->
+        <view class="course-title-container">
+          <view class="course-title">{{item.courseTitle || item.title}}</view>
+        </view>
+        
+        <!-- 主体内容：左右布局 -->
         <view class="booking-content">
-          <view class="booking-main">
-            <view class="course-info">
-              <view class="course-title">{{item.courseTitle || item.title}}</view>
-              <!-- 支付倒计时显示，和未缴费状态放在同一行 -->
-              <view class="payment-status-row" v-if="shouldShowCountdown(item)">
+          <!-- 左侧区域：预约状态 -->
+          <view class="booking-left">
+            <view class="booking-status-wrapper">
               <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item)}}</view>
-                <view class="payment-countdown">
-                  <text class="countdown-label">支付倒计时：</text>
-                  <text class="countdown-time">{{formatCountdown(getPaymentCountdown(item))}}</text>
-                </view>
-              </view>
-              <!-- 如果不需要显示倒计时，则只显示状态 -->
-              <view class="payment-status-row" v-else>
-                <view class="booking-status" :class="'status-' + item.status">{{getStatusText(item)}}</view>
-              </view>
-              <view class="course-deleted-tag" v-if="item.isCourseDeleted">课程已删除</view>
-              <view class="auto-cancel-tag" v-if="showAutoCancelTag(item)">超时未支付自动取消</view>
+              <view class="status-tag" v-if="item.isCourseDeleted">课程已删除</view>
+              <view class="status-tag auto-cancel" v-if="showAutoCancelTag(item)">超时未支付自动取消</view>
             </view>
             
-            <view class="booking-details">
-              <view class="details-column left-column">
-                <view class="detail-row">
-                  <text class="detail-label">校区地点</text>
-                  <text class="detail-value">{{item.schoolName || '未知'}}</text>
-                </view>
-                <view class="detail-row">
-                  <text class="detail-label">课程时间</text>
-                  <text class="detail-value">{{formatCourseTime(item)}}</text>
-                </view>
-                <view class="detail-row">
-                  <text class="detail-label">课程日期</text>
-                  <text class="detail-value">{{formatDateRange(item)}}</text>
-                </view>
-              </view>
-              
-              <view class="details-column right-column">
-                <view class="detail-row">
-                  <text class="detail-label">学生姓名</text>
-                  <text class="detail-value">{{item.studentName}}</text>
-                </view>
-                <view class="detail-row">
-                  <text class="detail-label">联系电话</text>
-                  <text class="detail-value">{{item.contactPhone || '暂无'}}</text>
-                </view>
-
-                <view class="detail-row teacher-row" v-if="item.teacherName">
-                  <text class="detail-label">任课教师</text>
-                  <text class="detail-value teacher-name">{{item.teacherName}}</text>
-                </view>
-              </view>
+            <view class="payment-countdown" v-if="shouldShowCountdown(item)">
+              <text class="countdown-label">支付倒计时：</text>
+              <text class="countdown-time">{{formatCountdown(getPaymentCountdown(item))}}</text>
             </view>
             
             <view class="booking-time">
-              {{formatBookingTime(item.createTime || item.create_time)}}
+              预约时间：{{formatBookingTime(item.createTime || item.create_time)}}
+            </view>
+          </view>
+          
+          <!-- 右侧区域：课程详细信息 -->
+          <view class="booking-right">
+            <!-- 课程详细信息 -->
+            <view class="detail-info">
+              <view class="detail-row">
+                <text class="detail-label">校区地点</text>
+                <text class="detail-value">{{item.schoolName || '未知'}}</text>
+              </view>
+              <view class="detail-row">
+                <text class="detail-label">课程时间</text>
+                <text class="detail-value">{{formatCourseTime(item)}}</text>
+              </view>
+              <view class="detail-row">
+                <text class="detail-label">课程日期</text>
+                <text class="detail-value">{{formatDateRange(item)}}</text>
+              </view>
+              <view class="detail-row">
+                <text class="detail-label">学生姓名</text>
+                <text class="detail-value">{{item.studentName}}</text>
+              </view>
+              <view class="detail-row" v-if="item.teacherName">
+                <text class="detail-label">任课教师</text>
+                <text class="detail-value teacher-name">{{item.teacherName}}</text>
+              </view>
             </view>
           </view>
         </view>
         
-        <view class="booking-footer" v-if="showActions(item)">
-          <view class="booking-actions">
-            <!-- 取消预约按钮 -->
-            <view class="action-btn primary" 
-                  v-if="item && item.status !== 'cancelled' && item.status !== 'finished'"
-                  @click.stop="$event => cancelBooking(item, $event)">取消预约</view>
-            
-            <!-- 去缴费按钮 -->
-            <view class="action-btn pay-btn" 
-                  v-if="shouldShowPayButton(item)"
-                  @click.stop="$event => goToPay(item, $event)">去缴费</view>
-            
-            <!-- 联系老师按钮 -->
-            <view class="action-btn" 
-                  v-if="shouldShowContactButton(item)"
-                  @click.stop="$event => contactTeacher(item, $event)">联系老师</view>
-                  
-            <!-- 退费按钮 -->
-            <view class="action-btn refund-btn"
-                  v-if="item.paymentStatus === 'paid' || item.isPaid === true"
-                  @click.stop="$event => handleRefund(item, $event)">申请退费</view>
-          </view>
+        <!-- 底部：操作按钮 -->
+        <view class="booking-actions" v-if="showActions(item)">
+          <!-- 取消预约按钮 -->
+          <view class="action-btn cancel-btn" 
+                v-if="item && item.status !== 'cancelled' && item.status !== 'finished'"
+                @click.stop="$event => cancelBooking(item, $event)">取消预约</view>
+          
+          <!-- 去缴费按钮 -->
+          <view class="action-btn pay-btn" 
+                v-if="shouldShowPayButton(item)"
+                @click.stop="$event => goToPay(item, $event)">去缴费</view>
+                
+          <!-- 其他按钮 -->
+          <view class="action-btn contact-btn" 
+                v-if="shouldShowContactButton(item)"
+                @click.stop="$event => contactTeacher(item, $event)">联系老师</view>
+                
+          <!-- 退费按钮 -->
+          <view class="action-btn refund-btn"
+                v-if="item.paymentStatus === 'paid' || item.isPaid === true"
+                @click.stop="$event => handleRefund(item, $event)">申请退费</view>
         </view>
       </view>
       
@@ -825,40 +818,25 @@ export default {
       }
     },
     
-    // 获取预约状态文本
+    // 获取状态文本
     getStatusText(booking) {
-      if (!booking) return '未知状态';
+      if (!booking || !booking.status) return '未知状态';
       
-      // 检查是否有支付状态属性
-      const paymentStatus = booking.paymentStatus || 'unpaid';
-      
-      // 如果退费，优先显示已退费
-      if (paymentStatus === 'refunded') {
-        return '已退费';
-      }
-      
-      // 如果支付状态为已付款，优先显示已支付状态
-      if (paymentStatus === 'paid') {
-        return booking.status === 'confirmed' ? '已确认（已缴费）' : 
-               booking.status === 'finished' ? '已完成' : 
-               booking.status === 'cancelled' ? '已取消' : '已缴费';
-      }
-      
-      // 根据预约状态返回文本
-      switch(booking.status) {
+      // 根据预约的状态返回对应的文本
+      switch (booking.status) {
         case 'pending':
-          return '待确认（未缴费）';
+          return '未缴费';
         case 'confirmed_unpaid':
-          return '已确认（未缴费）';
+          return '未缴费';
         case 'confirmed':
-          return paymentStatus === 'paid' ? '已确认（已缴费）' : '已确认（未缴费）';
+          return booking.paymentStatus === 'paid' || booking.isPaid ? '已缴费' : '未缴费';
+        case 'cancelled':
+        case 'cancel':
+          return '已取消';
         case 'finished':
           return '已完成';
-        case 'cancelled':
-        case 'cancel': // 兼容旧版数据
-          return '已取消';
         default:
-          return '未知状态';
+          return booking.status;
       }
     },
     
@@ -2355,335 +2333,252 @@ export default {
 
 <style lang="scss">
 .booking-container {
+  background-color: #f5f7fa;
   min-height: 100vh;
-  background-color: $bg-color;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: 30rpx;
 }
 
 /* 状态筛选选项卡 */
 .tab-bar {
   display: flex;
-  background-color: #ffffff;
-  padding: 20rpx 0;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+  padding: 0 20rpx;
   position: sticky;
   top: 0;
-  z-index: 10;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
   
   .tab-item {
     flex: 1;
     text-align: center;
-    font-size: 30rpx;
-    color: $text-color-light;
+    font-size: 28rpx;
+    color: #666;
+    padding: 20rpx 0;
     position: relative;
-    padding: 10rpx 0;
     
     &.active {
-      color: $theme-color;
+      color: #EC7A49;
       font-weight: bold;
       
-      &::after {
+      &:after {
         content: '';
         position: absolute;
-        bottom: -10rpx;
+        bottom: 0;
         left: 50%;
         transform: translateX(-50%);
-        width: 40rpx;
-        height: 6rpx;
-        background-color: $theme-color;
-        border-radius: 3rpx;
+        width: 60rpx;
+        height: 4rpx;
+        background-color: #EC7A49;
+        border-radius: 2rpx;
       }
     }
     
     .badge {
       position: absolute;
-      top: -8rpx;
-      right: 50%;
-      margin-right: -50rpx;
+      top: 10rpx;
+      right: 25%;
       min-width: 32rpx;
       height: 32rpx;
-      border-radius: 16rpx;
-      background-color: $theme-color;
-      color: #ffffff;
-      font-size: 20rpx;
       line-height: 32rpx;
-      text-align: center;
+      border-radius: 16rpx;
+      background-color: #FF5151;
+      color: #fff;
+      font-size: 20rpx;
       padding: 0 6rpx;
-      font-weight: normal;
+      box-sizing: border-box;
+      transform: translateX(50%);
     }
   }
 }
 
-/* 预约记录列表 */
+/* 预约列表 */
 .booking-list {
   padding: 20rpx;
+}
+
+/* 预约卡片 */
+.booking-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部：课程标题 */
+.course-title-container {
+  margin-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  padding-bottom: 12rpx;
   
-  .booking-item {
-    background-color: #ffffff;
-    border-radius: 12rpx;
-    margin-bottom: 20rpx;
-    overflow: hidden;
-    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-    position: relative;
-    
-    &:active {
-      transform: scale(0.99);
-      transition: transform 0.2s;
-    }
-    
-    .booking-content {
-      padding: 16rpx;
-      
-      .booking-main {
-        .course-info {
-          flex: 1;
-          
-          .course-title {
-            font-size: 32rpx;
-            font-weight: bold;
-            margin-bottom: 10rpx;
-            color: #333;
-          }
-          
-          /* 移除booking-status的样式设置，避免冲突 */
-          
-          .course-deleted-tag {
-            display: inline-block;
-            font-size: 22rpx;
-            padding: 4rpx 12rpx;
-            background-color: #EEEEEE;
-            color: #9E9E9E;
-            border-radius: 16rpx;
-            margin-right: 10rpx;
-          }
-          
-          .auto-cancel-tag {
-            display: inline-block;
-            font-size: 22rpx;
-            padding: 4rpx 12rpx;
-            background-color: #ffecec;
-            color: #ff6464;
-            border-radius: 16rpx;
-          }
-        }
-        
-        /* 新增支付状态行样式 */
-        .payment-status-row {
-          display: flex;
-          align-items: center;
-          margin: 10rpx 0;
-          
-          .booking-status {
-            margin-right: 16rpx;
-            flex-shrink: 0;
-          }
-          
-          .payment-countdown {
-            font-size: 24rpx;
-            color: #FF5733;
-            
-            .countdown-time {
-              color: #FF5733;
-              font-weight: bold;
-            }
-          }
-        }
-        
-        .booking-details {
-          display: flex;
-          
-          .details-column {
-            &.left-column {
-              flex: 1.2;
-              margin-right: 10rpx;
-            }
-            
-            &.right-column {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-            }
-            
-            .detail-row {
-              margin-bottom: 10rpx;
-              
-              .detail-label {
-                font-size: 24rpx;
-                color: $text-color-grey;
-                margin-bottom: 4rpx;
-                display: block;
-                position: relative;
-                padding-left: 16rpx;
-                
-                &::before {
-                  content: '';
-                  position: absolute;
-                  left: 0;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  width: 6rpx;
-                  height: 6rpx;
-                  background-color: $theme-color;
-                  border-radius: 50%;
-                }
-              }
-              
-              .detail-value {
-                font-size: 26rpx;
-                color: $text-color;
-                display: block;
-                word-break: break-word;
-                padding-left: 16rpx;
-                line-height: 1.3;
-              }
-            }
-          }
-        }
-      }
-    }
-    
-    .booking-time {
-      font-size: 24rpx;
-      color: $text-color-light;
-      text-align: right;
-      padding: 0 16rpx 12rpx 0;
-      position: relative;
-      bottom: 0;
-      right: 0;
-    }
-    
-    .booking-footer {
-      display: flex;
-      justify-content: flex-end;
-      padding: 16rpx 16rpx;
-      border-top: 1rpx solid $border-color-light;
-      
-      .booking-actions {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        align-items: flex-end;
-        gap: 10rpx;
-        
-        .action-btn {
-          width: 180rpx;
-          font-size: 26rpx;
-          padding: 10rpx 20rpx;
-          border-radius: 24rpx;
-          margin: 5rpx 0;
-          border: 1rpx solid $border-color;
-          color: $text-color;
-          background-color: #ffffff;
-          text-align: center;
-          
-          &.primary {
-            background-color: $theme-color;
-            color: #ffffff;
-            border-color: $theme-color;
-          }
-          
-          &.pay-btn {
-            background-color: #1989fa;
-            color: #ffffff;
-            border-color: #1989fa;
-          }
-          
-          &:active {
-            opacity: 0.8;
-          }
-        }
-      }
-    }
+  .course-title {
+    font-size: 30rpx;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.4;
   }
 }
 
-.course-deleted-tag {
+/* 主体内容：左右布局 */
+.booking-content {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+
+/* 左侧区域：预约状态 */
+.booking-left {
+  width: 200rpx;
+  padding-right: 20rpx;
+  border-right: 1rpx solid #f0f0f0;
+}
+
+.booking-status-wrapper {
+  margin-bottom: 8rpx;
+}
+
+.booking-status {
   display: inline-block;
-  background-color: #ff4d4f;
+  font-size: 24rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 6rpx;
   color: #fff;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 10px;
-  margin-top: 5px;
-}
-
-.auto-cancel-tag {
-  display: inline-block;
-  background-color: #ff4d4f;
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-  margin-top: 5px;
-  font-weight: bold;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* 支付倒计时样式 */
-.payment-countdown {
-  background-color: rgba(255, 87, 51, 0.1);
-  border-radius: 8rpx;
-  padding: 8rpx 16rpx;
-  margin: 10rpx 0;
-  display: inline-block;
+  margin-bottom: 6rpx;
   
-  .countdown-label {
-    font-size: 24rpx;
-    color: #FF5733;
+  &.status-pending {
+    background-color: #3B9BFF;
   }
   
-  .countdown-time {
-    font-size: 26rpx;
-    color: #FF5733;
+  &.status-confirmed_unpaid, &.status-confirmed {
+    background-color: #FA8C16;
+  }
+  
+  &.status-cancelled, &.status-cancel {
+    background-color: #BDBDBD;
+  }
+  
+  &.status-finished {
+    background-color: #52C41A;
+  }
+}
+
+.status-tag {
+  display: inline-block;
+  font-size: 22rpx;
+  color: #FF5151;
+  margin-top: 4rpx;
+  
+  &.auto-cancel {
+    color: #FF5151;
     font-weight: bold;
   }
 }
 
-// 添加预约状态样式
-.booking-status {
-  font-size: 24rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 20rpx;
-  text-align: center;
-  white-space: nowrap;
-  display: inline-block;
+.payment-countdown {
+  font-size: 22rpx;
+  color: #FF5151;
+  margin-bottom: 12rpx;
   
-  &.status-pending {
-    background-color: #FFF3E0;
-    color: #FF9800;
-  }
-  
-  &.status-confirmed, &.status-confirmed_unpaid {
-    background-color: #E0F7FA;
-    color: #00BCD4;
-  }
-  
-  &.status-finished {
-    background-color: #E8F5E9;
-    color: #4CAF50;
-  }
-  
-  &.status-cancelled, &.status-cancel {
-    background-color: #EEEEEE;
-    color: #9E9E9E;
+  .countdown-time {
+    font-weight: bold;
   }
 }
 
-.detail-row.teacher-row {
-  background-color: rgba(255, 107, 0, 0.08);
-  border-radius: 8rpx;
-  padding: 4rpx 8rpx;
-  margin: 8rpx 0;
+.booking-time {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 20rpx;
+}
+
+/* 右侧区域：课程详细信息 */
+.booking-right {
+  flex: 1;
+  padding-left: 20rpx;
+}
+
+.detail-info {
+  flex: 1;
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 10rpx;
+  font-size: 26rpx;
+  line-height: 1.4;
   
-  .teacher-name {
-    color: #FF6B00;
-    font-weight: 500;
+  .detail-label {
+    width: 140rpx;
+    color: #999;
+    flex-shrink: 0;
   }
+  
+  .detail-value {
+    color: #333;
+    flex: 1;
+    
+    &.teacher-name {
+      color: #EC7A49;
+    }
+  }
+}
+
+/* 底部：操作按钮 */
+.booking-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12rpx;
+  border-top: 1rpx solid #f0f0f0;
+  
+  .action-btn {
+    min-width: 140rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    border-radius: 30rpx;
+    color: #fff;
+    font-size: 26rpx;
+    text-align: center;
+    margin-left: 16rpx;
+    padding: 0 20rpx;
+    
+    &.cancel-btn {
+      background-color: #fff;
+      color: #EC7A49;
+      border: 1rpx solid #EC7A49;
+    }
+    
+    &.pay-btn {
+      background-color: #EC7A49;
+      color: #fff;
+    }
+    
+    &.contact-btn {
+      background-color: #f5f5f5;
+      color: #666;
+    }
+    
+    &.refund-btn {
+      background-color: #fff;
+      color: #3B9BFF;
+      border: 1rpx solid #3B9BFF;
+    }
+  }
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 20rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+
+/* 空数据提示 */
+.empty-tip {
+  padding: 100rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
 }
 </style> 

@@ -1,7 +1,7 @@
 <template>
   <view class="favorite-button" @click.stop="toggleFavorite">
-    <view :class="['heart-icon', {'is-favorite': isFavorite}]">
-      <text class="heart-symbol">{{ isFavorite ? '♥' : '♡' }}</text>
+    <view :class="['cart-icon', {'is-favorite': isFavorite}]">
+      <image class="cart-image" :src="isFavorite ? 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/Shopping-Bag-1.png' : 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/Shopping-Bag-2.png'" mode="aspectFit"></image>
     </view>
   </view>
 </template>
@@ -418,12 +418,12 @@ export default {
           return;
         }
         
-        uni.showLoading({ title: this.isFavorite ? '取消中' : '收藏中' });
+        uni.showLoading({ title: this.isFavorite ? '移出中' : '添加中' });
         
         if (this.isFavorite) {
-          // 取消收藏
+          // 从购物车移出
           if (!this.favoriteId) {
-            console.error('取消收藏失败: 缺少收藏ID');
+            console.error('从购物车移出失败: 缺少ID');
             uni.hideLoading();
             uni.showToast({
               title: '操作失败',
@@ -439,13 +439,13 @@ export default {
             this.favoriteId = '';
             uni.hideLoading();
             uni.showToast({
-              title: '已取消收藏',
+              title: '已移出购物车',
               icon: 'success'
             });
             
-            // 强制更新收藏状态（解决有时状态不更新的问题）
+            // 强制更新购物车状态（解决有时状态不更新的问题）
             this.$nextTick(() => {
-              console.log('强制更新收藏状态为:', false);
+              console.log('强制更新购物车状态为:', false);
               this.isFavorite = false;
             });
             
@@ -458,8 +458,8 @@ export default {
             });
           }
         } else {
-          // 添加收藏
-          // 构建收藏数据
+          // 添加到购物车
+          // 构建数据
           const favoriteData = {
             userId: userId, // 确保使用正确的用户ID
             itemType: this.itemType,
@@ -470,7 +470,7 @@ export default {
             createTime: Date.now()
           };
           
-          console.log('添加收藏数据:', favoriteData);
+          console.log('添加购物车数据:', favoriteData);
           
           // 根据类型调整URL
           if (this.itemType === 'lecture') {
@@ -486,13 +486,13 @@ export default {
             this.favoriteId = res.data._id || res.data.favoriteId || '';
             uni.hideLoading();
             uni.showToast({
-              title: '收藏成功',
+              title: '已加入购物车',
               icon: 'success'
             });
             
-            // 强制更新收藏状态（解决有时状态不更新的问题）
+            // 强制更新购物车状态（解决有时状态不更新的问题）
             this.$nextTick(() => {
-              console.log('强制更新收藏状态为:', true);
+              console.log('强制更新购物车状态为:', true);
               this.isFavorite = true;
             });
             
@@ -506,7 +506,7 @@ export default {
             });
             
             if (res && res.message) {
-              console.error('收藏失败原因:', res.message);
+              console.error('加入购物车失败原因:', res.message);
             }
           }
         }
@@ -591,7 +591,7 @@ export default {
   position: relative;
   z-index: 10;
   
-  .heart-icon {
+  .cart-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -601,17 +601,15 @@ export default {
     border-radius: 50%;
     box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
     
-    .heart-symbol {
-      font-size: 46rpx;
-      color: #FF0000;
+    .cart-image {
+      width: 40rpx;
+      height: 40rpx;
       transition: all 0.3s;
-      line-height: 1;
     }
     
     &.is-favorite {
-      .heart-symbol {
-        color: #FF0000;
-        transform: scale(1.2);
+      .cart-image {
+        transform: scale(1.1);
       }
     }
     

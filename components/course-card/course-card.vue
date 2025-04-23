@@ -1,5 +1,8 @@
 <template>
   <view class="course-card" @click="onClick" :class="{ 'course-full': isFull }">
+    <!-- 已约满图章 -->
+    <image v-if="isFull" class="sold-out-stamp" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/已约满-c2.png" mode="aspectFit"></image>
+    
     <view class="card-upper">
       <view class="course-image">
         <image :src="course.coverImage || '/static/images/course-default.jpg'" mode="aspectFill" @error="handleImageError"></image>
@@ -8,16 +11,20 @@
       </view>
       <view class="course-info">
         <view class="course-title">{{course.title}}</view>
-        <view class="course-location" v-if="course.location">
-          <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/map.png"></image>
-          <text class="location-text">{{course.location}}</text>
+        <view class="course-detail-row" v-if="course.location">
+          <view class="course-location">
+            <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/map.png"></image>
+            <text class="location-text">{{course.location}}</text>
+          </view>
+          <view class="enrollment-status" v-if="course.maxEnroll || course.courseCapacity">
+            <text class="enrollment-text">名额 {{getEnrollmentStatus()}}</text>
+          </view>
         </view>
-        <view class="course-time" v-if="course.startTime">
-          <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/time.png"></image>
-          <text class="time-text">{{formatTime(course.startTime, course.endTime)}}</text>
-        </view>
-        <view class="enrollment-status" v-if="course.maxEnroll || course.courseCapacity">
-          <text class="enrollment-text">名额 {{getEnrollmentStatus()}}</text>
+        <view class="course-detail-row" v-if="course.startTime">
+          <view class="course-time">
+            <image class="icon-image" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/time.png"></image>
+            <text class="time-text">{{formatTime(course.startTime, course.endTime)}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -161,7 +168,8 @@ export default {
   margin-bottom: 24rpx;
   border-radius: 12rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6rpx 16rpx rgba(236, 122, 73, 0.2);
+  position: relative;
 }
 
 .course-card.course-full {
@@ -187,8 +195,9 @@ export default {
 }
 
 .course-image {
-  width: 180rpx;
+  width: 190rpx;
   height: 140rpx;
+  margin-top: 10rpx;  /* 添加这行代码，数值可以根据需要调整 */
   position: relative;
   margin-right: 20rpx;
   border-radius: 8rpx;
@@ -243,29 +252,46 @@ export default {
   margin-bottom: 10rpx;
   line-height: 1.4;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.course-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
 }
 
 .course-location, .course-time {
   font-size: 22rpx;
   color: #666;
-  margin-bottom: 8rpx;
   display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .enrollment-status {
   font-size: 22rpx;
-  margin-top: 8rpx;
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 
 .enrollment-text {
   color: #FF6B00;
+  font-weight: 500;
+  background-color: rgba(255, 107, 0, 0.1);
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
 }
 
 .course-card.course-full .enrollment-text {
   color: #999;
+  background-color: rgba(153, 153, 153, 0.1);
 }
 
 .icon-image {
@@ -325,5 +351,18 @@ export default {
   font-size: 32rpx;
   font-weight: bold;
   color: #FF3B30;
+}
+
+/* 已约满图章样式 */
+.sold-out-stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180rpx;
+  height: 180rpx;
+  z-index: 10;
+  opacity: 0.8;
+  pointer-events: none; /* 防止图章影响点击事件 */
 }
 </style> 

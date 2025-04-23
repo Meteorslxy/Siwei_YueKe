@@ -1515,13 +1515,13 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  var m0 = _vm.course.startTime
-    ? _vm.formatTime(_vm.course.startTime, _vm.course.endTime)
-    : null
-  var m1 =
-    _vm.course.maxEnroll || _vm.course.courseCapacity
+  var m0 =
+    _vm.course.location && (_vm.course.maxEnroll || _vm.course.courseCapacity)
       ? _vm.getEnrollmentStatus()
       : null
+  var m1 = _vm.course.startTime
+    ? _vm.formatTime(_vm.course.startTime, _vm.course.endTime)
+    : null
   var m2 = _vm.getTeacherAvatar(_vm.course)
   _vm.$mp.data = Object.assign(
     {},
@@ -1570,6 +1570,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2883,7 +2890,7 @@ var _default = {
                 return _context4.abrupt("return");
               case 35:
                 uni.showLoading({
-                  title: _this4.isFavorite ? '取消中' : '收藏中'
+                  title: _this4.isFavorite ? '移出中' : '添加中'
                 });
                 if (!_this4.isFavorite) {
                   _context4.next = 48;
@@ -2893,7 +2900,7 @@ var _default = {
                   _context4.next = 42;
                   break;
                 }
-                console.error('取消收藏失败: 缺少收藏ID');
+                console.error('从购物车移出失败: 缺少ID');
                 uni.hideLoading();
                 uni.showToast({
                   title: '操作失败',
@@ -2910,13 +2917,13 @@ var _default = {
                   _this4.favoriteId = '';
                   uni.hideLoading();
                   uni.showToast({
-                    title: '已取消收藏',
+                    title: '已移出购物车',
                     icon: 'success'
                   });
 
-                  // 强制更新收藏状态（解决有时状态不更新的问题）
+                  // 强制更新购物车状态（解决有时状态不更新的问题）
                   _this4.$nextTick(function () {
-                    console.log('强制更新收藏状态为:', false);
+                    console.log('强制更新购物车状态为:', false);
                     _this4.isFavorite = false;
                   });
                   _this4.$emit('favoriteChange', false);
@@ -2930,8 +2937,8 @@ var _default = {
                 _context4.next = 55;
                 break;
               case 48:
-                // 添加收藏
-                // 构建收藏数据
+                // 添加到购物车
+                // 构建数据
                 favoriteData = {
                   userId: userId,
                   // 确保使用正确的用户ID
@@ -2942,7 +2949,7 @@ var _default = {
                   itemUrl: _this4.itemUrl || "/pages/".concat(_this4.itemType, "/detail?id=").concat(_this4.itemId),
                   createTime: Date.now()
                 };
-                console.log('添加收藏数据:', favoriteData);
+                console.log('添加购物车数据:', favoriteData);
 
                 // 根据类型调整URL
                 if (_this4.itemType === 'lecture') {
@@ -2959,13 +2966,13 @@ var _default = {
                   _this4.favoriteId = _res.data._id || _res.data.favoriteId || '';
                   uni.hideLoading();
                   uni.showToast({
-                    title: '收藏成功',
+                    title: '已加入购物车',
                     icon: 'success'
                   });
 
-                  // 强制更新收藏状态（解决有时状态不更新的问题）
+                  // 强制更新购物车状态（解决有时状态不更新的问题）
                   _this4.$nextTick(function () {
-                    console.log('强制更新收藏状态为:', true);
+                    console.log('强制更新购物车状态为:', true);
                     _this4.isFavorite = true;
                   });
                   _this4.$emit('favoriteChange', true);
@@ -2977,7 +2984,7 @@ var _default = {
                     duration: 3000
                   });
                   if (_res && _res.message) {
-                    console.error('收藏失败原因:', _res.message);
+                    console.error('加入购物车失败原因:', _res.message);
                   }
                 }
               case 55:
