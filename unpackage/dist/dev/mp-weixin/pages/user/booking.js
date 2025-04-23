@@ -150,7 +150,8 @@ var render = function () {
     var m8 = _vm.formatDateRange(item)
     var m9 = _vm.formatBookingTime(item.createTime || item.create_time)
     var m10 = _vm.showActions(item)
-    var m11 = m10 ? _vm.shouldShowContactButton(item) : null
+    var m11 = m10 ? _vm.shouldShowPayButton(item) : null
+    var m12 = m10 ? _vm.shouldShowContactButton(item) : null
     return {
       $orig: $orig,
       m2: m2,
@@ -163,10 +164,11 @@ var render = function () {
       m9: m9,
       m10: m10,
       m11: m11,
+      m12: m12,
     }
   })
   var g0 = _vm.filteredBookingList.length
-  var m12 = g0 === 0 ? _vm.getEmptyTipText() : null
+  var m13 = g0 === 0 ? _vm.getEmptyTipText() : null
   if (!_vm._isMounted) {
     _vm.e0 = function ($event, item) {
       var _temp = arguments[arguments.length - 1].currentTarget.dataset,
@@ -185,7 +187,27 @@ var render = function () {
       var _temp3, _temp4
       $event.stopPropagation()
       return (function ($event) {
+        return _vm.goToPay(item, $event)
+      })($event)
+    }
+    _vm.e2 = function ($event, item) {
+      var _temp5 = arguments[arguments.length - 1].currentTarget.dataset,
+        _temp6 = _temp5.eventParams || _temp5["event-params"],
+        item = _temp6.item
+      var _temp5, _temp6
+      $event.stopPropagation()
+      return (function ($event) {
         return _vm.contactTeacher(item, $event)
+      })($event)
+    }
+    _vm.e3 = function ($event, item) {
+      var _temp7 = arguments[arguments.length - 1].currentTarget.dataset,
+        _temp8 = _temp7.eventParams || _temp7["event-params"],
+        item = _temp8.item
+      var _temp7, _temp8
+      $event.stopPropagation()
+      return (function ($event) {
+        return _vm.handleRefund(item, $event)
       })($event)
     }
   }
@@ -196,7 +218,7 @@ var render = function () {
         l0: l0,
         l1: l1,
         g0: g0,
-        m12: m12,
+        m13: m13,
       },
     }
   )
@@ -357,6 +379,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -373,6 +408,9 @@ var _default = {
       }, {
         label: '已取消',
         value: 'cancelled'
+      }, {
+        label: '已退费',
+        value: 'refunded'
       }],
       currentStatus: 'all',
       // 列表数据
@@ -390,7 +428,8 @@ var _default = {
         all: 0,
         booked: 0,
         finished: 0,
-        cancelled: 0
+        cancelled: 0,
+        refunded: 0
       },
       // 是否已加载本地取消记录
       localCancelledLoaded: false,
@@ -424,6 +463,12 @@ var _default = {
           return booking.status === 'cancelled' || booking.paymentStatus === 'cancelled' || booking.status === 'cancel';
         });
       }
+      if (this.currentStatus === 'refunded') {
+        // 已退费状态的过滤条件
+        return validBookings.filter(function (booking) {
+          return booking.paymentStatus === 'refunded';
+        });
+      }
 
       // 其他状态直接按状态筛选
       return validBookings.filter(function (booking) {
@@ -438,6 +483,9 @@ var _default = {
     // 先获取自动取消的预约ID列表，用于后续渲染
     var autoCancelIds = this.getAutoCancelledBookingIds();
     console.log('加载时找到自动取消预约IDs:', autoCancelIds);
+
+    // 监听支付成功事件
+    uni.$on('payment:success', this.handlePaymentSuccess);
 
     // 处理特殊状态
     if (options.status) {
@@ -541,6 +589,9 @@ var _default = {
   onUnload: function onUnload() {
     // 页面卸载时清除所有定时器
     this.clearAllCountdowns();
+
+    // 清除事件监听
+    uni.$off('payment:success', this.handlePaymentSuccess);
   },
   onPullDownRefresh: function onPullDownRefresh() {
     this.resetList();
@@ -605,7 +656,7 @@ var _default = {
     loadBookingList: function loadBookingList() {
       var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var userInfoStr, userData, userId, localCancelledBookings, status, useClientFiltering, statusForLog, res, allBookings, totalCount, cancelledInList, pendingCount, cancelledBookings, _localCancelledBookings, existingIds, newLocalCancelled, _userId, _localCancelledBookings2;
+        var userInfoStr, userData, userId, localCancelledBookings, status, useClientFiltering, statusForLog, res, allBookings, totalCount, cancelledInList, refundedCount, pendingCount, cancelledBookings, _localCancelledBookings, existingIds, newLocalCancelled, _userId, _localCancelledBookings2;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -732,6 +783,12 @@ var _default = {
                     _this4.statusCounts.cancelled = cancelledInList;
                   }
 
+                  // 统计已退费的预约数量
+                  refundedCount = allBookings.filter(function (item) {
+                    return item && item.paymentStatus === 'refunded';
+                  }).length;
+                  _this4.statusCounts.refunded = refundedCount;
+
                   // 确保每个预约都有_id字段
                   allBookings = allBookings.filter(function (item) {
                     return item && item._id;
@@ -798,6 +855,12 @@ var _default = {
 
                       // 打印筛选后的已取消记录
                       console.log('前端筛选后的已取消预约记录:', allBookings);
+                    } else if (_this4.currentStatus === 'refunded') {
+                      // 筛选出已退费的预约
+                      allBookings = allBookings.filter(function (item) {
+                        return item && item.paymentStatus === 'refunded';
+                      });
+                      console.log('前端筛选后的已退费预约记录:', allBookings);
                     }
                   }
                 } else {
@@ -1079,25 +1142,40 @@ var _default = {
         }, _callee2, null, [[8, 36, 39, 42], [12, 29], [17, 24]]);
       }))();
     },
-    // 获取状态文本
-    getStatusText: function getStatusText(item) {
-      // 对于特殊状态的处理
-      if (item.status === 'pending' && item.paymentStatus === 'paid') {
-        return '已缴费';
-      }
-      if (item.status === 'confirmed' && item.paymentStatus === 'unpaid') {
-        return '未缴费';
+    // 获取预约状态文本
+    getStatusText: function getStatusText(booking) {
+      if (!booking) return '未知状态';
+
+      // 检查是否有支付状态属性
+      var paymentStatus = booking.paymentStatus || 'unpaid';
+
+      // 如果退费，优先显示已退费
+      if (paymentStatus === 'refunded') {
+        return '已退费';
       }
 
-      // 标准状态的显示
-      var statusMap = {
-        'pending': '未缴费',
-        'confirmed_unpaid': '未缴费',
-        'confirmed': '已缴费',
-        'finished': '已完成',
-        'cancelled': '已取消'
-      };
-      return statusMap[item.status] || '未知状态';
+      // 如果支付状态为已付款，优先显示已支付状态
+      if (paymentStatus === 'paid') {
+        return booking.status === 'confirmed' ? '已确认（已缴费）' : booking.status === 'finished' ? '已完成' : booking.status === 'cancelled' ? '已取消' : '已缴费';
+      }
+
+      // 根据预约状态返回文本
+      switch (booking.status) {
+        case 'pending':
+          return '待确认（未缴费）';
+        case 'confirmed_unpaid':
+          return '已确认（未缴费）';
+        case 'confirmed':
+          return paymentStatus === 'paid' ? '已确认（已缴费）' : '已确认（未缴费）';
+        case 'finished':
+          return '已完成';
+        case 'cancelled':
+        case 'cancel':
+          // 兼容旧版数据
+          return '已取消';
+        default:
+          return '未知状态';
+      }
     },
     // 格式化课程时间
     formatCourseTime: function formatCourseTime(item) {
@@ -1876,6 +1954,8 @@ var _default = {
           return '暂无已完成的预约';
         case 'cancelled':
           return '暂无已取消的预约记录';
+        case 'refunded':
+          return '暂无已退费的预约记录';
         default:
           return '暂无预约记录';
       }
@@ -2023,9 +2103,151 @@ var _default = {
       // 只有当状态为已确认但未缴费时才显示联系老师按钮
       return item.status === 'confirmed' && !isPaid || item.status === 'confirmed_unpaid';
     },
+    // 判断是否应该显示去缴费按钮
+    shouldShowPayButton: function shouldShowPayButton(item) {
+      if (!item) return false;
+
+      // 检查支付状态 - 未支付、非取消、非已完成、非退费状态时显示
+      var isUnpaid = item.paymentStatus !== 'paid' && item.paymentStatus !== 'refunded';
+      var isPayable = item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed' && !item.isPaid;
+      return isUnpaid && isPayable;
+    },
+    // 前往支付页面
+    goToPay: function goToPay(booking, e) {
+      // 阻止事件冒泡，避免触发viewDetail
+      if (e) e.stopPropagation();
+      if (!booking || !booking._id) {
+        console.error('无法支付：预约ID无效');
+        uni.showToast({
+          title: '预约ID无效',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 跳转到支付页面
+      uni.navigateTo({
+        url: "/pages/payment/index?bookingId=".concat(booking._id, "&courseId=").concat(booking.courseId || '')
+      });
+    },
+    // 处理申请退费
+    handleRefund: function handleRefund(booking, e) {
+      var _this8 = this;
+      // 阻止事件冒泡，避免触发viewDetail
+      if (e) e.stopPropagation();
+      if (!booking || !booking._id) {
+        console.error('无法申请退费：预约ID无效');
+        uni.showToast({
+          title: '预约ID无效',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 确认是否退费
+      uni.showModal({
+        title: '申请退费',
+        content: '确认要申请退费吗？退费后将无法恢复。',
+        success: function () {
+          var _success2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(res) {
+            var userId, result, _result$result;
+            return _regenerator.default.wrap(function _callee5$(_context5) {
+              while (1) {
+                switch (_context5.prev = _context5.next) {
+                  case 0:
+                    if (!res.confirm) {
+                      _context5.next = 22;
+                      break;
+                    }
+                    uni.showLoading({
+                      title: '处理中...'
+                    });
+                    _context5.prev = 2;
+                    // 获取当前用户ID
+                    userId = _this8.getUserId();
+                    if (userId) {
+                      _context5.next = 8;
+                      break;
+                    }
+                    uni.showToast({
+                      title: '用户未登录',
+                      icon: 'none'
+                    });
+                    uni.hideLoading();
+                    return _context5.abrupt("return");
+                  case 8:
+                    _context5.next = 10;
+                    return uniCloud.callFunction({
+                      name: 'refundBookingPayment',
+                      data: {
+                        bookingId: booking._id,
+                        userId: userId,
+                        refundReason: '用户申请退款'
+                      }
+                    });
+                  case 10:
+                    result = _context5.sent;
+                    console.log('退款处理结果:', result);
+                    if (result.result && result.result.success) {
+                      // 更新本地数据
+                      booking.paymentStatus = 'refunded';
+                      booking.refundTime = new Date();
+                      booking.refundReason = '用户申请退款';
+
+                      // 设置标记，通知列表页刷新
+                      _this8.markBookingChanged();
+                      uni.showToast({
+                        title: '退费申请已处理',
+                        icon: 'success'
+                      });
+
+                      // 刷新页面数据
+                      setTimeout(function () {
+                        _this8.resetList();
+                        _this8.loadBookingList();
+                      }, 1500);
+                    } else {
+                      uni.showToast({
+                        title: ((_result$result = result.result) === null || _result$result === void 0 ? void 0 : _result$result.message) || '处理失败',
+                        icon: 'none'
+                      });
+                    }
+                    _context5.next = 19;
+                    break;
+                  case 15:
+                    _context5.prev = 15;
+                    _context5.t0 = _context5["catch"](2);
+                    console.error('退款处理出错:', _context5.t0);
+                    uni.showToast({
+                      title: '处理失败，请重试',
+                      icon: 'none'
+                    });
+                  case 19:
+                    _context5.prev = 19;
+                    uni.hideLoading();
+                    return _context5.finish(19);
+                  case 22:
+                  case "end":
+                    return _context5.stop();
+                }
+              }
+            }, _callee5, null, [[2, 15, 19, 22]]);
+          }));
+          function success(_x2) {
+            return _success2.apply(this, arguments);
+          }
+          return success;
+        }()
+      });
+    },
     // 判断是否应该显示倒计时
     shouldShowCountdown: function shouldShowCountdown(booking) {
       if (!booking || !booking._id) return false;
+
+      // 如果已支付或已退费，不显示倒计时
+      if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'refunded') {
+        return false;
+      }
 
       // 检查状态是否为待支付
       var isPendingPayment = booking.status === 'pending' || booking.status === 'pending' && booking.paymentStatus === 'unpaid' || booking.status === 'confirmed_unpaid';
@@ -2039,7 +2261,7 @@ var _default = {
     },
     // 初始化所有倒计时
     initAllCountdowns: function initAllCountdowns() {
-      var _this8 = this;
+      var _this9 = this;
       // 清除之前的所有定时器
       this.clearAllCountdowns();
       console.log('开始初始化所有倒计时, 预约数量:', this.bookingList.length);
@@ -2050,7 +2272,7 @@ var _default = {
         this.bookingList.forEach(function (booking) {
           if (booking && (booking.status === 'pending' || booking.status === 'confirmed_unpaid')) {
             console.log('初始化预约倒计时:', booking.bookingId || booking._id);
-            _this8.initCountdown(booking);
+            _this9.initCountdown(booking);
             initCount++;
           }
         });
@@ -2063,8 +2285,14 @@ var _default = {
     // 初始化单个预约的倒计时
     initCountdown: function initCountdown(booking) {
       var _arguments = arguments,
-        _this9 = this;
+        _this10 = this;
       if (!booking || !booking._id || booking.status !== 'pending' && booking.status !== 'confirmed_unpaid') {
+        return;
+      }
+
+      // 如果已支付或已退费，不初始化倒计时
+      if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'refunded') {
+        console.log("\u9884\u7EA6 ".concat(booking.bookingId || booking._id, " \u5DF2\u652F\u4ED8\u6216\u5DF2\u9000\u8D39\uFF0C\u4E0D\u521D\u59CB\u5316\u5012\u8BA1\u65F6"));
         return;
       }
       console.log("\u5F00\u59CB\u521D\u59CB\u5316\u9884\u7EA6 ".concat(booking.bookingId || booking._id, " \u7684\u5012\u8BA1\u65F6"));
@@ -2096,41 +2324,41 @@ var _default = {
         // 创建定时器 - 使用单一定时器处理UI更新和云端检查
         this.countdownTimers[booking._id] = setInterval(function () {
           // 更新倒计时
-          if (_this9.countdownValues[booking._id] > 0) {
-            _this9.countdownValues[booking._id] -= updateInterval;
+          if (_this10.countdownValues[booking._id] > 0) {
+            _this10.countdownValues[booking._id] -= updateInterval;
 
             // 检查是否需要调整更新频率
-            var newInterval = _this9.getUpdateInterval(_this9.countdownValues[booking._id]);
+            var newInterval = _this10.getUpdateInterval(_this10.countdownValues[booking._id]);
             if (newInterval !== updateInterval) {
               console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u8C03\u6574\u66F4\u65B0\u9891\u7387: ").concat(updateInterval, "\u79D2 -> ").concat(newInterval, "\u79D2"));
-              clearInterval(_this9.countdownTimers[booking._id]);
+              clearInterval(_this10.countdownTimers[booking._id]);
               updateInterval = newInterval;
-              _this9.countdownTimers[booking._id] = setInterval(_arguments.callee, updateInterval * 1000);
+              _this10.countdownTimers[booking._id] = setInterval(_arguments.callee, updateInterval * 1000);
             }
 
             // 记录日志 - 在更新频率变化点或每小时记录一次
-            if (_this9.countdownValues[booking._id] % 3600 === 0 || _this9.countdownValues[booking._id] === 7200 ||
+            if (_this10.countdownValues[booking._id] % 3600 === 0 || _this10.countdownValues[booking._id] === 7200 ||
             // 剩余2小时
-            _this9.countdownValues[booking._id] === 3600 ||
+            _this10.countdownValues[booking._id] === 3600 ||
             // 剩余1小时
-            _this9.countdownValues[booking._id] === 120) {
+            _this10.countdownValues[booking._id] === 120) {
               // 剩余2分钟
-              console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u5269\u4F59\u652F\u4ED8\u65F6\u95F4: ").concat(_this9.formatCountdown(_this9.countdownValues[booking._id])));
+              console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u5269\u4F59\u652F\u4ED8\u65F6\u95F4: ").concat(_this10.formatCountdown(_this10.countdownValues[booking._id])));
             }
 
             // 检查是否需要进行云端检查（每小时）
             var now = Date.now();
             if (now - lastCloudCheck >= cloudCheckInterval) {
               console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u6267\u884C\u6BCF\u5C0F\u65F6\u4E91\u7AEF\u68C0\u67E5"));
-              _this9.checkBookingStatusFromCloud(booking._id);
+              _this10.checkBookingStatusFromCloud(booking._id);
               lastCloudCheck = now;
             }
 
             // 强制更新视图
-            _this9.$forceUpdate();
+            _this10.$forceUpdate();
           } else {
             // 倒计时结束，处理超时
-            _this9.handleExpiredBooking(booking);
+            _this10.handleExpiredBooking(booking);
           }
         }, updateInterval * 1000); // 转换为毫秒
       } catch (e) {
@@ -2200,18 +2428,18 @@ var _default = {
     },
     // 从云端检查预约状态
     checkBookingStatusFromCloud: function checkBookingStatusFromCloud(bookingId) {
-      var _this10 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+      var _this11 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
         var result, serverBooking, localBooking;
-        return _regenerator.default.wrap(function _callee5$(_context5) {
+        return _regenerator.default.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
-                _context5.prev = 0;
+                _context6.prev = 0;
                 console.log("\u4ECE\u4E91\u7AEF\u68C0\u67E5\u9884\u7EA6\u72B6\u6001: ".concat(bookingId));
 
                 // 调用云函数获取预约的最新状态
-                _context5.next = 4;
+                _context6.next = 4;
                 return uniCloud.callFunction({
                   name: 'getBookingStatus',
                   data: {
@@ -2219,67 +2447,67 @@ var _default = {
                   }
                 });
               case 4:
-                result = _context5.sent;
+                result = _context6.sent;
                 if (result.result && result.result.success) {
                   serverBooking = result.result.data;
                   console.log("\u4E91\u7AEF\u8FD4\u56DE\u9884\u7EA6\u72B6\u6001:", serverBooking);
 
                   // 如果云端状态已更改，更新本地状态
                   if (serverBooking && serverBooking.status) {
-                    localBooking = _this10.bookingList.find(function (b) {
+                    localBooking = _this11.bookingList.find(function (b) {
                       return b._id === bookingId;
                     });
                     if (localBooking && localBooking.status !== serverBooking.status) {
                       console.log("\u66F4\u65B0\u672C\u5730\u9884\u7EA6\u72B6\u6001: ".concat(localBooking.status, " -> ").concat(serverBooking.status));
-                      _this10.updateBookingStatus(bookingId, serverBooking.status);
+                      _this11.updateBookingStatus(bookingId, serverBooking.status);
 
                       // 如果状态为已取消，停止倒计时
                       if (serverBooking.status === 'cancelled') {
-                        _this10.clearCountdown(bookingId);
+                        _this11.clearCountdown(bookingId);
                       }
 
                       // 刷新UI
-                      _this10.$forceUpdate();
+                      _this11.$forceUpdate();
                     }
                   }
                 }
-                _context5.next = 11;
+                _context6.next = 11;
                 break;
               case 8:
-                _context5.prev = 8;
-                _context5.t0 = _context5["catch"](0);
-                console.error('从云端检查预约状态失败:', _context5.t0);
+                _context6.prev = 8;
+                _context6.t0 = _context6["catch"](0);
+                console.error('从云端检查预约状态失败:', _context6.t0);
               case 11:
               case "end":
-                return _context5.stop();
+                return _context6.stop();
             }
           }
-        }, _callee5, null, [[0, 8]]);
+        }, _callee6, null, [[0, 8]]);
       }))();
     },
     // 将超时状态同步到云端（限制频率）
     syncExpiredBookingToCloud: function syncExpiredBookingToCloud(bookingId) {
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
         var key, isSynced, result;
-        return _regenerator.default.wrap(function _callee6$(_context6) {
+        return _regenerator.default.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 // 检查是否已经同步过
                 key = "synced_expired_".concat(bookingId);
                 isSynced = uni.getStorageSync(key);
                 if (!isSynced) {
-                  _context6.next = 5;
+                  _context7.next = 5;
                   break;
                 }
                 console.log("\u9884\u7EA6 ".concat(bookingId, " \u5DF2\u7ECF\u540C\u6B65\u8FC7\u8D85\u65F6\u72B6\u6001\uFF0C\u8DF3\u8FC7"));
-                return _context6.abrupt("return");
+                return _context7.abrupt("return");
               case 5:
-                _context6.prev = 5;
+                _context7.prev = 5;
                 console.log("\u540C\u6B65\u9884\u7EA6 ".concat(bookingId, " \u7684\u8D85\u65F6\u72B6\u6001\u5230\u4E91\u7AEF"));
 
                 // 调用云函数更新预约状态
-                _context6.next = 9;
+                _context7.next = 9;
                 return uniCloud.callFunction({
                   name: 'forceUpdateBooking',
                   data: {
@@ -2291,7 +2519,7 @@ var _default = {
                   }
                 });
               case 9:
-                result = _context6.sent;
+                result = _context7.sent;
                 if (result.result && result.result.success) {
                   console.log("\u540C\u6B65\u9884\u7EA6 ".concat(bookingId, " \u8D85\u65F6\u72B6\u6001\u6210\u529F"));
                   // 标记为已同步
@@ -2299,18 +2527,18 @@ var _default = {
                 } else {
                   console.error("\u540C\u6B65\u9884\u7EA6 ".concat(bookingId, " \u8D85\u65F6\u72B6\u6001\u5931\u8D25:"), result.result);
                 }
-                _context6.next = 16;
+                _context7.next = 16;
                 break;
               case 13:
-                _context6.prev = 13;
-                _context6.t0 = _context6["catch"](5);
-                console.error("\u540C\u6B65\u9884\u7EA6 ".concat(bookingId, " \u8D85\u65F6\u72B6\u6001\u51FA\u9519:"), _context6.t0);
+                _context7.prev = 13;
+                _context7.t0 = _context7["catch"](5);
+                console.error("\u540C\u6B65\u9884\u7EA6 ".concat(bookingId, " \u8D85\u65F6\u72B6\u6001\u51FA\u9519:"), _context7.t0);
               case 16:
               case "end":
-                return _context6.stop();
+                return _context7.stop();
             }
           }
-        }, _callee6, null, [[5, 13]]);
+        }, _callee7, null, [[5, 13]]);
       }))();
     },
     // 格式化倒计时显示 - 根据时间长度调整显示格式
@@ -2398,11 +2626,40 @@ var _default = {
     },
     // 清除所有倒计时
     clearAllCountdowns: function clearAllCountdowns() {
-      var _this11 = this;
+      var _this12 = this;
       Object.keys(this.countdownTimers).forEach(function (bookingId) {
-        _this11.clearCountdown(bookingId);
+        _this12.clearCountdown(bookingId);
       });
       this.countdownTimers = {};
+    },
+    // 处理支付成功事件
+    handlePaymentSuccess: function handlePaymentSuccess(data) {
+      console.log('收到支付成功事件:', data);
+      if (!data || !data.bookingId) {
+        console.error('支付成功事件缺少bookingId');
+        return;
+      }
+
+      // 查找并更新指定预约的支付状态
+      var bookingIndex = this.bookingList.findIndex(function (item) {
+        return item && (item._id === data.bookingId || item.bookingId === data.bookingId);
+      });
+      if (bookingIndex >= 0) {
+        // 更新支付状态
+        this.bookingList[bookingIndex].paymentStatus = 'paid';
+
+        // 清除该预约的倒计时
+        this.clearCountdown(this.bookingList[bookingIndex]._id);
+
+        // 强制更新视图
+        this.$forceUpdate();
+        console.log("\u6210\u529F\u66F4\u65B0\u9884\u7EA6".concat(data.bookingId, "\u7684\u652F\u4ED8\u72B6\u6001\u4E3A\u5DF2\u652F\u4ED8"));
+      } else {
+        console.log("\u672A\u627E\u5230\u9884\u7EA6".concat(data.bookingId, "\uFF0C\u5237\u65B0\u5217\u8868\u4EE5\u83B7\u53D6\u6700\u65B0\u6570\u636E"));
+        // 刷新列表以获取最新数据
+        this.resetList();
+        this.loadBookingList();
+      }
     },
     // 判断是否应该显示"超时未支付自动取消"标签
     showAutoCancelTag: function showAutoCancelTag(item) {

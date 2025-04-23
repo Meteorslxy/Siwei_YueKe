@@ -236,8 +236,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var _default = {
   globalData: {
     userInfo: null,
@@ -456,14 +459,32 @@ var _default = {
         // 检查token是否有效
         var token = uni.getStorageSync('uni_id_token');
         var tokenExpired = uni.getStorageSync('uni_id_token_expired');
-        var isTokenValid = token && typeof token === 'string' && token.length > 10 && tokenExpired && tokenExpired > Date.now();
+
+        // 修改有效性检查，允许一定宽限期（例如10分钟），避免因为前后端时间差而导致token判定为过期
+        // 10分钟 = 600000毫秒
+        var GRACE_PERIOD = 600000;
+        var isTokenValid = token && typeof token === 'string' && token.length > 10 && tokenExpired && (tokenExpired > Date.now() || tokenExpired > Date.now() - GRACE_PERIOD);
+
+        // 如果token即将过期或刚过期，尝试刷新token
+        if (token && typeof token === 'string' && token.length > 10 && tokenExpired && tokenExpired > Date.now() - GRACE_PERIOD && tokenExpired < Date.now() + GRACE_PERIOD) {
+          console.log('Token即将过期，尝试刷新');
+          this.refreshToken(token);
+        }
 
         // 如果token无效但还有用户信息，可能是退出登录后未清理干净
         if (!isTokenValid && (this.globalData.userInfo || uniIdUserInfo)) {
-          console.log('检测到token无效但有用户信息，可能是退出登录状态不一致，清理用户信息');
-          this.globalData.userInfo = null;
-          uni.removeStorageSync('userInfo');
-          uni.removeStorageSync('uni-id-pages-userInfo');
+          console.log('检测到token无效但有用户信息，可能是退出登录状态不一致，尝试刷新token');
+
+          // 尝试刷新token，而不是直接清除用户信息
+          if (token && typeof token === 'string' && token.length > 10) {
+            this.refreshToken(token);
+          } else {
+            // 如果没有可用的token，才清理用户信息
+            console.log('无法刷新token，清理用户信息');
+            this.globalData.userInfo = null;
+            uni.removeStorageSync('userInfo');
+            uni.removeStorageSync('uni-id-pages-userInfo');
+          }
           return;
         }
 
@@ -488,26 +509,116 @@ var _default = {
         console.error('检查登录状态失败:', e);
       }
     },
-    // 检查用户是否绑定手机号
-    checkMobileBindingStatus: function checkMobileBindingStatus(userInfo) {
-      var _arguments = arguments,
-        _this3 = this;
+    // 刷新token方法
+    refreshToken: function refreshToken(token) {
+      var _this3 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var forceCheck, _result$result, pages, currentPage, currentPageRoute, currentUserInfo, hasShownMobileBindingTip, token, result, cloudUserInfo;
+        var result, newToken, newTokenExpired, currentUserInfo, preservedNickname, parsedInfo, mergedUserInfo;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                if (token) {
+                  _context.next = 3;
+                  break;
+                }
+                console.error('刷新token失败：token为空');
+                return _context.abrupt("return", false);
+              case 3:
+                _context.prev = 3;
+                console.log('尝试刷新token...');
+
+                // 调用刷新token的云函数
+                _context.next = 7;
+                return uniCloud.callFunction({
+                  name: 'refreshToken',
+                  data: {
+                    token: token
+                  }
+                });
+              case 7:
+                result = _context.sent;
+                console.log('刷新token结果:', result);
+                if (!(result.result && result.result.code === 0)) {
+                  _context.next = 19;
+                  break;
+                }
+                // 刷新成功，更新存储的token和过期时间
+                newToken = result.result.token;
+                newTokenExpired = result.result.tokenExpired;
+                console.log('token刷新成功，新过期时间:', new Date(newTokenExpired).toLocaleString());
+
+                // 更新存储
+                uni.setStorageSync('uni_id_token', newToken);
+                uni.setStorageSync('uni_id_token_expired', newTokenExpired);
+
+                // 如果有用户信息，也同步更新
+                if (result.result.userInfo) {
+                  // 确保不覆盖wx_nickname字段，避免用户实名被重置
+                  currentUserInfo = uni.getStorageSync('userInfo');
+                  preservedNickname = null;
+                  try {
+                    if (typeof currentUserInfo === 'string') {
+                      parsedInfo = JSON.parse(currentUserInfo);
+                      if (parsedInfo && parsedInfo.nickname && parsedInfo.nickname !== '微信用户') {
+                        preservedNickname = parsedInfo.nickname;
+                      }
+                    } else if (currentUserInfo && currentUserInfo.nickname && currentUserInfo.nickname !== '微信用户') {
+                      preservedNickname = currentUserInfo.nickname;
+                    }
+                  } catch (e) {
+                    console.error('解析当前用户信息失败:', e);
+                  }
+
+                  // 合并用户信息，保留原有昵称
+                  mergedUserInfo = _objectSpread({}, result.result.userInfo);
+                  if (preservedNickname) {
+                    mergedUserInfo.nickname = preservedNickname;
+                  }
+                  uni.setStorageSync('userInfo', mergedUserInfo);
+                  uni.setStorageSync('uni-id-pages-userInfo', mergedUserInfo);
+                  _this3.globalData.userInfo = mergedUserInfo;
+                }
+                return _context.abrupt("return", true);
+              case 19:
+                console.error('刷新token失败:', result.result);
+                return _context.abrupt("return", false);
+              case 21:
+                _context.next = 27;
+                break;
+              case 23:
+                _context.prev = 23;
+                _context.t0 = _context["catch"](3);
+                console.error('刷新token异常:', _context.t0);
+                return _context.abrupt("return", false);
+              case 27:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[3, 23]]);
+      }))();
+    },
+    // 检查用户是否绑定手机号
+    checkMobileBindingStatus: function checkMobileBindingStatus(userInfo) {
+      var _arguments = arguments,
+        _this4 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var forceCheck, _result$result, pages, currentPage, currentPageRoute, currentUserInfo, hasShownMobileBindingTip, token, result, cloudUserInfo;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
                 forceCheck = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : false;
-                if (!_this3._isCheckingMobileBinding) {
-                  _context.next = 4;
+                if (!_this4._isCheckingMobileBinding) {
+                  _context2.next = 4;
                   break;
                 }
                 console.log('手机绑定状态检查正在进行中，跳过重复检查');
-                return _context.abrupt("return");
+                return _context2.abrupt("return");
               case 4:
-                _this3._isCheckingMobileBinding = true;
-                _context.prev = 5;
+                _this4._isCheckingMobileBinding = true;
+                _context2.prev = 5;
                 // 获取当前页面路径
                 pages = getCurrentPages();
                 currentPage = pages[pages.length - 1];
@@ -517,17 +628,17 @@ var _default = {
                 // 获取当前用户信息
                 currentUserInfo = userInfo; // 如果没有传入用户信息，则从存储中获取
                 if (currentUserInfo) {
-                  _context.next = 17;
+                  _context2.next = 17;
                   break;
                 }
-                currentUserInfo = _this3.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
+                currentUserInfo = _this4.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
                 if (currentUserInfo) {
-                  _context.next = 17;
+                  _context2.next = 17;
                   break;
                 }
                 console.log('没有找到用户信息，无需检查手机绑定状态');
-                _this3._isCheckingMobileBinding = false;
-                return _context.abrupt("return");
+                _this4._isCheckingMobileBinding = false;
+                return _context2.abrupt("return");
               case 17:
                 console.log('准备检查用户手机绑定状态，用户信息:', JSON.stringify({
                   _id: currentUserInfo._id,
@@ -536,36 +647,36 @@ var _default = {
 
                 // 如果本地用户信息中已有手机号且不是强制检查，则直接返回
                 if (!(currentUserInfo.mobile && currentUserInfo.mobile.trim() !== '')) {
-                  _context.next = 22;
+                  _context2.next = 22;
                   break;
                 }
                 console.log('本地信息显示用户已绑定手机号:', currentUserInfo.mobile);
-                _this3._isCheckingMobileBinding = false;
-                return _context.abrupt("return");
+                _this4._isCheckingMobileBinding = false;
+                return _context2.abrupt("return");
               case 22:
                 // 检查是否已经显示过提示且不是强制检查
                 hasShownMobileBindingTip = uni.getStorageSync('hasShownMobileBindingTip');
                 if (!(hasShownMobileBindingTip && !forceCheck)) {
-                  _context.next = 27;
+                  _context2.next = 27;
                   break;
                 }
                 console.log('已经显示过手机绑定提示，不再重复显示');
-                _this3._isCheckingMobileBinding = false;
-                return _context.abrupt("return");
+                _this4._isCheckingMobileBinding = false;
+                return _context2.abrupt("return");
               case 27:
                 // 再次从云端验证
                 token = uni.getStorageSync('uni_id_token');
                 if (token) {
-                  _context.next = 32;
+                  _context2.next = 32;
                   break;
                 }
                 console.log('用户未登录或token不存在');
-                _this3._isCheckingMobileBinding = false;
-                return _context.abrupt("return");
+                _this4._isCheckingMobileBinding = false;
+                return _context2.abrupt("return");
               case 32:
                 // 调用云函数检查用户信息
                 console.log('调用云函数获取最新用户信息');
-                _context.next = 35;
+                _context2.next = 35;
                 return uniCloud.callFunction({
                   name: 'getUserInfoByToken',
                   data: {
@@ -573,12 +684,12 @@ var _default = {
                   }
                 });
               case 35:
-                result = _context.sent;
+                result = _context2.sent;
                 console.log('云函数返回用户信息状态:', (_result$result = result.result) === null || _result$result === void 0 ? void 0 : _result$result.code);
                 if (result.result && result.result.code === 0 && result.result.userInfo) {
                   cloudUserInfo = result.result.userInfo; // 更新本地用户信息
                   if (cloudUserInfo._id) {
-                    _this3.globalData.userInfo = cloudUserInfo;
+                    _this4.globalData.userInfo = cloudUserInfo;
                     uni.setStorageSync('uni-id-pages-userInfo', cloudUserInfo);
                     uni.setStorageSync('userInfo', cloudUserInfo);
                   }
@@ -636,46 +747,46 @@ var _default = {
                     console.log('云端验证用户已绑定手机号:', cloudUserInfo.mobile);
                   }
                 }
-                _context.next = 43;
+                _context2.next = 43;
                 break;
               case 40:
-                _context.prev = 40;
-                _context.t0 = _context["catch"](5);
-                console.error('检查手机绑定状态失败:', _context.t0);
+                _context2.prev = 40;
+                _context2.t0 = _context2["catch"](5);
+                console.error('检查手机绑定状态失败:', _context2.t0);
               case 43:
-                _context.prev = 43;
+                _context2.prev = 43;
                 // 无论成功或失败，都重置检查标志
-                _this3._isCheckingMobileBinding = false;
+                _this4._isCheckingMobileBinding = false;
                 console.log('手机绑定状态检查完成');
-                return _context.finish(43);
+                return _context2.finish(43);
               case 47:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, null, [[5, 40, 43, 47]]);
+        }, _callee2, null, [[5, 40, 43, 47]]);
       }))();
     },
     // 检查用户是否绑定微信账号
     checkWechatBindStatus: function checkWechatBindStatus(userInfo) {
       var _arguments2 = arguments,
-        _this4 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        _this5 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
         var forceCheck, pages, currentPage, currentPageRoute, currentUserInfo, isWechatBound;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
+        return _regenerator.default.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 forceCheck = _arguments2.length > 1 && _arguments2[1] !== undefined ? _arguments2[1] : false;
-                if (!_this4._isCheckingWechatBinding) {
-                  _context2.next = 4;
+                if (!_this5._isCheckingWechatBinding) {
+                  _context3.next = 4;
                   break;
                 }
                 console.log('微信绑定状态检查正在进行中，跳过重复检查');
-                return _context2.abrupt("return");
+                return _context3.abrupt("return");
               case 4:
-                _this4._isCheckingWechatBinding = true;
-                _context2.prev = 5;
+                _this5._isCheckingWechatBinding = true;
+                _context3.prev = 5;
                 // 获取当前页面路径
                 pages = getCurrentPages();
                 currentPage = pages[pages.length - 1];
@@ -684,30 +795,30 @@ var _default = {
 
                 // 如果当前页面是登录相关页面，延迟检查
                 if (!(currentPageRoute && (currentPageRoute.includes('login') || currentPageRoute.includes('register') || currentPageRoute.includes('auth')))) {
-                  _context2.next = 14;
+                  _context3.next = 14;
                   break;
                 }
                 console.log('当前在登录相关页面，将在页面跳转后再检查微信绑定状态');
                 setTimeout(function () {
-                  _this4._isCheckingWechatBinding = false;
-                  _this4.checkWechatBindStatus(userInfo, forceCheck);
+                  _this5._isCheckingWechatBinding = false;
+                  _this5.checkWechatBindStatus(userInfo, forceCheck);
                 }, 1500);
-                return _context2.abrupt("return");
+                return _context3.abrupt("return");
               case 14:
                 // 获取当前用户信息
                 currentUserInfo = userInfo; // 如果没有传入用户信息，则从存储中获取
                 if (currentUserInfo) {
-                  _context2.next = 21;
+                  _context3.next = 21;
                   break;
                 }
-                currentUserInfo = _this4.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
+                currentUserInfo = _this5.globalData.userInfo || uni.getStorageSync('uni-id-pages-userInfo');
                 if (currentUserInfo) {
-                  _context2.next = 21;
+                  _context3.next = 21;
                   break;
                 }
                 console.log('没有找到用户信息，无需检查微信绑定状态');
-                _this4._isCheckingWechatBinding = false;
-                return _context2.abrupt("return");
+                _this5._isCheckingWechatBinding = false;
+                return _context3.abrupt("return");
               case 21:
                 // 检查微信绑定状态
                 isWechatBound = false; // 判断wx_openid是否存在且不为空
@@ -748,34 +859,34 @@ var _default = {
                     }
                   });
                 }
-                return _context2.abrupt("return", isWechatBound);
+                return _context3.abrupt("return", isWechatBound);
               case 29:
-                _context2.prev = 29;
-                _context2.t0 = _context2["catch"](5);
-                console.error('检查微信绑定状态失败:', _context2.t0);
-                return _context2.abrupt("return", false);
+                _context3.prev = 29;
+                _context3.t0 = _context3["catch"](5);
+                console.error('检查微信绑定状态失败:', _context3.t0);
+                return _context3.abrupt("return", false);
               case 33:
-                _context2.prev = 33;
+                _context3.prev = 33;
                 // 无论成功或失败，都重置检查标志
-                _this4._isCheckingWechatBinding = false;
-                return _context2.finish(33);
+                _this5._isCheckingWechatBinding = false;
+                return _context3.finish(33);
               case 36:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, null, [[5, 29, 33, 36]]);
+        }, _callee3, null, [[5, 29, 33, 36]]);
       }))();
     },
     // 测试云函数连接
     testCloudConnection: function testCloudConnection() {
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
         var result;
-        return _regenerator.default.wrap(function _callee3$(_context3) {
+        return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                _context3.prev = 0;
+                _context4.prev = 0;
                 console.log('检查云服务状态...');
 
                 // 如果在微信小程序环境中，确保wx.cloud被禁用
@@ -787,15 +898,15 @@ var _default = {
 
                 // 检查uniCloud是否可用
                 if (!(typeof uniCloud === 'undefined')) {
-                  _context3.next = 6;
+                  _context4.next = 6;
                   break;
                 }
                 console.error('uniCloud对象不存在，可能是平台不支持');
-                return _context3.abrupt("return", false);
+                return _context4.abrupt("return", false);
               case 6:
                 // 直接使用uniCloud调用云函数
                 console.log('正在测试云函数连接...');
-                _context3.next = 9;
+                _context4.next = 9;
                 return uniCloud.callFunction({
                   name: 'yuekeCloudTest',
                   data: {
@@ -803,43 +914,43 @@ var _default = {
                   }
                 });
               case 9:
-                result = _context3.sent;
+                result = _context4.sent;
                 console.log('云函数测试结果:', result);
                 if (!(result && result.result && result.result.code === 0)) {
-                  _context3.next = 16;
+                  _context4.next = 16;
                   break;
                 }
                 console.log('云函数连接成功');
-                return _context3.abrupt("return", true);
+                return _context4.abrupt("return", true);
               case 16:
                 console.warn('云函数测试返回异常结果');
-                return _context3.abrupt("return", false);
+                return _context4.abrupt("return", false);
               case 18:
-                _context3.next = 24;
+                _context4.next = 24;
                 break;
               case 20:
-                _context3.prev = 20;
-                _context3.t0 = _context3["catch"](0);
-                console.error('云函数连接测试失败:', _context3.t0);
-                return _context3.abrupt("return", false);
+                _context4.prev = 20;
+                _context4.t0 = _context4["catch"](0);
+                console.error('云函数连接测试失败:', _context4.t0);
+                return _context4.abrupt("return", false);
               case 24:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, null, [[0, 20]]);
+        }, _callee4, null, [[0, 20]]);
       }))();
     },
     // 检查学生姓名设置状态
     checkStudentNameStatus: function checkStudentNameStatus() {
-      var _this5 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+      var _this6 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
         var _userInfo, _userInfo2, hasSetStudentName, userInfo, isAutoGeneratedNickname;
-        return _regenerator.default.wrap(function _callee4$(_context4) {
+        return _regenerator.default.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                _context4.prev = 0;
+                _context5.prev = 0;
                 hasSetStudentName = uni.getStorageSync('hasSetStudentName');
                 userInfo = uni.getStorageSync('userInfo'); // 确保userInfo是对象
                 if (typeof userInfo === 'string') {
@@ -858,11 +969,11 @@ var _default = {
 
                 // 如果用户已明确设置了学生姓名且有非自动生成的昵称，则不显示弹窗
                 if (!(hasSetStudentName === 'true' || hasSetStudentName && !isAutoGeneratedNickname)) {
-                  _context4.next = 9;
+                  _context5.next = 9;
                   break;
                 }
                 console.log('已经设置过学生姓名且昵称非自动生成，无需再次设置');
-                return _context4.abrupt("return");
+                return _context5.abrupt("return");
               case 9:
                 // 只有当用户有自动生成的昵称时才显示弹窗
                 if (userInfo && isAutoGeneratedNickname) {
@@ -871,23 +982,23 @@ var _default = {
                     console.log('检测到自动生成的昵称但已标记为设置过，清除标记');
                     uni.removeStorageSync('hasSetStudentName');
                   }
-                  _this5._showStudentNameModal();
+                  _this6._showStudentNameModal();
                 } else if ((_userInfo2 = userInfo) !== null && _userInfo2 !== void 0 && _userInfo2.nickname) {
                   console.log('用户已有昵称:', userInfo.nickname, '不显示弹窗');
                 }
-                _context4.next = 15;
+                _context5.next = 15;
                 break;
               case 12:
-                _context4.prev = 12;
-                _context4.t0 = _context4["catch"](0);
-                console.error('检查学生姓名设置状态失败:', _context4.t0);
+                _context5.prev = 12;
+                _context5.t0 = _context5["catch"](0);
+                console.error('检查学生姓名设置状态失败:', _context5.t0);
                 // 出错时不自动显示弹窗，避免不必要的干扰
               case 15:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4, null, [[0, 12]]);
+        }, _callee5, null, [[0, 12]]);
       }))();
     },
     // 新增：封装显示学生姓名弹窗的方法

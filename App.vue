@@ -217,18 +217,41 @@ export default {
         // 检查token是否有效
         const token = uni.getStorageSync('uni_id_token');
         const tokenExpired = uni.getStorageSync('uni_id_token_expired');
+        
+        // 修改有效性检查，允许一定宽限期（例如10分钟），避免因为前后端时间差而导致token判定为过期
+        // 10分钟 = 600000毫秒
+        const GRACE_PERIOD = 600000; 
         const isTokenValid = token && 
                             typeof token === 'string' && 
                             token.length > 10 && 
                             tokenExpired && 
-                            tokenExpired > Date.now();
+                            (tokenExpired > Date.now() || tokenExpired > (Date.now() - GRACE_PERIOD));
+        
+        // 如果token即将过期或刚过期，尝试刷新token
+        if (token && 
+            typeof token === 'string' && 
+            token.length > 10 && 
+            tokenExpired && 
+            tokenExpired > (Date.now() - GRACE_PERIOD) && 
+            tokenExpired < (Date.now() + GRACE_PERIOD)) {
+          console.log('Token即将过期，尝试刷新');
+          this.refreshToken(token);
+        }
         
         // 如果token无效但还有用户信息，可能是退出登录后未清理干净
         if (!isTokenValid && (this.globalData.userInfo || uniIdUserInfo)) {
-          console.log('检测到token无效但有用户信息，可能是退出登录状态不一致，清理用户信息');
-          this.globalData.userInfo = null;
-          uni.removeStorageSync('userInfo');
-          uni.removeStorageSync('uni-id-pages-userInfo');
+          console.log('检测到token无效但有用户信息，可能是退出登录状态不一致，尝试刷新token');
+          
+          // 尝试刷新token，而不是直接清除用户信息
+          if (token && typeof token === 'string' && token.length > 10) {
+            this.refreshToken(token);
+          } else {
+            // 如果没有可用的token，才清理用户信息
+            console.log('无法刷新token，清理用户信息');
+            this.globalData.userInfo = null;
+            uni.removeStorageSync('userInfo');
+            uni.removeStorageSync('uni-id-pages-userInfo');
+          }
           return;
         }
         
@@ -254,6 +277,81 @@ export default {
       }
     },
     
+    // 刷新token方法
+    async refreshToken(token) {
+      if (!token) {
+        console.error('刷新token失败：token为空');
+        return false;
+      }
+      
+      try {
+        console.log('尝试刷新token...');
+        
+        // 调用刷新token的云函数
+        const result = await uniCloud.callFunction({
+          name: 'refreshToken',
+          data: {
+            token: token
+          }
+        });
+        
+        console.log('刷新token结果:', result);
+        
+        if (result.result && result.result.code === 0) {
+          // 刷新成功，更新存储的token和过期时间
+          const newToken = result.result.token;
+          const newTokenExpired = result.result.tokenExpired;
+          
+          console.log('token刷新成功，新过期时间:', new Date(newTokenExpired).toLocaleString());
+          
+          // 更新存储
+          uni.setStorageSync('uni_id_token', newToken);
+          uni.setStorageSync('uni_id_token_expired', newTokenExpired);
+          
+          // 如果有用户信息，也同步更新
+          if (result.result.userInfo) {
+            // 确保不覆盖wx_nickname字段，避免用户实名被重置
+            const currentUserInfo = uni.getStorageSync('userInfo');
+            let preservedNickname = null;
+            
+            try {
+              if (typeof currentUserInfo === 'string') {
+                const parsedInfo = JSON.parse(currentUserInfo);
+                if (parsedInfo && parsedInfo.nickname && parsedInfo.nickname !== '微信用户') {
+                  preservedNickname = parsedInfo.nickname;
+                }
+              } else if (currentUserInfo && currentUserInfo.nickname && currentUserInfo.nickname !== '微信用户') {
+                preservedNickname = currentUserInfo.nickname;
+              }
+            } catch (e) {
+              console.error('解析当前用户信息失败:', e);
+            }
+            
+            // 合并用户信息，保留原有昵称
+            const mergedUserInfo = {
+              ...result.result.userInfo
+            };
+            
+            if (preservedNickname) {
+              mergedUserInfo.nickname = preservedNickname;
+            }
+            
+            uni.setStorageSync('userInfo', mergedUserInfo);
+            uni.setStorageSync('uni-id-pages-userInfo', mergedUserInfo);
+            this.globalData.userInfo = mergedUserInfo;
+          }
+          
+          return true;
+        } else {
+          console.error('刷新token失败:', result.result);
+          return false;
+        }
+      } catch (error) {
+        console.error('刷新token异常:', error);
+        return false;
+      }
+    },
+
     // 检查用户是否绑定手机号
     async checkMobileBindingStatus(userInfo, forceCheck = false) {
       // 使用一个正在检查的标志，避免重复检查

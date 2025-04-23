@@ -1,0 +1,7 @@
+{
+  "functionName": "refundBookingPayment",
+  "description": "处理预约退款，将支付状态从paid(已支付)更新为refunded(已退费)",
+  "memorySize": 256,
+  "timeout": 20,
+  "triggers": []
+} 

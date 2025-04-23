@@ -1,97 +1,100 @@
 'use strict';
 
-// 阿里云云函数入口文件
+// 云函数入口文件
 const db = uniCloud.database();
+const dbCmd = db.command;
 
-// 云函数入口函数
+/**
+ * 刷新用户token
+ * @param {Object} event
+ * @param {String} event.token - 当前token
+ */
 exports.main = async (event, context) => {
-	console.log('刷新token云函数调用:', event);
-	
-	const { userId } = event;
-	if (!userId) {
-		return {
-			code: -1,
-			message: '缺少用户ID'
-		};
-	}
+	console.log('refreshToken云函数被调用，参数:', event);
 	
 	try {
-		// 查询用户信息
-		const userInfo = await db.collection('uni-id-users')
-			.doc(userId)
-			.get();
+		const { token } = event;
 		
-		if (!userInfo.data || userInfo.data.length === 0) {
+		// 基本参数校验
+		if (!token) {
 			return {
 				code: -1,
-				message: '用户不存在'
+				message: '缺少必要参数',
 			};
 		}
 		
-		const userData = userInfo.data[0];
+		// 解析token，获取用户信息
+		// 注意：这里直接使用getUserInfoByToken云函数获取用户信息，不自己解析token
+		const userInfoResult = await uniCloud.callFunction({
+			name: 'getUserInfoByToken',
+			data: { uniIdToken: token }
+		});
 		
-		// 生成新token
-		const token = generateToken(userId);
-		const tokenExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天有效期
+		console.log('获取用户信息结果:', userInfoResult.result);
 		
-		// 更新用户token
-		await db.collection('uni-id-users')
-			.doc(userId)
-			.update({
-				token: [token],
-				token_expired: new Date(tokenExpired)
+		// 检查用户信息获取是否成功
+		if (userInfoResult.result.code !== 0 || !userInfoResult.result.userInfo) {
+			console.log('根据token获取用户信息失败');
+			return {
+				code: -2,
+				message: '无效的token或token已失效',
+			};
+		}
+		
+		const userData = userInfoResult.result.userInfo;
+		
+		// 生成新的token，有效期延长7天
+		const tokenExpireTime = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天后的时间戳
+		const newToken = token.split('.')[0] + '.' + Math.random().toString(36).substring(2) + '.' + Math.random().toString(36).substring(2);
+		
+		// 更新用户token信息到数据库
+		try {
+			await db.collection('users').doc(userData._id).update({
+				token: newToken,
+				token_expired: tokenExpireTime,
+				last_login_date: new Date()
 			});
+			
+			console.log('已更新用户token，用户ID:', userData._id);
+		} catch (dbError) {
+			console.error('更新用户token失败:', dbError);
+			
+			// 尝试使用另一种表名
+			try {
+				await db.collection('uni-id-users').doc(userData._id).update({
+					token: [newToken],
+					token_expired: tokenExpireTime,
+					last_login_date: new Date()
+				});
+				console.log('已更新用户token(uni-id-users表)，用户ID:', userData._id);
+			} catch (dbError2) {
+				console.error('更新用户token失败(uni-id-users表):', dbError2);
+				return {
+					code: -3,
+					message: '更新token失败',
+				};
+			}
+		}
 		
-		// 过滤敏感信息，返回前端需要的数据
-		const filteredData = filterUserData(userData);
+		// 保留用户原有nickname，防止被重置
+		if (userData.nickname && userData.nickname !== '微信用户') {
+			console.log('保留用户原有昵称:', userData.nickname);
+			// 确保返回的用户信息中包含原有nickname
+		}
 		
+		// 返回成功结果
 		return {
 			code: 0,
 			message: 'token刷新成功',
-			token,
-			tokenExpired,
-			userInfo: filteredData
+			token: newToken,
+			tokenExpired: tokenExpireTime,
+			userInfo: userData
 		};
 	} catch (error) {
 		console.error('刷新token失败:', error);
 		return {
-			code: -1,
-			message: '刷新token失败: ' + error.message
+			code: -4,
+			message: '刷新token失败: ' + (error.message || '未知错误')
 		};
 	}
-};
-
-// 生成token函数
-function generateToken(userId) {
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 10);
-	return `token_${userId}_${timestamp}_${random}`;
-}
-
-// 过滤用户数据
-function filterUserData(userData) {
-	if (!userData) return {};
-	
-	// 创建新对象，避免修改原有数据
-	const filteredData = {
-		_id: userData._id || '',
-		uid: userData._id || '',  // 使用_id作为uid确保一致性
-		nickname: userData.nickname || '',
-		username: userData.username || '',
-		mobile: userData.mobile || '',
-		email: userData.email || '',
-		avatar: userData.avatar || '',
-		gender: userData.gender || 0,
-		status: userData.status || 0,
-		wx_nickname: userData.wx_nickname || '',
-		real_name: userData.real_name || ''
-	};
-	
-	// 确保兼容性：添加前端可能使用的其他字段名
-	filteredData.userId = filteredData._id;
-	filteredData.nickName = filteredData.nickname;
-	filteredData.avatarUrl = filteredData.avatar;
-	filteredData.phoneNumber = filteredData.mobile;
-	
-	return filteredData;
-} 
+}; 

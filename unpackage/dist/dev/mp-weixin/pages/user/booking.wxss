@@ -244,25 +244,36 @@
 .booking-list .booking-item .booking-footer {
   display: flex;
   justify-content: flex-end;
-  padding: 12rpx 16rpx;
+  padding: 16rpx 16rpx;
   border-top: 1rpx solid var(--border-color-light);
 }
 .booking-list .booking-item .booking-footer .booking-actions {
   display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: flex-end;
+  gap: 10rpx;
 }
 .booking-list .booking-item .booking-footer .booking-actions .action-btn {
-  font-size: 24rpx;
-  padding: 6rpx 16rpx;
+  width: 180rpx;
+  font-size: 26rpx;
+  padding: 10rpx 20rpx;
   border-radius: 24rpx;
-  margin-left: 16rpx;
+  margin: 5rpx 0;
   border: 1rpx solid var(--border-color);
   color: var(--text-color);
   background-color: #ffffff;
+  text-align: center;
 }
 .booking-list .booking-item .booking-footer .booking-actions .action-btn.primary {
   background-color: var(--theme-color);
   color: #ffffff;
   border-color: var(--theme-color);
+}
+.booking-list .booking-item .booking-footer .booking-actions .action-btn.pay-btn {
+  background-color: #1989fa;
+  color: #ffffff;
+  border-color: #1989fa;
 }
 .booking-list .booking-item .booking-footer .booking-actions .action-btn:active {
   opacity: 0.8;

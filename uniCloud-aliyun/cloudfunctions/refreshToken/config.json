@@ -1,5 +1,7 @@
 {
-  "concurrency": 50,
-  "timeout": 5000,
-  "memorySize": 256
+  "functionName": "refreshToken",
+  "description": "刷新用户token，延长登录状态，避免自动退出登录",
+  "memorySize": 256,
+  "timeout": 20,
+  "triggers": []
 } 

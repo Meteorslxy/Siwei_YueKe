@@ -86,12 +86,25 @@
         
         <view class="booking-footer" v-if="showActions(item)">
           <view class="booking-actions">
+            <!-- 取消预约按钮 -->
             <view class="action-btn primary" 
                   v-if="item && item.status !== 'cancelled' && item.status !== 'finished'"
                   @click.stop="$event => cancelBooking(item, $event)">取消预约</view>
+            
+            <!-- 去缴费按钮 -->
+            <view class="action-btn pay-btn" 
+                  v-if="shouldShowPayButton(item)"
+                  @click.stop="$event => goToPay(item, $event)">去缴费</view>
+            
+            <!-- 联系老师按钮 -->
             <view class="action-btn" 
                   v-if="shouldShowContactButton(item)"
                   @click.stop="$event => contactTeacher(item, $event)">联系老师</view>
+                  
+            <!-- 退费按钮 -->
+            <view class="action-btn refund-btn"
+                  v-if="item.paymentStatus === 'paid' || item.isPaid === true"
+                  @click.stop="$event => handleRefund(item, $event)">申请退费</view>
           </view>
         </view>
       </view>
@@ -114,7 +127,8 @@ export default {
         { label: '全部', value: 'all' },
         { label: '已预约', value: 'booked' },
         { label: '已完成', value: 'finished' },
-        { label: '已取消', value: 'cancelled' }
+        { label: '已取消', value: 'cancelled' },
+        { label: '已退费', value: 'refunded' }
       ],
       currentStatus: 'all',
       
@@ -133,7 +147,8 @@ export default {
         all: 0,
         booked: 0,
         finished: 0,
-        cancelled: 0
+        cancelled: 0,
+        refunded: 0
       },
       
       // 是否已加载本地取消记录
@@ -174,6 +189,13 @@ export default {
         );
       }
       
+      if (this.currentStatus === 'refunded') {
+        // 已退费状态的过滤条件
+        return validBookings.filter(booking => 
+          booking.paymentStatus === 'refunded'
+        );
+      }
+      
       // 其他状态直接按状态筛选
       return validBookings.filter(booking => booking.status === this.currentStatus);
     }
@@ -184,6 +206,9 @@ export default {
     // 先获取自动取消的预约ID列表，用于后续渲染
     const autoCancelIds = this.getAutoCancelledBookingIds();
     console.log('加载时找到自动取消预约IDs:', autoCancelIds);
+    
+    // 监听支付成功事件
+    uni.$on('payment:success', this.handlePaymentSuccess);
     
     // 处理特殊状态
     if (options.status) {
@@ -290,6 +315,9 @@ export default {
   onUnload() {
     // 页面卸载时清除所有定时器
     this.clearAllCountdowns();
+    
+    // 清除事件监听
+    uni.$off('payment:success', this.handlePaymentSuccess);
   },
   onPullDownRefresh() {
     this.resetList()
@@ -488,6 +516,12 @@ export default {
             this.statusCounts.cancelled = cancelledInList;
           }
           
+          // 统计已退费的预约数量
+          const refundedCount = allBookings.filter(item => 
+            item && item.paymentStatus === 'refunded'
+          ).length;
+          this.statusCounts.refunded = refundedCount;
+          
           // 确保每个预约都有_id字段
           allBookings = allBookings.filter(item => item && item._id);
           
@@ -564,6 +598,14 @@ export default {
               
               // 打印筛选后的已取消记录
               console.log('前端筛选后的已取消预约记录:', allBookings);
+            }
+            else if (this.currentStatus === 'refunded') {
+              // 筛选出已退费的预约
+              allBookings = allBookings.filter(item => 
+                item && item.paymentStatus === 'refunded'
+              );
+              
+              console.log('前端筛选后的已退费预约记录:', allBookings);
             }
           }
         } else {
@@ -786,27 +828,41 @@ export default {
       }
     },
     
-    // 获取状态文本
-    getStatusText(item) {
-      // 对于特殊状态的处理
-      if (item.status === 'pending' && item.paymentStatus === 'paid') {
-        return '已缴费';
+    // 获取预约状态文本
+    getStatusText(booking) {
+      if (!booking) return '未知状态';
+      
+      // 检查是否有支付状态属性
+      const paymentStatus = booking.paymentStatus || 'unpaid';
+      
+      // 如果退费，优先显示已退费
+      if (paymentStatus === 'refunded') {
+        return '已退费';
       }
       
-      if (item.status === 'confirmed' && item.paymentStatus === 'unpaid') {
-        return '未缴费';
+      // 如果支付状态为已付款，优先显示已支付状态
+      if (paymentStatus === 'paid') {
+        return booking.status === 'confirmed' ? '已确认（已缴费）' : 
+               booking.status === 'finished' ? '已完成' : 
+               booking.status === 'cancelled' ? '已取消' : '已缴费';
       }
       
-      // 标准状态的显示
-      const statusMap = {
-        'pending': '未缴费',
-        'confirmed_unpaid': '未缴费',
-        'confirmed': '已缴费',
-        'finished': '已完成',
-        'cancelled': '已取消'
-      };
-      
-      return statusMap[item.status] || '未知状态';
+      // 根据预约状态返回文本
+      switch(booking.status) {
+        case 'pending':
+          return '待确认（未缴费）';
+        case 'confirmed_unpaid':
+          return '已确认（未缴费）';
+        case 'confirmed':
+          return paymentStatus === 'paid' ? '已确认（已缴费）' : '已确认（未缴费）';
+        case 'finished':
+          return '已完成';
+        case 'cancelled':
+        case 'cancel': // 兼容旧版数据
+          return '已取消';
+        default:
+          return '未知状态';
+      }
     },
     
     // 格式化课程时间
@@ -1532,6 +1588,8 @@ export default {
           return '暂无已完成的预约';
         case 'cancelled':
           return '暂无已取消的预约记录';
+        case 'refunded':
+          return '暂无已退费的预约记录';
         default:
           return '暂无预约记录';
       }
@@ -1689,9 +1747,135 @@ export default {
              item.status === 'confirmed_unpaid';
     },
     
+    // 判断是否应该显示去缴费按钮
+    shouldShowPayButton(item) {
+      if (!item) return false;
+      
+      // 检查支付状态 - 未支付、非取消、非已完成、非退费状态时显示
+      const isUnpaid = item.paymentStatus !== 'paid' && item.paymentStatus !== 'refunded';
+      const isPayable = item.status === 'pending' || 
+                        item.status === 'confirmed_unpaid' || 
+                        (item.status === 'confirmed' && !item.isPaid);
+      
+      return isUnpaid && isPayable;
+    },
+    
+    // 前往支付页面
+    goToPay(booking, e) {
+      // 阻止事件冒泡，避免触发viewDetail
+      if (e) e.stopPropagation();
+      
+      if (!booking || !booking._id) {
+        console.error('无法支付：预约ID无效');
+        uni.showToast({ 
+          title: '预约ID无效', 
+          icon: 'none' 
+        });
+        return;
+      }
+      
+      // 跳转到支付页面
+      uni.navigateTo({
+        url: `/pages/payment/index?bookingId=${booking._id}&courseId=${booking.courseId || ''}`
+      });
+    },
+    
+    // 处理申请退费
+    handleRefund(booking, e) {
+      // 阻止事件冒泡，避免触发viewDetail
+      if (e) e.stopPropagation();
+      
+      if (!booking || !booking._id) {
+        console.error('无法申请退费：预约ID无效');
+        uni.showToast({ 
+          title: '预约ID无效', 
+          icon: 'none' 
+        });
+        return;
+      }
+      
+      // 确认是否退费
+      uni.showModal({
+        title: '申请退费',
+        content: '确认要申请退费吗？退费后将无法恢复。',
+        success: async (res) => {
+          if (res.confirm) {
+            uni.showLoading({
+              title: '处理中...'
+            });
+            
+            try {
+              // 获取当前用户ID
+              const userId = this.getUserId();
+              
+              if (!userId) {
+                uni.showToast({
+                  title: '用户未登录',
+                  icon: 'none'
+                });
+                uni.hideLoading();
+                return;
+              }
+              
+              // 调用退款云函数
+              const result = await uniCloud.callFunction({
+                name: 'refundBookingPayment',
+                data: {
+                  bookingId: booking._id,
+                  userId,
+                  refundReason: '用户申请退款'
+                }
+              });
+              
+              console.log('退款处理结果:', result);
+              
+              if (result.result && result.result.success) {
+                // 更新本地数据
+                booking.paymentStatus = 'refunded';
+                booking.refundTime = new Date();
+                booking.refundReason = '用户申请退款';
+                
+                // 设置标记，通知列表页刷新
+                this.markBookingChanged();
+                
+                uni.showToast({
+                  title: '退费申请已处理',
+                  icon: 'success'
+                });
+                
+                // 刷新页面数据
+                setTimeout(() => {
+                  this.resetList();
+                  this.loadBookingList();
+                }, 1500);
+              } else {
+                uni.showToast({
+                  title: result.result?.message || '处理失败',
+                  icon: 'none'
+                });
+              }
+            } catch (error) {
+              console.error('退款处理出错:', error);
+              uni.showToast({
+                title: '处理失败，请重试',
+                icon: 'none'
+              });
+            } finally {
+              uni.hideLoading();
+            }
+          }
+        }
+      });
+    },
+    
     // 判断是否应该显示倒计时
     shouldShowCountdown(booking) {
       if (!booking || !booking._id) return false;
+      
+      // 如果已支付或已退费，不显示倒计时
+      if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'refunded') {
+        return false;
+      }
       
       // 检查状态是否为待支付
       const isPendingPayment = booking.status === 'pending' || 
@@ -1734,6 +1918,12 @@ export default {
     // 初始化单个预约的倒计时
     initCountdown(booking) {
       if (!booking || !booking._id || (booking.status !== 'pending' && booking.status !== 'confirmed_unpaid')) {
+        return;
+      }
+      
+      // 如果已支付或已退费，不初始化倒计时
+      if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'refunded') {
+        console.log(`预约 ${booking.bookingId || booking._id} 已支付或已退费，不初始化倒计时`);
         return;
       }
       
@@ -2047,6 +2237,39 @@ export default {
       this.countdownTimers = {};
     },
     
+    // 处理支付成功事件
+    handlePaymentSuccess(data) {
+      console.log('收到支付成功事件:', data);
+      
+      if (!data || !data.bookingId) {
+        console.error('支付成功事件缺少bookingId');
+        return;
+      }
+      
+      // 查找并更新指定预约的支付状态
+      const bookingIndex = this.bookingList.findIndex(item => 
+        item && (item._id === data.bookingId || item.bookingId === data.bookingId)
+      );
+      
+      if (bookingIndex >= 0) {
+        // 更新支付状态
+        this.bookingList[bookingIndex].paymentStatus = 'paid';
+        
+        // 清除该预约的倒计时
+        this.clearCountdown(this.bookingList[bookingIndex]._id);
+        
+        // 强制更新视图
+        this.$forceUpdate();
+        
+        console.log(`成功更新预约${data.bookingId}的支付状态为已支付`);
+      } else {
+        console.log(`未找到预约${data.bookingId}，刷新列表以获取最新数据`);
+        // 刷新列表以获取最新数据
+        this.resetList();
+        this.loadBookingList();
+      }
+    },
+    
     // 判断是否应该显示"超时未支付自动取消"标签
     showAutoCancelTag(item) {
       if (!item || !item._id || item.status !== 'cancelled') return false;
@@ -2335,25 +2558,37 @@ export default {
     .booking-footer {
       display: flex;
       justify-content: flex-end;
-      padding: 12rpx 16rpx;
+      padding: 16rpx 16rpx;
       border-top: 1rpx solid $border-color-light;
       
       .booking-actions {
         display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: flex-end;
+        gap: 10rpx;
         
         .action-btn {
-          font-size: 24rpx;
-          padding: 6rpx 16rpx;
+          width: 180rpx;
+          font-size: 26rpx;
+          padding: 10rpx 20rpx;
           border-radius: 24rpx;
-          margin-left: 16rpx;
+          margin: 5rpx 0;
           border: 1rpx solid $border-color;
           color: $text-color;
           background-color: #ffffff;
+          text-align: center;
           
           &.primary {
             background-color: $theme-color;
             color: #ffffff;
             border-color: $theme-color;
+          }
+          
+          &.pay-btn {
+            background-color: #1989fa;
+            color: #ffffff;
+            border-color: #1989fa;
           }
           
           &:active {
