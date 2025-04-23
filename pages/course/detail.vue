@@ -248,7 +248,7 @@ export default {
       }, 1000);
       
       // 主动检查课程收藏状态，确保收藏按钮正确显示
-      this.checkCourseFavoriteStatus();
+      this.checkFavoriteStatus();
     } else {
       uni.showToast({
         title: '未找到课程ID',
@@ -1818,56 +1818,39 @@ export default {
     
     // 收藏状态变更
     onFavoriteChange(isFavorite) {
-      console.log('收藏状态变更:', isFavorite);
+      console.log('购物车状态变更:', isFavorite);
     },
     
     // 检查课程收藏状态
-    async checkCourseFavoriteStatus() {
-      if (!this.courseId) return;
-      
+    async checkFavoriteStatus() {
       try {
+        if (!this.courseId || !this.$refs.favoriteBtn) return;
+        
+        console.log('检查课程购物车状态, courseId:', this.courseId);
+        
+        // 调用API检查是否已加入购物车
         const userInfo = uni.getStorageSync('userInfo');
         if (!userInfo) return;
         
-        // 修复这里的问题：检查userInfo是否已经是对象
-        let userData;
-        if (typeof userInfo === 'string') {
-          try {
-            userData = JSON.parse(userInfo);
-          } catch (e) {
-            console.error('解析用户信息字符串失败:', e);
-            return;
-          }
-        } else {
-          // 已经是对象，直接使用
-          userData = userInfo;
-        }
-        
-        const userId = userData.userId || userData._id;
-        if (!userId) return;
-        
-        console.log('检查课程收藏状态, courseId:', this.courseId);
-        
-        // 调用API检查是否已收藏
-        const res = await this.$api.user.checkFavorite({
-          userId,
-          itemType: 'course',
-          itemId: this.courseId
+        // 检查课程是否已在购物车中
+        const result = await this.$api.user.checkFavorite({
+          userId: this.getUserId(userInfo),
+          itemId: this.courseId,
+          itemType: 'course'
         });
         
-        if (res && res.code === 0 && res.data) {
-          console.log('课程已被收藏，更新按钮状态');
+        if (result && result.code === 0 && result.data) {
+          console.log('课程已在购物车中，更新按钮状态');
           
           // 获取收藏按钮组件实例并更新状态
-          this.$nextTick(() => {
-            const favoriteBtn = this.$refs.favoriteBtn;
-            if (favoriteBtn) {
-              favoriteBtn.updateFavoriteStatus(true, res.data._id);
-            }
-          });
+          if (this.$refs.favoriteBtn && typeof this.$refs.favoriteBtn.updateFavoriteStatus === 'function') {
+            this.$refs.favoriteBtn.updateFavoriteStatus(true, result.data._id || '');
+          } else {
+            console.warn('收藏按钮组件实例或方法不存在');
+          }
         }
       } catch (error) {
-        console.error('检查课程收藏状态失败:', error);
+        console.error('检查课程购物车状态失败:', error);
       }
     },
     

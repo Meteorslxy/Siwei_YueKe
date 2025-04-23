@@ -130,7 +130,10 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   var m0 =
-    _vm.bookingDetail.status === "pending" && _vm.paymentCountdown > 0
+    _vm.bookingDetail.status === "pending" &&
+    _vm.bookingDetail.paymentStatus !== "paid" &&
+    _vm.bookingDetail.paymentStatus !== "refunded" &&
+    _vm.paymentCountdown > 0
       ? _vm.formatCountdown(_vm.paymentCountdown)
       : null
   var m1 = _vm.formatBookingTime(_vm.bookingDetail.createTime)
@@ -286,6 +289,33 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -305,7 +335,9 @@ var _default = {
         paymentStatus: '',
         createTime: '',
         isCourseDeleted: false,
-        courseDeletedNote: ''
+        courseDeletedNote: '',
+        teacherName: '',
+        teacherPhone: ''
       },
       // 倒计时相关
       paymentCountdown: 0,
@@ -427,7 +459,10 @@ var _default = {
                   // 合并返回的数据
                   _this3.bookingDetail = _objectSpread(_objectSpread(_objectSpread({}, _this3.bookingDetail), res.result.data), {}, {
                     courseTime: res.result.data.courseTime || _this3.formatCourseTimeFromFields(res.result.data),
-                    userPhoneNumber: res.result.data.userPhoneNumber || ''
+                    userPhoneNumber: res.result.data.userPhoneNumber || '',
+                    // 确保teacherName有默认值
+                    teacherName: res.result.data.teacherName || '暂无指定教师',
+                    teacherPhone: res.result.data.teacherPhone || ''
                   });
                   console.log('获取到预约详情:', _this3.bookingDetail);
 
@@ -686,7 +721,7 @@ var _default = {
     // 联系老师
     contactTeacher: function contactTeacher() {
       // 检查是否有联系电话
-      var phoneNumber = this.bookingDetail.userPhoneNumber || this.bookingDetail.teacherPhone || '';
+      var phoneNumber = this.bookingDetail.teacherPhone || this.bookingDetail.userPhoneNumber || '';
       if (!phoneNumber) {
         uni.showToast({
           title: '暂无联系方式',
@@ -696,6 +731,25 @@ var _default = {
       }
       uni.makePhoneCall({
         phoneNumber: phoneNumber,
+        fail: function fail() {
+          uni.showToast({
+            title: '拨打电话失败',
+            icon: 'none'
+          });
+        }
+      });
+    },
+    // 直接拨打教师电话
+    callTeacher: function callTeacher() {
+      if (!this.bookingDetail.teacherPhone) {
+        uni.showToast({
+          title: '暂无教师电话',
+          icon: 'none'
+        });
+        return;
+      }
+      uni.makePhoneCall({
+        phoneNumber: this.bookingDetail.teacherPhone,
         fail: function fail() {
           uni.showToast({
             title: '拨打电话失败',
@@ -725,6 +779,11 @@ var _default = {
       if (paymentStatus === 'paid') {
         return status === 'confirmed' ? '已确认（已缴费）' : status === 'finished' ? '已完成' : status === 'cancelled' ? '已取消' : '已缴费';
       }
+
+      // 如果支付状态为已退费
+      if (paymentStatus === 'refunded') {
+        return '已退费';
+      }
       switch (status) {
         case 'pending':
           return '待确认（未缴费）';
@@ -745,6 +804,11 @@ var _default = {
       // 如果支付状态为已付款，优先显示已支付状态的描述
       if (paymentStatus === 'paid') {
         return status === 'confirmed' ? '教师已确认您的预约，您已完成缴费，请按时参加课程' : status === 'finished' ? '课程已顺利完成，感谢您的参与' : status === 'cancelled' ? '预约已取消' : '您已完成缴费，等待教师确认';
+      }
+
+      // 如果支付状态为已退费
+      if (paymentStatus === 'refunded') {
+        return '您的课程费用已退还，预约已结束';
       }
       switch (status) {
         case 'pending':
@@ -831,6 +895,156 @@ var _default = {
         }, _callee3, null, [[0, 20]]);
       }))();
     },
+    // 申请退款
+    handleRefund: function handleRefund() {
+      var _this6 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+        return _regenerator.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                // 确认是否退款
+                uni.showModal({
+                  title: '申请退费',
+                  content: '确认要申请退费吗？退费后将无法恢复。',
+                  success: function () {
+                    var _success2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(res) {
+                      var userInfoStr, userId, userInfo, bookingId, result, _result$result;
+                      return _regenerator.default.wrap(function _callee4$(_context4) {
+                        while (1) {
+                          switch (_context4.prev = _context4.next) {
+                            case 0:
+                              if (!res.confirm) {
+                                _context4.next = 30;
+                                break;
+                              }
+                              uni.showLoading({
+                                title: '处理中...'
+                              });
+                              _context4.prev = 2;
+                              // 获取当前用户ID
+                              userInfoStr = uni.getStorageSync('userInfo');
+                              userId = '';
+                              if (userInfoStr) {
+                                try {
+                                  userInfo = JSON.parse(userInfoStr);
+                                  userId = userInfo.userId || userInfo._id || '';
+                                } catch (e) {
+                                  console.error('解析用户信息失败:', e);
+                                }
+                              }
+                              if (userId) {
+                                _context4.next = 10;
+                                break;
+                              }
+                              uni.showToast({
+                                title: '用户未登录',
+                                icon: 'none'
+                              });
+                              uni.hideLoading();
+                              return _context4.abrupt("return");
+                            case 10:
+                              // 确保bookingId有值
+                              bookingId = _this6.bookingDetail._id || _this6.bookingId;
+                              if (bookingId) {
+                                _context4.next = 16;
+                                break;
+                              }
+                              console.error('预约ID无效');
+                              uni.showToast({
+                                title: '预约ID无效',
+                                icon: 'none'
+                              });
+                              uni.hideLoading();
+                              return _context4.abrupt("return");
+                            case 16:
+                              _context4.next = 18;
+                              return uniCloud.callFunction({
+                                name: 'refundBookingPayment',
+                                data: {
+                                  bookingId: bookingId,
+                                  userId: userId,
+                                  refundReason: '用户申请退款'
+                                }
+                              });
+                            case 18:
+                              result = _context4.sent;
+                              console.log('退款处理结果:', result);
+                              if (result.result && result.result.success) {
+                                // 更新本地数据
+                                _this6.bookingDetail.paymentStatus = 'refunded';
+                                _this6.bookingDetail.refundTime = new Date();
+                                _this6.bookingDetail.refundReason = '用户申请退款';
+
+                                // 设置标记，通知列表页刷新
+                                uni.setStorageSync('booking_changed', 'true');
+                                uni.showToast({
+                                  title: '退费申请已处理',
+                                  icon: 'success'
+                                });
+
+                                // 刷新页面数据
+                                setTimeout(function () {
+                                  _this6.fetchBookingDetail();
+                                }, 1500);
+                              } else {
+                                uni.showToast({
+                                  title: ((_result$result = result.result) === null || _result$result === void 0 ? void 0 : _result$result.message) || '处理失败',
+                                  icon: 'none'
+                                });
+                              }
+                              _context4.next = 27;
+                              break;
+                            case 23:
+                              _context4.prev = 23;
+                              _context4.t0 = _context4["catch"](2);
+                              console.error('退款处理出错:', _context4.t0);
+                              uni.showToast({
+                                title: '处理失败，请重试',
+                                icon: 'none'
+                              });
+                            case 27:
+                              _context4.prev = 27;
+                              uni.hideLoading();
+                              return _context4.finish(27);
+                            case 30:
+                            case "end":
+                              return _context4.stop();
+                          }
+                        }
+                      }, _callee4, null, [[2, 23, 27, 30]]);
+                    }));
+                    function success(_x2) {
+                      return _success2.apply(this, arguments);
+                    }
+                    return success;
+                  }()
+                });
+              case 1:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
+      }))();
+    },
+    // 去缴费
+    goToPay: function goToPay() {
+      // 确保有预约ID
+      var bookingId = this.bookingDetail._id || this.bookingId;
+      if (!bookingId) {
+        uni.showToast({
+          title: '预约ID无效',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 跳转到支付页面
+      uni.navigateTo({
+        url: "/pages/payment/index?bookingId=".concat(bookingId, "&courseId=").concat(this.bookingDetail.courseId || '')
+      });
+    },
     // 手动计算支付剩余时间（备用方案）
     calculateTimeManually: function calculateTimeManually() {
       try {
@@ -894,22 +1108,22 @@ var _default = {
     },
     // 更新已超时预约的状态
     updateExpiredStatus: function updateExpiredStatus() {
-      var _this6 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+      var _this7 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
         var res;
-        return _regenerator.default.wrap(function _callee4$(_context4) {
+        return _regenerator.default.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
-                _context4.prev = 0;
-                if (_this6.bookingDetail._id) {
-                  _context4.next = 3;
+                _context6.prev = 0;
+                if (_this7.bookingDetail._id) {
+                  _context6.next = 3;
                   break;
                 }
-                return _context4.abrupt("return");
+                return _context6.abrupt("return");
               case 3:
-                console.log('尝试更新已超时预约状态:', _this6.bookingDetail._id);
-                _context4.next = 6;
+                console.log('尝试更新已超时预约状态:', _this7.bookingDetail._id);
+                _context6.next = 6;
                 return uniCloud.callFunction({
                   name: 'autoExpireBooking',
                   data: {
@@ -917,36 +1131,36 @@ var _default = {
                   }
                 });
               case 6:
-                res = _context4.sent;
+                res = _context6.sent;
                 console.log('更新超时预约状态结果:', res.result);
-                _context4.next = 13;
+                _context6.next = 13;
                 break;
               case 10:
-                _context4.prev = 10;
-                _context4.t0 = _context4["catch"](0);
-                console.error('更新超时预约状态失败:', _context4.t0);
+                _context6.prev = 10;
+                _context6.t0 = _context6["catch"](0);
+                console.error('更新超时预约状态失败:', _context6.t0);
               case 13:
               case "end":
-                return _context4.stop();
+                return _context6.stop();
             }
           }
-        }, _callee4, null, [[0, 10]]);
+        }, _callee6, null, [[0, 10]]);
       }))();
     },
     // 开始倒计时
     startCountdown: function startCountdown() {
-      var _this7 = this;
+      var _this8 = this;
       // 先清除可能存在的定时器
       this.clearCountdownTimer();
 
       // 创建新的定时器
       this.countdownTimer = setInterval(function () {
-        if (_this7.paymentCountdown > 0) {
-          _this7.paymentCountdown--;
+        if (_this8.paymentCountdown > 0) {
+          _this8.paymentCountdown--;
         } else {
           // 倒计时结束，重新检查状态
-          _this7.clearCountdownTimer();
-          _this7.fetchBookingDetail();
+          _this8.clearCountdownTimer();
+          _this8.fetchBookingDetail();
         }
       }, 1000);
     },

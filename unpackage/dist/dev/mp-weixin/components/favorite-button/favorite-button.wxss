@@ -71,7 +71,7 @@
   position: relative;
   z-index: 10;
 }
-.favorite-button .heart-icon {
+.favorite-button .cart-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,18 +81,16 @@
   border-radius: 50%;
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
 }
-.favorite-button .heart-icon .heart-symbol {
-  font-size: 46rpx;
-  color: #FF0000;
+.favorite-button .cart-icon .cart-image {
+  width: 40rpx;
+  height: 40rpx;
   transition: all 0.3s;
-  line-height: 1;
 }
-.favorite-button .heart-icon.is-favorite .heart-symbol {
-  color: #FF0000;
-  -webkit-transform: scale(1.2);
-          transform: scale(1.2);
+.favorite-button .cart-icon.is-favorite .cart-image {
+  -webkit-transform: scale(1.1);
+          transform: scale(1.1);
 }
-.favorite-button .heart-icon:active {
+.favorite-button .cart-icon:active {
   -webkit-transform: scale(0.9);
           transform: scale(0.9);
 }

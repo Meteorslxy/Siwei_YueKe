@@ -141,17 +141,16 @@ var render = function () {
   })
   var l1 = _vm.__map(_vm.filteredBookingList, function (item, index) {
     var $orig = _vm.__get_orig(item)
-    var m2 = _vm.shouldShowCountdown(item)
-    var m3 = m2 ? _vm.getStatusText(item) : null
-    var m4 = m2 ? _vm.formatCountdown(_vm.getPaymentCountdown(item)) : null
-    var m5 = !m2 ? _vm.getStatusText(item) : null
-    var m6 = _vm.showAutoCancelTag(item)
+    var m2 = _vm.getStatusText(item)
+    var m3 = _vm.showAutoCancelTag(item)
+    var m4 = _vm.shouldShowCountdown(item)
+    var m5 = m4 ? _vm.formatCountdown(_vm.getPaymentCountdown(item)) : null
+    var m6 = _vm.formatBookingTime(item.createTime || item.create_time)
     var m7 = _vm.formatCourseTime(item)
     var m8 = _vm.formatDateRange(item)
-    var m9 = _vm.formatBookingTime(item.createTime || item.create_time)
-    var m10 = _vm.showActions(item)
-    var m11 = m10 ? _vm.shouldShowPayButton(item) : null
-    var m12 = m10 ? _vm.shouldShowContactButton(item) : null
+    var m9 = _vm.showActions(item)
+    var m10 = m9 ? _vm.shouldShowPayButton(item) : null
+    var m11 = m9 ? _vm.shouldShowContactButton(item) : null
     return {
       $orig: $orig,
       m2: m2,
@@ -164,11 +163,10 @@ var render = function () {
       m9: m9,
       m10: m10,
       m11: m11,
-      m12: m12,
     }
   })
   var g0 = _vm.filteredBookingList.length
-  var m13 = g0 === 0 ? _vm.getEmptyTipText() : null
+  var m12 = g0 === 0 ? _vm.getEmptyTipText() : null
   if (!_vm._isMounted) {
     _vm.e0 = function ($event, item) {
       var _temp = arguments[arguments.length - 1].currentTarget.dataset,
@@ -218,7 +216,7 @@ var render = function () {
         l0: l0,
         l1: l1,
         g0: g0,
-        m13: m13,
+        m12: m12,
       },
     }
   )
@@ -272,13 +270,6 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -1139,39 +1130,25 @@ var _default = {
         }, _callee2, null, [[8, 36, 39, 42], [12, 29], [17, 24]]);
       }))();
     },
-    // 获取预约状态文本
+    // 获取状态文本
     getStatusText: function getStatusText(booking) {
-      if (!booking) return '未知状态';
+      if (!booking || !booking.status) return '未知状态';
 
-      // 检查是否有支付状态属性
-      var paymentStatus = booking.paymentStatus || 'unpaid';
-
-      // 如果退费，优先显示已退费
-      if (paymentStatus === 'refunded') {
-        return '已退费';
-      }
-
-      // 如果支付状态为已付款，优先显示已支付状态
-      if (paymentStatus === 'paid') {
-        return booking.status === 'confirmed' ? '已确认（已缴费）' : booking.status === 'finished' ? '已完成' : booking.status === 'cancelled' ? '已取消' : '已缴费';
-      }
-
-      // 根据预约状态返回文本
+      // 根据预约的状态返回对应的文本
       switch (booking.status) {
         case 'pending':
-          return '待确认（未缴费）';
+          return '未缴费';
         case 'confirmed_unpaid':
-          return '已确认（未缴费）';
+          return '未缴费';
         case 'confirmed':
-          return paymentStatus === 'paid' ? '已确认（已缴费）' : '已确认（未缴费）';
-        case 'finished':
-          return '已完成';
+          return booking.paymentStatus === 'paid' || booking.isPaid ? '已缴费' : '未缴费';
         case 'cancelled':
         case 'cancel':
-          // 兼容旧版数据
           return '已取消';
+        case 'finished':
+          return '已完成';
         default:
-          return '未知状态';
+          return booking.status;
       }
     },
     // 格式化课程时间
