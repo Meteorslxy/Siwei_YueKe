@@ -5,113 +5,70 @@
       <!-- 顶部标题 -->
       <view class="app-title">四维工作室</view>
       
-      <!-- 顶部城市选择和年级选择栏 -->
+      <!-- 顶部选择栏 -->
       <view class="sub-header">
-        <view class="city-selector" @click.stop="toggleGradeFilter">
-          <text class="grade-name">{{selectedGradeText}}</text>
+        <view class="selector-item" @click.stop="toggleFilter('grade')">
+          <text class="selector-text">{{selectedGradeText}}</text>
           <view class="arrow-icon" :class="{ 'arrow-up': isGradeFilterShow }"></view>
         </view>
         
-        <view class="grade-selector" @click.stop="toggleSchoolFilter">
-          <text class="city-name">{{selectedSchoolText}}</text>
+        <view class="selector-item" @click.stop="toggleFilter('school')">
+          <text class="selector-text">{{selectedSchoolText}}</text>
           <view class="arrow-icon" :class="{ 'arrow-up': isSchoolFilterShow }"></view>
+        </view>
+        
+        <view class="selector-item" @click.stop="toggleFilter('subject')">
+          <text class="selector-text">{{selectedSubject === 'all' ? '科目' : getSubjectLabel(selectedSubject)}}</text>
+          <view class="arrow-icon" :class="{ 'arrow-up': isSubjectFilterShow }"></view>
+        </view>
+
+        <view class="selector-item filter-button" @click.stop="showFilterPanel">
+          <view class="filter-icon"></view>
+          <text class="selector-text">筛选</text>
+          <view class="arrow-icon" :class="{ 'arrow-up': isFilterPanelShow }"></view>
         </view>
       </view>
       
-      <!-- 年级选择面板 -->
+      <!-- 下拉选择面板 -->
       <view class="grade-dropdown-panel" v-if="isGradeFilterShow" @click.stop>
-        <view class="dropdown-options">
+        <view class="grade-dropdown-options">
+          <view class="grade-dropdown-header">选择年级</view>
           <view 
             class="dropdown-option" 
             v-for="(grade, index) in gradeGroups" 
             :key="index"
             :class="{ active: selectedGradeGroup === grade.value }"
-            @click="selectGradeGroup(grade.value)">
+            @click="selectOption('grade', grade.value)">
             {{grade.label}}
           </view>
         </view>
       </view>
       
-      <!-- 校区选择面板 -->
-      <view class="grade-dropdown" v-if="isSchoolFilterShow" @click.stop>
-        <view class="dropdown-options">
+      <view class="school-dropdown-panel" v-if="isSchoolFilterShow" @click.stop>
+        <view class="school-dropdown-options">
+          <view class="school-dropdown-header">选择校区</view>
           <view 
             class="dropdown-option" 
             v-for="(school, index) in schoolOptions" 
             :key="index"
             :class="{ active: selectedSchool === school.value }"
-            @click="selectSchool(school.value)">
+            @click="selectOption('school', school.value)">
             {{school.label}}
           </view>
         </view>
       </view>
       
-      <!-- 筛选区域 -->
-      <view class="filter-section">
-        <!-- 科目筛选 -->
-        <view class="filter-dropdown">
-          <view class="filter-item" @click.stop="toggleSubjectFilter">
-            <text class="filter-text">{{selectedSubject === 'all' ? '科目' : getSubjectLabel(selectedSubject)}}</text>
-            <view class="arrow-icon" :class="{ 'arrow-up': isSubjectFilterShow }"></view>
+      <view class="subject-dropdown-panel" v-if="isSubjectFilterShow" @click.stop>
+        <view class="subject-dropdown-options">
+          <view class="subject-dropdown-header">选择科目</view>
+          <view 
+            class="dropdown-option" 
+            v-for="(subject, index) in subjectOptions" 
+            :key="index"
+            :class="{ active: selectedSubject === subject.value }"
+            @click="selectOption('subject', subject.value)">
+            {{subject.label}}
           </view>
-          
-          <!-- 科目下拉选项 -->
-          <view class="dropdown-content" v-if="isSubjectFilterShow" @click.stop>
-            <view 
-              class="dropdown-option" 
-              v-for="(subject, index) in subjectOptions" 
-              :key="index"
-              :class="{ active: selectedSubject === subject.value }"
-              @click="selectSubject(subject.value)">
-              {{subject.label}}
-            </view>
-          </view>
-        </view>
-        
-        <!-- 学期筛选 -->
-        <view class="filter-dropdown">
-          <view class="filter-item" @click.stop="toggleTermFilter">
-            <text class="filter-text">{{selectedTerm === 'all' ? '学期' : getTermLabel(selectedTerm)}}</text>
-            <view class="arrow-icon" :class="{ 'arrow-up': isTermFilterShow }"></view>
-          </view>
-          
-          <!-- 学期下拉选项 -->
-          <view class="dropdown-content" v-if="isTermFilterShow" @click.stop>
-            <view 
-              class="dropdown-option" 
-              v-for="(term, index) in termOptions" 
-              :key="index"
-              :class="{ active: selectedTerm === term.value }"
-              @click="selectTerm(term.value)">
-              {{term.label}}
-            </view>
-          </view>
-        </view>
-        
-        <!-- 班型筛选 -->
-        <view class="filter-dropdown">
-          <view class="filter-item" @click.stop="toggleClassTypeFilter">
-            <text class="filter-text">{{selectedCourseType === 'all' ? '班型' : getClassTypeLabel(selectedCourseType)}}</text>
-            <view class="arrow-icon" :class="{ 'arrow-up': isClassTypeFilterShow }"></view>
-          </view>
-          
-          <!-- 班型下拉选项 -->
-          <view class="dropdown-content" v-if="isClassTypeFilterShow" @click.stop>
-            <view 
-              class="dropdown-option" 
-              v-for="(type, index) in courseTypes" 
-              :key="index"
-              :class="{ active: selectedCourseType === type.value }"
-              @click="selectCourseType(type.value)">
-              {{type.label}}
-            </view>
-          </view>
-        </view>
-        
-        <!-- 筛选按钮 -->
-        <view class="filter-button" @click.stop="showFilterPanel">
-          <view class="filter-icon"></view>
-          <text class="filter-button-text">筛选</text>
         </view>
       </view>
     </view>
@@ -121,6 +78,44 @@
     
     <!-- 筛选面板 -->
     <view class="filter-panel" v-if="isFilterPanelShow" :class="{ 'show': isFilterPanelShow }" @click.stop>
+      <!-- 添加学期筛选 -->
+      <view class="filter-panel-section">
+        <view class="filter-section-title">学期</view>
+        <view class="filter-options">
+          <view class="filter-option-item"
+            :class="{ active: selectedTerm === 'all' }"
+            @click="selectTerm('all')">
+            不限
+          </view>
+          <view class="filter-option-item" 
+            v-for="(term, index) in termOptions.slice(1)" 
+            :key="index"
+            :class="{ active: selectedTerm === term.value }"
+            @click="selectTerm(term.value)">
+            {{term.label}}
+          </view>
+        </view>
+      </view>
+      
+      <!-- 添加班型筛选 -->
+      <view class="filter-panel-section">
+        <view class="filter-section-title">班型</view>
+        <view class="filter-options">
+          <view class="filter-option-item"
+            :class="{ active: selectedCourseType === 'all' }"
+            @click="selectCourseType('all')">
+            不限
+          </view>
+          <view class="filter-option-item" 
+            v-for="(type, index) in courseTypes.slice(1)" 
+            :key="index"
+            :class="{ active: selectedCourseType === type.value }"
+            @click="selectCourseType(type.value)">
+            {{type.label}}
+          </view>
+        </view>
+      </view>
+      
       <view class="filter-panel-header">
         <view class="filter-section-title">时期</view>
         <view class="filter-options">
@@ -212,19 +207,24 @@ export default {
       // 筛选面板显示状态
       isFilterPanelShow: false,
       
-      // 筛选项显示状态
-      isSubjectFilterShow: false,
-      isTermFilterShow: false,
-      isClassTypeFilterShow: false,
+      // 统一管理筛选器显示状态
+      filterStates: {
+        grade: false,
+        school: false,
+        subject: false
+      },
+      
+      // 统一管理筛选器选中值
+      filterValues: {
+        grade: 'all',
+        school: 'all',
+        subject: 'all'
+      },
       
       // 年级筛选相关
-      isGradeFilterShow: false,
-      selectedGradeGroup: 'all',
       gradeGroups: [], // 从grades数据库获取
       
       // 校区筛选相关
-      isSchoolFilterShow: false,
-      selectedSchool: 'all',
       schoolOptions: [], // 从locations数据库获取
       
       // 课程类型筛选相关
@@ -254,7 +254,6 @@ export default {
       ],
       
       // 学科筛选相关
-      selectedSubject: 'all',
       subjectOptions: [], // 从subjects数据库获取
       
       // 课程列表相关
@@ -272,13 +271,57 @@ export default {
     }
   },
   computed: {
+    // 筛选器显示状态的计算属性
+    isGradeFilterShow() {
+      return this.filterStates.grade
+    },
+    isSchoolFilterShow() {
+      return this.filterStates.school
+    },
+    isSubjectFilterShow() {
+      return this.filterStates.subject
+    },
+    
+    // 选中值的计算属性
+    selectedGradeGroup: {
+      get() {
+        return this.filterValues.grade
+      },
+      set(value) {
+        this.filterValues.grade = value
+      }
+    },
+    selectedSchool: {
+      get() {
+        return this.filterValues.school
+      },
+      set(value) {
+        this.filterValues.school = value
+      }
+    },
+    selectedSubject: {
+      get() {
+        return this.filterValues.subject
+      },
+      set(value) {
+        this.filterValues.subject = value
+      }
+    },
+    
+    // 显示文本的计算属性
     selectedGradeText() {
+      if (this.selectedGradeGroup === 'all') {
+        return '年级'
+      }
       const found = this.gradeGroups.find(item => item.value === this.selectedGradeGroup)
-      return found ? found.label : '全部'
+      return found ? found.label : '年级'
     },
     selectedSchoolText() {
+      if (this.selectedSchool === 'all') {
+        return '校区'
+      }
       const found = this.schoolOptions.find(item => item.value === this.selectedSchool)
-      return found ? found.label : '全部校区'
+      return found ? found.label : '校区'
     }
   },
   onLoad() {
@@ -291,7 +334,8 @@ export default {
       this.getTermOptions(),
       this.getClassTypeOptions(),
       this.getTeacherOptions(),
-      this.getCoursePeriodOptions()
+      this.getCoursePeriodOptions(),
+      this.getLocationOptions()
     ];
     
     // 等待所有数据加载完成后再加载课程列表
@@ -330,25 +374,26 @@ export default {
       }
     },
     
-    // 切换科目筛选
-    toggleSubjectFilter() {
-      this.isSubjectFilterShow = !this.isSubjectFilterShow
-      this.isTermFilterShow = false
-      this.isClassTypeFilterShow = false
+    // 统一的筛选器切换方法
+    toggleFilter(type) {
+      // 关闭其他筛选器
+      Object.keys(this.filterStates).forEach(key => {
+        if (key !== type) {
+          this.filterStates[key] = false
+        }
+      })
+      // 切换当前筛选器
+      this.filterStates[type] = !this.filterStates[type]
     },
     
-    // 切换学期筛选
-    toggleTermFilter() {
-      this.isTermFilterShow = !this.isTermFilterShow
-      this.isSubjectFilterShow = false
-      this.isClassTypeFilterShow = false
-    },
-    
-    // 切换班型筛选
-    toggleClassTypeFilter() {
-      this.isClassTypeFilterShow = !this.isClassTypeFilterShow
-      this.isSubjectFilterShow = false
-      this.isTermFilterShow = false
+    // 统一的选项选择方法
+    selectOption(type, value) {
+      if (this.filterValues[type] === value) return
+      
+      this.filterValues[type] = value
+      this.filterStates[type] = false
+      this.resetList()
+      this.loadCourseList()
     },
     
     // 显示筛选面板
@@ -366,7 +411,6 @@ export default {
       if (this.selectedCourseType === type) return;
       
       this.selectedCourseType = type;
-      this.isClassTypeFilterShow = false;
       this.resetList();
       this.loadCourseList();
     },
@@ -399,58 +443,6 @@ export default {
     // 应用筛选条件
     applyFilters() {
       this.hideFilterPanel()
-      this.resetList()
-      this.loadCourseList()
-    },
-    
-    // 切换年级筛选下拉框
-    toggleGradeFilter() {
-      this.isGradeFilterShow = !this.isGradeFilterShow
-      if (this.isGradeFilterShow) {
-        this.isSchoolFilterShow = false
-        this.isSubjectFilterShow = false
-        this.isTermFilterShow = false
-        this.isClassTypeFilterShow = false
-      }
-    },
-    
-    // 切换校区筛选下拉框
-    toggleSchoolFilter() {
-      this.isSchoolFilterShow = !this.isSchoolFilterShow
-      if (this.isSchoolFilterShow) {
-        this.isGradeFilterShow = false
-        this.isSubjectFilterShow = false
-        this.isTermFilterShow = false
-        this.isClassTypeFilterShow = false
-      }
-    },
-    
-    // 选择年级组
-    selectGradeGroup(gradeGroup) {
-      if (this.selectedGradeGroup === gradeGroup) return
-      
-      this.selectedGradeGroup = gradeGroup
-      this.isGradeFilterShow = false
-      this.resetList()
-      this.loadCourseList()
-    },
-    
-    // 选择校区
-    selectSchool(school) {
-      if (this.selectedSchool === school) return
-      
-      this.selectedSchool = school
-      this.isSchoolFilterShow = false
-      this.resetList()
-      this.loadCourseList()
-    },
-    
-    // 选择学科
-    selectSubject(subject) {
-      if (this.selectedSubject === subject) return
-      
-      this.selectedSubject = subject
-      this.isSubjectFilterShow = false
       this.resetList()
       this.loadCourseList()
     },
@@ -768,7 +760,7 @@ export default {
           // 直接使用从数据库获取的年级数据，不进行转换
           const grades = result.data;
           
-          // 添加"全部年级"选项
+          // 保持下拉选项中的"全部年级"文本
           this.gradeGroups = [
             { label: '全部年级', value: 'all' },
             ...grades
@@ -950,7 +942,7 @@ export default {
             };
           });
           
-          // 将全部校区选项和后端获取的校区选项合并
+          // 保持下拉选项中的"全部校区"文本
           this.schoolOptions = [
             { label: '全部校区', value: 'all' },
             ...locations
@@ -982,22 +974,15 @@ export default {
       if (this.selectedTerm === term) return
       
       this.selectedTerm = term
-      this.isTermFilterShow = false
       this.resetList()
       this.loadCourseList()
     },
     
-    // 获取校区列表
-    async getLocationList() {
-      // 已被 getLocationOptions 方法替代
-    },
-    
     // 关闭所有下拉框
     closeAllDropdowns() {
-      this.isGradeFilterShow = false;
-      this.isSubjectFilterShow = false;
-      this.isTermFilterShow = false;
-      this.isClassTypeFilterShow = false;
+      Object.keys(this.filterStates).forEach(key => {
+        this.filterStates[key] = false
+      })
     },
     
     // 获取学科标签
@@ -1140,8 +1125,8 @@ export default {
 /* 顶部背景 */
 .header-background {
   width: 100%;
-  background-color: #EC7A49; /* 与用户页面一致的颜色 */
-  padding-bottom: 50rpx;
+  background-color: #EC7A49;
+  padding-bottom: 120rpx;
 }
 
 /* 应用标题 */
@@ -1150,85 +1135,32 @@ export default {
   font-size: 32rpx;
   font-weight: bold;
   color: #fff;
-  padding: 20rpx 0;
+  padding: 20rpx 0 30rpx;
 }
 
 /* 顶部城市和年级选择栏 */
 .sub-header {
   display: flex;
   justify-content: space-between;
-  padding: 10rpx 30rpx 20rpx;
+  align-items: center;
+  padding: 30rpx 30rpx;
+  background-color: #EC7A49;
 }
 
 /* 城市选择 */
-.city-selector {
+.selector-item {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 10rpx 20rpx;
+  position: relative;
 }
 
-.city-name {
+.selector-text {
   font-size: 28rpx;
   color: #fff;
-  font-weight: bold;
-  margin-right: 10rpx;
-}
-
-/* 年级选择 */
-.grade-selector {
-  display: flex;
-  align-items: center;
-}
-
-.grade-name {
-  font-size: 28rpx;
-  color: #fff;
-  font-weight: bold;
-  margin-right: 10rpx;
-}
-
-/* 年级选择下拉面板 */
-.grade-dropdown-panel {
-  position: absolute;
-  top: 120rpx;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  z-index: 100;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown-options {
-  padding: 20rpx 0;
-  max-height: 500rpx;
-  overflow-y: auto;
-}
-
-.dropdown-option {
-  padding: 20rpx 30rpx;
-  font-size: 28rpx;
-  color: #333;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.dropdown-option.active {
-  color: #EC7A49;
-  background-color: #f7f7f7;
-}
-
-.dropdown-option:last-child {
-  border-bottom: none;
-}
-
-/* 筛选下拉内容 */
-.dropdown-content {
-  position: absolute;
-  top: 70rpx;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  border-radius: 10rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  margin-right: 8rpx;
 }
 
 /* 箭头图标 */
@@ -1241,37 +1173,51 @@ export default {
   transition: transform 0.3s;
 }
 
-.arrow-icon.arrow-up {
+.arrow-up {
   transform: rotate(180deg);
+}
+
+/* 筛选按钮样式 */
+.filter-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 8rpx;
+  /* 修改为白色的筛选图标 */
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB0PSIxNjg5MTQwNDk5NDY4IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjIzNDgiIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48cGF0aCBkPSJNODk2IDEyOEgxMjhjLTE3LjcgMC0zMiAxNC4zLTMyIDMydjM2YzAgNC40IDMuNiA4IDggOGg2MGMwLjkgMCAxLjgtMC4yIDIuNi0wLjVsMjguOC0xMS41YzIuMi0wLjkgNC43LTAuOSA2LjkgMGwyOC44IDExLjVjMC44IDAuMyAxLjcgMC41IDIuNiAwLjVoNjBjNC40IDAgOC0zLjYgOC04di0zNmMwLTE3LjctMTQuMy0zMi0zMi0zMkg4OTZ6TTg5NiA0NDhIMTI4Yy0xNy43IDAtMzIgMTQuMy0zMiAzMnYzNmMwIDQuNCAzLjYgOCA4IDhoNjBjMC45IDAgMS44LTAuMiAyLjYtMC41bDI4LjgtMTEuNWMyLjItMC45IDQuNy0wLjkgNi45IDBsMjguOCAxMS41YzAuOCAwLjMgMS43IDAuNSAyLjYgMC41aDYwYzQuNCAwIDgtMy42IDgtOHYtMzZjMC0xNy43LTE0LjMtMzItMzItMzJIODk2ek04OTYgNzY4SDEyOGMtMTcuNyAwLTMyIDE0LjMtMzIgMzJ2MzZjMCA0LjQgMy42IDggOCA4aDYwYzAuOSAwIDEuOC0wLjIgMi42LTAuNWwyOC44LTExLjVjMi4yLTAuOSA0LjctMC45IDYuOSAwbDI4LjggMTEuNWMwLjggMC4zIDEuNyAwLjUgMi42IDAuNWg2MGM0LjQgMCA4LTMuNiA4LTh2LTM2YzAtMTcuNy0xNC4zLTMyLTMyLTMySDg5NnoiIGZpbGw9IiNmZmZmZmYiIHAtaWQ9IjIzNDkiPjwvcGF0aD48L3N2Zz4=');
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 /* 筛选区域 */
 .filter-section {
   display: flex;
-  justify-content: space-around;
-  padding: 40rpx 20rpx 20rpx;
+  justify-content: space-between;
+  padding: 30rpx 30rpx 30rpx;
+  margin: 0 20rpx;
 }
 
 .filter-dropdown {
   flex: 1;
 }
 
-.filter-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.filter-text {
-  font-size: 28rpx;
-  color: #fff;
-  margin-right: 10rpx;
-}
-
 .filter-button {
   display: flex;
   align-items: center;
   justify-content: center;
+  // background-color: rgba(255, 255, 255, 0.2);
+  padding: 8rpx 20rpx;
+  // border-radius: 30rpx;
+  transition: all 0.2s ease;
+}
+
+.filter-button:active {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .filter-icon {
@@ -1303,26 +1249,26 @@ export default {
 /* 筛选面板 */
 .filter-panel {
   position: absolute;
-  top: 220rpx;
-  left: 0;
-  right: 0;
+  top: 280rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
   background-color: #fff;
   z-index: 100;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
   padding: 30rpx;
-  transform: translateY(-100%);
+  border-radius: 16rpx;
   opacity: 0;
   transition: all 0.3s ease;
 }
 
 .filter-panel.show {
-  transform: translateY(0);
   opacity: 1;
 }
 
 .filter-panel-header,
 .filter-panel-section {
-  margin-bottom: 40rpx;
+  margin-bottom: 30rpx;
 }
 
 .filter-section-title {
@@ -1330,57 +1276,49 @@ export default {
   font-weight: bold;
   color: #333;
   margin-bottom: 20rpx;
+  padding-left: 10rpx;
+  position: relative;
+}
+
+.filter-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4rpx;
+  height: 24rpx;
+  background-color: #EC7A49;
+  border-radius: 2rpx;
 }
 
 .filter-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 20rpx;
+  gap: 16rpx;
+  padding: 0 6rpx;
 }
 
 .filter-option-item {
-  padding: 15rpx 30rpx;
+  padding: 12rpx 24rpx;
   font-size: 26rpx;
   color: #666;
-  background-color: #f5f5f5;
-  border-radius: 8rpx;
+  background-color: #f8f8f8;
+  border-radius: 26rpx;
+  transition: all 0.2s ease;
 }
 
 .filter-option-item.active {
-  background-color: #EC7A49;
-  color: #fff;
-}
-
-.filter-section-action {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 26rpx;
-  color: #666;
-}
-
-.arrow-icon-right {
-  width: 15rpx;
-  height: 26rpx;
-  /* 使用纯CSS替代图片 */
-  position: relative;
-}
-
-.arrow-icon-right::before {
-  content: "";
-  position: absolute;
-  width: 8rpx;
-  height: 8rpx;
-  border-top: 2rpx solid #666;
-  border-right: 2rpx solid #666;
-  transform: rotate(45deg);
-  top: 8rpx;
-  right: 6rpx;
+  background-color: rgba(236, 122, 73, 0.1);
+  color: #EC7A49;
+  font-weight: 500;
 }
 
 .filter-panel-buttons {
   display: flex;
   margin-top: 40rpx;
+  gap: 20rpx;
+  padding: 0 20rpx;
 }
 
 .reset-button {
@@ -1390,6 +1328,8 @@ export default {
   text-align: center;
   font-size: 28rpx;
   color: #666;
+  background-color: #f5f5f5;
+  border-radius: 40rpx;
 }
 
 .apply-button {
@@ -1399,8 +1339,8 @@ export default {
   text-align: center;
   font-size: 28rpx;
   color: #fff;
-  background-color: #1989FA;
-  border-radius: 8rpx;
+  background-color: #EC7A49;
+  border-radius: 40rpx;
 }
 
 /* 课程列表 */
@@ -1408,6 +1348,7 @@ export default {
   padding: 30rpx 30rpx 30rpx;
   position: relative;
   z-index: 10;
+  margin-top: -120rpx;  /* 添加负边距使列表向上移动 */
   
   .course-item {
     display: flex;
@@ -1533,7 +1474,7 @@ export default {
   }
 
   .course-item:first-child {
-    margin-top: 10rpx;
+    margin-top: 0;  /* 移除第一个卡片的顶部边距 */
   }
 }
 
@@ -1547,4 +1488,155 @@ export default {
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 90;
 }
+
+/* 统一的下拉面板样式 */
+.dropdown-panel {
+  position: absolute;
+  top: 240rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background-color: #fff;
+  z-index: 100;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.dropdown-options {
+  padding: 10rpx 0;
+  max-height: 350rpx;
+  overflow-y: auto;
+}
+
+.dropdown-header {
+  padding: 20rpx 30rpx;
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-option {
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.dropdown-option.active {
+  color: #EC7A49;
+  background-color: rgba(236, 122, 73, 0.1);
+  font-weight: bold;
+}
+
+.dropdown-option:hover, .dropdown-option:active {
+  background-color: #f9f9f9;
+}
+
+/* 年级下拉面板 */
+.grade-dropdown-panel {
+  position: absolute;
+  top: 280rpx;
+  left: 3%;
+  width: 25%;
+  background-color: #fff;
+  z-index: 100;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.grade-dropdown-options {
+  padding: 10rpx 0;
+  max-height: 350rpx;
+  overflow-y: auto;
+}
+
+.grade-dropdown-header {
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 校区下拉面板 */
+.school-dropdown-panel {
+  position: absolute;
+  top: 280rpx;
+  left: 22%;
+  width: 35%;
+  background-color: #fff;
+  z-index: 100;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.school-dropdown-options {
+  padding: 10rpx 0;
+  max-height: 350rpx;
+  overflow-y: auto;
+}
+
+.school-dropdown-header {
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 科目下拉面板 */
+.subject-dropdown-panel {
+  position: absolute;
+  top: 280rpx;
+  left: 50%;
+  width: 25%;
+  background-color: #fff;
+  z-index: 100;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.subject-dropdown-options {
+  padding: 10rpx 0;
+  max-height: 350rpx;
+  overflow-y: auto;
+}
+
+.subject-dropdown-header {
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 统一的下拉选项样式 */
+.dropdown-option {
+  padding: 20rpx 30rpx;
+  font-size: 26rpx;
+  color: #333;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.dropdown-option.active {
+  color: #EC7A49;
+  background-color: rgba(236, 122, 73, 0.1);
+  font-weight: bold;
+}
+
+.dropdown-option:hover, .dropdown-option:active {
+  background-color: #f9f9f9;
+}
+
 </style> 
