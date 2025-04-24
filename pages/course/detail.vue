@@ -34,8 +34,17 @@
     <!-- 课程信息卡片 -->
     <view class="info-card">
       <view class="info-price">
-        <text class="price-value">¥{{courseInfo.price}}.00</text>
+        <text class="price-value">¥{{getTotalPrice()}}.00</text>
         <text class="price-label">/{{courseInfo.courseCount}}课时</text>
+      </view>
+      
+      <view class="info-item" v-if="courseInfo.classFee || courseInfo.materialFee">
+        <image class="item-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/价格明细.png" mode="aspectFit"></image>
+        <text class="item-label">价格明细：</text>
+        <view class="item-value price-details">
+          <text>课时费：¥{{courseInfo.classFee || 0}}.00</text>
+          <text>材料费：¥{{courseInfo.materialFee || 0}}.00</text>
+        </view>
       </view>
       
       <view class="info-item">
@@ -266,6 +275,12 @@ export default {
     uni.$off('login:success', this.handleLoginSuccess);
   },
   methods: {
+    getTotalPrice() {
+      const classFee = parseFloat(this.courseInfo.classFee || 0);
+      const materialFee = parseFloat(this.courseInfo.materialFee || 0);
+      const totalPrice = classFee + materialFee;
+      return totalPrice || this.courseInfo.price || 0;
+    },
     // 获取课程详情
     async fetchCourseDetail(retryCount = 0) {
       // 验证课程ID是否有效
@@ -2157,6 +2172,24 @@ export default {
       margin-left: 10rpx;
     }
   }
+}
+
+.info-card .info-item .teacher-title {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+  background-color: #f5f5f5;
+  padding: 6rpx 12rpx;
+  border-radius: 6rpx;
+  margin-left: 10rpx;
+}
+
+.info-card .info-item .price-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-card .info-item .price-details text {
+  margin-bottom: 8rpx;
 }
 
 /* 课程详情和师资介绍 */
