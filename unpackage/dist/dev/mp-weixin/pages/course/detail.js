@@ -126,19 +126,21 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  var m0 = _vm.formatCourseDateAndTime(
+  var m0 = _vm.getTotalPrice()
+  var m1 = _vm.formatCourseDateAndTime(
     _vm.courseInfo.startDate,
     _vm.courseInfo.endDate,
     _vm.courseInfo.startTime,
     _vm.courseInfo.endTime
   )
-  var m1 = _vm.calculateRemainingSeats()
+  var m2 = _vm.calculateRemainingSeats()
   _vm.$mp.data = Object.assign(
     {},
     {
       $root: {
         m0: m0,
         m1: m1,
+        m2: m2,
       },
     }
   )
@@ -331,6 +333,12 @@ var _default = {
     uni.$off('login:success', this.handleLoginSuccess);
   },
   methods: {
+    getTotalPrice: function getTotalPrice() {
+      var classFee = parseFloat(this.courseInfo.classFee || 0);
+      var materialFee = parseFloat(this.courseInfo.materialFee || 0);
+      var totalPrice = classFee + materialFee;
+      return totalPrice || this.courseInfo.price || 0;
+    },
     // 获取课程详情
     fetchCourseDetail: function fetchCourseDetail() {
       var _arguments = arguments,

@@ -38,7 +38,7 @@
         <text class="teacher-title">{{course.teacherTitle || ''}}</text>
       </view>
       <view class="price-info">
-        <text class="price-value">{{course.price || 4000}}.00</text>
+        <text class="price-value">{{getTotalPrice()}}.00</text>
       </view>
     </view>
   </view>
@@ -61,6 +61,12 @@ export default {
     }
   },
   methods: {
+    getTotalPrice() {
+      const classFee = parseFloat(this.course.classFee || 0);
+      const materialFee = parseFloat(this.course.materialFee || 0);
+      const totalPrice = classFee + materialFee;
+      return totalPrice || this.course.price || 4000;
+    },
     onClick() {
       this.$emit('click', this.course)
     },

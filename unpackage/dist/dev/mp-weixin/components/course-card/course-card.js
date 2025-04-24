@@ -89,6 +89,7 @@ var render = function () {
     ? _vm.formatTime(_vm.course.startTime, _vm.course.endTime)
     : null
   var m2 = _vm.getTeacherAvatar(_vm.course)
+  var m3 = _vm.getTotalPrice()
   _vm.$mp.data = Object.assign(
     {},
     {
@@ -96,6 +97,7 @@ var render = function () {
         m0: m0,
         m1: m1,
         m2: m2,
+        m3: m3,
       },
     }
   )
@@ -202,6 +204,12 @@ var _default2 = {
     }
   },
   methods: {
+    getTotalPrice: function getTotalPrice() {
+      var classFee = parseFloat(this.course.classFee || 0);
+      var materialFee = parseFloat(this.course.materialFee || 0);
+      var totalPrice = classFee + materialFee;
+      return totalPrice || this.course.price || 4000;
+    },
     onClick: function onClick() {
       this.$emit('click', this.course);
     },
