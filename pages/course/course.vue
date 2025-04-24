@@ -122,20 +122,20 @@
     <!-- 筛选面板 -->
     <view class="filter-panel" v-if="isFilterPanelShow" :class="{ 'show': isFilterPanelShow }" @click.stop>
       <view class="filter-panel-header">
-        <view class="filter-section-title">类型</view>
+        <view class="filter-section-title">时期</view>
         <view class="filter-options">
           <view class="filter-option-item" 
-            v-for="(type, index) in courseTypes" 
+            v-for="(type, index) in periodTypes" 
             :key="index"
-            :class="{ active: selectedCourseType === type.value }"
-            @click="selectCourseType(type.value)">
+            :class="{ active: selectedPeriod === type.value }"
+            @click="selectPeriod(type.value)">
             {{type.label}}
           </view>
         </view>
       </view>
       
       <view class="filter-panel-section">
-        <view class="filter-section-title">时间</view>
+        <view class="filter-section-title">上课时间</view>
         <view class="filter-options">
           <view class="filter-option-item" 
             v-for="(time, index) in timeOptions" 
@@ -148,23 +148,21 @@
       </view>
       
       <view class="filter-panel-section">
-        <view class="filter-section-title">校区</view>
-        <view class="filter-options">
-          <view class="filter-option-item" 
-            v-for="(location, index) in schoolOptions" 
-            :key="index"
-            :class="{ active: selectedSchool === location.value }"
-            @click="selectSchool(location.value)">
-            {{location.label}}
-          </view>
-        </view>
-      </view>
-      
-      <view class="filter-panel-section">
         <view class="filter-section-title">教师</view>
-        <view class="filter-section-action" @click="toggleAllTeachers">
-          <text>不限</text>
-          <view class="arrow-icon-right"></view>
+        <view class="filter-options">
+          <view class="filter-option-item"
+            :class="{ active: selectedTeacher === 'all' }"
+            @click="selectTeacher('all')">
+            不限
+          </view>
+          <!-- 这里可以添加教师列表 -->
+          <view class="filter-option-item" 
+            v-for="(teacher, index) in teacherOptions" 
+            :key="index"
+            :class="{ active: selectedTeacher === teacher.value }"
+            @click="selectTeacher(teacher.value)">
+            {{teacher.label}}
+          </view>
         </view>
       </view>
       
@@ -233,6 +231,10 @@ export default {
       selectedCourseType: 'all',
       courseTypes: [], // 从course_classtype数据库获取
       
+      // 时期筛选相关
+      selectedPeriod: 'all',
+      periodTypes: [], // 从course_period数据库获取
+      
       // 学期筛选相关
       selectedTerm: 'all',
       termOptions: [], // 从course_term数据库获取
@@ -241,13 +243,14 @@ export default {
       selectedTime: 'all',
       timeOptions: [
         { label: '不限', value: 'all' },
+        { label: '周一', value: 'monday' },
+        { label: '周二', value: 'tuesday' },
         { label: '周三', value: 'wednesday' },
         { label: '周四', value: 'thursday' },
         { label: '周五', value: 'friday' },
         { label: '周六', value: 'saturday' },
         { label: '周日', value: 'sunday' },
-        { label: '二期', value: 'secondPhase' },
-        { label: '三期', value: 'thirdPhase' }
+        { label: '每天', value: 'everyday' }
       ],
       
       // 学科筛选相关
@@ -263,7 +266,9 @@ export default {
       isLoading: false,
       allCourses: [], // 存储所有课程数据
       displayCount: 10, // 初始显示数量
-      isReachBottom: false // 是否触底标记
+      isReachBottom: false, // 是否触底标记
+      selectedTeacher: 'all',
+      teacherOptions: []
     }
   },
   computed: {
@@ -285,7 +290,8 @@ export default {
       this.getSubjectOptions(),
       this.getTermOptions(),
       this.getClassTypeOptions(),
-      this.getLocationOptions()
+      this.getTeacherOptions(),
+      this.getCoursePeriodOptions()
     ];
     
     // 等待所有数据加载完成后再加载课程列表
@@ -382,11 +388,12 @@ export default {
     // 重置筛选条件
     resetFilters() {
       this.selectedCourseType = 'all'
+      this.selectedPeriod = 'all'
       this.selectedTime = 'all'
       this.selectedTerm = 'all'
-      this.selectedSchool = 'all'
       this.selectedSubject = 'all'
       this.selectedGradeGroup = 'all'
+      this.selectedTeacher = 'all'
     },
     
     // 应用筛选条件
@@ -538,8 +545,16 @@ export default {
           params.classType = this.selectedCourseType;
         }
         
+        if (this.selectedPeriod !== 'all') {
+          params.period = this.selectedPeriod;
+        }
+        
         if (this.selectedTime !== 'all') {
           params.classTime = this.selectedTime;
+        }
+        
+        if (this.selectedTeacher !== 'all') {
+          params.teacherName = this.selectedTeacher;
         }
         
         console.log('发送到后端的查询参数:', params);
@@ -1002,6 +1017,116 @@ export default {
       const classType = this.courseTypes.find(item => item.value === value);
       return classType ? classType.label : '班型';
     },
+    
+    // 选择教师
+    selectTeacher(teacher) {
+      this.selectedTeacher = teacher;
+    },
+    
+    // 获取教师列表
+    async getTeacherOptions() {
+      try {
+        console.log('开始获取教师列表...');
+        const result = await this.$api.teacher.getTeacherList({});
+        console.log('获取教师列表API返回结果:', result);
+        
+        if (result && result.data && result.data.length > 0) {
+          // 格式化教师数据
+          const teachers = result.data.map(item => {
+            return {
+              label: item.realname || item.nickname || item.name || '未命名教师',
+              value: item.name || item.realname || item.nickname || '未命名教师',
+              avatar: item.avatar || ''
+            };
+          });
+          
+          this.teacherOptions = teachers;
+          console.log('更新后的教师选项:', this.teacherOptions);
+        } else {
+          console.warn('未获取到教师数据或数据为空');
+          this.teacherOptions = [
+            {
+              label: '胡柱昂',
+              value: '胡柱昂',
+              avatar: ''
+            }
+          ];
+        }
+      } catch (e) {
+        console.error('获取教师列表失败，具体错误:', e);
+        this.teacherOptions = [
+          {
+            label: '胡柱昂',
+            value: '胡柱昂',
+            avatar: ''
+          }
+        ];
+      }
+      
+      return Promise.resolve(); // 确保Promise总是resolved
+    },
+    
+    // 获取时期选项
+    async getCoursePeriodOptions() {
+      try {
+        console.log('开始获取时期选项...');
+        const result = await this.$api.common.getCoursePeriodOptions();
+        console.log('获取时期选项API返回结果:', JSON.stringify(result));
+        
+        if (result && result.data && result.data.length > 0) {
+          // 格式化时期数据，打印每一项进行调试
+          const periods = result.data.map(item => {
+            console.log('处理时期选项项目:', JSON.stringify(item));
+            const option = {
+              label: item.label || item.period || '未知期数',
+              value: item.value || item.period || '未知期数',
+              _id: item._id || ''
+            };
+            console.log('格式化后的时期选项:', option);
+            return option;
+          });
+          
+          // 添加"不限"选项
+          this.periodTypes = [
+            { label: '不限', value: 'all' },
+            ...periods
+          ];
+          
+          console.log('更新后的时期选项:', JSON.stringify(this.periodTypes));
+        } else {
+          console.warn('未获取到时期数据或数据为空，使用默认值');
+          this.setDefaultPeriodTypes();
+        }
+      } catch (e) {
+        console.error('获取时期选项失败，具体错误:', e);
+        this.setDefaultPeriodTypes();
+      }
+      
+      return Promise.resolve(); // 确保Promise总是resolved
+    },
+    
+    // 设置默认时期选项
+    setDefaultPeriodTypes() {
+      console.log('设置默认时期选项');
+      this.periodTypes = [
+        { label: '不限', value: 'all' },
+        { label: '零期', value: '零期' },
+        { label: '一期', value: '一期' },
+        { label: '二期', value: '二期' },
+        { label: '三期', value: '三期' },
+        { label: '四期', value: '四期' },
+        { label: '五期', value: '五期' }
+      ];
+    },
+    
+    // 选择时期
+    selectPeriod(period) {
+      if (this.selectedPeriod === period) return
+      
+      this.selectedPeriod = period
+      this.resetList()
+      this.loadCourseList()
+    }
   }
 }
 </script>

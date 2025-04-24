@@ -17,7 +17,9 @@ exports.main = async (event, context) => {
     schoolId = '',
     term = '',             // 学期
     classType = '',        // 班型
-    classTime = ''         // 上课时间
+    period = '',           // 期数
+    classTime = '',        // 上课时间
+    teacherName = ''       // 教师名称
   } = event;
   
   try {
@@ -103,6 +105,14 @@ exports.main = async (event, context) => {
       console.log('添加班型筛选条件:', classType);
     }
     
+    // 处理期数筛选
+    if (period) {
+      const periodCondition = { period: period };
+      andConditions.push(periodCondition);
+      filterConditions.push(`期数=${period}`);
+      console.log('添加期数筛选条件:', period);
+    }
+    
     // 处理上课时间筛选
     if (classTime) {
       // classTime是数组字段，需要使用数组查询操作符
@@ -112,6 +122,14 @@ exports.main = async (event, context) => {
       andConditions.push(classTimeCondition);
       filterConditions.push(`上课时间=${classTime}`);
       console.log('添加上课时间筛选条件:', classTime);
+    }
+    
+    // 处理教师名称筛选
+    if (teacherName) {
+      const teacherCondition = { teacherName: teacherName };
+      andConditions.push(teacherCondition);
+      filterConditions.push(`教师=${teacherName}`);
+      console.log('添加教师筛选条件:', teacherName);
     }
     
     if (schoolId) {

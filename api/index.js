@@ -30,6 +30,15 @@ const commonApi = {
     }).then(res => debugAPI('getClassTypeOptions返回', res));
   },
   
+  // 获取课程周期选项
+  getCoursePeriodOptions() {
+    console.log('调用getCoursePeriodOptions');
+    return request({
+      name: 'getCoursePeriodOptions',
+      data: {}
+    }).then(res => debugAPI('getCoursePeriodOptions返回', res));
+  },
+  
   // 获取年级选项
   getGradeOptions() {
     console.log('调用getGradeOptions');
