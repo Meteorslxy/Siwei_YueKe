@@ -173,6 +173,16 @@
   height: 80rpx;
   line-height: 80rpx;
 }
+.user-info-section .user-info .user-detail .edit-profile-btn {
+  margin-top: 20rpx;
+  font-size: 32rpx;
+  background-color: var(--theme-color);
+  color: #fff;
+  border-radius: 40rpx;
+  padding: 0 40rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+}
 /* 菜单区域 */
 .menu-section {
   padding: 20rpx;

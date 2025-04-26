@@ -2879,9 +2879,17 @@ export default {
                 console.log('用户已存在且wx_nickname已有效设置，直接登录');
                 uni.hideLoading();
                 this.loginOrRegisterWithPhone(phoneNumber);
+              } else if (checkUserResult.result && 
+                         checkUserResult.result.userExists && 
+                         checkUserResult.result.wx_confirmed === 1) {
+                // 用户已存在且wx_confirmed为1，表示已授权，直接登录
+                console.log('用户已存在且已授权微信信息(wx_confirmed=1)，直接登录');
+                uni.hideLoading();
+                this.loginOrRegisterWithPhone(phoneNumber);
               } else {
-                // 用户不存在或wx_nickname未设置，显示用户信息授权弹窗
-                console.log('需要完善用户信息');
+                // 用户不存在或wx_nickname未设置且未授权，显示用户信息授权弹窗
+                console.log('需要完善用户信息，wx_confirmed =', 
+                  checkUserResult.result?.wx_confirmed || 0);
                 uni.hideLoading();
                 this.showUserProfileModal = true;
               }
@@ -3018,7 +3026,9 @@ export default {
             userInfo: userInfo,
             // 特别指定这些字段，确保它们被保存到数据库中的正确位置
             wx_nickname: userInfo.nickName,
-            avatar: userInfo.avatarUrl
+            avatar: userInfo.avatarUrl,
+            // 传递wx_confirmed字段，确保用户授权状态被保存
+            wx_confirmed: userInfo.wx_confirmed || 0
           }
         });
         
@@ -3227,9 +3237,15 @@ export default {
       
       this.showUserProfileModal = false;
       
-      // 使用手机号和用户信息登录
+      // 使用手机号和用户信息登录，添加wx_confirmed=1标记
       if (this.loginState.phoneNumber) {
-        this.loginOrRegisterWithPhone(this.loginState.phoneNumber, this.userProfileData);
+        // 将用户信息和wx_confirmed=1一起传递给登录函数
+        const userInfoWithConfirmed = {
+          ...this.userProfileData,
+          wx_confirmed: 1  // 添加已授权标记
+        };
+        
+        this.loginOrRegisterWithPhone(this.loginState.phoneNumber, userInfoWithConfirmed);
       }
     }
   }

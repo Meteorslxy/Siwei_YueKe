@@ -1,0 +1,8 @@
+{
+  "name": "updateBookingPaymentStatus",
+  "version": "1.0.0",
+  "description": "更新预约支付状态",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {}
+} 

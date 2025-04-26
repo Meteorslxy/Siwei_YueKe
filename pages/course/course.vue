@@ -140,7 +140,9 @@
           <view class="filter-option-item" 
             v-for="(time, index) in timeOptions" 
             :key="index"
-            :class="{ active: selectedTime === time.value }"
+            :class="{ 
+              'active': time.value === 'all' ? selectedTime === 'all' : selectedTimes.includes(time.value)
+            }"
             @click="selectTime(time.value)">
             {{time.label}}
           </view>
@@ -241,16 +243,17 @@ export default {
       
       // 时间筛选相关
       selectedTime: 'all',
+      selectedTimes: [], // 多选时间数组
       timeOptions: [
         { label: '不限', value: 'all' },
-        { label: '周一', value: 'monday' },
-        { label: '周二', value: 'tuesday' },
-        { label: '周三', value: 'wednesday' },
-        { label: '周四', value: 'thursday' },
-        { label: '周五', value: 'friday' },
-        { label: '周六', value: 'saturday' },
-        { label: '周日', value: 'sunday' },
-        { label: '每天', value: 'everyday' }
+        { label: '周一', value: '周一' },
+        { label: '周二', value: '周二' },
+        { label: '周三', value: '周三' },
+        { label: '周四', value: '周四' },
+        { label: '周五', value: '周五' },
+        { label: '周六', value: '周六' },
+        { label: '周日', value: '周日' },
+        { label: '每天', value: '每天' }
       ],
       
       // 学科筛选相关
@@ -373,9 +376,32 @@ export default {
     
     // 选择时间
     selectTime(time) {
-      if (this.selectedTime === time) return;
+      if (time === 'all') {
+        // 如果选择"不限"，清空已选时间
+        this.selectedTimes = [];
+        this.selectedTime = 'all';
+      } else {
+        // 多选时间逻辑
+        const index = this.selectedTimes.indexOf(time);
+        if (index > -1) {
+          // 如果已经选择了该时间，则取消选择
+          this.selectedTimes.splice(index, 1);
+        } else {
+          // 如果没有选择该时间，则添加选择
+          this.selectedTimes.push(time);
+        }
+        
+        // 如果没有选择任何时间，则回到"全部"
+        if (this.selectedTimes.length === 0) {
+          this.selectedTime = 'all';
+        } else {
+          // 否则使用多选值，显示第一个选中值加数量提示
+          this.selectedTime = this.selectedTimes.length > 1 
+            ? `${this.timeOptions.find(t => t.value === this.selectedTimes[0]).label}等${this.selectedTimes.length}项` 
+            : this.selectedTimes[0];
+        }
+      }
       
-      this.selectedTime = time;
       this.resetList();
       this.loadCourseList();
     },
@@ -390,6 +416,7 @@ export default {
       this.selectedCourseType = 'all'
       this.selectedPeriod = 'all'
       this.selectedTime = 'all'
+      this.selectedTimes = [] // 清空多选时间
       this.selectedTerm = 'all'
       this.selectedSubject = 'all'
       this.selectedGradeGroup = 'all'
@@ -550,7 +577,8 @@ export default {
         }
         
         if (this.selectedTime !== 'all') {
-          params.classTime = this.selectedTime;
+          // 使用多选时间数组
+          params.classTime = this.selectedTimes.length > 0 ? this.selectedTimes.join(',') : this.selectedTime;
         }
         
         if (this.selectedTeacher !== 'all') {
@@ -1344,11 +1372,25 @@ export default {
   color: #666;
   background-color: #f5f5f5;
   border-radius: 8rpx;
+  position: relative;
+  overflow: hidden;
 }
 
 .filter-option-item.active {
   background-color: #EC7A49;
   color: #fff;
+}
+
+.filter-option-item.active::after {
+  content: '';
+  position: absolute;
+  right: 5rpx;
+  bottom: 5rpx;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background-color: #fff;
+  opacity: 0.8;
 }
 
 .filter-section-action {

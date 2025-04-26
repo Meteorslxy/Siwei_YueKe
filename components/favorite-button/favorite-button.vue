@@ -2,6 +2,7 @@
   <view class="favorite-button" @click.stop="toggleFavorite">
     <view :class="['cart-icon', {'is-favorite': isFavorite}]">
       <image class="cart-image" :src="isFavorite ? 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/Shopping-Bag-1.png' : 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/Shopping-Bag-2.png'" mode="aspectFit"></image>
+      <text class="cart-text">{{isFavorite ? '已加入购物车' : '加入购物车'}}</text>
     </view>
   </view>
 </template>
@@ -39,6 +40,11 @@ export default {
     initialFavorite: {
       type: Boolean,
       default: false
+    },
+    // 价格
+    price: {
+      type: [Number, String],
+      default: 0
     }
   },
   data() {
@@ -246,179 +252,115 @@ export default {
       }
     },
     
-    // 切换收藏状态
-    async toggleFavorite() {
-      // 检查登录状态
-      const userInfo = uni.getStorageSync('userInfo');
-      if (!userInfo) {
-        uni.showModal({
-          title: '提示',
-          content: '请先登录',
-          confirmText: '去登录',
-          success: (res) => {
-            if (res.confirm) {
-              uni.navigateTo({
-                url: '/pages/login/login'
-              });
+    // 添加到购物车
+    async addToCart(userId, userData) {
+      try {
+        // 构建数据前先获取最新课程价格
+        let finalPrice = parseFloat(this.price) || 0;
+        
+        // 如果是课程类型，尝试获取最新价格
+        if (this.itemType === 'course') {
+          try {
+            const courseRes = await this.$api.course.getCourseDetail(this.itemId);
+            if (courseRes && courseRes.code === 0 && courseRes.data) {
+              const course = courseRes.data;
+              // 计算课时费和材料费的总和
+              const classFee = parseFloat(course.classFee || 0);
+              const materialFee = parseFloat(course.materialFee || 0);
+              const totalPrice = classFee + materialFee;
+              
+              // 如果计算得到的价格不为0，则使用计算得到的价格
+              finalPrice = totalPrice > 0 ? totalPrice : (parseFloat(course.price) || finalPrice);
+              console.log(`获取到课程 ${this.itemTitle} 的价格: ${finalPrice}`);
             }
+          } catch (error) {
+            console.error('获取课程价格失败，使用传入的价格:', error);
           }
+        }
+        
+        // 确保价格为数字类型
+        finalPrice = parseFloat(finalPrice) || 0;
+        
+        // 构建收藏数据
+        const favoriteData = {
+          userId: userId, // 确保使用正确的用户ID
+          userName: userData.nickname || userData.username || '', // 添加用户名
+          itemType: this.itemType,
+          itemId: this.itemId,
+          itemTitle: this.itemTitle || '',
+          itemCover: this.itemCover || '',
+          itemUrl: this.itemUrl || `/pages/${this.itemType}/detail?id=${this.itemId}`,
+          price: finalPrice, // 使用获取到的最新价格
+          createTime: Date.now()
+        };
+        
+        console.log('添加购物车数据:', favoriteData);
+        
+        // 根据类型调整URL
+        if (this.itemType === 'lecture') {
+          favoriteData.itemUrl = `/pages/course/lecture-detail?id=${this.itemId}`;
+        } else if (this.itemType === 'teacher') {
+          favoriteData.itemUrl = `/pages/teacher/detail?id=${this.itemId}`;
+        }
+        
+        const res = await this.$api.user.addFavorite(favoriteData);
+        
+        return res;
+      } catch (error) {
+        console.error('添加购物车失败:', error);
+        throw error;
+      }
+    },
+    
+    // 点击收藏按钮
+    async toggleFavorite() {
+      console.log('点击收藏按钮, 当前状态:', this.isFavorite ? '已收藏' : '未收藏');
+      console.log('itemId:', this.itemId, 'itemType:', this.itemType);
+      
+      // 检查是否已登录
+      const userInfo = uni.getStorageSync('userInfo');
+      
+      if (!userInfo) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        
+        setTimeout(() => {
+          uni.navigateTo({
+            url: '/pages/login/login'
+          });
+        }, 1500);
+        
+        return;
+      }
+      
+      // 处理登录信息
+      let userData;
+      try {
+        userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
+      } catch (error) {
+        console.error('解析用户数据失败:', error);
+        userData = userInfo; // 如果解析失败，使用原始数据
+      }
+      
+      const userId = userData.userId || userData._id || userData.uid || 
+                     (userData.userInfo && userData.userInfo._id) || 
+                     (userData.userInfo && userData.userInfo.uid);
+      
+      if (!userId) {
+        console.error('收藏操作失败: 无法获取用户ID');
+        uni.showToast({
+          title: '用户信息不完整，请重新登录',
+          icon: 'none'
         });
         return;
       }
       
       try {
-        // 安全地解析用户数据
-        let userData;
-        try {
-          userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
-        } catch (e) {
-          console.error('解析用户数据失败:', e);
-          userData = userInfo; // 如果解析失败，使用原始数据
-        }
-        
-        console.log('用户数据:', userData);
-        
-        // 更新用户信息：尝试通过云函数获取最新信息
-        try {
-          console.log('尝试获取最新用户信息...');
-          
-          // 获取token
-          const token = uni.getStorageSync('uni_id_token');
-          if (token) {
-            // 获取用户详情
-            const userDetailRes = await uniCloud.callFunction({
-              name: 'getUserInfoByToken',
-              data: { uniIdToken: token }
-            });
-            
-            console.log('getUserInfoByToken结果:', userDetailRes);
-            
-            if (userDetailRes.result && userDetailRes.result.code === 0 && userDetailRes.result.userInfo) {
-              const freshUserInfo = userDetailRes.result.userInfo;
-              console.log('获取到最新用户信息:', freshUserInfo);
-              
-              // 更新到本地存储
-              uni.setStorageSync('userInfo', freshUserInfo);
-              
-              // 更新当前使用的userData
-              userData = freshUserInfo;
-            }
-          }
-        } catch (refreshError) {
-          console.error('刷新用户信息失败:', refreshError);
-        }
-        
-        // 获取用户ID，支持多种字段格式
-        let userId = '';
-        
-        // 第1步：尝试直接从uni-id-token中获取uid
-        try {
-          const token = uni.getStorageSync('uni_id_token');
-          if (token) {
-            console.log('尝试从token中解析获取用户ID');
-            
-            try {
-              // 解析token
-              const tokenParts = token.split('.');
-              if (tokenParts.length === 3) {
-                // 解码payload部分
-                const base64Payload = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
-                const payload = JSON.parse(atob(base64Payload));
-                console.log('Token payload:', payload);
-                
-                if (payload.uid) {
-                  userId = payload.uid;
-                  console.log('从token获取到用户ID(uid):', userId);
-                }
-              }
-            } catch (tokenError) {
-              console.error('解析token失败:', tokenError);
-            }
-          }
-        } catch (e) {
-          console.error('获取token失败:', e);
-        }
-        
-        // 第2步：如果没有从token获取，尝试从用户对象获取
-        if (!userId) {
-          if (userData._id) {
-            userId = userData._id;
-            console.log('使用用户对象中的_id:', userId);
-          }
-          else if (userData.uid) {
-            userId = userData.uid;
-            console.log('使用用户对象中的uid:', userId);
-          }
-          else if (userData.userId) {
-            userId = userData.userId;
-            console.log('使用用户对象中的userId:', userId);
-          }
-          else if (userData.userInfo && userData.userInfo._id) {
-            userId = userData.userInfo._id;
-            console.log('使用嵌套userInfo中的_id:', userId);
-          }
-          else if (userData.userInfo && userData.userInfo.uid) {
-            userId = userData.userInfo.uid;
-            console.log('使用嵌套userInfo中的uid:', userId);
-          }
-        }
-        
-        // 第3步：如果还没有ID，尝试从uni-id-pages-userInfo获取
-        if (!userId) {
-          try {
-            const uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
-            if (uniIdUserInfo) {
-              console.log('尝试从uni-id-pages-userInfo获取用户ID');
-              const uniIdData = typeof uniIdUserInfo === 'string' ? JSON.parse(uniIdUserInfo) : uniIdUserInfo;
-              
-              if (uniIdData._id) userId = uniIdData._id;
-              else if (uniIdData.uid) userId = uniIdData.uid;
-            }
-          } catch (e) {
-            console.error('从uni-id-pages-userInfo获取ID失败:', e);
-          }
-        }
-        
-        // 第4步：如果还是没有用户ID，使用临时ID
-        if (!userId) {
-          // 生成一个持久的设备ID
-          let deviceId = uni.getStorageSync('device_id');
-          if (!deviceId) {
-            deviceId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-            uni.setStorageSync('device_id', deviceId);
-          }
-          userId = deviceId;
-          console.log('使用临时设备ID作为用户ID:', userId);
-        }
-        
-        // 检查用户ID
-        if (!userId) {
-          console.error('收藏操作失败: 无法获取用户ID', userData);
-          uni.showToast({
-            title: '用户信息不完整，请重新登录',
-            icon: 'none'
-          });
-          
-          // 跳转到登录页面
-          setTimeout(() => {
-            uni.navigateTo({
-              url: '/pages/login/login'
-            });
-          }, 1500);
-          return;
-        }
-        
-        // 检查必要参数
-        if (!this.itemType || !this.itemId) {
-          console.error('收藏操作失败: 缺少必要参数', this.itemType, this.itemId);
-          uni.showToast({
-            title: '参数错误',
-            icon: 'none'
-          });
-          return;
-        }
-        
-        uni.showLoading({ title: this.isFavorite ? '移出中' : '添加中' });
+        uni.showLoading({
+          title: this.isFavorite ? '移出中' : '添加中'
+        });
         
         if (this.isFavorite) {
           // 从购物车移出
@@ -432,6 +374,7 @@ export default {
             return;
           }
           
+          // 直接传递ID字符串，而不是包含ID的对象
           const res = await this.$api.user.removeFavorite(this.favoriteId);
           
           if (res && res.code === 0) {
@@ -459,27 +402,7 @@ export default {
           }
         } else {
           // 添加到购物车
-          // 构建数据
-          const favoriteData = {
-            userId: userId, // 确保使用正确的用户ID
-            itemType: this.itemType,
-            itemId: this.itemId,
-            itemTitle: this.itemTitle || '',
-            itemCover: this.itemCover || '',
-            itemUrl: this.itemUrl || `/pages/${this.itemType}/detail?id=${this.itemId}`,
-            createTime: Date.now()
-          };
-          
-          console.log('添加购物车数据:', favoriteData);
-          
-          // 根据类型调整URL
-          if (this.itemType === 'lecture') {
-            favoriteData.itemUrl = `/pages/course/lecture-detail?id=${this.itemId}`;
-          } else if (this.itemType === 'teacher') {
-            favoriteData.itemUrl = `/pages/teacher/detail?id=${this.itemId}`;
-          }
-          
-          const res = await this.$api.user.addFavorite(favoriteData);
+          const res = await this.addToCart(userId, userData);
           
           if (res && res.code === 0) {
             this.isFavorite = true;
@@ -504,7 +427,6 @@ export default {
               icon: 'none',
               duration: 3000
             });
-            
             if (res && res.message) {
               console.error('加入购物车失败原因:', res.message);
             }
@@ -585,36 +507,53 @@ export default {
 
 <style lang="scss">
 .favorite-button {
+  position: relative;
+  width: 80rpx;
+  height: 80rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 10;
+  padding: 10rpx;
   
   .cart-icon {
+    position: relative;
+    width: 100%;
+    height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 70rpx;
-    height: 70rpx;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 50%;
-    box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
     
     .cart-image {
-      width: 40rpx;
-      height: 40rpx;
-      transition: all 0.3s;
+      width: 55rpx;
+      height: 55rpx;
+    }
+    
+    .cart-text {
+      position: absolute;
+      bottom: -50rpx;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24rpx;
+      color: white;
+      white-space: nowrap;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 4rpx 10rpx;
+      border-radius: 10rpx;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
     
     &.is-favorite {
-      .cart-image {
-        transform: scale(1.1);
+      .cart-text {
+        background-color: rgba(255, 107, 0, 0.8);
       }
     }
-    
-    &:active {
-      transform: scale(0.9);
+  }
+  
+  &:active {
+    .cart-text {
+      opacity: 1;
     }
   }
 }

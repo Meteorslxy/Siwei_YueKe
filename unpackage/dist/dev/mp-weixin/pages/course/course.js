@@ -141,8 +141,20 @@ var render = function () {
   var m2 = !(_vm.selectedCourseType === "all")
     ? _vm.getClassTypeLabel(_vm.selectedCourseType)
     : null
-  var g0 = _vm.courseList.length
+  var l0 = _vm.isFilterPanelShow
+    ? _vm.__map(_vm.timeOptions, function (time, index) {
+        var $orig = _vm.__get_orig(time)
+        var g0 = !(time.value === "all")
+          ? _vm.selectedTimes.includes(time.value)
+          : null
+        return {
+          $orig: $orig,
+          g0: g0,
+        }
+      })
+    : null
   var g1 = _vm.courseList.length
+  var g2 = _vm.courseList.length
   _vm.$mp.data = Object.assign(
     {},
     {
@@ -150,8 +162,9 @@ var render = function () {
         m0: m0,
         m1: m1,
         m2: m2,
-        g0: g0,
+        l0: l0,
         g1: g1,
+        g2: g2,
       },
     }
   )
@@ -259,33 +272,35 @@ var _default = {
 
       // 时间筛选相关
       selectedTime: 'all',
+      selectedTimes: [],
+      // 多选时间数组
       timeOptions: [{
         label: '不限',
         value: 'all'
       }, {
         label: '周一',
-        value: 'monday'
+        value: '周一'
       }, {
         label: '周二',
-        value: 'tuesday'
+        value: '周二'
       }, {
         label: '周三',
-        value: 'wednesday'
+        value: '周三'
       }, {
         label: '周四',
-        value: 'thursday'
+        value: '周四'
       }, {
         label: '周五',
-        value: 'friday'
+        value: '周五'
       }, {
         label: '周六',
-        value: 'saturday'
+        value: '周六'
       }, {
         label: '周日',
-        value: 'sunday'
+        value: '周日'
       }, {
         label: '每天',
-        value: 'everyday'
+        value: '每天'
       }],
       // 学科筛选相关
       selectedSubject: 'all',
@@ -403,8 +418,32 @@ var _default = {
     },
     // 选择时间
     selectTime: function selectTime(time) {
-      if (this.selectedTime === time) return;
-      this.selectedTime = time;
+      var _this4 = this;
+      if (time === 'all') {
+        // 如果选择"不限"，清空已选时间
+        this.selectedTimes = [];
+        this.selectedTime = 'all';
+      } else {
+        // 多选时间逻辑
+        var index = this.selectedTimes.indexOf(time);
+        if (index > -1) {
+          // 如果已经选择了该时间，则取消选择
+          this.selectedTimes.splice(index, 1);
+        } else {
+          // 如果没有选择该时间，则添加选择
+          this.selectedTimes.push(time);
+        }
+
+        // 如果没有选择任何时间，则回到"全部"
+        if (this.selectedTimes.length === 0) {
+          this.selectedTime = 'all';
+        } else {
+          // 否则使用多选值，显示第一个选中值加数量提示
+          this.selectedTime = this.selectedTimes.length > 1 ? "".concat(this.timeOptions.find(function (t) {
+            return t.value === _this4.selectedTimes[0];
+          }).label, "\u7B49").concat(this.selectedTimes.length, "\u9879") : this.selectedTimes[0];
+        }
+      }
       this.resetList();
       this.loadCourseList();
     },
@@ -417,6 +456,7 @@ var _default = {
       this.selectedCourseType = 'all';
       this.selectedPeriod = 'all';
       this.selectedTime = 'all';
+      this.selectedTimes = []; // 清空多选时间
       this.selectedTerm = 'all';
       this.selectedSubject = 'all';
       this.selectedGradeGroup = 'all';
@@ -515,60 +555,61 @@ var _default = {
     },
     // 获取课程列表
     loadCourseList: function loadCourseList() {
-      var _this4 = this;
+      var _this5 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
         var _result, _result$data, params, retryCount, maxRetries, result, processedData, hasMoreOnServer;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!_this4.isLoading) {
+                if (!_this5.isLoading) {
                   _context.next = 2;
                   break;
                 }
                 return _context.abrupt("return");
               case 2:
-                _this4.isLoading = true;
-                _this4.loadMoreStatus = 'loading';
+                _this5.isLoading = true;
+                _this5.loadMoreStatus = 'loading';
                 console.log('开始加载课程列表，当前筛选条件：', {
-                  年级: _this4.selectedGradeGroup,
-                  校区: _this4.selectedSchool,
-                  学科: _this4.selectedSubject,
-                  学期: _this4.selectedTerm,
-                  班型: _this4.selectedCourseType,
-                  页码: _this4.page,
-                  数量限制: _this4.limit
+                  年级: _this5.selectedGradeGroup,
+                  校区: _this5.selectedSchool,
+                  学科: _this5.selectedSubject,
+                  学期: _this5.selectedTerm,
+                  班型: _this5.selectedCourseType,
+                  页码: _this5.page,
+                  数量限制: _this5.limit
                 });
                 _context.prev = 5;
                 // 构建查询参数
                 params = {
-                  page: _this4.page,
-                  pageSize: _this4.limit
+                  page: _this5.page,
+                  pageSize: _this5.limit
                 }; // 添加筛选条件 - 确保参数名称与后端一致
-                if (_this4.selectedGradeGroup !== 'all') {
-                  params.grade = _this4.selectedGradeGroup; // 直接使用年级name作为查询条件
+                if (_this5.selectedGradeGroup !== 'all') {
+                  params.grade = _this5.selectedGradeGroup; // 直接使用年级name作为查询条件
                 }
 
-                if (_this4.selectedSchool !== 'all') {
-                  params.location = _this4.selectedSchool;
+                if (_this5.selectedSchool !== 'all') {
+                  params.location = _this5.selectedSchool;
                 }
-                if (_this4.selectedSubject !== 'all') {
-                  params.subject = _this4.selectedSubject;
+                if (_this5.selectedSubject !== 'all') {
+                  params.subject = _this5.selectedSubject;
                 }
-                if (_this4.selectedTerm !== 'all') {
-                  params.term = _this4.selectedTerm;
+                if (_this5.selectedTerm !== 'all') {
+                  params.term = _this5.selectedTerm;
                 }
-                if (_this4.selectedCourseType !== 'all') {
-                  params.classType = _this4.selectedCourseType;
+                if (_this5.selectedCourseType !== 'all') {
+                  params.classType = _this5.selectedCourseType;
                 }
-                if (_this4.selectedPeriod !== 'all') {
-                  params.period = _this4.selectedPeriod;
+                if (_this5.selectedPeriod !== 'all') {
+                  params.period = _this5.selectedPeriod;
                 }
-                if (_this4.selectedTime !== 'all') {
-                  params.classTime = _this4.selectedTime;
+                if (_this5.selectedTime !== 'all') {
+                  // 使用多选时间数组
+                  params.classTime = _this5.selectedTimes.length > 0 ? _this5.selectedTimes.join(',') : _this5.selectedTime;
                 }
-                if (_this4.selectedTeacher !== 'all') {
-                  params.teacherName = _this4.selectedTeacher;
+                if (_this5.selectedTeacher !== 'all') {
+                  params.teacherName = _this5.selectedTeacher;
                 }
                 console.log('发送到后端的查询参数:', params);
 
@@ -583,7 +624,7 @@ var _default = {
                 }
                 _context.prev = 20;
                 _context.next = 23;
-                return _this4.$api.course.getCourseList(params);
+                return _this5.$api.course.getCourseList(params);
               case 23:
                 result = _context.sent;
                 if (!(result && result.success)) {
@@ -622,43 +663,43 @@ var _default = {
                   break;
                 }
                 _context.next = 42;
-                return _this4.processTeacherAvatars(result.data);
+                return _this5.processTeacherAvatars(result.data);
               case 42:
                 processedData = _context.sent;
-                if (_this4.page === 1) {
-                  _this4.allCourses = processedData;
+                if (_this5.page === 1) {
+                  _this5.allCourses = processedData;
                   // 初始只显示部分课程
-                  _this4.courseList = processedData.slice(0, _this4.displayCount);
+                  _this5.courseList = processedData.slice(0, _this5.displayCount);
                 } else {
-                  _this4.allCourses = [].concat((0, _toConsumableArray2.default)(_this4.allCourses), (0, _toConsumableArray2.default)(processedData));
+                  _this5.allCourses = [].concat((0, _toConsumableArray2.default)(_this5.allCourses), (0, _toConsumableArray2.default)(processedData));
                   // 更新显示的课程
-                  _this4.courseList = _this4.allCourses.slice(0, _this4.displayCount);
+                  _this5.courseList = _this5.allCourses.slice(0, _this5.displayCount);
                 }
-                _this4.total = result.total || processedData.length;
-                console.log('当前显示课程总数:', _this4.courseList.length);
-                console.log('已加载课程总数:', _this4.allCourses.length);
-                console.log('服务器返回总数:', _this4.total);
+                _this5.total = result.total || processedData.length;
+                console.log('当前显示课程总数:', _this5.courseList.length);
+                console.log('已加载课程总数:', _this5.allCourses.length);
+                console.log('服务器返回总数:', _this5.total);
 
                 // 更新加载状态
-                hasMoreOnServer = _this4.allCourses.length < _this4.total;
-                if (!hasMoreOnServer && _this4.courseList.length >= _this4.allCourses.length) {
-                  _this4.loadMoreStatus = 'noMore';
+                hasMoreOnServer = _this5.allCourses.length < _this5.total;
+                if (!hasMoreOnServer && _this5.courseList.length >= _this5.allCourses.length) {
+                  _this5.loadMoreStatus = 'noMore';
                 } else {
-                  _this4.loadMoreStatus = 'more';
+                  _this5.loadMoreStatus = 'more';
                 }
 
                 // 如果触底了，立即显示更多
-                if (_this4.isReachBottom) {
-                  _this4.loadMoreCourses();
+                if (_this5.isReachBottom) {
+                  _this5.loadMoreCourses();
                 }
                 _context.next = 55;
                 break;
               case 53:
-                if (_this4.page === 1) {
-                  _this4.courseList = [];
-                  _this4.allCourses = [];
+                if (_this5.page === 1) {
+                  _this5.courseList = [];
+                  _this5.allCourses = [];
                 }
-                _this4.loadMoreStatus = 'noMore';
+                _this5.loadMoreStatus = 'noMore';
               case 55:
                 _context.next = 62;
                 break;
@@ -670,10 +711,10 @@ var _default = {
                   title: '获取课程列表失败',
                   icon: 'none'
                 });
-                _this4.loadMoreStatus = 'more';
+                _this5.loadMoreStatus = 'more';
               case 62:
                 _context.prev = 62;
-                _this4.isLoading = false;
+                _this5.isLoading = false;
                 return _context.finish(62);
               case 65:
               case "end":
@@ -685,7 +726,7 @@ var _default = {
     },
     // 处理教师头像数据
     processTeacherAvatars: function processTeacherAvatars(courses) {
-      var _this5 = this;
+      var _this6 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
         var needTeacherInfoCourses, teacherNames, teacherResult, teachers, teacherAvatarMap;
         return _regenerator.default.wrap(function _callee2$(_context2) {
@@ -726,7 +767,7 @@ var _default = {
               case 11:
                 _context2.prev = 11;
                 _context2.next = 14;
-                return _this5.$api.teacher.getTeacherList({
+                return _this6.$api.teacher.getTeacherList({
                   names: teacherNames // 传递教师名称数组进行筛选
                 });
               case 14:
@@ -824,7 +865,7 @@ var _default = {
     },
     // 获取年级选项
     getGradeOptions: function getGradeOptions() {
-      var _this6 = this;
+      var _this7 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
         var result, grades;
         return _regenerator.default.wrap(function _callee3$(_context3) {
@@ -833,21 +874,21 @@ var _default = {
               case 0:
                 _context3.prev = 0;
                 _context3.next = 3;
-                return _this6.$api.common.getGradeOptions();
+                return _this7.$api.common.getGradeOptions();
               case 3:
                 result = _context3.sent;
                 console.log('获取年级选项结果:', result);
                 if (result && result.data && result.data.length > 0) {
                   // 直接使用从数据库获取的年级数据，不进行转换
                   grades = result.data; // 添加"全部年级"选项
-                  _this6.gradeGroups = [{
+                  _this7.gradeGroups = [{
                     label: '全部年级',
                     value: 'all'
                   }].concat((0, _toConsumableArray2.default)(grades));
-                  console.log('更新后的年级选项:', _this6.gradeGroups);
+                  console.log('更新后的年级选项:', _this7.gradeGroups);
                 } else {
                   console.warn('未获取到年级数据，使用默认值');
-                  _this6.gradeGroups = [{
+                  _this7.gradeGroups = [{
                     label: '全部年级',
                     value: 'all'
                   }, {
@@ -867,7 +908,7 @@ var _default = {
                 _context3.prev = 8;
                 _context3.t0 = _context3["catch"](0);
                 console.error('获取年级选项失败:', _context3.t0);
-                _this6.gradeGroups = [{
+                _this7.gradeGroups = [{
                   label: '全部年级',
                   value: 'all'
                 }, {
@@ -890,7 +931,7 @@ var _default = {
     },
     // 获取学科选项
     getSubjectOptions: function getSubjectOptions() {
-      var _this7 = this;
+      var _this8 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
         var result, subjects;
         return _regenerator.default.wrap(function _callee4$(_context4) {
@@ -899,21 +940,21 @@ var _default = {
               case 0:
                 _context4.prev = 0;
                 _context4.next = 3;
-                return _this7.$api.common.getSubjectOptions();
+                return _this8.$api.common.getSubjectOptions();
               case 3:
                 result = _context4.sent;
                 console.log('获取学科选项结果:', result);
                 if (result && result.data && result.data.length > 0) {
                   // 直接使用从数据库获取的科目数据
                   subjects = result.data; // 添加"全部"选项
-                  _this7.subjectOptions = [{
+                  _this8.subjectOptions = [{
                     label: '全部',
                     value: 'all'
                   }].concat((0, _toConsumableArray2.default)(subjects));
-                  console.log('更新后的学科选项:', _this7.subjectOptions);
+                  console.log('更新后的学科选项:', _this8.subjectOptions);
                 } else {
                   console.warn('未获取到学科数据，使用默认值');
-                  _this7.subjectOptions = [{
+                  _this8.subjectOptions = [{
                     label: '全部',
                     value: 'all'
                   }, {
@@ -939,7 +980,7 @@ var _default = {
                 _context4.prev = 8;
                 _context4.t0 = _context4["catch"](0);
                 console.error('获取学科选项失败:', _context4.t0);
-                _this7.subjectOptions = [{
+                _this8.subjectOptions = [{
                   label: '全部',
                   value: 'all'
                 }, {
@@ -968,7 +1009,7 @@ var _default = {
     },
     // 获取学期选项
     getTermOptions: function getTermOptions() {
-      var _this8 = this;
+      var _this9 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
         var result, terms;
         return _regenerator.default.wrap(function _callee5$(_context5) {
@@ -977,7 +1018,7 @@ var _default = {
               case 0:
                 _context5.prev = 0;
                 _context5.next = 3;
-                return _this8.$api.common.getTermOptions();
+                return _this9.$api.common.getTermOptions();
               case 3:
                 result = _context5.sent;
                 console.log('获取学期选项结果:', result);
@@ -989,7 +1030,7 @@ var _default = {
                       value: item._id || item.value
                     };
                   }); // 添加"全部"选项
-                  _this8.termOptions = [{
+                  _this9.termOptions = [{
                     label: '全部',
                     value: 'all'
                   }, {
@@ -1008,10 +1049,10 @@ var _default = {
                     label: '短期班',
                     value: '短期班'
                   }];
-                  console.log('更新后的学期选项:', _this8.termOptions);
+                  console.log('更新后的学期选项:', _this9.termOptions);
                 } else {
                   console.warn('未获取到学期数据，使用默认值');
-                  _this8.termOptions = [{
+                  _this9.termOptions = [{
                     label: '全部',
                     value: 'all'
                   }, {
@@ -1037,7 +1078,7 @@ var _default = {
                 _context5.prev = 8;
                 _context5.t0 = _context5["catch"](0);
                 console.error('获取学期选项失败:', _context5.t0);
-                _this8.termOptions = [{
+                _this9.termOptions = [{
                   label: '全部',
                   value: 'all'
                 }, {
@@ -1066,7 +1107,7 @@ var _default = {
     },
     // 获取班型选项
     getClassTypeOptions: function getClassTypeOptions() {
-      var _this9 = this;
+      var _this10 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
         var result, classTypes;
         return _regenerator.default.wrap(function _callee6$(_context6) {
@@ -1076,7 +1117,7 @@ var _default = {
                 _context6.prev = 0;
                 console.log('开始获取班型选项...');
                 _context6.next = 4;
-                return _this9.$api.common.getClassTypeOptions();
+                return _this10.$api.common.getClassTypeOptions();
               case 4:
                 result = _context6.sent;
                 console.log('获取班型选项API返回结果:', result);
@@ -1090,14 +1131,14 @@ var _default = {
                     console.log('格式化班型选项:', option);
                     return option;
                   }); // 添加"不限"选项
-                  _this9.courseTypes = [{
+                  _this10.courseTypes = [{
                     label: '不限',
                     value: 'all'
                   }].concat((0, _toConsumableArray2.default)(classTypes));
-                  console.log('更新后的班型选项:', _this9.courseTypes);
+                  console.log('更新后的班型选项:', _this10.courseTypes);
                 } else {
                   console.warn('未获取到班型数据或数据为空，使用默认值');
-                  _this9.setDefaultClassTypes();
+                  _this10.setDefaultClassTypes();
                 }
                 _context6.next = 13;
                 break;
@@ -1105,7 +1146,7 @@ var _default = {
                 _context6.prev = 9;
                 _context6.t0 = _context6["catch"](0);
                 console.error('获取班型选项失败，具体错误:', _context6.t0);
-                _this9.setDefaultClassTypes();
+                _this10.setDefaultClassTypes();
               case 13:
                 return _context6.abrupt("return", Promise.resolve());
               case 14:
@@ -1135,7 +1176,7 @@ var _default = {
     },
     // 获取校区选项
     getLocationOptions: function getLocationOptions() {
-      var _this10 = this;
+      var _this11 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
         var result, locations;
         return _regenerator.default.wrap(function _callee7$(_context7) {
@@ -1144,7 +1185,7 @@ var _default = {
               case 0:
                 _context7.prev = 0;
                 _context7.next = 3;
-                return _this10.$api.location.getLocationList();
+                return _this11.$api.location.getLocationList();
               case 3:
                 result = _context7.sent;
                 console.log('获取校区列表结果:', result);
@@ -1159,14 +1200,14 @@ var _default = {
                     };
                   }); // 将全部校区选项和后端获取的校区选项合并
 
-                  _this10.schoolOptions = [{
+                  _this11.schoolOptions = [{
                     label: '全部校区',
                     value: 'all'
                   }].concat((0, _toConsumableArray2.default)(locations));
-                  console.log('更新后的校区选项:', _this10.schoolOptions);
+                  console.log('更新后的校区选项:', _this11.schoolOptions);
                 } else {
                   console.warn('未获取到校区数据，使用默认值');
-                  _this10.schoolOptions = [{
+                  _this11.schoolOptions = [{
                     label: '全部校区',
                     value: 'all'
                   }, {
@@ -1186,7 +1227,7 @@ var _default = {
                 _context7.prev = 8;
                 _context7.t0 = _context7["catch"](0);
                 console.error('获取校区列表失败:', _context7.t0);
-                _this10.schoolOptions = [{
+                _this11.schoolOptions = [{
                   label: '全部校区',
                   value: 'all'
                 }, {
@@ -1264,7 +1305,7 @@ var _default = {
     },
     // 获取教师列表
     getTeacherOptions: function getTeacherOptions() {
-      var _this11 = this;
+      var _this12 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
         var result, teachers;
         return _regenerator.default.wrap(function _callee9$(_context9) {
@@ -1274,7 +1315,7 @@ var _default = {
                 _context9.prev = 0;
                 console.log('开始获取教师列表...');
                 _context9.next = 4;
-                return _this11.$api.teacher.getTeacherList({});
+                return _this12.$api.teacher.getTeacherList({});
               case 4:
                 result = _context9.sent;
                 console.log('获取教师列表API返回结果:', result);
@@ -1287,11 +1328,11 @@ var _default = {
                       avatar: item.avatar || ''
                     };
                   });
-                  _this11.teacherOptions = teachers;
-                  console.log('更新后的教师选项:', _this11.teacherOptions);
+                  _this12.teacherOptions = teachers;
+                  console.log('更新后的教师选项:', _this12.teacherOptions);
                 } else {
                   console.warn('未获取到教师数据或数据为空');
-                  _this11.teacherOptions = [{
+                  _this12.teacherOptions = [{
                     label: '胡柱昂',
                     value: '胡柱昂',
                     avatar: ''
@@ -1303,7 +1344,7 @@ var _default = {
                 _context9.prev = 9;
                 _context9.t0 = _context9["catch"](0);
                 console.error('获取教师列表失败，具体错误:', _context9.t0);
-                _this11.teacherOptions = [{
+                _this12.teacherOptions = [{
                   label: '胡柱昂',
                   value: '胡柱昂',
                   avatar: ''
@@ -1320,7 +1361,7 @@ var _default = {
     },
     // 获取时期选项
     getCoursePeriodOptions: function getCoursePeriodOptions() {
-      var _this12 = this;
+      var _this13 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10() {
         var result, periods;
         return _regenerator.default.wrap(function _callee10$(_context10) {
@@ -1330,7 +1371,7 @@ var _default = {
                 _context10.prev = 0;
                 console.log('开始获取时期选项...');
                 _context10.next = 4;
-                return _this12.$api.common.getCoursePeriodOptions();
+                return _this13.$api.common.getCoursePeriodOptions();
               case 4:
                 result = _context10.sent;
                 console.log('获取时期选项API返回结果:', JSON.stringify(result));
@@ -1346,14 +1387,14 @@ var _default = {
                     console.log('格式化后的时期选项:', option);
                     return option;
                   }); // 添加"不限"选项
-                  _this12.periodTypes = [{
+                  _this13.periodTypes = [{
                     label: '不限',
                     value: 'all'
                   }].concat((0, _toConsumableArray2.default)(periods));
-                  console.log('更新后的时期选项:', JSON.stringify(_this12.periodTypes));
+                  console.log('更新后的时期选项:', JSON.stringify(_this13.periodTypes));
                 } else {
                   console.warn('未获取到时期数据或数据为空，使用默认值');
-                  _this12.setDefaultPeriodTypes();
+                  _this13.setDefaultPeriodTypes();
                 }
                 _context10.next = 13;
                 break;
@@ -1361,7 +1402,7 @@ var _default = {
                 _context10.prev = 9;
                 _context10.t0 = _context10["catch"](0);
                 console.error('获取时期选项失败，具体错误:', _context10.t0);
-                _this12.setDefaultPeriodTypes();
+                _this13.setDefaultPeriodTypes();
               case 13:
                 return _context10.abrupt("return", Promise.resolve());
               case 14:

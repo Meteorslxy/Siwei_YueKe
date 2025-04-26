@@ -118,6 +118,10 @@
     "finishTime": {
       "bsonType": "timestamp",
       "description": "完成时间"
+    },
+    "paidTime": {
+      "bsonType": "timestamp",
+      "description": "支付时间，支付状态变为已支付时记录的时间"
     }
   }
 } 

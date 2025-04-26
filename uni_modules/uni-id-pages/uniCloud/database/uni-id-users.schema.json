@@ -195,6 +195,25 @@
 				"write": "'CREATE_UNI_ID_USERS' in auth.permission || 'UPDATE_UNI_ID_USERS' in auth.permission"
 			}
 		},
+		"wx_confirmed": {
+			"bsonType": "int",
+			"defaultValue": 0,
+			"description": "微信信息授权状态：0 未授权 1 已授权",
+			"enum": [{
+					"text": "未授权",
+					"value": 0
+				},
+				{
+					"text": "已授权",
+					"value": 1
+				}
+			],
+			"title": "微信信息授权状态",
+			"permission": {
+				"read": "doc._id == auth.uid || 'READ_UNI_ID_USERS' in auth.permission",
+				"write": "'CREATE_UNI_ID_USERS' in auth.permission || 'UPDATE_UNI_ID_USERS' in auth.permission"
+			}
+		},
 		"my_invite_code": {
 			"bsonType": "string",
 			"description": "用户自身邀请码",

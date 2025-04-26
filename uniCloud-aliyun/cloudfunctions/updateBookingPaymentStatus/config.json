@@ -1,0 +1,7 @@
+{
+  "functionName": "updateBookingPaymentStatus",
+  "description": "更新预约支付状态，当支付状态从未支付变为已支付时，记录支付时间到paidTime字段",
+  "memorySize": 256,
+  "timeout": 20,
+  "triggers": []
+} 

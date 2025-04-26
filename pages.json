@@ -26,6 +26,15 @@
             }
         },
         {
+            "path": "pages/cart/index",
+            "style": {
+                "navigationBarTitleText": "购物车",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
             "path": "pages/user/favorite/index",
             "style": {
                 "navigationBarTitleText": "我的收藏",

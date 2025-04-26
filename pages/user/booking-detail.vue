@@ -120,11 +120,31 @@
         @close="closePopup">
       </uni-popup-dialog>
     </uni-popup>
+    
+    <!-- 二维码支付弹窗 -->
+    <uni-popup ref="qrcodePopup" type="center">
+      <view class="qrcode-popup">
+        <view class="qrcode-title">扫码缴费</view>
+        <image class="qrcode-image" :src="qrcodeUrl" mode="aspectFit"></image>
+        <view class="qrcode-contact">
+          <text>如有问题，请联系老师</text>
+          <text>电话：13800138000</text>
+        </view>
+        <button class="close-btn" @click="closeQrcodePopup">关闭</button>
+      </view>
+    </uni-popup>
   </view>
 </template>
 
 <script>
+import uniPopup from '@/uni_modules/uni-popup/components/uni-popup/uni-popup.vue';
+import uniPopupDialog from '@/uni_modules/uni-popup/components/uni-popup-dialog/uni-popup-dialog.vue';
+
 export default {
+  components: {
+    uniPopup,
+    uniPopupDialog
+  },
   data() {
     return {
       bookingId: '',
@@ -145,11 +165,15 @@ export default {
         isCourseDeleted: false,
         courseDeletedNote: '',
         teacherName: '',
-        teacherPhone: ''
+        teacherPhone: '',
+        grade: '' // 添加grade字段
       },
       // 倒计时相关
       paymentCountdown: 0, // 支付倒计时（秒）
-      countdownTimer: null // 倒计时定时器
+      countdownTimer: null, // 倒计时定时器
+      
+      // 二维码相关
+      qrcodeUrl: '' // 支付二维码URL
     }
   },
   onLoad(options) {
@@ -264,7 +288,8 @@ export default {
             userPhoneNumber: res.result.data.userPhoneNumber || '',
             // 确保teacherName有默认值
             teacherName: res.result.data.teacherName || '暂无指定教师',
-            teacherPhone: res.result.data.teacherPhone || ''
+            teacherPhone: res.result.data.teacherPhone || '',
+            grade: res.result.data.grade || '' // 添加grade字段
           }
           console.log('获取到预约详情:', this.bookingDetail)
           
@@ -767,10 +792,39 @@ export default {
         return;
       }
       
-      // 跳转到支付页面
-      uni.navigateTo({
-        url: `/pages/payment/index?bookingId=${bookingId}&courseId=${this.bookingDetail.courseId || ''}`
-      });
+      // 根据课程的grade字段确定二维码URL
+      let grade = this.bookingDetail.grade || '';
+      // 从课程标题中尝试提取年级信息（如果grade字段为空）
+      if (!grade && this.bookingDetail.courseTitle) {
+        const title = this.bookingDetail.courseTitle;
+        if (title.includes('初一') || title.includes('七年级')) {
+          grade = '初一';
+        } else if (title.includes('初二') || title.includes('八年级')) {
+          grade = '初二';
+        } else if (title.includes('初三') || title.includes('九年级')) {
+          grade = '初三';
+        }
+      }
+      
+      // 设置二维码URL
+      if (grade === '初一') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+      } else if (grade === '初二') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初二.png';
+      } else if (grade === '初三') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初三.png';
+      } else {
+        // 如果未找到匹配的年级，使用初一年级的二维码作为默认
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+      }
+      
+      // 显示二维码弹窗
+      this.$refs.qrcodePopup.open();
+    },
+    
+    // 关闭二维码弹窗
+    closeQrcodePopup() {
+      this.$refs.qrcodePopup.close();
     },
     
     // 手动计算支付剩余时间（备用方案）
@@ -1182,5 +1236,43 @@ export default {
   .teacher-name {
     font-weight: 500;
   }
+}
+
+.qrcode-popup {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30rpx;
+  width: 80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qrcode-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+
+.qrcode-image {
+  width: 500rpx;
+  height: 500rpx;
+  margin-bottom: 20rpx;
+}
+
+.qrcode-contact {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.close-btn {
+  width: 80%;
+  background-color: #2b85e4;
+  color: #fff;
+  border-radius: 50rpx;
 }
 </style> 

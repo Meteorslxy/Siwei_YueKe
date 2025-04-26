@@ -113,15 +113,49 @@ exports.main = async (event, context) => {
       console.log('添加期数筛选条件:', period);
     }
     
-    // 处理上课时间筛选
+    // 处理上课时间筛选 - 完全重写为包含关系查询
     if (classTime) {
-      // classTime是数组字段，需要使用数组查询操作符
-      const classTimeCondition = { 
-        classTime: db.command.all([classTime]) 
-      };
-      andConditions.push(classTimeCondition);
-      filterConditions.push(`上课时间=${classTime}`);
-      console.log('添加上课时间筛选条件:', classTime);
+      // 将classTime转换为数组
+      let classTimeArray = [];
+      
+      if (Array.isArray(classTime)) {
+        classTimeArray = classTime;
+      } else if (typeof classTime === 'string') {
+        if (classTime.includes(',')) {
+          classTimeArray = classTime.split(',').map(item => item.trim());
+        } else {
+          classTimeArray = [classTime];
+        }
+      }
+      
+      console.log('处理后的上课时间数组:', classTimeArray);
+      
+      if (classTimeArray.length > 0 && classTimeArray[0] !== 'all') {
+        // 使用 $elemMatch 和 $in 组合查询，支持数组字段中的任意一个值匹配
+        // 或者使用 $in 直接查询字符串字段
+        const classTimeCondition = {
+          $or: [
+            // 如果classTime是数组字段，查找任意一个值匹配的情况
+            {
+              classTime: {
+                $elemMatch: {
+                  $in: classTimeArray
+                }
+              }
+            },
+            // 如果classTime是字符串字段，直接匹配任意一个值
+            {
+              classTime: {
+                $in: classTimeArray
+              }
+            }
+          ]
+        };
+        
+        andConditions.push(classTimeCondition);
+        filterConditions.push(`上课时间=${classTime}`);
+        console.log('添加上课时间筛选条件:', classTime);
+      }
     }
     
     // 处理教师名称筛选

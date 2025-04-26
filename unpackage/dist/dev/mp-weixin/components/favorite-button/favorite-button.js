@@ -131,6 +131,7 @@ var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/r
 //
 //
 //
+//
 var _default = {
   name: 'favorite-button',
   props: {
@@ -163,6 +164,11 @@ var _default = {
     initialFavorite: {
       type: Boolean,
       default: false
+    },
+    // 价格
+    price: {
+      type: [Number, String],
+      default: 0
     }
   },
   data: function data() {
@@ -427,246 +433,58 @@ var _default = {
         }, _callee3, null, [[0, 27]]);
       }))();
     },
-    // 切换收藏状态
-    toggleFavorite: function toggleFavorite() {
+    // 添加到购物车
+    addToCart: function addToCart(userId, userData) {
       var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
-        var userInfo, userData, token, userDetailRes, freshUserInfo, userId, _token, tokenParts, base64Payload, payload, uniIdUserInfo, uniIdData, deviceId, res, favoriteData, _res;
+        var finalPrice, courseRes, course, classFee, materialFee, totalPrice, favoriteData, res;
         return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                // 检查登录状态
-                userInfo = uni.getStorageSync('userInfo');
-                if (userInfo) {
-                  _context4.next = 4;
+                _context4.prev = 0;
+                // 构建数据前先获取最新课程价格
+                finalPrice = parseFloat(_this4.price) || 0; // 如果是课程类型，尝试获取最新价格
+                if (!(_this4.itemType === 'course')) {
+                  _context4.next = 13;
                   break;
                 }
-                uni.showModal({
-                  title: '提示',
-                  content: '请先登录',
-                  confirmText: '去登录',
-                  success: function success(res) {
-                    if (res.confirm) {
-                      uni.navigateTo({
-                        url: '/pages/login/login'
-                      });
-                    }
-                  }
-                });
-                return _context4.abrupt("return");
-              case 4:
-                _context4.prev = 4;
-                // 安全地解析用户数据
-
-                try {
-                  userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
-                } catch (e) {
-                  console.error('解析用户数据失败:', e);
-                  userData = userInfo; // 如果解析失败，使用原始数据
-                }
-
-                console.log('用户数据:', userData);
-
-                // 更新用户信息：尝试通过云函数获取最新信息
-                _context4.prev = 7;
-                console.log('尝试获取最新用户信息...');
-
-                // 获取token
-                token = uni.getStorageSync('uni_id_token');
-                if (!token) {
-                  _context4.next = 16;
-                  break;
+                _context4.prev = 3;
+                _context4.next = 6;
+                return _this4.$api.course.getCourseDetail(_this4.itemId);
+              case 6:
+                courseRes = _context4.sent;
+                if (courseRes && courseRes.code === 0 && courseRes.data) {
+                  course = courseRes.data; // 计算课时费和材料费的总和
+                  classFee = parseFloat(course.classFee || 0);
+                  materialFee = parseFloat(course.materialFee || 0);
+                  totalPrice = classFee + materialFee; // 如果计算得到的价格不为0，则使用计算得到的价格
+                  finalPrice = totalPrice > 0 ? totalPrice : parseFloat(course.price) || finalPrice;
+                  console.log("\u83B7\u53D6\u5230\u8BFE\u7A0B ".concat(_this4.itemTitle, " \u7684\u4EF7\u683C: ").concat(finalPrice));
                 }
                 _context4.next = 13;
-                return uniCloud.callFunction({
-                  name: 'getUserInfoByToken',
-                  data: {
-                    uniIdToken: token
-                  }
-                });
+                break;
+              case 10:
+                _context4.prev = 10;
+                _context4.t0 = _context4["catch"](3);
+                console.error('获取课程价格失败，使用传入的价格:', _context4.t0);
               case 13:
-                userDetailRes = _context4.sent;
-                console.log('getUserInfoByToken结果:', userDetailRes);
-                if (userDetailRes.result && userDetailRes.result.code === 0 && userDetailRes.result.userInfo) {
-                  freshUserInfo = userDetailRes.result.userInfo;
-                  console.log('获取到最新用户信息:', freshUserInfo);
+                // 确保价格为数字类型
+                finalPrice = parseFloat(finalPrice) || 0;
 
-                  // 更新到本地存储
-                  uni.setStorageSync('userInfo', freshUserInfo);
-
-                  // 更新当前使用的userData
-                  userData = freshUserInfo;
-                }
-              case 16:
-                _context4.next = 21;
-                break;
-              case 18:
-                _context4.prev = 18;
-                _context4.t0 = _context4["catch"](7);
-                console.error('刷新用户信息失败:', _context4.t0);
-              case 21:
-                // 获取用户ID，支持多种字段格式
-                userId = ''; // 第1步：尝试直接从uni-id-token中获取uid
-                try {
-                  _token = uni.getStorageSync('uni_id_token');
-                  if (_token) {
-                    console.log('尝试从token中解析获取用户ID');
-                    try {
-                      // 解析token
-                      tokenParts = _token.split('.');
-                      if (tokenParts.length === 3) {
-                        // 解码payload部分
-                        base64Payload = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
-                        payload = JSON.parse(atob(base64Payload));
-                        console.log('Token payload:', payload);
-                        if (payload.uid) {
-                          userId = payload.uid;
-                          console.log('从token获取到用户ID(uid):', userId);
-                        }
-                      }
-                    } catch (tokenError) {
-                      console.error('解析token失败:', tokenError);
-                    }
-                  }
-                } catch (e) {
-                  console.error('获取token失败:', e);
-                }
-
-                // 第2步：如果没有从token获取，尝试从用户对象获取
-                if (!userId) {
-                  if (userData._id) {
-                    userId = userData._id;
-                    console.log('使用用户对象中的_id:', userId);
-                  } else if (userData.uid) {
-                    userId = userData.uid;
-                    console.log('使用用户对象中的uid:', userId);
-                  } else if (userData.userId) {
-                    userId = userData.userId;
-                    console.log('使用用户对象中的userId:', userId);
-                  } else if (userData.userInfo && userData.userInfo._id) {
-                    userId = userData.userInfo._id;
-                    console.log('使用嵌套userInfo中的_id:', userId);
-                  } else if (userData.userInfo && userData.userInfo.uid) {
-                    userId = userData.userInfo.uid;
-                    console.log('使用嵌套userInfo中的uid:', userId);
-                  }
-                }
-
-                // 第3步：如果还没有ID，尝试从uni-id-pages-userInfo获取
-                if (!userId) {
-                  try {
-                    uniIdUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
-                    if (uniIdUserInfo) {
-                      console.log('尝试从uni-id-pages-userInfo获取用户ID');
-                      uniIdData = typeof uniIdUserInfo === 'string' ? JSON.parse(uniIdUserInfo) : uniIdUserInfo;
-                      if (uniIdData._id) userId = uniIdData._id;else if (uniIdData.uid) userId = uniIdData.uid;
-                    }
-                  } catch (e) {
-                    console.error('从uni-id-pages-userInfo获取ID失败:', e);
-                  }
-                }
-
-                // 第4步：如果还是没有用户ID，使用临时ID
-                if (!userId) {
-                  // 生成一个持久的设备ID
-                  deviceId = uni.getStorageSync('device_id');
-                  if (!deviceId) {
-                    deviceId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-                    uni.setStorageSync('device_id', deviceId);
-                  }
-                  userId = deviceId;
-                  console.log('使用临时设备ID作为用户ID:', userId);
-                }
-
-                // 检查用户ID
-                if (userId) {
-                  _context4.next = 31;
-                  break;
-                }
-                console.error('收藏操作失败: 无法获取用户ID', userData);
-                uni.showToast({
-                  title: '用户信息不完整，请重新登录',
-                  icon: 'none'
-                });
-
-                // 跳转到登录页面
-                setTimeout(function () {
-                  uni.navigateTo({
-                    url: '/pages/login/login'
-                  });
-                }, 1500);
-                return _context4.abrupt("return");
-              case 31:
-                if (!(!_this4.itemType || !_this4.itemId)) {
-                  _context4.next = 35;
-                  break;
-                }
-                console.error('收藏操作失败: 缺少必要参数', _this4.itemType, _this4.itemId);
-                uni.showToast({
-                  title: '参数错误',
-                  icon: 'none'
-                });
-                return _context4.abrupt("return");
-              case 35:
-                uni.showLoading({
-                  title: _this4.isFavorite ? '移出中' : '添加中'
-                });
-                if (!_this4.isFavorite) {
-                  _context4.next = 48;
-                  break;
-                }
-                if (_this4.favoriteId) {
-                  _context4.next = 42;
-                  break;
-                }
-                console.error('从购物车移出失败: 缺少ID');
-                uni.hideLoading();
-                uni.showToast({
-                  title: '操作失败',
-                  icon: 'none'
-                });
-                return _context4.abrupt("return");
-              case 42:
-                _context4.next = 44;
-                return _this4.$api.user.removeFavorite(_this4.favoriteId);
-              case 44:
-                res = _context4.sent;
-                if (res && res.code === 0) {
-                  _this4.isFavorite = false;
-                  _this4.favoriteId = '';
-                  uni.hideLoading();
-                  uni.showToast({
-                    title: '已移出购物车',
-                    icon: 'success'
-                  });
-
-                  // 强制更新购物车状态（解决有时状态不更新的问题）
-                  _this4.$nextTick(function () {
-                    console.log('强制更新购物车状态为:', false);
-                    _this4.isFavorite = false;
-                  });
-                  _this4.$emit('favoriteChange', false);
-                } else {
-                  uni.hideLoading();
-                  uni.showToast({
-                    title: '操作失败',
-                    icon: 'none'
-                  });
-                }
-                _context4.next = 55;
-                break;
-              case 48:
-                // 添加到购物车
-                // 构建数据
+                // 构建收藏数据
                 favoriteData = {
                   userId: userId,
                   // 确保使用正确的用户ID
+                  userName: userData.nickname || userData.username || '',
+                  // 添加用户名
                   itemType: _this4.itemType,
                   itemId: _this4.itemId,
                   itemTitle: _this4.itemTitle || '',
                   itemCover: _this4.itemCover || '',
                   itemUrl: _this4.itemUrl || "/pages/".concat(_this4.itemType, "/detail?id=").concat(_this4.itemId),
+                  price: finalPrice,
+                  // 使用获取到的最新价格
                   createTime: Date.now()
                 };
                 console.log('添加购物车数据:', favoriteData);
@@ -677,13 +495,127 @@ var _default = {
                 } else if (_this4.itemType === 'teacher') {
                   favoriteData.itemUrl = "/pages/teacher/detail?id=".concat(_this4.itemId);
                 }
-                _context4.next = 53;
+                _context4.next = 19;
                 return _this4.$api.user.addFavorite(favoriteData);
-              case 53:
-                _res = _context4.sent;
+              case 19:
+                res = _context4.sent;
+                return _context4.abrupt("return", res);
+              case 23:
+                _context4.prev = 23;
+                _context4.t1 = _context4["catch"](0);
+                console.error('添加购物车失败:', _context4.t1);
+                throw _context4.t1;
+              case 27:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, null, [[0, 23], [3, 10]]);
+      }))();
+    },
+    // 点击收藏按钮
+    toggleFavorite: function toggleFavorite() {
+      var _this5 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+        var userInfo, userData, userId, res, _res;
+        return _regenerator.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                console.log('点击收藏按钮, 当前状态:', _this5.isFavorite ? '已收藏' : '未收藏');
+                console.log('itemId:', _this5.itemId, 'itemType:', _this5.itemType);
+
+                // 检查是否已登录
+                userInfo = uni.getStorageSync('userInfo');
+                if (userInfo) {
+                  _context5.next = 7;
+                  break;
+                }
+                uni.showToast({
+                  title: '请先登录',
+                  icon: 'none'
+                });
+                setTimeout(function () {
+                  uni.navigateTo({
+                    url: '/pages/login/login'
+                  });
+                }, 1500);
+                return _context5.abrupt("return");
+              case 7:
+                try {
+                  userData = typeof userInfo === 'string' ? JSON.parse(userInfo) : userInfo;
+                } catch (error) {
+                  console.error('解析用户数据失败:', error);
+                  userData = userInfo; // 如果解析失败，使用原始数据
+                }
+                userId = userData.userId || userData._id || userData.uid || userData.userInfo && userData.userInfo._id || userData.userInfo && userData.userInfo.uid;
+                if (userId) {
+                  _context5.next = 13;
+                  break;
+                }
+                console.error('收藏操作失败: 无法获取用户ID');
+                uni.showToast({
+                  title: '用户信息不完整，请重新登录',
+                  icon: 'none'
+                });
+                return _context5.abrupt("return");
+              case 13:
+                _context5.prev = 13;
+                uni.showLoading({
+                  title: _this5.isFavorite ? '移出中' : '添加中'
+                });
+                if (!_this5.isFavorite) {
+                  _context5.next = 27;
+                  break;
+                }
+                if (_this5.favoriteId) {
+                  _context5.next = 21;
+                  break;
+                }
+                console.error('从购物车移出失败: 缺少ID');
+                uni.hideLoading();
+                uni.showToast({
+                  title: '操作失败',
+                  icon: 'none'
+                });
+                return _context5.abrupt("return");
+              case 21:
+                _context5.next = 23;
+                return _this5.$api.user.removeFavorite(_this5.favoriteId);
+              case 23:
+                res = _context5.sent;
+                if (res && res.code === 0) {
+                  _this5.isFavorite = false;
+                  _this5.favoriteId = '';
+                  uni.hideLoading();
+                  uni.showToast({
+                    title: '已移出购物车',
+                    icon: 'success'
+                  });
+
+                  // 强制更新购物车状态（解决有时状态不更新的问题）
+                  _this5.$nextTick(function () {
+                    console.log('强制更新购物车状态为:', false);
+                    _this5.isFavorite = false;
+                  });
+                  _this5.$emit('favoriteChange', false);
+                } else {
+                  uni.hideLoading();
+                  uni.showToast({
+                    title: '操作失败',
+                    icon: 'none'
+                  });
+                }
+                _context5.next = 31;
+                break;
+              case 27:
+                _context5.next = 29;
+                return _this5.addToCart(userId, userData);
+              case 29:
+                _res = _context5.sent;
                 if (_res && _res.code === 0) {
-                  _this4.isFavorite = true;
-                  _this4.favoriteId = _res.data._id || _res.data.favoriteId || '';
+                  _this5.isFavorite = true;
+                  _this5.favoriteId = _res.data._id || _res.data.favoriteId || '';
                   uni.hideLoading();
                   uni.showToast({
                     title: '已加入购物车',
@@ -691,11 +623,11 @@ var _default = {
                   });
 
                   // 强制更新购物车状态（解决有时状态不更新的问题）
-                  _this4.$nextTick(function () {
+                  _this5.$nextTick(function () {
                     console.log('强制更新购物车状态为:', true);
-                    _this4.isFavorite = true;
+                    _this5.isFavorite = true;
                   });
-                  _this4.$emit('favoriteChange', true);
+                  _this5.$emit('favoriteChange', true);
                 } else {
                   uni.hideLoading();
                   uni.showToast({
@@ -707,24 +639,24 @@ var _default = {
                     console.error('加入购物车失败原因:', _res.message);
                   }
                 }
-              case 55:
-                _context4.next = 62;
+              case 31:
+                _context5.next = 38;
                 break;
-              case 57:
-                _context4.prev = 57;
-                _context4.t1 = _context4["catch"](4);
-                console.error('收藏操作失败:', _context4.t1);
+              case 33:
+                _context5.prev = 33;
+                _context5.t0 = _context5["catch"](13);
+                console.error('收藏操作失败:', _context5.t0);
                 uni.hideLoading();
                 uni.showToast({
                   title: '操作失败',
                   icon: 'none'
                 });
-              case 62:
+              case 38:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4, null, [[4, 57], [7, 18]]);
+        }, _callee5, null, [[13, 33]]);
       }))();
     },
     // 手动更新收藏状态

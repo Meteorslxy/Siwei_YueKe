@@ -696,6 +696,8 @@ export default {
         height: 100rpx;
         border-radius: 50%;
         margin-right: 20rpx;
+        border: 1rpx solid #eee;
+        background-color: #f8f8f8;
       }
       
       .item-value {

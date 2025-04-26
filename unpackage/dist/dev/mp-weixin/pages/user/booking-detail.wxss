@@ -333,3 +333,36 @@
 .teacher-info .teacher-name {
   font-weight: 500;
 }
+.qrcode-popup {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30rpx;
+  width: 80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.qrcode-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+.qrcode-image {
+  width: 500rpx;
+  height: 500rpx;
+  margin-bottom: 20rpx;
+}
+.qrcode-contact {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.close-btn {
+  width: 80%;
+  background-color: #2b85e4;
+  color: #fff;
+  border-radius: 50rpx;
+}

@@ -99,17 +99,39 @@
         </view>
       </view>
       
-      <!-- 加载更多 -->
-      <load-more :status="loadMoreStatus" @click="loadMore"></load-more>
-      
       <!-- 空数据提示 -->
       <empty-tip v-if="filteredBookingList.length === 0" :tip="getEmptyTipText()"></empty-tip>
+      
+      <!-- 加载更多 -->
+      <uni-load-more :status="loadMoreStatus" v-if="loadMoreStatus !== 'noMore'"></uni-load-more>
     </view>
+    
+    <!-- 二维码支付弹窗 -->
+    <uni-popup ref="qrcodePopup" type="center">
+      <view class="qrcode-popup">
+        <view class="qrcode-title">扫码缴费</view>
+        <image class="qrcode-image" :src="qrcodeUrl" mode="aspectFit"></image>
+        <view class="qrcode-contact">
+          <text>如有问题，请联系老师</text>
+          <text>电话：13800138000</text>
+        </view>
+        <button class="close-btn" @click="closeQrcodePopup">关闭</button>
+      </view>
+    </uni-popup>
   </view>
 </template>
 
 <script>
+import bookingItem from '@/components/booking-item/booking-item.vue';
+import emptyTip from '@/components/empty-tip/empty-tip.vue';
+import uniLoadMore from '@/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue';
+
 export default {
+  components: {
+    bookingItem,
+    emptyTip,
+    uniLoadMore
+  },
   data() {
     return {
       // 状态筛选标签
@@ -146,7 +168,11 @@ export default {
       
       // 支付倒计时数据
       countdownTimers: {}, // 存储每个预约的倒计时定时器
-      countdownValues: {} // 存储每个预约的倒计时值
+      countdownValues: {}, // 存储每个预约的倒计时值
+      
+      // 二维码相关
+      qrcodeUrl: '', // 二维码URL
+      currentPayingBookingId: '' // 当前正在支付的预约ID
     }
   },
   computed: {
@@ -1749,10 +1775,42 @@ export default {
         return;
       }
       
-      // 跳转到支付页面
-      uni.navigateTo({
-        url: `/pages/payment/index?bookingId=${booking._id}&courseId=${booking.courseId || ''}`
-      });
+      // 根据课程的grade字段确定二维码URL
+      let grade = booking.grade || '';
+      // 从课程标题中尝试提取年级信息（如果grade字段为空）
+      if (!grade && booking.courseTitle) {
+        const title = booking.courseTitle;
+        if (title.includes('初一') || title.includes('七年级')) {
+          grade = '初一';
+        } else if (title.includes('初二') || title.includes('八年级')) {
+          grade = '初二';
+        } else if (title.includes('初三') || title.includes('九年级')) {
+          grade = '初三';
+        }
+      }
+      
+      // 设置二维码URL
+      if (grade === '初一') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+      } else if (grade === '初二') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初二.png';
+      } else if (grade === '初三') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初三.png';
+      } else {
+        // 如果未找到匹配的年级，使用初一年级的二维码作为默认
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+      }
+      
+      // 保存当前正在支付的预约ID，用于可能的后续操作
+      this.currentPayingBookingId = booking._id;
+      
+      // 显示二维码弹窗
+      this.$refs.qrcodePopup.open();
+    },
+    
+    // 关闭二维码弹窗
+    closeQrcodePopup() {
+      this.$refs.qrcodePopup.close();
     },
     
     // 处理申请退费
@@ -2580,5 +2638,54 @@ export default {
   text-align: center;
   color: #999;
   font-size: 28rpx;
+}
+
+/* 二维码弹窗样式 */
+.qrcode-popup {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30rpx;
+  width: 80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qrcode-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+
+.qrcode-image {
+  width: 500rpx;
+  height: 500rpx;
+  margin-bottom: 20rpx;
+}
+
+.qrcode-contact {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.close-btn {
+  width: 80%;
+  background-color: #2b85e4;
+  color: #fff;
+  border-radius: 50rpx;
+}
+
+@keyframes fadeInOut {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cancelled-tag {
+  color: #FF6633;
+  margin-right: 5px;
 }
 </style> 

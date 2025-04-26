@@ -1,19 +1,12 @@
 <template>
   <view class="favorite-page">
-    <!-- 顶部筛选栏 -->
+    <!-- 顶部栏 -->
     <view class="filter-bar">
-      <view 
-        v-for="(tab, index) in tabs" 
-        :key="index" 
-        class="filter-item"
-        :class="{ active: currentTab === index }"
-        @click="switchTab(index)"
-      >
-        {{tab.name}}
-      </view>
+      <view class="page-title">购物车</view>
+      <view class="manage-btn" @click="toggleManageMode">{{isManageMode ? '完成' : '管理'}}</view>
     </view>
     
-    <!-- 收藏列表 -->
+    <!-- 购物车列表 -->
     <view class="favorite-list">
       <block v-if="favoriteList.length > 0">
         <view 
@@ -21,6 +14,10 @@
           v-for="(item, index) in favoriteList" 
           :key="index"
         >
+          <view class="checkbox-wrapper">
+            <checkbox :checked="item.selected" color="#FF6B00" @tap.stop="toggleSelect(index)" />
+          </view>
+          
           <view class="item-content" @click="handleClick(index)">
             <view class="item-image">
               <image :src="item.itemCover || getDefaultImage(item.itemType)" 
@@ -31,22 +28,41 @@
             <view class="item-info">
               <view class="item-title">{{item.itemTitle || '未命名'}}</view>
               <view class="item-type">{{getItemTypeName(item.itemType)}}</view>
+              <view class="item-price">¥{{item.price || 0}}.00</view>
               <view class="item-time">{{formatDate(item.createTime)}}</view>
             </view>
           </view>
           
           <view class="item-action">
-            <view class="action-btn delete-btn" @click="handleDelete(index)">
+            <button class="action-btn book-btn" @click.stop="bookCourse(item)" v-if="!isManageMode">立即预约</button>
+            <view class="action-btn delete-btn" @click="handleDelete(index)" v-else>
               <text class="iconfont icon-delete"></text>
-              <text class="delete-text">取消收藏</text>
+              <text class="delete-text">删除</text>
             </view>
           </view>
         </view>
       </block>
       
-      <empty-tip v-else tip="暂无收藏内容" :show="!loading"></empty-tip>
+      <empty-tip v-else tip="购物车空空如也" :show="!loading"></empty-tip>
       
       <load-more :status="loadMoreStatus" @click="loadMore"></load-more>
+    </view>
+    
+    <!-- 底部结算栏 -->
+    <view class="cart-footer" v-if="favoriteList.length > 0">
+      <view class="select-all" @click="toggleSelectAll">
+        <checkbox :checked="isAllSelected" color="#FF6B00" />
+        <text>全选</text>
+      </view>
+      
+      <view class="total-price">
+        <text>合计：</text>
+        <text class="price-value">¥{{totalPrice}}.00</text>
+      </view>
+      
+      <button class="checkout-btn" @click="checkout" :disabled="selectedCount === 0">
+        {{isManageMode ? '删除' : '一键预约'}}({{selectedCount}})
+      </button>
     </view>
   </view>
 </template>
@@ -67,7 +83,21 @@ export default {
       pageSize: 10,
       loading: false,
       loadMoreStatus: 'more',
-      hasMore: true
+      hasMore: true,
+      isManageMode: false, // 是否为管理模式
+      isAllSelected: false // 是否全选
+    }
+  },
+  computed: {
+    // 选中的数量
+    selectedCount() {
+      return this.favoriteList.filter(item => item.selected).length;
+    },
+    // 计算总价
+    totalPrice() {
+      return this.favoriteList
+        .filter(item => item.selected)
+        .reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0);
     }
   },
   onLoad() {
@@ -157,7 +187,7 @@ export default {
           // 确保列表项都有必要的属性
           const processedList = list.map(item => {
             // 处理可能的数据结构问题
-            const processedItem = {...item};
+            const processedItem = {...item, selected: false};
             
             // 如果缺少必要的属性，添加默认值
             if (!processedItem.itemType) {
@@ -179,6 +209,11 @@ export default {
               processedItem.itemCover = this.getDefaultImage(processedItem.itemType);
             }
             
+            // 如果价格为空，尝试获取课程信息
+            if (!processedItem.price && processedItem.itemId && processedItem.itemType === 'course') {
+              this.fetchCoursePrice(processedItem);
+            }
+            
             return processedItem;
           });
           
@@ -192,14 +227,14 @@ export default {
           this.loadMoreStatus = this.hasMore ? 'more' : 'noMore';
         } else {
           uni.showToast({
-            title: '获取收藏列表失败',
+            title: '获取购物车列表失败',
             icon: 'none'
           });
         }
       } catch (error) {
-        console.error('获取收藏列表失败:', error);
+        console.error('获取购物车列表失败:', error);
         uni.showToast({
-          title: '获取收藏列表失败',
+          title: '获取购物车列表失败',
           icon: 'none'
         });
       } finally {
@@ -207,6 +242,156 @@ export default {
         uni.hideLoading();
         uni.stopPullDownRefresh();
       }
+    },
+    
+    // 获取课程价格信息
+    async fetchCoursePrice(item) {
+      try {
+        // 调用获取课程详情的API
+        const res = await this.$api.course.getCourseDetail(item.itemId);
+        
+        if (res && res.code === 0 && res.data) {
+          const course = res.data;
+          // 计算课时费和材料费的总和
+          const classFee = parseFloat(course.classFee || 0);
+          const materialFee = parseFloat(course.materialFee || 0);
+          const totalPrice = classFee + materialFee;
+          
+          // 如果总价为0，则使用course.price
+          item.price = totalPrice || course.price || 0;
+          
+          // 强制更新视图
+          this.$forceUpdate();
+        }
+      } catch (error) {
+        console.error('获取课程价格失败:', error);
+      }
+    },
+    
+    // 切换管理模式
+    toggleManageMode() {
+      this.isManageMode = !this.isManageMode;
+    },
+    
+    // 切换选择状态
+    toggleSelect(index) {
+      this.favoriteList[index].selected = !this.favoriteList[index].selected;
+      // 检查是否全选
+      this.checkAllSelected();
+    },
+    
+    // 切换全选状态
+    toggleSelectAll() {
+      this.isAllSelected = !this.isAllSelected;
+      this.favoriteList.forEach(item => {
+        item.selected = this.isAllSelected;
+      });
+    },
+    
+    // 检查是否全选
+    checkAllSelected() {
+      this.isAllSelected = this.favoriteList.length > 0 && 
+                          this.favoriteList.every(item => item.selected);
+    },
+    
+    // 立即预约单个课程
+    bookCourse(item) {
+      if (item.itemType !== 'course') {
+        uni.showToast({
+          title: '只能预约课程',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      uni.navigateTo({
+        url: `/pages/course/detail?id=${item.itemId}`
+      });
+    },
+    
+    // 一键预约或批量删除
+    checkout() {
+      if (this.selectedCount === 0) {
+        uni.showToast({
+          title: '请先选择课程',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      if (this.isManageMode) {
+        // 批量删除
+        this.batchDelete();
+      } else {
+        // 批量预约
+        this.batchBook();
+      }
+    },
+    
+    // 批量预约
+    batchBook() {
+      const selectedCourses = this.favoriteList.filter(item => 
+        item.selected && item.itemType === 'course'
+      );
+      
+      if (selectedCourses.length === 0) {
+        uni.showToast({
+          title: '请选择课程进行预约',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 跳转到第一个课程的详情页
+      uni.navigateTo({
+        url: `/pages/course/detail?id=${selectedCourses[0].itemId}`
+      });
+    },
+    
+    // 批量删除
+    async batchDelete() {
+      const selectedItems = this.favoriteList.filter(item => item.selected);
+      
+      if (selectedItems.length === 0) return;
+      
+      uni.showModal({
+        title: '确认删除',
+        content: `确定删除这${selectedItems.length}个项目吗？`,
+        success: async (res) => {
+          if (res.confirm) {
+            try {
+              uni.showLoading({ title: '删除中' });
+              
+              for (const item of selectedItems) {
+                await this.$api.user.removeFavorite({
+                  id: item._id
+                });
+              }
+              
+              // 更新列表
+              this.favoriteList = this.favoriteList.filter(item => !item.selected);
+              
+              uni.showToast({
+                title: '删除成功',
+                icon: 'success'
+              });
+              
+              // 如果列表为空，则刷新
+              if (this.favoriteList.length === 0) {
+                this.refreshList();
+              }
+            } catch (error) {
+              console.error('批量删除失败:', error);
+              uni.showToast({
+                title: '删除失败',
+                icon: 'none'
+              });
+            } finally {
+              uni.hideLoading();
+            }
+          }
+        }
+      });
     },
     
     // 获取默认图片
@@ -433,133 +618,179 @@ export default {
 
 .filter-bar {
   display: flex;
+  padding: 30rpx 20rpx;
   background-color: #fff;
-  height: 80rpx;
-  line-height: 80rpx;
   border-bottom: 1rpx solid #eee;
-  position: sticky;
-  top: 0;
-  z-index: 100;
   
-  .filter-item {
+  .page-title {
     flex: 1;
-    text-align: center;
-    font-size: 28rpx;
-    color: #666;
-    position: relative;
-    
-    &.active {
-      color: #FF6B00;
-      font-weight: bold;
-      
-      &:after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60rpx;
-        height: 4rpx;
-        background-color: #FF6B00;
-        border-radius: 2rpx;
-      }
-    }
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .manage-btn {
+    padding: 0 20rpx;
+    font-size: 30rpx;
+    color: #FF6B00;
   }
 }
 
 .favorite-list {
   flex: 1;
   padding: 20rpx;
+  padding-bottom: 120rpx;
   
   .favorite-item {
-    display: flex;
-    background-color: #fff;
-    margin-bottom: 20rpx;
-    border-radius: 8rpx;
-    overflow: hidden;
-    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
     padding: 20rpx;
+    margin-bottom: 20rpx;
+    background-color: #fff;
+    border-radius: 8rpx;
+    display: flex;
+    align-items: center;
+    
+    .checkbox-wrapper {
+      padding: 0 10rpx;
+      width: 60rpx;
+      min-width: 60rpx;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
     
     .item-content {
       flex: 1;
       display: flex;
-    }
-    
-    .item-image {
-      width: 160rpx;
-      height: 120rpx;
       margin-right: 20rpx;
-      border-radius: 8rpx;
-      overflow: hidden;
       
-      image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-    }
-    
-    .item-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      
-      .item-title {
-        font-size: 28rpx;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 10rpx;
-        line-height: 1.4;
+      .item-image {
+        width: 150rpx;
+        height: 150rpx;
+        margin-right: 20rpx;
+        
+        image {
+          width: 100%;
+          height: 100%;
+          border-radius: 8rpx;
+        }
       }
       
-      .item-type {
-        font-size: 24rpx;
-        color: #FF6B00;
-        background-color: rgba(255, 107, 0, 0.1);
-        padding: 4rpx 12rpx;
-        border-radius: 4rpx;
-        display: inline-block;
-        margin-bottom: 10rpx;
-      }
-      
-      .item-time {
-        font-size: 22rpx;
-        color: #999;
+      .item-info {
+        flex: 1;
+        
+        .item-title {
+          font-size: 28rpx;
+          font-weight: bold;
+          margin-bottom: 10rpx;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+        
+        .item-type {
+          font-size: 24rpx;
+          color: #FF6B00;
+          background-color: rgba(255, 107, 0, 0.1);
+          padding: 6rpx 12rpx;
+          border-radius: 4rpx;
+          display: inline-block;
+          margin-bottom: 10rpx;
+        }
+        
+        .item-price {
+          font-size: 32rpx;
+          color: #FF3B30;
+          font-weight: bold;
+          margin: 10rpx 0;
+        }
+        
+        .item-time {
+          font-size: 22rpx;
+          color: #999;
+        }
       }
     }
     
     .item-action {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      margin-left: 20rpx;
-      
       .action-btn {
-        padding: 10rpx 16rpx;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        flex-direction: column;
-        border-radius: 8rpx;
         
-        .iconfont {
-          font-size: 36rpx;
-          color: #999;
-          margin-bottom: 6rpx;
+        &.delete-btn {
+          color: #FF3B30;
+        }
+        
+        &.book-btn {
+          padding: 12rpx 24rpx;
+          background-color: #FF6B00;
+          color: #fff;
+          border-radius: 40rpx;
+          font-size: 24rpx;
+          border: none;
+          line-height: 1.5;
+          min-width: 140rpx;
+          text-align: center;
         }
         
         .delete-text {
-          font-size: 20rpx;
-          color: #999;
+          font-size: 24rpx;
+          margin-top: 8rpx;
         }
       }
-      
-      .delete-btn {
-        .iconfont, .delete-text {
-          color: #FF3B30;
-        }
-      }
+    }
+  }
+}
+
+.cart-footer {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #fff;
+  border-top: 1rpx solid #eee;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  
+  .select-all {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    
+    text {
+      margin-left: 10rpx;
+      font-size: 28rpx;
+    }
+  }
+  
+  .total-price {
+    flex: 1;
+    text-align: right;
+    
+    .price-value {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #FF3B30;
+    }
+  }
+  
+  .checkout-btn {
+    min-width: 240rpx;
+    padding: 16rpx 30rpx;
+    background-color: #FF6B00;
+    color: #fff;
+    border: none;
+    border-radius: 40rpx;
+    margin-left: 20rpx;
+    font-size: 28rpx;
+    
+    &:disabled {
+      background-color: #ccc;
     }
   }
 }

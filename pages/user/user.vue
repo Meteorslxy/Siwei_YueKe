@@ -23,6 +23,7 @@
         <view class="user-detail">
           <text v-if="hasUserInfo" class="user-name">{{getUserDisplayName()}}</text>
           <button v-else class="login-btn" @click="getUserProfile">点击登录</button>
+          <button v-if="hasUserInfo" class="edit-profile-btn" @click="navigateTo('/pages/user/profile/index')">编辑资料</button>
         </view>
       </view>
     </view>
@@ -69,9 +70,9 @@
       <view class="menu-group">
         <view class="menu-title">我的服务</view>
         <view class="menu-list">
-          <view class="menu-list-item" @click="navigateTo('/pages/user/favorite/index')">
+          <view class="menu-list-item" @click="navigateTo('/pages/cart/index')">
             <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/我的收藏-c.png" mode="aspectFit"></image>
-            <text class="list-text">我的收藏</text>
+            <text class="list-text">购物车</text>
             <text class="list-arrow">></text>
           </view>
           <view class="menu-list-item" @click="openFeedback">
@@ -86,7 +87,7 @@
           </view>
           <view class="menu-list-item" @click="navigateTo('/pages/user/setting/index')">
             <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/设置-c.png" mode="aspectFit"></image>
-            <text class="list-text">编辑资料</text>
+            <text class="list-text">设置</text>
             <text class="list-arrow">></text>
           </view>
         </view>
@@ -1903,6 +1904,17 @@ export default {
       
       .login-btn {
         margin-top: 50rpx;
+        font-size: 32rpx;
+        background-color: $theme-color;
+        color: #fff;
+        border-radius: 40rpx;
+        padding: 0 40rpx;
+        height: 80rpx;
+        line-height: 80rpx;
+      }
+      
+      .edit-profile-btn {
+        margin-top: 20rpx;
         font-size: 32rpx;
         background-color: $theme-color;
         color: #fff;

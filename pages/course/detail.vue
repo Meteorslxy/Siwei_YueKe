@@ -8,6 +8,7 @@
         itemType="course" 
         :itemTitle="courseInfo.title" 
         :itemCover="courseInfo.image || courseInfo.coverImage || '/static/images/course-default.jpg'"
+        :price="getTotalPrice()"
         @favorite-change="onFavoriteChange"
         @statusBarHeight="onStatusBarHeight"
       ></favorite-button>
@@ -81,6 +82,14 @@
       </view>
     </view>
     
+    <!-- 课程备注 -->
+    <view class="course-notes" v-if="courseInfo.courseNoted">
+      <view class="detail-title">课程备注</view>
+      <view class="detail-content">
+        <rich-text :nodes="courseInfo.courseNoted"></rich-text>
+      </view>
+    </view>
+    
     <!-- 师资介绍 -->
     <view class="teacher-intro">
       <view class="detail-title">
@@ -144,6 +153,8 @@ export default {
   data() {
     return {
       courseId: '',
+      fromCart: false, // 是否来自购物车
+      showBookBtn: true, // 是否显示预约按钮
       courseInfo: {},
       hasBooked: false,
       userInfo: null,
@@ -174,6 +185,17 @@ export default {
     uni.$off('login:success', this.handleLoginSuccess);
   },
   onLoad(options) {
+    console.log('课程详情页面加载, options:', options);
+    
+    // 设置课程ID
+    this.courseId = options.id || '';
+    
+    // 检查是否来自购物车
+    this.fromCart = options.fromCart === 'true';
+    
+    // 检查是否显示预约按钮
+    this.showBookBtn = options.showBookBtn !== 'false';
+    
     console.log('加载课程详情页面, 参数:', options);
     
     // 监听预约取消事件，更新本页面的预约状态
@@ -1428,7 +1450,8 @@ export default {
           // 发送预约成功事件，用于其他页面更新
           uni.$emit('booking:success', {
             courseId: this.courseId,
-            userId: this.userInfo.userId
+            userId: this.userInfo.userId,
+            fromCart: this.fromCart
           });
           
           // 确保UI立即更新
@@ -2416,5 +2439,13 @@ export default {
   position: fixed;
   right: 30rpx;
   z-index: 9999;
+}
+
+.course-notes {
+  background-color: #fff;
+  border-radius: 20rpx;
+  margin: 30rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 </style> 

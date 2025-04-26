@@ -111,6 +111,8 @@
   height: 100rpx;
   border-radius: 50%;
   margin-right: 20rpx;
+  border: 1rpx solid #eee;
+  background-color: #f8f8f8;
 }
 .profile-form .form-item .item-content .item-value {
   font-size: 28rpx;

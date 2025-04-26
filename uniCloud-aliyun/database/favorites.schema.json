@@ -15,6 +15,10 @@
       "bsonType": "string",
       "description": "用户ID，关联用户表"
     },
+    "userName": {
+      "bsonType": "string",
+      "description": "用户名称"
+    },
     "itemId": {
       "bsonType": "string",
       "description": "被收藏项目的ID"
@@ -35,6 +39,10 @@
     "itemUrl": {
       "bsonType": "string",
       "description": "被收藏项目的详情页URL"
+    },
+    "price": {
+      "bsonType": ["number", "string"],
+      "description": "项目价格"
     },
     "createTime": {
       "bsonType": "timestamp",

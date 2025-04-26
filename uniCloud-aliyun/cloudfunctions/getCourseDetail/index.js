@@ -5,8 +5,8 @@ const dbCmd = db.command;
 
 // 云函数入口函数
 exports.main = async (event, context) => {
-  // 获取课程ID
-  const { courseId } = event;
+  // 获取课程ID，同时支持id和courseId两种参数名
+  const courseId = event.courseId || event.id;
   
   // 校验参数
   if (!courseId) {
@@ -17,9 +17,20 @@ exports.main = async (event, context) => {
     };
   }
   
+  // 确保ID是字符串类型
+  const docId = typeof courseId === 'object' ? (courseId.id || courseId._id || '') : courseId.toString();
+  
+  if (!docId) {
+    return {
+      code: -1,
+      success: false,
+      message: '获取课程详情失败: docId必须为字符串或数字'
+    };
+  }
+  
   try {
     // 查询课程详情
-    const courseResult = await db.collection('courses').doc(courseId).get();
+    const courseResult = await db.collection('courses').doc(docId).get();
     
     if (!courseResult.data) {
       return {
@@ -30,6 +41,26 @@ exports.main = async (event, context) => {
     }
     
     const course = courseResult.data;
+    
+    // 确保课程费用字段存在且类型正确
+    if (!course.classFee || course.classFee === '') {
+      console.log('课时费为空，设置默认值为0');
+      course.classFee = '0';
+    } else if (typeof course.classFee !== 'string') {
+      course.classFee = String(course.classFee);
+    }
+    
+    if (!course.materialFee || course.materialFee === '') {
+      console.log('材料费为空，设置默认值为0');
+      course.materialFee = '0';
+    } else if (typeof course.materialFee !== 'string') {
+      course.materialFee = String(course.materialFee);
+    }
+    
+    // 强制设置 price 字段为课时费和材料费的总和 (主要用于回退)
+    const classFee = parseFloat(course.classFee || 0);
+    const materialFee = parseFloat(course.materialFee || 0);
+    course.price = String(classFee + materialFee);
     
     // 确保image字段存在，如果不存在则使用coverImage的值
     if (!course.image && course.coverImage) {
@@ -94,19 +125,21 @@ exports.main = async (event, context) => {
           }
           
           // 步骤3: 如果没找到匹配，只用subject查询
-          console.log('使用subject查询课程描述, subject:', subject);
-          const generalResult = await db.collection('course_description')
-            .where({
-              subject: subject
-            })
-            .limit(1)
-            .get();
-            
-          if (generalResult.data && generalResult.data.length > 0) {
-            course.description = generalResult.data[0].description;
-            console.log('找到匹配的课程描述(仅subject)');
-          } else {
-            console.log('未找到任何匹配的课程描述');
+          if (!course.description || course.description === '') {
+            console.log('使用subject查询课程描述, subject:', subject);
+            const generalResult = await db.collection('course_description')
+              .where({
+                subject: subject
+              })
+              .limit(1)
+              .get();
+              
+            if (generalResult.data && generalResult.data.length > 0) {
+              course.description = generalResult.data[0].description;
+              console.log('找到匹配的课程描述(仅subject)');
+            } else {
+              console.log('未找到任何匹配的课程描述');
+            }
           }
         } catch (e) {
           console.error('查询通用课程描述失败:', e);
@@ -136,7 +169,7 @@ exports.main = async (event, context) => {
     try {
       const bookingCount = await db.collection('bookings')
         .where({
-          courseId: courseId,
+          courseId: docId,
           status: 'confirmed' // 只统计确认的预约
         })
         .count();
@@ -146,6 +179,13 @@ exports.main = async (event, context) => {
       console.error('查询报名人数失败:', e);
       course.enrolled = 0;
     }
+    
+    // 打印关键价格字段，帮助调试
+    console.log('返回课程价格信息:', {
+      classFee: course.classFee,
+      materialFee: course.materialFee,
+      price: course.price
+    });
     
     return {
       code: 0,
