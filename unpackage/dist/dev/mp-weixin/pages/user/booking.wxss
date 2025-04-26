@@ -93,7 +93,7 @@
   font-weight: bold;
 }
 .tab-bar .tab-item.active:after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: 50%;

@@ -180,7 +180,7 @@ export default {
 
 .course-card.course-full {
   background-color: #f5f5f5;
-  opacity: 0.8;
+  /* opacity: 0.8; */
 }
 
 .course-card.course-full .course-title,
