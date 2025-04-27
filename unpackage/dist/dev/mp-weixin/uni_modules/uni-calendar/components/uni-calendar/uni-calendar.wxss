@@ -1,0 +1,216 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+.data-v-0682a296:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.uni-calendar.data-v-0682a296 {
+  display: flex;
+  flex-direction: column;
+}
+.uni-calendar__mask.data-v-0682a296 {
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  transition-property: opacity;
+  transition-duration: 0.3s;
+  opacity: 0;
+  z-index: 99;
+}
+.uni-calendar--mask-show.data-v-0682a296 {
+  opacity: 1;
+}
+.uni-calendar--fixed.data-v-0682a296 {
+  position: fixed;
+  left: 0;
+  right: 0;
+  transition-property: -webkit-transform;
+  transition-property: transform;
+  transition-property: transform, -webkit-transform;
+  transition-duration: 0.3s;
+  -webkit-transform: translateY(460px);
+          transform: translateY(460px);
+  bottom: calc(0px);
+  z-index: 99;
+}
+.uni-calendar--ani-show.data-v-0682a296 {
+  -webkit-transform: translateY(0);
+          transform: translateY(0);
+}
+.uni-calendar__content.data-v-0682a296 {
+  background-color: #fff;
+}
+.uni-calendar__header.data-v-0682a296 {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  border-bottom-color: #EDEDED;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+}
+.uni-calendar--fixed-top.data-v-0682a296 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-top-color: #EDEDED;
+  border-top-style: solid;
+  border-top-width: 1px;
+}
+.uni-calendar--fixed-width.data-v-0682a296 {
+  width: 50px;
+}
+.uni-calendar__backtoday.data-v-0682a296 {
+  position: absolute;
+  right: 0;
+  top: 25rpx;
+  padding: 0 5px;
+  padding-left: 10px;
+  height: 25px;
+  line-height: 25px;
+  font-size: 12px;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  color: #333;
+  background-color: #f1f1f1;
+}
+.uni-calendar__header-text.data-v-0682a296 {
+  text-align: center;
+  width: 100px;
+  font-size: 14px;
+  color: #333;
+}
+.uni-calendar__header-btn-box.data-v-0682a296 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+}
+.uni-calendar__header-btn.data-v-0682a296 {
+  width: 10px;
+  height: 10px;
+  border-left-color: #808080;
+  border-left-style: solid;
+  border-left-width: 2px;
+  border-top-color: #555555;
+  border-top-style: solid;
+  border-top-width: 2px;
+}
+.uni-calendar--left.data-v-0682a296 {
+  -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+}
+.uni-calendar--right.data-v-0682a296 {
+  -webkit-transform: rotate(135deg);
+          transform: rotate(135deg);
+}
+.uni-calendar__weeks.data-v-0682a296 {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+.uni-calendar__weeks-item.data-v-0682a296 {
+  flex: 1;
+}
+.uni-calendar__weeks-day.data-v-0682a296 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 45px;
+  border-bottom-color: #F5F5F5;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+}
+.uni-calendar__weeks-day-text.data-v-0682a296 {
+  font-size: 14px;
+}
+.uni-calendar__box.data-v-0682a296 {
+  position: relative;
+}
+.uni-calendar__box-bg.data-v-0682a296 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.uni-calendar__box-bg-text.data-v-0682a296 {
+  font-size: 200px;
+  font-weight: bold;
+  color: #999;
+  opacity: 0.1;
+  text-align: center;
+  line-height: 1;
+}

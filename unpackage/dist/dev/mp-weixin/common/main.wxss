@@ -1299,7 +1299,6 @@ text {
   font-weight: 500;
   padding-left: 20rpx;
 }
-
 @charset "UTF-8";
 /* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
 :root {
@@ -1447,7 +1446,6 @@ text {
   margin-right: 8rpx;
   flex-shrink: 0;
 }
-
 @charset "UTF-8";
 /* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
 :root {
@@ -1557,4 +1555,3 @@ text {
 .favorite-button:active .cart-text {
   opacity: 1;
 }
-

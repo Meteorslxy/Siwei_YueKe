@@ -37,31 +37,56 @@
     
     <!-- 用户菜单 -->
     <view class="menu-section" v-else>
-      <!-- 订单管理 -->
+      <!-- 我的预约框 -->
       <view class="menu-group">
         <view class="menu-title">
-          预约记录
+          我的预约
           <text class="refresh-link" @click="refreshBookingCount">刷新</text>
         </view>
-        <view class="menu-content">
-          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=all')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/all.png" mode="aspectFit" @error="handleImageError"></image>
-            <text class="item-text">全部</text>
-            <text v-if="bookingCounts.all > 0" class="item-badge">{{bookingCounts.all}}</text>
+        <view class="booking-tab-wrapper">
+          <view class="booking-tabs">
+            <view class="booking-tab-item" @click="navigateTo('/pages/user/booking?status=all')">
+              <image class="tab-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/all.png" mode="aspectFit" @error="handleImageError"></image>
+              <text class="tab-text">全部</text>
+              <text v-if="bookingCounts.all > 0" class="tab-badge">{{bookingCounts.all}}</text>
+            </view>
+            <view class="booking-tab-item" @click="navigateTo('/pages/user/booking?status=usable')">
+              <image class="tab-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/use.png" mode="aspectFit" @error="handleImageError"></image>
+              <text class="tab-text">可使用</text>
+              <text v-if="bookingCounts.usable > 0" class="tab-badge">{{bookingCounts.usable}}</text>
+            </view>
+            <view class="booking-tab-item" @click="navigateTo('/pages/user/booking?status=expired')">
+              <image class="tab-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/out.png" mode="aspectFit" @error="handleImageError"></image>
+              <text class="tab-text">已完成</text>
+            </view>
+            <view class="booking-tab-item" @click="navigateTo('/pages/user/booking?status=canceled')">
+              <image class="tab-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/cancal.png" mode="aspectFit" @error="handleImageError"></image>
+              <text class="tab-text">已取消</text>
+              <text v-if="bookingCounts.canceled > 0" class="tab-badge">{{bookingCounts.canceled}}</text>
+            </view>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=usable')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/use.png" mode="aspectFit" @error="handleImageError"></image>
-            <text class="item-text">可使用</text>
-            <text v-if="bookingCounts.usable > 0" class="item-badge">{{bookingCounts.usable}}</text>
+        </view>
+      </view>
+      
+      <!-- 学习服务 -->
+      <view class="menu-group">
+        <view class="menu-title">学习服务</view>
+        <view class="menu-content grid-layout">
+          <view class="menu-item" @click="navigateTo('/pages/user/calendar')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/日历-c.png" mode="aspectFit"></image>
+            <text class="item-text">课程日历</text>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=expired')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/out.png" mode="aspectFit" @error="handleImageError"></image>
-            <text class="item-text">已完成</text>
+          <view class="menu-item" @click="navigateTo('/pages/course/course')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/课程-c.png" mode="aspectFit"></image>
+            <text class="item-text">全部课程</text>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=canceled')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/cancal.png" mode="aspectFit" @error="handleImageError"></image>
-            <text class="item-text">已取消</text>
-            <text v-if="bookingCounts.canceled > 0" class="item-badge">{{bookingCounts.canceled}}</text>
+          <view class="menu-item" @click="navigateTo('/pages/news/index')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/通知-c.png" mode="aspectFit"></image>
+            <text class="item-text">课程通知</text>
+          </view>
+          <view class="menu-item" @click="navigateTo('/pages/course/manage')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/资料-c.png" mode="aspectFit"></image>
+            <text class="item-text">课程管理</text>
           </view>
         </view>
       </view>
@@ -69,26 +94,22 @@
       <!-- 我的服务 -->
       <view class="menu-group">
         <view class="menu-title">我的服务</view>
-        <view class="menu-list">
-          <view class="menu-list-item" @click="navigateTo('/pages/cart/index')">
-            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/我的收藏-c.png" mode="aspectFit"></image>
-            <text class="list-text">购物车</text>
-            <text class="list-arrow">></text>
+        <view class="menu-content grid-layout">
+          <view class="menu-item" @click="navigateTo('/pages/cart/index')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/我的收藏-c.png" mode="aspectFit"></image>
+            <text class="item-text">购物车</text>
           </view>
-          <view class="menu-list-item" @click="openFeedback">
-            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/意见反馈-c.png" mode="aspectFit"></image>
-            <text class="list-text">意见反馈</text>
-            <text class="list-arrow">></text>
+          <view class="menu-item" @click="openFeedback">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/意见反馈-c.png" mode="aspectFit"></image>
+            <text class="item-text">意见反馈</text>
           </view>
-          <view class="menu-list-item" @click="navigateTo('/pages/user/about/index')">
-            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/关于我们-c.png" mode="aspectFit"></image>
-            <text class="list-text">关于我们</text>
-            <text class="list-arrow">></text>
+          <view class="menu-item" @click="navigateTo('/pages/user/about/index')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/关于我们-c.png" mode="aspectFit"></image>
+            <text class="item-text">关于我们</text>
           </view>
-          <view class="menu-list-item" @click="navigateTo('/pages/user/setting/index')">
-            <image class="list-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/设置-c.png" mode="aspectFit"></image>
-            <text class="list-text">设置</text>
-            <text class="list-arrow">></text>
+          <view class="menu-item" @click="navigateTo('/pages/user/setting/index')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/设置-c.png" mode="aspectFit"></image>
+            <text class="item-text">设置</text>
           </view>
         </view>
       </view>
@@ -2101,5 +2122,87 @@ export default {
     height: 80rpx;
     line-height: 80rpx;
   }
+}
+
+/* 添加预约标签的样式 */
+.booking-tab-wrapper {
+  padding: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  margin-top: 10rpx;
+  border: 1px solid #f0f0f0;
+}
+
+.booking-tabs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.booking-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.tab-icon {
+  width: 56rpx;
+  height: 56rpx;
+  margin-bottom: 10rpx;
+}
+
+.tab-text {
+  font-size: 24rpx;
+  color: #333;
+}
+
+.tab-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  background-color: #ff6b00;
+  color: #fff;
+  font-size: 20rpx;
+  height: 32rpx;
+  min-width: 32rpx;
+  border-radius: 16rpx;
+  text-align: center;
+  line-height: 32rpx;
+  padding: 0 6rpx;
+}
+
+/* 网格布局样式 */
+.grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 20rpx 10rpx;
+}
+
+.grid-layout .menu-item {
+  width: 24%;
+  height: auto;
+  margin-bottom: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx 0;
+  box-sizing: border-box;
+}
+
+.grid-layout .item-icon-img {
+  width: 64rpx;
+  height: 64rpx;
+  margin-bottom: 10rpx;
+}
+
+.grid-layout .item-text {
+  font-size: 24rpx;
+  color: #333;
+  text-align: center;
 }
 </style> 

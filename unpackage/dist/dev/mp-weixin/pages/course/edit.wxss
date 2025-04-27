@@ -1,0 +1,246 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.course-edit-container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+.course-edit-container .header {
+  margin-bottom: 30rpx;
+}
+.course-edit-container .header .title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+.course-edit-container .form-container .form-group {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+.course-edit-container .form-container .form-group .group-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  border-bottom: 1px solid #f5f5f5;
+  padding-bottom: 20rpx;
+}
+.course-edit-container .form-container .form-group .form-item {
+  margin-bottom: 30rpx;
+}
+.course-edit-container .form-container .form-group .form-item:last-child {
+  margin-bottom: 0;
+}
+.course-edit-container .form-container .form-group .form-item .label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+}
+.course-edit-container .form-container .form-group .form-item .label.required:after {
+  content: "*";
+  color: #F56C6C;
+  margin-left: 5rpx;
+}
+.course-edit-container .form-container .form-group .form-item .input, .course-edit-container .form-container .form-group .form-item .picker {
+  width: 100%;
+  height: 80rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+}
+.course-edit-container .form-container .form-group .form-item .picker {
+  display: flex;
+  align-items: center;
+}
+.course-edit-container .form-container .form-group .form-item .picker-value {
+  color: #333;
+}
+.course-edit-container .form-container .form-group .form-item .input-group {
+  display: flex;
+  align-items: center;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+}
+.course-edit-container .form-container .form-group .form-item .input-group .number-input {
+  background-color: transparent;
+  padding: 0;
+  flex: 1;
+}
+.course-edit-container .form-container .form-group .form-item .input-group .prefix, .course-edit-container .form-container .form-group .form-item .input-group .unit {
+  font-size: 28rpx;
+  color: #666;
+}
+.course-edit-container .form-container .form-group .form-item .textarea {
+  width: 100%;
+  height: 200rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+}
+.course-edit-container .form-container .form-group .form-item .weekday-selector {
+  display: flex;
+  flex-wrap: wrap;
+}
+.course-edit-container .form-container .form-group .form-item .weekday-selector .weekday-item {
+  width: 120rpx;
+  height: 80rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #666;
+  margin-right: 20rpx;
+  margin-bottom: 20rpx;
+}
+.course-edit-container .form-container .form-group .form-item .weekday-selector .weekday-item.active {
+  background-color: #EC7A49;
+  color: #fff;
+}
+.course-edit-container .form-container .form-group .form-item .radio-group {
+  display: flex;
+}
+.course-edit-container .form-container .form-group .form-item .radio-group .radio-item {
+  display: flex;
+  align-items: center;
+  margin-right: 60rpx;
+}
+.course-edit-container .form-container .form-group .form-item .radio-group .radio-item .radio-circle {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10rpx;
+}
+.course-edit-container .form-container .form-group .form-item .radio-group .radio-item .radio-circle .radio-inner {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background-color: #EC7A49;
+}
+.course-edit-container .form-container .form-group .form-item .radio-group .radio-item.active .radio-circle {
+  border-color: #EC7A49;
+}
+.course-edit-container .form-container .form-group .form-item .radio-group .radio-item .radio-label {
+  font-size: 28rpx;
+  color: #333;
+}
+.course-edit-container .form-container .upload-container {
+  width: 300rpx;
+  height: 200rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+.course-edit-container .form-container .upload-container .preview-image {
+  width: 100%;
+  height: 100%;
+}
+.course-edit-container .form-container .upload-container .upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.course-edit-container .form-container .upload-container .upload-placeholder .upload-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+.course-edit-container .button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40rpx;
+}
+.course-edit-container .button-group button {
+  width: 46%;
+  height: 90rpx;
+  line-height: 90rpx;
+  border-radius: 45rpx;
+  font-size: 32rpx;
+}
+.course-edit-container .button-group .cancel-btn {
+  background-color: #f5f5f5;
+  color: #666;
+  border: 1px solid #ddd;
+}
+.course-edit-container .button-group .save-btn {
+  background-color: #EC7A49;
+  color: #fff;
+}

@@ -101,14 +101,6 @@
             }
         },
         {
-            "path": "pages/booking/create",
-            "style": {
-                "navigationBarTitleText": "课程预约",
-                "navigationBarBackgroundColor": "#EC7A49",
-                "navigationBarTextStyle": "white"
-            }
-        },
-        {
             "path": "pages/school/detail",
             "style": {
                 "navigationBarTitleText": "校区详情",
@@ -232,6 +224,38 @@
                 "navigationBarBackgroundColor": "#EC7A49",
                 "navigationBarTextStyle": "white",
                 "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/user/calendar",
+            "style": {
+                "navigationBarTitleText": "我的课程日历",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/course/manage",
+            "style": {
+                "navigationBarTitleText": "课程管理",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/schedule/schedule",
+            "style": {
+                "navigationBarTitleText": "排课管理",
+                "navigationBarBackgroundColor": "#EC7A49",
+                "navigationBarTextStyle": "white"
+            }
+        },
+        {
+            "path": "pages/course/edit",
+            "style": {
+                "navigationBarTitleText": "编辑课程",
+                "enablePullDownRefresh": false
             }
         }
     ],

@@ -304,8 +304,9 @@ export default {
         return;
       }
       
+      // 跳转到课程详情页面，并传递fromCart=true参数，表明是从收藏页面来的
       uni.navigateTo({
-        url: `/pages/course/detail?id=${item.itemId}`
+        url: `/pages/course/detail?id=${item.itemId}&fromCart=true`
       });
     },
     

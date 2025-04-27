@@ -1,0 +1,214 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.schedule-container {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+.date-picker {
+  background-color: #fff;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+.date-picker .picker-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+.date-picker .picker-title .date-actions {
+  display: flex;
+  align-items: center;
+}
+.date-picker .picker-title .date-actions .prev-btn, .date-picker .picker-title .date-actions .next-btn, .date-picker .picker-title .date-actions .today-btn {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-grey);
+  padding: 0 16rpx;
+}
+.date-picker .picker-title .date-actions .today-btn {
+  color: var(--theme-color);
+}
+.date-picker .week-header {
+  display: flex;
+  width: 100%;
+  margin-bottom: 20rpx;
+}
+.date-picker .week-header text {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-color-grey);
+}
+.date-picker .days-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+.date-picker .days-grid .day-cell {
+  width: 14.28%;
+  height: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.date-picker .days-grid .day-cell .day-num {
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+}
+.date-picker .days-grid .day-cell .day-marker {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background-color: var(--theme-color);
+  margin-top: 8rpx;
+}
+.date-picker .days-grid .day-cell.other .day-num {
+  color: var(--text-color-light);
+}
+.date-picker .days-grid .day-cell.today .day-num {
+  color: var(--theme-color);
+  font-weight: bold;
+}
+.date-picker .days-grid .day-cell.active .day-num {
+  background-color: var(--theme-color);
+  color: #fff;
+  width: 60rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  text-align: center;
+  border-radius: 50%;
+}
+.schedule-list {
+  background-color: #fff;
+  padding: 20rpx;
+}
+.schedule-list .day-title {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 30rpx;
+}
+.schedule-list .schedule-item {
+  display: flex;
+  margin-bottom: 30rpx;
+  background-color: var(--bg-color-white);
+  border-radius: var(--border-radius-lg);
+  padding: 20rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+}
+.schedule-list .schedule-item .time-box {
+  width: 160rpx;
+}
+.schedule-list .schedule-item .time-box .time {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-grey);
+  white-space: nowrap;
+}
+.schedule-list .schedule-item .content-box {
+  flex: 1;
+}
+.schedule-list .schedule-item .content-box .course-name {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 10rpx;
+}
+.schedule-list .schedule-item .content-box .info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.schedule-list .schedule-item .content-box .info-row .teacher, .schedule-list .schedule-item .content-box .info-row .location {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-grey);
+  margin-right: 20rpx;
+}
+.schedule-list .schedule-item .content-box .status-box {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+}
+.schedule-list .schedule-item .content-box .status-box.status-upcoming {
+  background-color: rgba(var(--theme-color), 0.1);
+  color: var(--theme-color);
+}
+.schedule-list .schedule-item .content-box .status-box.status-ongoing {
+  background-color: rgba(255, 149, 0, 0.1);
+  color: #ff9500;
+}
+.schedule-list .schedule-item .content-box .status-box.status-completed {
+  background-color: rgba(142, 142, 147, 0.1);
+  color: #8e8e93;
+}
+.schedule-list .schedule-item .content-box .status-box.status-cancelled {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+}

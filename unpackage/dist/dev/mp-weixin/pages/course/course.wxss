@@ -209,7 +209,7 @@
   position: relative;
 }
 .filter-section-title::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 50%;
@@ -524,4 +524,3 @@
 .dropdown-option:hover, .dropdown-option:active {
   background-color: #f9f9f9;
 }
-

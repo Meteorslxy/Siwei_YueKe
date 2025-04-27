@@ -185,8 +185,11 @@ export default {
     
     // 点击预约
     onBookClick(course) {
+      if (!course || !course._id) return;
+      
+      // 跳转到课程详情页面进行预约
       uni.navigateTo({
-        url: `/pages/booking/create?id=${course._id}`
+        url: `/pages/course/detail?id=${course._id}`
       });
     }
   }

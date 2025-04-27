@@ -161,7 +161,7 @@
   font-weight: bold;
 }
 .lecture-detail .lecture-tabs .tab-item.active:after {
-  content: '';
+  content: "";
   position: absolute;
   left: 30rpx;
   right: 30rpx;
@@ -250,4 +250,3 @@
   right: 30rpx;
   z-index: 9999;
 }
-

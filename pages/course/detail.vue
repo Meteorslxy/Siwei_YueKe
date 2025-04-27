@@ -145,6 +145,8 @@
 <script>
 // 引入收藏按钮组件
 import FavoriteButton from '@/components/favorite-button/favorite-button.vue';
+// 导入课程日历工具
+import courseCalendarUtils from '@/utils/courseCalendar.js';
 
 export default {
   components: {
@@ -1311,200 +1313,241 @@ export default {
     
     // 预约课程
     bookCourse() {
-      console.log('点击预约课程按钮');
-      
-      // 检查课程是否已满
-      if (this.isCourseFulled) {
+      // 先检查是否登录
+      if (!this.userInfo || !this.userInfo.userId) {
         uni.showToast({
-          title: '该课程已约满',
+          title: '请先登录',
           icon: 'none'
         });
+        
+        // 跳转到登录页
+        setTimeout(() => {
+          uni.navigateTo({
+            url: '/pages/login/login'
+          });
+        }, 1500);
+        
         return;
       }
+
+      // 课程冲突检测
+      this.checkCourseConflict().then(conflictResult => {
+        if (conflictResult.hasConflict) {
+          // 有冲突，显示冲突信息
+          this.showConflictDialog(conflictResult);
+        } else {
+          // 无冲突，继续预约流程
+          this.proceedWithBooking();
+        }
+      }).catch(err => {
+        console.error('课程冲突检测失败:', err);
+        // 出错时也继续预约流程，但记录错误
+        this.proceedWithBooking();
+      });
+    },
+
+    // 检查课程冲突
+    checkCourseConflict() {
+      return new Promise((resolve, reject) => {
+        // 获取用户ID
+        const userId = this.userInfo.userId;
+        
+        // 调用云函数获取用户已预约的课程
+        uniCloud.callFunction({
+          name: 'getUserBookings',
+          data: { 
+            userId, 
+            status: 'confirmed' // 只检查已确认的预约
+          },
+          success: res => {
+            if (!res.result || !res.result.data) {
+              resolve({ hasConflict: false });
+              return;
+            }
+            
+            const bookedCourses = res.result.data;
+            
+            // 检查每个已预约课程是否与当前课程冲突
+            let conflictResult = { hasConflict: false, conflictCourses: [] };
+            
+            for (const booking of bookedCourses) {
+              // 确保有课程信息
+              if (!booking.courseInfo) continue;
+              
+              // 检测冲突
+              const result = courseCalendarUtils.checkCoursesConflict(
+                this.courseInfo, 
+                booking.courseInfo
+              );
+              
+              if (result.hasConflict) {
+                conflictResult.hasConflict = true;
+                conflictResult.conflictCourses.push({
+                  course: booking.courseInfo,
+                  conflictDates: result.conflictDates
+                });
+              }
+            }
+            
+            resolve(conflictResult);
+          },
+          fail: err => {
+            console.error('获取用户预约失败:', err);
+            reject(err);
+          }
+        });
+      });
+    },
+    
+    // 显示课程冲突提示对话框
+    showConflictDialog(conflictResult) {
+      // 构建冲突信息文本
+      let conflictMessage = '您已预约的课程与此课程时间冲突：\n\n';
       
-      // 如果仍然未登录
-      if (!this.userInfo) {
-        console.log('未找到用户信息对象，用户未登录');
-        this.showLoginTip();
-        return;
-      }
-      
-      // 检查用户信息中的各种可能的ID字段
-      const userId = this.userInfo.userId || this.userInfo.uid || 
-                     this.userInfo._id || 
-                     (this.userInfo.userInfo && this.userInfo.userInfo._id) || 
-                     (this.userInfo.userInfo && this.userInfo.userInfo.uid);
-      
-      if (!userId) {
-        console.log('用户信息中没有有效的ID字段，无法预约课程', this.userInfo);
-        // 输出用户信息的所有键
-        console.log('用户信息对象包含的字段:', Object.keys(this.userInfo));
-        if (this.userInfo.userInfo) {
-          console.log('userInfo子对象包含的字段:', Object.keys(this.userInfo.userInfo));
+      conflictResult.conflictCourses.forEach((item, index) => {
+        const course = item.course;
+        conflictMessage += `${index + 1}. ${course.title || course.courseTitle}\n`;
+        conflictMessage += `   时间：${course.startTime}-${course.endTime}\n`;
+        
+        // 添加冲突日期
+        if (item.conflictDates && item.conflictDates.length > 0) {
+          const formattedDates = item.conflictDates.map(date => 
+            courseCalendarUtils.formatDate(date)
+          );
+          conflictMessage += `   冲突日期：${formattedDates.join('、')}\n`;
         }
         
-        this.showLoginTip();
-        return;
-      }
+        conflictMessage += '\n';
+      });
       
-      // 找到了有效的用户ID，储存起来
-      this.userInfo.userId = userId;
-      console.log('找到有效的用户ID:', userId);
+      conflictMessage += '确定要继续预约吗？';
       
-      // 显示确认弹窗
+      // 显示确认对话框
       uni.showModal({
-        title: '确认预约',
-        content: `您确定要预约"${this.courseInfo.title}"课程吗？`,
-        success: async (res) => {
+        title: '课程时间冲突',
+        content: conflictMessage,
+        confirmText: '继续预约',
+        cancelText: '取消',
+        success: res => {
           if (res.confirm) {
-            console.log('用户确认预约');
-            // 用户点击确定
-            await this.submitBooking();
-          } else {
-            console.log('用户取消预约');
+            // 用户确认继续预约
+            this.proceedWithBooking();
           }
         }
       });
     },
     
-    // 提交预约
-    async submitBooking() {
-      console.log('开始提交预约请求');
+    // 继续预约流程
+    proceedWithBooking() {
+      // 删除跳转到预约页面的代码，直接在当前页面完成预约
+      console.log('直接完成课程预约');
       
+      // 显示加载提示
       uni.showLoading({
         title: '预约中...'
       });
       
-      try {
-        // 确保有有效的用户ID
-        const userId = this.userInfo.userId || this.userInfo.uid || this.userInfo._id || 
-                     (this.userInfo.userInfo && this.userInfo.userInfo._id) || 
-                     (this.userInfo.userInfo && this.userInfo.userInfo.uid);
-        
-        if (!userId) {
-          console.error('无法确定用户ID，预约失败');
+      // 获取用户信息
+      const userId = this.userInfo.userId;
+      const userName = this.userInfo.nickname || this.userInfo.nickName || '未知用户';
+      
+      // 构建预约数据
+      const bookingData = {
+        userId: userId,
+        courseId: this.courseId,
+        studentName: this.userInfo.studentName || userName,
+        contactPhone: this.userInfo.mobile || this.userInfo.phoneNumber || '',
+        remark: ''
+      };
+      
+      // 调用云函数预约课程
+      uniCloud.callFunction({
+        name: 'bookCourse',
+        data: bookingData,
+        success: res => {
           uni.hideLoading();
-          uni.showToast({
-            title: '用户信息不完整，请重新登录',
-            icon: 'none'
-          });
-          return;
-        }
-        
-        // 获取用户名称
-        const userName = this.userInfo.nickName || 
-                       this.userInfo.nickname || 
-                       this.userInfo.username || 
-                       (this.userInfo.userInfo && this.userInfo.userInfo.nickname) ||
-                       '微信用户';
-                       
-        // 获取手机号
-        const phoneNumber = this.userInfo.phoneNumber || 
-                          this.userInfo.mobile ||
-                          (this.userInfo.userInfo && this.userInfo.userInfo.mobile) ||
-                          '';
-        
-        console.log('提交预约数据：用户ID:', userId, '课程ID:', this.courseId);
-        console.log('用户名称:', userName, '手机号:', phoneNumber || '(未提供)');
-        
-        // 输出更详细的用户信息调试
-        console.log('用户数据详情:', JSON.stringify(this.userInfo));
-        
-        // 调用云函数预约课程
-        const res = await uniCloud.callFunction({
-          name: 'bookCourse',
-          data: {
-            userId: userId,
-            courseId: this.courseId,
-            userName: userName,
-            phoneNumber: phoneNumber,
-            remark: ''
-          }
-        });
-        
-        console.log('预约结果详情:', JSON.stringify(res.result));
-        
-        uni.hideLoading();
-        
-        if (res.result && res.result.success) {
-          console.log('预约成功:', res.result);
           
-          // 强制立即设置预约状态
-          this.hasBooked = true;
-          console.log('预约成功，强制设置hasBooked =', this.hasBooked);
-          
-          // 立即保存到本地缓存
-          this.saveBookingStatusToCache(true);
-          
-          uni.showToast({
-            title: '预约成功',
-            icon: 'success'
-          });
-          
-          // 更新预约人数，确保UI显示正确
-          if (this.courseInfo) {
-            this.courseInfo.bookingCount = (this.courseInfo.bookingCount || 0) + 1;
-            console.log('更新预约人数，bookingCount:', this.courseInfo.bookingCount);
-          }
-          
-          // 发送预约成功事件，用于其他页面更新
-          uni.$emit('booking:success', {
-            courseId: this.courseId,
-            userId: this.userInfo.userId,
-            fromCart: this.fromCart
-          });
-          
-          // 确保UI立即更新
-          this.$forceUpdate();
-          
-          // 确保下一帧渲染时状态正确
-          this.$nextTick(() => {
-            // 再次确认hasBooked状态
+          if (res.result && res.result.success) {
+            // 预约成功
             this.hasBooked = true;
-            // 检查DOM是否正确反映了状态
-            console.log('DOM更新后再次检查状态：hasBooked =', this.hasBooked);
-          });
-          
-          // 强制刷新页面以显示预约成功状态
-          setTimeout(() => {
-            // 重新加载页面（彻底解决显示问题）
-            this.reloadPage();
-          }, 1000);
-          
-          // 预约成功后显示支付时间限制提示
-          setTimeout(() => {
-            uni.showModal({
-              title: '支付提醒',
-              content: '您需要在7天内完成支付，否则预约将被自动取消',
-              showCancel: false,
-              success: () => {
-                // 预约成功后，跳转到预约详情页
-                if (res.result.bookingId) {
-                  uni.navigateTo({
-                    url: '/pages/user/booking-detail?id=' + res.result.bookingId
-                  });
-                } else {
-                  // 改为reloadPage函数，这个函数是存在的
-                  this.reloadPage();
-                }
-              }
+            
+            // 更新预约人数
+            if (this.courseInfo) {
+              this.courseInfo.bookingCount = (this.courseInfo.bookingCount || 0) + 1;
+            }
+            
+            // 发送预约成功事件
+            uni.$emit('booking:success', {
+              courseId: this.courseId,
+              userId: userId
             });
-          }, 1500);
-        } else {
-          console.error('预约失败:', res.result);
+            
+            // 如果是从购物车跳转来的，从购物车中移除该课程
+            if (this.fromCart) {
+              console.log('检测到从购物车跳转预约，准备从购物车移除课程');
+              
+              // 调用云函数或API移除购物车中的课程
+              try {
+                // 需要获取购物车中的记录ID，通过查询获取
+                uniCloud.callFunction({
+                  name: 'getFavoriteList',
+                  data: {
+                    userId: userId,
+                    type: 'course',
+                    itemId: this.courseId
+                  },
+                  success: (result) => {
+                    if (result.result && result.result.data && result.result.data.length > 0) {
+                      const favoriteId = result.result.data[0]._id;
+                      console.log('找到购物车记录，ID:', favoriteId);
+                      
+                      // 调用移除收藏API
+                      this.$api.user.removeFavorite(favoriteId).then(() => {
+                        console.log('成功从购物车移除课程');
+                      }).catch(err => {
+                        console.error('从购物车移除课程失败:', err);
+                      });
+                    } else {
+                      console.log('未找到购物车中对应的课程记录');
+                    }
+                  },
+                  fail: (err) => {
+                    console.error('获取购物车记录失败:', err);
+                  }
+                });
+              } catch (e) {
+                console.error('移除购物车项目失败:', e);
+              }
+            }
+            
+            // 显示成功提示
+            uni.showToast({
+              title: '预约成功',
+              icon: 'success'
+            });
+            
+            // 刷新页面以显示预约成功状态
+            setTimeout(() => {
+              this.reloadPage();
+            }, 1500);
+          } else {
+            // 预约失败
+            uni.showToast({
+              title: res.result && res.result.message ? res.result.message : '预约失败，请重试',
+              icon: 'none'
+            });
+          }
+        },
+        fail: err => {
+          uni.hideLoading();
+          console.error('预约课程失败:', err);
+          
           uni.showToast({
-            title: res.result && res.result.message ? res.result.message : '预约失败',
+            title: '预约失败，请重试',
             icon: 'none'
           });
         }
-      } catch (e) {
-        uni.hideLoading();
-        console.error('预约课程过程中发生异常:', e);
-        uni.showToast({
-          title: '预约失败，请稍后重试',
-          icon: 'none'
-        });
-      }
+      });
     },
     
     // 重新加载页面

@@ -1,0 +1,46 @@
+{
+    "bsonType": "object",
+    "required": [
+        "studentId",
+        "courses"
+    ],
+    "permission": {
+        "read": true,
+        "create": true,
+        "update": true,
+        "delete": true
+    },
+    "properties": {
+        "_id": {
+            "description": "ID，系统自动生成"
+        },
+        "studentId": {
+            "bsonType": "string",
+            "description": "学生 ID"
+        },
+        "courses": {
+            "bsonType": "array",
+            "description": "学生所选课程及对应课次",
+            "items": {
+                "bsonType": "object",
+                "required": [
+                    "courseId",
+                    "selectedSlots"
+                ],
+                "properties": {
+                    "courseId": {
+                        "bsonType": "string",
+                        "description": "课程 ID"
+                    },
+                    "selectedSlots": {
+                        "bsonType": "array",
+                        "description": "学生选择的上课日期（ISODate）",
+                        "items": {
+                            "bsonType": "date"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

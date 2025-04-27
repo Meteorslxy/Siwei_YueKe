@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "课程管理",
+  "navigationBarBackgroundColor": "#EC7A49",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "uni-icons": "/uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
+}

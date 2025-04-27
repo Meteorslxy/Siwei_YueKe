@@ -367,6 +367,14 @@ const userApi = {
       name: 'checkFavorite',
       data
     }).then(res => debugAPI('checkFavorite返回', res));
+  },
+  
+  // 获取用户的所有预约记录
+  getUserBookings(userId) {
+    return request({
+      name: 'getUserBookings',
+      data: { userId }
+    });
   }
 }
 

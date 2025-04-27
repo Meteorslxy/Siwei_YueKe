@@ -68,9 +68,9 @@ module.exports = _nonIterableRest, module.exports.__esModule = true, module.expo
 /***/ }),
 
 /***/ 108:
-/*!********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/utils/filters.js ***!
-  \********************************************************************************/
+/*!************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/utils/filters.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -454,9 +454,9 @@ module.exports = _defineProperty, module.exports.__esModule = true, module.expor
 /***/ }),
 
 /***/ 117:
-/*!****************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/common/store.js ***!
-  \****************************************************************************************************/
+/*!********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/store.js ***!
+  \********************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1284,6 +1284,597 @@ function toPrimitive(t, r) {
   return ("string" === r ? String : Number)(t);
 }
 module.exports = toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 142:
+/*!***************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/utils/courseCalendar.js ***!
+  \***************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getMatchingDates = getMatchingDates;
+exports.parseDate = parseDate;
+exports.parseTimeToMinutes = parseTimeToMinutes;
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+// 课程日历功能
+
+/**
+ * 获取当前学期的开始和结束日期
+ */
+function getCurrentSemesterDates() {
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1;
+  var startDate, endDate;
+  if (currentMonth >= 2 && currentMonth <= 7) {
+    // 春季学期（2月至7月）
+    startDate = new Date(currentYear, 1, 1); // 2月1日
+    endDate = new Date(currentYear, 6, 31); // 7月31日
+  } else {
+    // 秋季学期（8月至次年1月）
+    startDate = new Date(currentYear, 8, 1); // 9月1日
+    if (currentMonth >= 9) {
+      // 当前是9-12月
+      endDate = new Date(currentYear + 1, 0, 31); // 次年1月31日
+    } else {
+      // 当前是1月
+      endDate = new Date(currentYear, 0, 31); // 当年1月31日
+      startDate = new Date(currentYear - 1, 8, 1); // 前一年9月1日
+    }
+  }
+
+  return {
+    startDate: startDate,
+    endDate: endDate
+  };
+}
+
+/**
+ * 解析日期字符串为Date对象
+ * @param {String} dateStr 日期字符串，支持多种格式
+ * @returns {Date|null} 解析后的Date对象，解析失败则返回null
+ */
+function parseDate(dateStr) {
+  if (!dateStr) return null;
+
+  // 预处理日期字符串
+  var normalizedDateStr = dateStr;
+
+  // 统一分隔符为"-"
+  normalizedDateStr = normalizedDateStr.replace(/\//g, '-').replace(/\./g, '-');
+  try {
+    // 尝试直接解析
+    var date = new Date(normalizedDateStr);
+
+    // 判断是否为有效日期
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+
+    // 处理常见的格式问题
+    if (normalizedDateStr.length === 10 && normalizedDateStr.includes('-')) {
+      // 处理YYYY-MM-DD格式
+      var parts = normalizedDateStr.split('-');
+      if (parts.length === 3) {
+        var year = parseInt(parts[0], 10);
+        var month = parseInt(parts[1], 10) - 1; // 月份从0开始
+        var day = parseInt(parts[2], 10);
+        var parsedDate = new Date(year, month, day);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate;
+        }
+      }
+    }
+
+    // 尝试解析其他常见格式
+    // ...
+
+    // 所有尝试都失败了
+    console.error('无法解析日期字符串:', dateStr);
+    return null;
+  } catch (e) {
+    console.error('解析日期出错:', e);
+    return null;
+  }
+}
+
+/**
+ * 将时间字符串解析为分钟数（从凌晨开始计算）
+ * @param {String} timeStr 时间字符串，如"14:30"
+ * @returns {Number} 分钟数，解析失败则返回0
+ */
+function parseTimeToMinutes(timeStr) {
+  if (!timeStr || timeStr === '--:--') return 0;
+  try {
+    var parts = timeStr.split(':');
+    if (parts.length >= 2) {
+      var hours = parseInt(parts[0], 10) || 0;
+      var minutes = parseInt(parts[1], 10) || 0;
+      return hours * 60 + minutes;
+    }
+    return 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+/**
+ * 检查两个时间区间是否重叠
+ * @param {number} start1 - 第一个区间的开始（分钟）
+ * @param {number} end1 - 第一个区间的结束（分钟）
+ * @param {number} start2 - 第二个区间的开始（分钟）
+ * @param {number} end2 - 第二个区间的结束（分钟）
+ * @returns {boolean} - 如果重叠则返回true
+ */
+function isTimeOverlap(start1, end1, start2, end2) {
+  return start1 <= end2 && start2 <= end1;
+}
+
+/**
+ * 判断一个日期是否匹配指定的星期几
+ * @param {Date} date - 要检查的日期
+ * @param {string} weekDay - 星期几，例如 "周一"、"周二" 等
+ * @returns {boolean} - 如果匹配则返回true
+ */
+function isMatchingWeekDay(date, weekDay) {
+  if (!date || !weekDay) {
+    console.log('isMatchingWeekDay: 参数无效', date, weekDay);
+    return false;
+  }
+  try {
+    var _weekDayMap;
+    // 获取日期是星期几
+    var dayOfWeek = date.getDay();
+    console.log("isMatchingWeekDay: \u68C0\u67E5\u65E5\u671F ".concat(date.toISOString().split('T')[0], " \u662F\u661F\u671F ").concat(dayOfWeek, " \u662F\u5426\u5339\u914D ").concat(weekDay));
+
+    // 标准化周几格式
+    var weekDayMap = (_weekDayMap = {
+      // 中文格式
+      "周日": 0,
+      "周一": 1,
+      "周二": 2,
+      "周三": 3,
+      "周四": 4,
+      "周五": 5,
+      "周六": 6,
+      "星期日": 0,
+      "星期一": 1,
+      "星期二": 2,
+      "星期三": 3,
+      "星期四": 4,
+      "星期五": 5,
+      "星期六": 6,
+      "礼拜日": 0,
+      "礼拜一": 1,
+      "礼拜二": 2,
+      "礼拜三": 3,
+      "礼拜四": 4,
+      "礼拜五": 5,
+      "礼拜六": 6,
+      "日": 0,
+      "一": 1,
+      "二": 2,
+      "三": 3,
+      "四": 4,
+      "五": 5,
+      "六": 6,
+      // 数字格式
+      "0": 0,
+      "1": 1,
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 5,
+      "6": 6
+    }, (0, _defineProperty2.default)(_weekDayMap, "0", 0), (0, _defineProperty2.default)(_weekDayMap, "1", 1), (0, _defineProperty2.default)(_weekDayMap, "2", 2), (0, _defineProperty2.default)(_weekDayMap, "3", 3), (0, _defineProperty2.default)(_weekDayMap, "4", 4), (0, _defineProperty2.default)(_weekDayMap, "5", 5), (0, _defineProperty2.default)(_weekDayMap, "6", 6), (0, _defineProperty2.default)(_weekDayMap, "Sun", 0), (0, _defineProperty2.default)(_weekDayMap, "Mon", 1), (0, _defineProperty2.default)(_weekDayMap, "Tue", 2), (0, _defineProperty2.default)(_weekDayMap, "Wed", 3), (0, _defineProperty2.default)(_weekDayMap, "Thu", 4), (0, _defineProperty2.default)(_weekDayMap, "Fri", 5), (0, _defineProperty2.default)(_weekDayMap, "Sat", 6), (0, _defineProperty2.default)(_weekDayMap, "Sunday", 0), (0, _defineProperty2.default)(_weekDayMap, "Monday", 1), (0, _defineProperty2.default)(_weekDayMap, "Tuesday", 2), (0, _defineProperty2.default)(_weekDayMap, "Wednesday", 3), (0, _defineProperty2.default)(_weekDayMap, "Thursday", 4), (0, _defineProperty2.default)(_weekDayMap, "Friday", 5), (0, _defineProperty2.default)(_weekDayMap, "Saturday", 6), _weekDayMap);
+
+    // 从标准化映射获取周几值
+    var expectedDay = null;
+
+    // 如果传入的是字符串数组，尝试匹配第一个合法格式
+    if (Array.isArray(weekDay)) {
+      console.log('isMatchingWeekDay: 检测到weekDay是数组', weekDay);
+      var _iterator = _createForOfIteratorHelper(weekDay),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var day = _step.value;
+          if (day in weekDayMap) {
+            expectedDay = weekDayMap[day];
+            console.log("isMatchingWeekDay: \u4ECE\u6570\u7EC4\u4E2D\u627E\u5230\u5339\u914D\u9879 ".concat(day, " => ").concat(expectedDay));
+            break;
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    } else if (weekDay in weekDayMap) {
+      expectedDay = weekDayMap[weekDay];
+      console.log("isMatchingWeekDay: \u627E\u5230\u5339\u914D\u9879 ".concat(weekDay, " => ").concat(expectedDay));
+    } else {
+      // 尝试忽略大小写匹配英文格式
+      var lowerWeekDay = typeof weekDay === 'string' ? weekDay.toLowerCase() : weekDay;
+      var lowerCaseMap = {
+        "sun": 0,
+        "mon": 1,
+        "tue": 2,
+        "wed": 3,
+        "thu": 4,
+        "fri": 5,
+        "sat": 6,
+        "sunday": 0,
+        "monday": 1,
+        "tuesday": 2,
+        "wednesday": 3,
+        "thursday": 4,
+        "friday": 5,
+        "saturday": 6
+      };
+      if (lowerWeekDay in lowerCaseMap) {
+        expectedDay = lowerCaseMap[lowerWeekDay];
+        console.log("isMatchingWeekDay: \u627E\u5230\u5FFD\u7565\u5927\u5C0F\u5199\u7684\u5339\u914D\u9879 ".concat(lowerWeekDay, " => ").concat(expectedDay));
+      } else {
+        console.error('未能识别的星期格式:', weekDay);
+        return false;
+      }
+    }
+    var result = dayOfWeek === expectedDay;
+    console.log("isMatchingWeekDay: \u7ED3\u679C ".concat(result, " (").concat(dayOfWeek, " === ").concat(expectedDay, ")"));
+    return result;
+  } catch (e) {
+    console.error('检查星期匹配出错:', e, date, weekDay);
+    return false;
+  }
+}
+
+/**
+ * 获取指定日期范围内满足特定星期几的所有日期
+ * @param {Date} startDate - 开始日期
+ * @param {Date} endDate - 结束日期
+ * @param {Array<string>|string} weekDays - 星期几列表，例如 ["周一", "周三"] 或 "周一"，如果为 "每天" 或空数组则表示每天
+ * @returns {Array<Date>} - 满足条件的日期列表
+ */
+function getMatchingDates(startDate, endDate, weekDays) {
+  console.log('获取匹配日期:', startDate ? startDate.toISOString().split('T')[0] : startDate, endDate ? endDate.toISOString().split('T')[0] : endDate, weekDays);
+  if (!startDate || !endDate) {
+    console.error('开始或结束日期无效');
+    return [];
+  }
+
+  // 检查是否为每天模式
+  var isEveryDay = false;
+
+  // 如果weekDays是字符串，转换为数组
+  var weekDaysArray = weekDays;
+  if (typeof weekDays === 'string') {
+    if (weekDays === '每天') {
+      isEveryDay = true;
+      weekDaysArray = [];
+    } else {
+      console.log('weekDays是字符串，转换为数组:', weekDays);
+      weekDaysArray = [weekDays];
+    }
+  } else if (!Array.isArray(weekDays)) {
+    console.error('星期几参数格式无效:', weekDays, (0, _typeof2.default)(weekDays));
+    return [];
+  } else if (weekDays.length === 0 || weekDays.includes('每天')) {
+    isEveryDay = true;
+  }
+  console.log('处理的星期几列表:', weekDaysArray, '是否每天模式:', isEveryDay);
+
+  // 确保日期对象有效
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    console.error('无效的日期对象');
+    return [];
+  }
+
+  // 确保日期顺序正确
+  if (startDate > endDate) {
+    console.error('开始日期晚于结束日期');
+    return [];
+  }
+  try {
+    var dates = [];
+    var currentDate = new Date(startDate);
+
+    // 计算时间范围的天数
+    var daysDiff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    console.log("\u65E5\u671F\u8303\u56F4\u5305\u542B ".concat(daysDiff, " \u5929"));
+
+    // 最多处理365天，防止无限循环
+    var maxIterations = Math.min(365, daysDiff + 1);
+    var iterations = 0;
+    while (currentDate <= endDate && iterations < maxIterations) {
+      iterations++;
+      var dateString = currentDate.toISOString().split('T')[0];
+
+      // 如果是每天模式，直接添加日期
+      if (isEveryDay) {
+        dates.push(new Date(currentDate));
+        if (iterations % 7 === 0) {
+          // 每7天记录一次日志，减少日志量
+          console.log("\u627E\u5230\u5339\u914D\u65E5\u671F: ".concat(dateString, " (\u6BCF\u5929\u6A21\u5F0F)"));
+        }
+      } else {
+        // 非每天模式，检查星期几是否匹配
+        var _iterator2 = _createForOfIteratorHelper(weekDaysArray),
+          _step2;
+        try {
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            var weekDay = _step2.value;
+            if (isMatchingWeekDay(currentDate, weekDay)) {
+              dates.push(new Date(currentDate));
+              console.log("\u627E\u5230\u5339\u914D\u65E5\u671F: ".concat(dateString, " \u5339\u914D ").concat(weekDay));
+              break;
+            }
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+      }
+
+      // 移到下一天
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    console.log('找到匹配日期数量:', dates.length);
+    if (dates.length > 0) {
+      console.log('第一个匹配日期:', dates[0].toISOString().split('T')[0]);
+      console.log('最后一个匹配日期:', dates[dates.length - 1].toISOString().split('T')[0]);
+    }
+    return dates;
+  } catch (e) {
+    console.error('获取匹配日期时出错:', e);
+    return [];
+  }
+}
+
+/**
+ * 检测两个课程是否有时间冲突
+ * @param {Object} course1 - 第一个课程
+ * @param {Object} course2 - 第二个课程
+ * @returns {Object} - 冲突信息，如果有冲突返回 {hasConflict: true, conflictDates: [...]}，否则返回 {hasConflict: false}
+ */
+function checkCoursesConflict(course1, course2) {
+  console.log('检测课程冲突:', course1 ? course1.title || course1.courseTitle || '未命名课程1' : '无效课程1', course2 ? course2.title || course2.courseTitle || '未命名课程2' : '无效课程2');
+
+  // 验证课程对象
+  if (!course1 || !course2) {
+    console.error('无效的课程对象');
+    return {
+      hasConflict: false
+    };
+  }
+
+  // 验证必要字段
+  if (!course1.startDate || !course1.endDate || !course1.startTime || !course1.endTime || !course1.classTime || !course2.startDate || !course2.endDate || !course2.startTime || !course2.endTime || !course2.classTime) {
+    console.error('课程缺少必要的时间字段');
+    return {
+      hasConflict: false
+    };
+  }
+
+  // 解析课程1的日期和时间
+  var course1Start = parseDate(course1.startDate);
+  var course1End = parseDate(course1.endDate);
+  var course1StartMinutes = parseTimeToMinutes(course1.startTime);
+  var course1EndMinutes = parseTimeToMinutes(course1.endTime);
+  var course1WeekDays = course1.classTime || [];
+
+  // 解析课程2的日期和时间
+  var course2Start = parseDate(course2.startDate);
+  var course2End = parseDate(course2.endDate);
+  var course2StartMinutes = parseTimeToMinutes(course2.startTime);
+  var course2EndMinutes = parseTimeToMinutes(course2.endTime);
+  var course2WeekDays = course2.classTime || [];
+  console.log('课程1时间:', course1Start, course1End, course1StartMinutes, course1EndMinutes, course1WeekDays);
+  console.log('课程2时间:', course2Start, course2End, course2StartMinutes, course2EndMinutes, course2WeekDays);
+
+  // 验证解析结果
+  if (!course1Start || !course1End || !course2Start || !course2End) {
+    console.error('课程日期解析失败');
+    return {
+      hasConflict: false
+    };
+  }
+
+  // 如果日期范围没有重叠，则没有冲突
+  if (course1End < course2Start || course2End < course1Start) {
+    console.log('课程日期范围无重叠，无冲突');
+    return {
+      hasConflict: false
+    };
+  }
+
+  // 如果时间没有重叠，则没有冲突
+  if (!isTimeOverlap(course1StartMinutes, course1EndMinutes, course2StartMinutes, course2EndMinutes)) {
+    console.log('课程时间段无重叠，无冲突');
+    return {
+      hasConflict: false
+    };
+  }
+
+  // 如果没有上课日信息，或者上课日列表为空，则无法判断冲突
+  if (!course1WeekDays.length || !course2WeekDays.length) {
+    console.log('课程上课日列表为空，无法判断是否冲突');
+    return {
+      hasConflict: false
+    };
+  }
+
+  // 检查上课日是否有重叠（例如都在周一上课）
+  var hasWeekDayOverlap = false;
+  var _iterator3 = _createForOfIteratorHelper(course1WeekDays),
+    _step3;
+  try {
+    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+      var day1 = _step3.value;
+      if (course2WeekDays.includes(day1)) {
+        hasWeekDayOverlap = true;
+        console.log('发现上课日重叠:', day1);
+        break;
+      }
+    }
+  } catch (err) {
+    _iterator3.e(err);
+  } finally {
+    _iterator3.f();
+  }
+  if (!hasWeekDayOverlap) {
+    console.log('课程上课日无重叠，无冲突');
+    return {
+      hasConflict: false
+    };
+  }
+
+  // 确定重叠的日期范围
+  var overlapStart = new Date(Math.max(course1Start.getTime(), course2Start.getTime()));
+  var overlapEnd = new Date(Math.min(course1End.getTime(), course2End.getTime()));
+  console.log('重叠日期范围:', overlapStart, overlapEnd);
+
+  // 获取课程1在重叠日期范围内的所有上课日期
+  var course1Dates = getMatchingDates(overlapStart, overlapEnd, course1WeekDays);
+  console.log('课程1在重叠范围内的上课日期:', course1Dates.length);
+
+  // 获取课程2在重叠日期范围内的所有上课日期
+  var course2Dates = getMatchingDates(overlapStart, overlapEnd, course2WeekDays);
+  console.log('课程2在重叠范围内的上课日期:', course2Dates.length);
+
+  // 查找冲突的日期
+  var conflictDates = [];
+  var _iterator4 = _createForOfIteratorHelper(course1Dates),
+    _step4;
+  try {
+    for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+      var date1 = _step4.value;
+      var _iterator5 = _createForOfIteratorHelper(course2Dates),
+        _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var date2 = _step5.value;
+          if (date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate()) {
+            // 日期相同，且时间有重叠，存在冲突
+            conflictDates.push(new Date(date1));
+            console.log('发现冲突日期:', formatDate(date1));
+            break;
+          }
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+    }
+  } catch (err) {
+    _iterator4.e(err);
+  } finally {
+    _iterator4.f();
+  }
+  var result = {
+    hasConflict: conflictDates.length > 0,
+    conflictDates: conflictDates
+  };
+  console.log('冲突检测结果:', result);
+  return result;
+}
+
+/**
+ * 格式化日期为 "YYYY-MM-DD" 格式
+ * @param {Date} date - 日期对象
+ * @returns {string} - 格式化后的日期字符串
+ */
+function formatDate(date) {
+  var year = date.getFullYear();
+  var month = String(date.getMonth() + 1).padStart(2, '0');
+  var day = String(date.getDate()).padStart(2, '0');
+  return "".concat(year, "-").concat(month, "-").concat(day);
+}
+
+/**
+ * 根据课程信息生成日历事件
+ * @param {Object} course - 课程信息
+ * @returns {Array} - 日历事件列表
+ */
+function generateCalendarEvents(course) {
+  console.log('生成课程日历事件:', course);
+  if (!course) {
+    console.error('课程对象为空');
+    return [];
+  }
+  if (!course.startDate || !course.endDate) {
+    console.error('课程缺少开始或结束日期:', course._id);
+    return [];
+  }
+  if (!course.classTime || !Array.isArray(course.classTime) || course.classTime.length === 0) {
+    console.error('课程缺少上课时间:', course._id);
+    return [];
+  }
+
+  // 解析日期
+  var startDate = parseDate(course.startDate);
+  var endDate = parseDate(course.endDate);
+  if (!startDate || !endDate) {
+    console.error('解析课程日期失败:', course.startDate, course.endDate);
+    return [];
+  }
+
+  // 日期顺序检查
+  if (startDate > endDate) {
+    console.error('课程开始日期晚于结束日期:', course.startDate, course.endDate);
+    return [];
+  }
+
+  // 获取所有上课日期
+  var classDates = getMatchingDates(startDate, endDate, course.classTime);
+  console.log('获取到上课日期数量:', classDates.length);
+  if (classDates.length === 0) {
+    console.warn('未能生成有效的上课日期');
+    return [];
+  }
+
+  // 为每个上课日期生成日历事件
+  return classDates.map(function (date) {
+    return {
+      id: "course-".concat(course._id || 'unknown', "-").concat(formatDate(date)),
+      title: course.title || course.courseTitle || '未命名课程',
+      start: formatDate(date) + ' ' + (course.startTime || '00:00'),
+      end: formatDate(date) + ' ' + (course.endTime || '00:00'),
+      courseId: course._id || 'unknown',
+      teacherName: course.teacherName || '未知',
+      location: course.location || course.schoolName || '未知',
+      color: '#FF6B00',
+      // 使用橙色作为默认颜色
+      textColor: '#FFFFFF'
+    };
+  });
+}
+module.exports = {
+  getCurrentSemesterDates: getCurrentSemesterDates,
+  parseDate: parseDate,
+  parseTimeToMinutes: parseTimeToMinutes,
+  isTimeOverlap: isTimeOverlap,
+  checkCoursesConflict: checkCoursesConflict,
+  generateCalendarEvents: generateCalendarEvents,
+  formatDate: formatDate,
+  getMatchingDates: getMatchingDates,
+  isMatchingWeekDay: isMatchingWeekDay
+};
 
 /***/ }),
 
@@ -11050,7 +11641,7 @@ var b = "development" === "development",
   k = "true" === undefined || !0 === undefined,
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
-  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7001,"debugPort":9001,"initialLaunchType":"local","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+  A = T({"address":["127.0.0.1","192.168.31.38","172.25.208.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"local","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
   O = T([{"provider":"aliyun","spaceName":"siwei-chuzhong","spaceId":"mp-a876f469-bab5-46b7-8863-2e7147900fdd","clientSecret":"IhCqrULEYv+AG3PS/Z7jrw==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
@@ -18917,21 +19508,7 @@ exports.default = Zs;
 
 /***/ }),
 
-/***/ 27:
-/*!************************************************************************************************!*\
-  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
-  \************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-// TODO(Babel 8): Remove this file.
-
-var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 28)();
-module.exports = runtime;
-
-/***/ }),
-
-/***/ 270:
+/***/ 263:
 /*!***********************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/user.js ***!
   \***********************************************************************************************/
@@ -19171,6 +19748,20 @@ var _default = {
 };
 exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
+/***/ 27:
+/*!************************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
+  \************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// TODO(Babel 8): Remove this file.
+
+var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 28)();
+module.exports = runtime;
 
 /***/ }),
 
@@ -19613,7 +20204,7 @@ module.exports = _inherits, module.exports.__esModule = true, module.exports["de
 
 /***/ }),
 
-/***/ 319:
+/***/ 312:
 /*!******************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/common/utils/marked.min.js ***!
   \******************************************************************************************************/
@@ -19703,7 +20294,83 @@ module.exports = _possibleConstructorReturn, module.exports.__esModule = true, m
 
 /***/ }),
 
-/***/ 328:
+/***/ 33:
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _getPrototypeOf(o) {
+  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _getPrototypeOf(o);
+}
+module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 34:
+/*!****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 33);
+var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
+var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 35);
+var construct = __webpack_require__(/*! ./construct.js */ 15);
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+  module.exports = _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !isNativeFunction(Class)) return Class;
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+      _cache.set(Class, Wrapper);
+    }
+    function Wrapper() {
+      return construct(Class, arguments, getPrototypeOf(this).constructor);
+    }
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return setPrototypeOf(Wrapper, Class);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _wrapNativeSuper(Class);
+}
+module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 35:
+/*!*****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _isNativeFunction(fn) {
+  try {
+    return Function.toString.call(fn).indexOf("[native code]") !== -1;
+  } catch (e) {
+    return typeof fn === "function";
+  }
+}
+module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 353:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
   \*******************************************************************************************************************************/
@@ -19817,24 +20484,339 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 33:
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/getPrototypeOf.js ***!
-  \***************************************************************/
+/***/ 36:
+/*!*******************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json?{"type":"origin-pages-json"} ***!
+  \*******************************************************************************************************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-function _getPrototypeOf(o) {
-  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _getPrototypeOf(o);
-}
-module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  "pages": [{
+    "path": "pages/index/index",
+    "style": {
+      "navigationBarTitleText": "",
+      "navigationBarBackgroundColor": "#ffffff",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/course/course",
+    "style": {
+      "navigationBarTitleText": "",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/user/user",
+    "style": {
+      "navigationBarTitleText": "我的",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/cart/index",
+    "style": {
+      "navigationBarTitleText": "购物车",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "enablePullDownRefresh": true
+    }
+  }, {
+    "path": "pages/user/favorite/index",
+    "style": {
+      "navigationBarTitleText": "我的收藏",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "enablePullDownRefresh": true
+    }
+  }, {
+    "path": "pages/course/detail",
+    "style": {
+      "navigationBarTitleText": "课程详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/teacher/detail",
+    "style": {
+      "navigationBarTitleText": "教师详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/login/login",
+    "style": {
+      "navigationBarTitleText": "登录",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/booking/list",
+    "style": {
+      "navigationBarTitleText": "我的预约",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/featured",
+    "style": {
+      "navigationBarTitleText": "精选好课",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/lectures",
+    "style": {
+      "navigationBarTitleText": "热点讲座",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/teacher/list",
+    "style": {
+      "navigationBarTitleText": "名师介绍",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/school/detail",
+    "style": {
+      "navigationBarTitleText": "校区详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/lecture-detail",
+    "style": {
+      "navigationBarTitleText": "讲座详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/upload-image",
+    "style": {
+      "navigationBarTitleText": "图片上传",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/news/list",
+    "style": {
+      "navigationBarTitleText": "最新通知",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom",
+      "enablePullDownRefresh": true
+    }
+  }, {
+    "path": "pages/news/detail",
+    "style": {
+      "navigationBarTitleText": "通知详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/user/booking",
+    "style": {
+      "navigationBarTitleText": "预约记录",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "enablePullDownRefresh": true
+    }
+  }, {
+    "path": "pages/user/booking-detail",
+    "style": {
+      "navigationBarTitleText": "预约详情",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/about/index",
+    "style": {
+      "navigationBarTitleText": "关于我们",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/setting/index",
+    "style": {
+      "navigationBarTitleText": "设置",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/edit-field",
+    "style": {
+      "navigationBarTitleText": "编辑资料",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/user/profile/index",
+    "style": {
+      "navigationBarTitleText": "个人资料",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/phone/index",
+    "style": {
+      "navigationBarTitleText": "手机绑定",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/user/wechat/index",
+    "style": {
+      "navigationBarTitleText": "微信账号",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/common/input-page",
+    "style": {
+      "navigationBarTitleText": "输入",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/common/markdown",
+    "style": {
+      "navigationBarTitleText": "文档",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom"
+    }
+  }, {
+    "path": "pages/user/calendar",
+    "style": {
+      "navigationBarTitleText": "我的课程日历",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/manage",
+    "style": {
+      "navigationBarTitleText": "课程管理",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "enablePullDownRefresh": false
+    }
+  }, {
+    "path": "pages/schedule/schedule",
+    "style": {
+      "navigationBarTitleText": "排课管理",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
+    }
+  }, {
+    "path": "pages/course/edit",
+    "style": {
+      "navigationBarTitleText": "编辑课程",
+      "enablePullDownRefresh": false
+    }
+  }],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "四维教育",
+    "navigationBarBackgroundColor": "#EC7A49",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#EC7A49",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [{
+      "pagePath": "pages/index/index",
+      "iconPath": "static/images/tabbar/home.png",
+      "selectedIconPath": "static/images/tabbar/home_cur.png",
+      "text": "首页"
+    }, {
+      "pagePath": "pages/course/course",
+      "iconPath": "static/images/tabbar/course.png",
+      "selectedIconPath": "static/images/tabbar/course_cur.png",
+      "text": "课程"
+    }, {
+      "pagePath": "pages/user/user",
+      "iconPath": "static/images/tabbar/my.png",
+      "selectedIconPath": "static/images/tabbar/my_cur.png",
+      "text": "我的"
+    }]
+  },
+  "subPackages": [{
+    "root": "uni_modules/uni-id-pages/pages",
+    "pages": [{
+      "path": "login/login-withoutpwd",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    }, {
+      "path": "login/login-withpwd",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    }, {
+      "path": "login/login-smscode",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    }, {
+      "path": "register/register",
+      "style": {
+        "navigationBarTitleText": "注册"
+      }
+    }, {
+      "path": "retrieve/retrieve",
+      "style": {
+        "navigationBarTitleText": "找回密码"
+      }
+    }, {
+      "path": "common/webview/webview",
+      "style": {
+        "enablePullDownRefresh": false,
+        "navigationBarTitleText": ""
+      }
+    }, {
+      "path": "userinfo/userinfo",
+      "style": {
+        "navigationBarTitleText": "个人资料"
+      }
+    }, {
+      "path": "userinfo/bind-mobile/bind-mobile",
+      "style": {
+        "navigationBarTitleText": "绑定手机号码"
+      }
+    }, {
+      "path": "userinfo/cropImage/cropImage",
+      "style": {
+        "navigationBarTitleText": ""
+      }
+    }, {
+      "path": "userinfo/set-pwd/set-pwd",
+      "style": {
+        "navigationBarTitleText": "设置密码"
+      }
+    }]
+  }]
+};
+exports.default = _default;
 
 /***/ }),
 
-/***/ 337:
+/***/ 362:
 /*!**************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vuex3/dist/vuex.common.js ***!
   \**************************************************************************************/
@@ -21091,66 +22073,28 @@ module.exports = index_cjs;
 
 /***/ }),
 
-/***/ 34:
-/*!****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/wrapNativeSuper.js ***!
-  \****************************************************************/
+/***/ 37:
+/*!******************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json?{"type":"stat"} ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getPrototypeOf = __webpack_require__(/*! ./getPrototypeOf.js */ 33);
-var setPrototypeOf = __webpack_require__(/*! ./setPrototypeOf.js */ 16);
-var isNativeFunction = __webpack_require__(/*! ./isNativeFunction.js */ 35);
-var construct = __webpack_require__(/*! ./construct.js */ 15);
-function _wrapNativeSuper(Class) {
-  var _cache = typeof Map === "function" ? new Map() : undefined;
-  module.exports = _wrapNativeSuper = function _wrapNativeSuper(Class) {
-    if (Class === null || !isNativeFunction(Class)) return Class;
-    if (typeof Class !== "function") {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    if (typeof _cache !== "undefined") {
-      if (_cache.has(Class)) return _cache.get(Class);
-      _cache.set(Class, Wrapper);
-    }
-    function Wrapper() {
-      return construct(Class, arguments, getPrototypeOf(this).constructor);
-    }
-    Wrapper.prototype = Object.create(Class.prototype, {
-      constructor: {
-        value: Wrapper,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-    return setPrototypeOf(Wrapper, Class);
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  return _wrapNativeSuper(Class);
-}
-module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  "appid": "__UNI__3F36A45"
+};
+exports.default = _default;
 
 /***/ }),
 
-/***/ 35:
-/*!*****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/isNativeFunction.js ***!
-  \*****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _isNativeFunction(fn) {
-  try {
-    return Function.toString.call(fn).indexOf("[native code]") !== -1;
-  } catch (e) {
-    return typeof fn === "function";
-  }
-}
-module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 354:
+/***/ 379:
 /*!********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/register/validator.js ***!
   \********************************************************************************************************************************/
@@ -21166,7 +22110,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 355));
+var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 380));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var _default = _objectSpread({
@@ -21226,7 +22170,18 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 355:
+/***/ 38:
+/*!**************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json ***!
+  \**************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+
+/***/ }),
+
+/***/ 380:
 /*!***********************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/password.js ***!
   \***********************************************************************************************************************/
@@ -21323,349 +22278,6 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 36:
-/*!***************************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/pages.json?{"type":"origin-pages-json"} ***!
-  \***************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  "pages": [{
-    "path": "pages/index/index",
-    "style": {
-      "navigationBarTitleText": "",
-      "navigationBarBackgroundColor": "#ffffff",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/course/course",
-    "style": {
-      "navigationBarTitleText": "",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/user/user",
-    "style": {
-      "navigationBarTitleText": "我的",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/cart/index",
-    "style": {
-      "navigationBarTitleText": "购物车",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/user/favorite/index",
-    "style": {
-      "navigationBarTitleText": "我的收藏",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/course/detail",
-    "style": {
-      "navigationBarTitleText": "课程详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/teacher/detail",
-    "style": {
-      "navigationBarTitleText": "教师详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/login/login",
-    "style": {
-      "navigationBarTitleText": "登录",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/booking/list",
-    "style": {
-      "navigationBarTitleText": "我的预约",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/featured",
-    "style": {
-      "navigationBarTitleText": "精选好课",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/lectures",
-    "style": {
-      "navigationBarTitleText": "热点讲座",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/teacher/list",
-    "style": {
-      "navigationBarTitleText": "名师介绍",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/booking/create",
-    "style": {
-      "navigationBarTitleText": "课程预约",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/school/detail",
-    "style": {
-      "navigationBarTitleText": "校区详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/lecture-detail",
-    "style": {
-      "navigationBarTitleText": "讲座详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/upload-image",
-    "style": {
-      "navigationBarTitleText": "图片上传",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/news/list",
-    "style": {
-      "navigationBarTitleText": "最新通知",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/news/detail",
-    "style": {
-      "navigationBarTitleText": "通知详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/user/booking",
-    "style": {
-      "navigationBarTitleText": "预约记录",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/user/booking-detail",
-    "style": {
-      "navigationBarTitleText": "预约详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/about/index",
-    "style": {
-      "navigationBarTitleText": "关于我们",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/setting/index",
-    "style": {
-      "navigationBarTitleText": "设置",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/edit-field",
-    "style": {
-      "navigationBarTitleText": "编辑资料",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/user/profile/index",
-    "style": {
-      "navigationBarTitleText": "个人资料",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/phone/index",
-    "style": {
-      "navigationBarTitleText": "手机绑定",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/wechat/index",
-    "style": {
-      "navigationBarTitleText": "微信账号",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/common/input-page",
-    "style": {
-      "navigationBarTitleText": "输入",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/common/markdown",
-    "style": {
-      "navigationBarTitleText": "文档",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }],
-  "globalStyle": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "四维教育",
-    "navigationBarBackgroundColor": "#EC7A49",
-    "backgroundColor": "#F8F8F8"
-  },
-  "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#EC7A49",
-    "borderStyle": "black",
-    "backgroundColor": "#ffffff",
-    "list": [{
-      "pagePath": "pages/index/index",
-      "iconPath": "static/images/tabbar/home.png",
-      "selectedIconPath": "static/images/tabbar/home_cur.png",
-      "text": "首页"
-    }, {
-      "pagePath": "pages/course/course",
-      "iconPath": "static/images/tabbar/course.png",
-      "selectedIconPath": "static/images/tabbar/course_cur.png",
-      "text": "课程"
-    }, {
-      "pagePath": "pages/user/user",
-      "iconPath": "static/images/tabbar/my.png",
-      "selectedIconPath": "static/images/tabbar/my_cur.png",
-      "text": "我的"
-    }]
-  },
-  "subPackages": [{
-    "root": "uni_modules/uni-id-pages/pages",
-    "pages": [{
-      "path": "login/login-withoutpwd",
-      "style": {
-        "navigationBarTitleText": "登录"
-      }
-    }, {
-      "path": "login/login-withpwd",
-      "style": {
-        "navigationBarTitleText": "登录"
-      }
-    }, {
-      "path": "login/login-smscode",
-      "style": {
-        "navigationBarTitleText": "登录"
-      }
-    }, {
-      "path": "register/register",
-      "style": {
-        "navigationBarTitleText": "注册"
-      }
-    }, {
-      "path": "retrieve/retrieve",
-      "style": {
-        "navigationBarTitleText": "找回密码"
-      }
-    }, {
-      "path": "common/webview/webview",
-      "style": {
-        "enablePullDownRefresh": false,
-        "navigationBarTitleText": ""
-      }
-    }, {
-      "path": "userinfo/userinfo",
-      "style": {
-        "navigationBarTitleText": "个人资料"
-      }
-    }, {
-      "path": "userinfo/bind-mobile/bind-mobile",
-      "style": {
-        "navigationBarTitleText": "绑定手机号码"
-      }
-    }, {
-      "path": "userinfo/cropImage/cropImage",
-      "style": {
-        "navigationBarTitleText": ""
-      }
-    }, {
-      "path": "userinfo/set-pwd/set-pwd",
-      "style": {
-        "navigationBarTitleText": "设置密码"
-      }
-    }]
-  }]
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 37:
-/*!**************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/pages.json?{"type":"stat"} ***!
-  \**************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  "appid": "__UNI__3F36A45"
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 38:
-/*!**********************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/pages.json ***!
-  \**********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-
-
-/***/ }),
-
 /***/ 4:
 /*!**********************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/interopRequireDefault.js ***!
@@ -21682,7 +22294,7 @@ module.exports = _interopRequireDefault, module.exports.__esModule = true, modul
 
 /***/ }),
 
-/***/ 414:
+/***/ 439:
 /*!********************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/index.js ***!
   \********************************************************************************************************************************************/
@@ -21697,150 +22309,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 415));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 416));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 417));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 440));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 441));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 442));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
   'zh-Hant': _zhHant.default
 };
 exports.default = _default;
-
-/***/ }),
-
-/***/ 415:
-/*!*******************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/en.json ***!
-  \*******************************************************************************************************************************************/
-/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"Pull up to show more\",\"uni-load-more.contentrefresh\":\"loading...\",\"uni-load-more.contentnomore\":\"No more data\"}");
-
-/***/ }),
-
-/***/ 416:
-/*!************************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hans.json ***!
-  \************************************************************************************************************************************************/
-/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉显示更多\",\"uni-load-more.contentrefresh\":\"正在加载...\",\"uni-load-more.contentnomore\":\"没有更多数据了\"}");
-
-/***/ }),
-
-/***/ 417:
-/*!************************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hant.json ***!
-  \************************************************************************************************************************************************/
-/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉顯示更多\",\"uni-load-more.contentrefresh\":\"正在加載...\",\"uni-load-more.contentnomore\":\"沒有更多數據了\"}");
-
-/***/ }),
-
-/***/ 432:
-/*!*******************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
-  \*******************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  data: function data() {
-    return {};
-  },
-  created: function created() {
-    this.popup = this.getParent();
-  },
-  methods: {
-    /**
-     * 获取父元素实例
-     */
-    getParent: function getParent() {
-      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'uniPopup';
-      var parent = this.$parent;
-      var parentName = parent.$options.name;
-      while (parentName !== name) {
-        parent = parent.$parent;
-        if (!parent) return false;
-        parentName = parent.$options.name;
-      }
-      return parent;
-    }
-  }
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 433:
-/*!************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
-  \************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 434));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 435));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 436));
-var _default = {
-  en: _en.default,
-  'zh-Hans': _zhHans.default,
-  'zh-Hant': _zhHant.default
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 434:
-/*!***********************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
-  \***********************************************************************************************************************************/
-/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\"ok\",\"uni-popup.placeholder\":\"pleace enter\",\"uni-popup.title\":\"Hint\",\"uni-popup.shareTitle\":\"Share to\"}");
-
-/***/ }),
-
-/***/ 435:
-/*!****************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
-  \****************************************************************************************************************************************/
-/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"确定\",\"uni-popup.placeholder\":\"请输入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
-
-/***/ }),
-
-/***/ 436:
-/*!****************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
-  \****************************************************************************************************************************************/
-/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"確定\",\"uni-popup.placeholder\":\"請輸入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
 
 /***/ }),
 
@@ -21976,7 +22453,325 @@ function normalizeComponent (
 
 /***/ }),
 
-/***/ 444:
+/***/ 440:
+/*!*******************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/en.json ***!
+  \*******************************************************************************************************************************************/
+/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"Pull up to show more\",\"uni-load-more.contentrefresh\":\"loading...\",\"uni-load-more.contentnomore\":\"No more data\"}");
+
+/***/ }),
+
+/***/ 441:
+/*!************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hans.json ***!
+  \************************************************************************************************************************************************/
+/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉显示更多\",\"uni-load-more.contentrefresh\":\"正在加载...\",\"uni-load-more.contentnomore\":\"没有更多数据了\"}");
+
+/***/ }),
+
+/***/ 442:
+/*!************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hant.json ***!
+  \************************************************************************************************************************************************/
+/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉顯示更多\",\"uni-load-more.contentrefresh\":\"正在加載...\",\"uni-load-more.contentnomore\":\"沒有更多數據了\"}");
+
+/***/ }),
+
+/***/ 45:
+/*!************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/init.js ***!
+  \************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
+// 导入配置
+
+// uni-id的云对象
+var uniIdCo = uniCloud.importObject('uni-id-co', {
+  customUI: true
+});
+// 用户配置的登录方式、是否打开调试模式
+var loginTypes = _config.default.loginTypes,
+  debug = _config.default.debug;
+function _default() {
+  return _ref.apply(this, arguments);
+}
+function _ref() {
+  _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+    var _yield$uniIdCo$getSup, supportedLoginType, data, list, db, onDBError;
+    return _regenerator.default.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            onDBError = function _onDBError(_ref2) {
+              var code = _ref2.code,
+                message = _ref2.message;
+            } // console.error('onDBError', {code,message});
+            ;
+            if (!debug) {
+              _context2.next = 10;
+              break;
+            }
+            _context2.next = 4;
+            return uniIdCo.getSupportedLoginType();
+          case 4:
+            _yield$uniIdCo$getSup = _context2.sent;
+            supportedLoginType = _yield$uniIdCo$getSup.supportedLoginType;
+            console.log('supportedLoginType: ' + JSON.stringify(supportedLoginType));
+            // 登录方式，服务端和客户端的映射关系
+            data = {
+              smsCode: 'mobile-code',
+              univerify: 'univerify',
+              username: 'username-password',
+              weixin: 'weixin',
+              qq: 'qq',
+              xiaomi: 'xiaomi',
+              sinaweibo: 'sinaweibo',
+              taobao: 'taobao',
+              facebook: 'facebook',
+              google: 'google',
+              alipay: 'alipay',
+              apple: 'apple',
+              weixinMobile: 'weixin'
+            }; // 遍历客户端配置的登录方式，与服务端比对。并在错误时抛出错误提示
+            list = loginTypes.filter(function (type) {
+              return !supportedLoginType.includes(data[type]);
+            });
+            if (list.length) {
+              console.error("\u9519\u8BEF\uFF1A\u524D\u7AEF\u542F\u7528\u7684\u767B\u5F55\u65B9\u5F0F:".concat(list.join('，'), ";\u6CA1\u6709\u5728\u670D\u52A1\u7AEF\u5B8C\u6210\u914D\u7F6E\u3002\u914D\u7F6E\u6587\u4EF6\u8DEF\u5F84\uFF1A\"/uni_modules/uni-config-center/uniCloud/cloudfunctions/common/uni-config-center/uni-id/config.json\""));
+            }
+          case 10:
+            // 3. 绑定clientDB错误事件
+            // clientDB对象
+            db = uniCloud.database();
+            db.on('error', onDBError);
+            // clientDB的错误提示
+
+            // 解绑clientDB错误事件
+            // db.off('error', onDBError)
+
+            // 4. 同步客户端push_clientid至device表
+            if (uniCloud.onRefreshToken) {
+              uniCloud.onRefreshToken(function () {
+                // console.log('onRefreshToken');
+                if (uni.getPushClientId) {
+                  uni.getPushClientId({
+                    success: function () {
+                      var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(e) {
+                        var pushClientId, res;
+                        return _regenerator.default.wrap(function _callee$(_context) {
+                          while (1) {
+                            switch (_context.prev = _context.next) {
+                              case 0:
+                                // console.log(e)
+                                pushClientId = e.cid; // console.log(pushClientId);
+                                _context.next = 3;
+                                return uniIdCo.setPushCid({
+                                  pushClientId: pushClientId
+                                });
+                              case 3:
+                                res = _context.sent;
+                              case 4:
+                              case "end":
+                                return _context.stop();
+                            }
+                          }
+                        }, _callee);
+                      }));
+                      function success(_x) {
+                        return _success.apply(this, arguments);
+                      }
+                      return success;
+                    }(),
+                    fail: function fail(e) {
+                      // console.log(e)
+                    }
+                  });
+                }
+              });
+            }
+          case 13:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _ref.apply(this, arguments);
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
+/***/ 457:
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
+  \*******************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  data: function data() {
+    return {};
+  },
+  created: function created() {
+    this.popup = this.getParent();
+  },
+  methods: {
+    /**
+     * 获取父元素实例
+     */
+    getParent: function getParent() {
+      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'uniPopup';
+      var parent = this.$parent;
+      var parentName = parent.$options.name;
+      while (parentName !== name) {
+        parent = parent.$parent;
+        if (!parent) return false;
+        parentName = parent.$options.name;
+      }
+      return parent;
+    }
+  }
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 458:
+/*!************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
+  \************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 459));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 460));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 461));
+var _default = {
+  en: _en.default,
+  'zh-Hans': _zhHans.default,
+  'zh-Hant': _zhHant.default
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 459:
+/*!***********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
+  \***********************************************************************************************************************************/
+/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\"ok\",\"uni-popup.placeholder\":\"pleace enter\",\"uni-popup.title\":\"Hint\",\"uni-popup.shareTitle\":\"Share to\"}");
+
+/***/ }),
+
+/***/ 46:
+/*!**************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/config.js ***!
+  \**************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  debug: true,
+  isAdmin: false,
+  customLoginPagePath: "/pages/login/login",
+  customHomePagePath: "/pages/index/index",
+  loginTypes: ['univerify', 'weixin', 'username', 'smsCode'],
+  agreements: {
+    serviceUrl: 'https://example.com/agreement',
+    privacyUrl: 'https://example.com/privacy',
+    scope: ['register', 'login']
+  },
+  "mp-weixin": {
+    "oauth": {
+      "weixin": {
+        "appid": "wx64b3a851f619fc04",
+        "appsecret": "c5c9c4047bf0c292e28f5019a950b18d"
+      }
+    }
+  },
+  appid: {
+    weixin: {
+      h5: 'wx64b3a851f619fc04',
+      web: 'wx64b3a851f619fc04'
+    }
+  },
+  passwordStrength: 'medium',
+  setPasswordAfterLogin: false
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 460:
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
+  \****************************************************************************************************************************************/
+/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"确定\",\"uni-popup.placeholder\":\"请输入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
+
+/***/ }),
+
+/***/ 461:
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
+  \****************************************************************************************************************************************/
+/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"確定\",\"uni-popup.placeholder\":\"請輸入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
+
+/***/ }),
+
+/***/ 469:
 /*!**********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/validate.js ***!
   \**********************************************************************************************************************************/
@@ -22668,7 +23463,51 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 445:
+/***/ 47:
+/*!************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/components/global.js ***!
+  \************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
+var _emptyTip = _interopRequireDefault(__webpack_require__(/*! ./empty-tip/empty-tip.vue */ 48));
+var _loadMore = _interopRequireDefault(__webpack_require__(/*! ./load-more/load-more.vue */ 55));
+var _courseCard = _interopRequireDefault(__webpack_require__(/*! ./course-card/course-card.vue */ 62));
+var _bookingItem = _interopRequireDefault(__webpack_require__(/*! ./booking-item/booking-item.vue */ 69));
+var _teacherCard = _interopRequireDefault(__webpack_require__(/*! ./teacher-card/teacher-card.vue */ 76));
+var _favoriteButton = _interopRequireDefault(__webpack_require__(/*! ./favorite-button/favorite-button.vue */ 83));
+// 空数据提示组件
+
+_vue.default.component('empty-tip', _emptyTip.default);
+
+// 加载更多组件
+
+_vue.default.component('load-more', _loadMore.default);
+
+// 课程卡片组件
+
+_vue.default.component('course-card', _courseCard.default);
+
+// 预约项目组件
+
+_vue.default.component('booking-item', _bookingItem.default);
+
+// 教师卡片组件
+
+_vue.default.component('teacher-card', _teacherCard.default);
+
+// 收藏按钮组件
+
+_vue.default.component('favorite-button', _favoriteButton.default);
+
+/***/ }),
+
+/***/ 470:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/utils.js ***!
   \*******************************************************************************************************************************/
@@ -23004,233 +23843,6 @@ exports.isEqual = isEqual;
 
 /***/ }),
 
-/***/ 45:
-/*!********************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/init.js ***!
-  \********************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
-var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
-// 导入配置
-
-// uni-id的云对象
-var uniIdCo = uniCloud.importObject('uni-id-co', {
-  customUI: true
-});
-// 用户配置的登录方式、是否打开调试模式
-var loginTypes = _config.default.loginTypes,
-  debug = _config.default.debug;
-function _default() {
-  return _ref.apply(this, arguments);
-}
-function _ref() {
-  _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-    var _yield$uniIdCo$getSup, supportedLoginType, data, list, db, onDBError;
-    return _regenerator.default.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            onDBError = function _onDBError(_ref2) {
-              var code = _ref2.code,
-                message = _ref2.message;
-            } // console.error('onDBError', {code,message});
-            ;
-            if (!debug) {
-              _context2.next = 10;
-              break;
-            }
-            _context2.next = 4;
-            return uniIdCo.getSupportedLoginType();
-          case 4:
-            _yield$uniIdCo$getSup = _context2.sent;
-            supportedLoginType = _yield$uniIdCo$getSup.supportedLoginType;
-            console.log('supportedLoginType: ' + JSON.stringify(supportedLoginType));
-            // 登录方式，服务端和客户端的映射关系
-            data = {
-              smsCode: 'mobile-code',
-              univerify: 'univerify',
-              username: 'username-password',
-              weixin: 'weixin',
-              qq: 'qq',
-              xiaomi: 'xiaomi',
-              sinaweibo: 'sinaweibo',
-              taobao: 'taobao',
-              facebook: 'facebook',
-              google: 'google',
-              alipay: 'alipay',
-              apple: 'apple',
-              weixinMobile: 'weixin'
-            }; // 遍历客户端配置的登录方式，与服务端比对。并在错误时抛出错误提示
-            list = loginTypes.filter(function (type) {
-              return !supportedLoginType.includes(data[type]);
-            });
-            if (list.length) {
-              console.error("\u9519\u8BEF\uFF1A\u524D\u7AEF\u542F\u7528\u7684\u767B\u5F55\u65B9\u5F0F:".concat(list.join('，'), ";\u6CA1\u6709\u5728\u670D\u52A1\u7AEF\u5B8C\u6210\u914D\u7F6E\u3002\u914D\u7F6E\u6587\u4EF6\u8DEF\u5F84\uFF1A\"/uni_modules/uni-config-center/uniCloud/cloudfunctions/common/uni-config-center/uni-id/config.json\""));
-            }
-          case 10:
-            // 3. 绑定clientDB错误事件
-            // clientDB对象
-            db = uniCloud.database();
-            db.on('error', onDBError);
-            // clientDB的错误提示
-
-            // 解绑clientDB错误事件
-            // db.off('error', onDBError)
-
-            // 4. 同步客户端push_clientid至device表
-            if (uniCloud.onRefreshToken) {
-              uniCloud.onRefreshToken(function () {
-                // console.log('onRefreshToken');
-                if (uni.getPushClientId) {
-                  uni.getPushClientId({
-                    success: function () {
-                      var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(e) {
-                        var pushClientId, res;
-                        return _regenerator.default.wrap(function _callee$(_context) {
-                          while (1) {
-                            switch (_context.prev = _context.next) {
-                              case 0:
-                                // console.log(e)
-                                pushClientId = e.cid; // console.log(pushClientId);
-                                _context.next = 3;
-                                return uniIdCo.setPushCid({
-                                  pushClientId: pushClientId
-                                });
-                              case 3:
-                                res = _context.sent;
-                              case 4:
-                              case "end":
-                                return _context.stop();
-                            }
-                          }
-                        }, _callee);
-                      }));
-                      function success(_x) {
-                        return _success.apply(this, arguments);
-                      }
-                      return success;
-                    }(),
-                    fail: function fail(e) {
-                      // console.log(e)
-                    }
-                  });
-                }
-              });
-            }
-          case 13:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-  return _ref.apply(this, arguments);
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
-/***/ 46:
-/*!**********************************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/uni_modules/uni-id-pages/config.js ***!
-  \**********************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  debug: true,
-  isAdmin: false,
-  customLoginPagePath: "/pages/login/login",
-  customHomePagePath: "/pages/index/index",
-  loginTypes: ['univerify', 'weixin', 'username', 'smsCode'],
-  agreements: {
-    serviceUrl: 'https://example.com/agreement',
-    privacyUrl: 'https://example.com/privacy',
-    scope: ['register', 'login']
-  },
-  "mp-weixin": {
-    "oauth": {
-      "weixin": {
-        "appid": "wx64b3a851f619fc04",
-        "appsecret": "c5c9c4047bf0c292e28f5019a950b18d"
-      }
-    }
-  },
-  appid: {
-    weixin: {
-      h5: 'wx64b3a851f619fc04',
-      web: 'wx64b3a851f619fc04'
-    }
-  },
-  passwordStrength: 'medium',
-  setPasswordAfterLogin: false
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 47:
-/*!********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/components/global.js ***!
-  \********************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
-var _emptyTip = _interopRequireDefault(__webpack_require__(/*! ./empty-tip/empty-tip.vue */ 48));
-var _loadMore = _interopRequireDefault(__webpack_require__(/*! ./load-more/load-more.vue */ 55));
-var _courseCard = _interopRequireDefault(__webpack_require__(/*! ./course-card/course-card.vue */ 62));
-var _bookingItem = _interopRequireDefault(__webpack_require__(/*! ./booking-item/booking-item.vue */ 69));
-var _teacherCard = _interopRequireDefault(__webpack_require__(/*! ./teacher-card/teacher-card.vue */ 76));
-var _favoriteButton = _interopRequireDefault(__webpack_require__(/*! ./favorite-button/favorite-button.vue */ 83));
-// 空数据提示组件
-
-_vue.default.component('empty-tip', _emptyTip.default);
-
-// 加载更多组件
-
-_vue.default.component('load-more', _loadMore.default);
-
-// 课程卡片组件
-
-_vue.default.component('course-card', _courseCard.default);
-
-// 预约项目组件
-
-_vue.default.component('booking-item', _bookingItem.default);
-
-// 教师卡片组件
-
-_vue.default.component('teacher-card', _teacherCard.default);
-
-// 收藏按钮组件
-
-_vue.default.component('favorite-button', _favoriteButton.default);
-
-/***/ }),
-
 /***/ 5:
 /*!**************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/slicedToArray.js ***!
@@ -23249,398 +23861,999 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 
 /***/ }),
 
-/***/ 530:
-/*!**************************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
-  \**************************************************************************************************************************************************/
+/***/ 506:
+/*!************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/util.js ***!
+  \************************************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.calcImageOffset = calcImageOffset;
-exports.calcImageScale = calcImageScale;
-exports.calcImageSize = calcImageSize;
-exports.calcPythagoreanTheorem = calcPythagoreanTheorem;
-exports.clipTouchMoveOfCalculate = clipTouchMoveOfCalculate;
-exports.determineDirection = determineDirection;
-exports.imageTouchMoveOfCalcOffset = imageTouchMoveOfCalcOffset;
-/**
- * 判断手指触摸位置
- */
-function determineDirection(clipX, clipY, clipWidth, clipHeight, currentX, currentY) {
-  /*
-   * (右下>>1 右上>>2 左上>>3 左下>>4)
-   */
-  var corner;
-  /**
-   * 思路：（利用直角坐标系）
-   *  1.找出裁剪框中心点
-   *  2.如点击坐标在上方点与左方点区域内，则点击为左上角
-   *  3.如点击坐标在下方点与右方点区域内，则点击为右下角
-   *  4.其他角同理
-   */
-  var mainPoint = [clipX + clipWidth / 2, clipY + clipHeight / 2]; // 中心点
-  var currentPoint = [currentX, currentY]; // 触摸点
-
-  if (currentPoint[0] <= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
-    corner = 3; // 左上
-  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
-    corner = 2; // 右上
-  } else if (currentPoint[0] <= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
-    corner = 4; // 左下
-  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
-    corner = 1; // 右下
-  }
-
-  return corner;
-}
-
-/**
- * 图片边缘检测检测时，计算图片偏移量
- */
-function calcImageOffset(data, scale) {
-  var left = data.imageLeft;
-  var top = data.imageTop;
-  scale = scale || data.scale;
-  var imageWidth = data.imageWidth;
-  var imageHeight = data.imageHeight;
-  if (data.angle / 90 % 2) {
-    imageWidth = data.imageHeight;
-    imageHeight = data.imageWidth;
-  }
-  var clipX = data.clipX,
-    clipWidth = data.clipWidth,
-    clipY = data.clipY,
-    clipHeight = data.clipHeight;
-
-  // 当前图片宽度/高度
-  var currentImageSize = function currentImageSize(size) {
-    return size * scale / 2;
-  };
-  var currentImageWidth = currentImageSize(imageWidth);
-  var currentImageHeight = currentImageSize(imageHeight);
-  left = clipX + currentImageWidth >= left ? left : clipX + currentImageWidth;
-  left = clipX + clipWidth - currentImageWidth <= left ? left : clipX + clipWidth - currentImageWidth;
-  top = clipY + currentImageHeight >= top ? top : clipY + currentImageHeight;
-  top = clipY + clipHeight - currentImageHeight <= top ? top : clipY + clipHeight - currentImageHeight;
-  return {
-    left: left,
-    top: top,
-    scale: scale
-  };
-}
-
-/**
- * 图片边缘检测时，计算图片缩放比例
- */
-function calcImageScale(data, scale) {
-  scale = scale || data.scale;
-  var imageWidth = data.imageWidth,
-    imageHeight = data.imageHeight,
-    clipWidth = data.clipWidth,
-    clipHeight = data.clipHeight,
-    angle = data.angle;
-  if (angle / 90 % 2) {
-    imageWidth = imageHeight;
-    imageHeight = imageWidth;
-  }
-  if (imageWidth * scale < clipWidth) {
-    scale = clipWidth / imageWidth;
-  }
-  if (imageHeight * scale < clipHeight) {
-    scale = Math.max(scale, clipHeight / imageHeight);
-  }
-  return scale;
-}
-
-/**
- * 计算图片尺寸
- */
-function calcImageSize(width, height, data) {
-  var imageWidth = width,
-    imageHeight = height;
-  var clipWidth = data.clipWidth,
-    clipHeight = data.clipHeight,
-    sysinfo = data.sysinfo,
-    originWidth = data.width,
-    originHeight = data.height;
-  if (imageWidth && imageHeight) {
-    if (imageWidth / imageHeight > (clipWidth || originWidth) / (clipWidth || originHeight)) {
-      imageHeight = clipHeight || originHeight;
-      imageWidth = width / height * imageHeight;
-    } else {
-      imageWidth = clipWidth || originWidth;
-      imageHeight = height / width * imageWidth;
-    }
-  } else {
-    var sys = sysinfo || uni.getSystemInfoSync();
-    imageWidth = sys.windowWidth;
-    imageHeight = 0;
-  }
-  return {
-    imageWidth: imageWidth,
-    imageHeight: imageHeight
-  };
-}
-
-/**
- * 勾股定理求斜边
- */
-function calcPythagoreanTheorem(width, height) {
-  return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
-}
-
-/**
- * 拖动裁剪框时计算
- */
-function clipTouchMoveOfCalculate(data, event) {
-  var clientX = event.touches[0].clientX;
-  var clientY = event.touches[0].clientY;
-  var clipWidth = data.clipWidth,
-    clipHeight = data.clipHeight,
-    oldClipY = data.clipY,
-    oldClipX = data.clipX,
-    clipStart = data.clipStart,
-    isLockRatio = data.isLockRatio,
-    maxWidth = data.maxWidth,
-    minWidth = data.minWidth,
-    maxHeight = data.maxHeight,
-    minHeight = data.minHeight;
-  maxWidth = maxWidth / 2;
-  minWidth = minWidth / 2;
-  minHeight = minHeight / 2;
-  maxHeight = maxHeight / 2;
-  var width = clipWidth,
-    height = clipHeight,
-    clipY = oldClipY,
-    clipX = oldClipX,
-    // 获取裁剪框实际宽度/高度
-    // 如果大于最大值则使用最大值
-    // 如果小于最小值则使用最小值
-    sizecorrect = function sizecorrect() {
-      width = width <= maxWidth ? width >= minWidth ? width : minWidth : maxWidth;
-      height = height <= maxHeight ? height >= minHeight ? height : minHeight : maxHeight;
-    },
-    sizeinspect = function sizeinspect() {
-      sizecorrect();
-      if ((width > maxWidth || width < minWidth || height > maxHeight || height < minHeight) && isLockRatio) {
-        return false;
-      } else {
-        return true;
-      }
-    };
-  //if (clipStart.corner) {
-  height = clipStart.height + (clipStart.corner > 1 && clipStart.corner < 4 ? 1 : -1) * (clipStart.y - clientY);
-  //}
-  switch (clipStart.corner) {
-    case 1:
-      width = clipStart.width - clipStart.x + clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) return;
-      break;
-    case 2:
-      width = clipStart.width - clipStart.x + clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) {
-        return;
-      } else {
-        clipY = clipStart.clipY - (height - clipStart.height);
-      }
-      break;
-    case 3:
-      width = clipStart.width + clipStart.x - clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) {
-        return;
-      } else {
-        clipY = clipStart.clipY - (height - clipStart.height);
-        clipX = clipStart.clipX - (width - clipStart.width);
-      }
-      break;
-    case 4:
-      width = clipStart.width + clipStart.x - clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) {
-        return;
-      } else {
-        clipX = clipStart.clipX - (width - clipStart.width);
-      }
-      break;
-    default:
-      break;
-  }
-  return {
-    width: width,
-    height: height,
-    clipX: clipX,
-    clipY: clipY
-  };
-}
-
-/**
- * 单指拖动图片计算偏移
- */
-function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
-  var left = clientXForLeft - data.touchRelative[0].x,
-    top = clientYForLeft - data.touchRelative[0].y;
-  return {
-    left: left,
-    top: top
-  };
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
-/***/ 538:
-/*!***************************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
-  \***************************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createAnimation = createAnimation;
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+exports.default = void 0;
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-// const defaultOption = {
-// 	duration: 300,
-// 	timingFunction: 'linear',
-// 	delay: 0,
-// 	transformOrigin: '50% 50% 0'
-// }
-var MPAnimation = /*#__PURE__*/function () {
-  function MPAnimation(options, _this) {
-    (0, _classCallCheck2.default)(this, MPAnimation);
-    this.options = options;
-    // 在iOS10+QQ小程序平台下，传给原生的对象一定是个普通对象而不是Proxy对象，否则会报parameter should be Object instead of ProxyObject的错误
-    this.animation = uni.createAnimation(_objectSpread({}, options));
-    this.currentStepAnimates = {};
-    this.next = 0;
-    this.$ = _this;
+var _calendar = _interopRequireDefault(__webpack_require__(/*! ./calendar.js */ 507));
+var Calendar = /*#__PURE__*/function () {
+  function Calendar() {
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      date = _ref.date,
+      selected = _ref.selected,
+      startDate = _ref.startDate,
+      endDate = _ref.endDate,
+      range = _ref.range;
+    (0, _classCallCheck2.default)(this, Calendar);
+    // 当前日期
+    this.date = this.getDate(new Date()); // 当前初入日期
+    // 打点信息
+    this.selected = selected || [];
+    // 范围开始
+    this.startDate = startDate;
+    // 范围结束
+    this.endDate = endDate;
+    this.range = range;
+    // 多选状态
+    this.cleanMultipleStatus();
+    // 每周日期
+    this.weeks = {};
+    // this._getWeek(this.date.fullDate)
   }
-  (0, _createClass2.default)(MPAnimation, [{
-    key: "_nvuePushAnimates",
-    value: function _nvuePushAnimates(type, args) {
-      var aniObj = this.currentStepAnimates[this.next];
-      var styles = {};
-      if (!aniObj) {
-        styles = {
-          styles: {},
-          config: {}
+  /**
+   * 设置日期
+   * @param {Object} date
+   */
+  (0, _createClass2.default)(Calendar, [{
+    key: "setDate",
+    value: function setDate(date) {
+      this.selectDate = this.getDate(date);
+      this._getWeek(this.selectDate.fullDate);
+    }
+
+    /**
+     * 清理多选状态
+     */
+  }, {
+    key: "cleanMultipleStatus",
+    value: function cleanMultipleStatus() {
+      this.multipleStatus = {
+        before: '',
+        after: '',
+        data: []
+      };
+    }
+
+    /**
+     * 重置开始日期
+     */
+  }, {
+    key: "resetSatrtDate",
+    value: function resetSatrtDate(startDate) {
+      // 范围开始
+      this.startDate = startDate;
+    }
+
+    /**
+     * 重置结束日期
+     */
+  }, {
+    key: "resetEndDate",
+    value: function resetEndDate(endDate) {
+      // 范围结束
+      this.endDate = endDate;
+    }
+
+    /**
+     * 获取任意时间
+     */
+  }, {
+    key: "getDate",
+    value: function getDate(date) {
+      var AddDayCount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var str = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'day';
+      if (!date) {
+        date = new Date();
+      }
+      if ((0, _typeof2.default)(date) !== 'object') {
+        date = date.replace(/-/g, '/');
+      }
+      var dd = new Date(date);
+      switch (str) {
+        case 'day':
+          dd.setDate(dd.getDate() + AddDayCount); // 获取AddDayCount天后的日期
+          break;
+        case 'month':
+          if (dd.getDate() === 31 && AddDayCount > 0) {
+            dd.setDate(dd.getDate() + AddDayCount);
+          } else {
+            var preMonth = dd.getMonth();
+            dd.setMonth(preMonth + AddDayCount); // 获取AddDayCount天后的日期
+            var nextMonth = dd.getMonth();
+            // 处理 pre 切换月份目标月份为2月没有当前日(30 31) 切换错误问题
+            if (AddDayCount < 0 && preMonth !== 0 && nextMonth - preMonth > AddDayCount) {
+              dd.setMonth(nextMonth + (nextMonth - preMonth + AddDayCount));
+            }
+            // 处理 next 切换月份目标月份为2月没有当前日(30 31) 切换错误问题
+            if (AddDayCount > 0 && nextMonth - preMonth > AddDayCount) {
+              dd.setMonth(nextMonth - (nextMonth - preMonth - AddDayCount));
+            }
+          }
+          break;
+        case 'year':
+          dd.setFullYear(dd.getFullYear() + AddDayCount); // 获取AddDayCount天后的日期
+          break;
+      }
+      var y = dd.getFullYear();
+      var m = dd.getMonth() + 1 < 10 ? '0' + (dd.getMonth() + 1) : dd.getMonth() + 1; // 获取当前月份的日期，不足10补0
+      var d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate(); // 获取当前几号，不足10补0
+      return {
+        fullDate: y + '-' + m + '-' + d,
+        year: y,
+        month: m,
+        date: d,
+        day: dd.getDay()
+      };
+    }
+
+    /**
+     * 获取上月剩余天数
+     */
+  }, {
+    key: "_getLastMonthDays",
+    value: function _getLastMonthDays(firstDay, full) {
+      var dateArr = [];
+      for (var i = firstDay; i > 0; i--) {
+        var beforeDate = new Date(full.year, full.month - 1, -i + 1).getDate();
+        dateArr.push({
+          date: beforeDate,
+          month: full.month - 1,
+          lunar: this.getlunar(full.year, full.month - 1, beforeDate),
+          disable: true
+        });
+      }
+      return dateArr;
+    }
+    /**
+     * 获取本月天数
+     */
+  }, {
+    key: "_currentMonthDys",
+    value: function _currentMonthDys(dateData, full) {
+      var _this = this;
+      var dateArr = [];
+      var fullDate = this.date.fullDate;
+      var _loop = function _loop(i) {
+        var nowDate = full.year + '-' + (full.month < 10 ? full.month : full.month) + '-' + (i < 10 ? '0' + i : i);
+        // 是否今天
+        var isDay = fullDate === nowDate;
+        // 获取打点信息
+        var info = _this.selected && _this.selected.find(function (item) {
+          if (_this.dateEqual(nowDate, item.date)) {
+            return item;
+          }
+        });
+
+        // 日期禁用
+        var disableBefore = true;
+        var disableAfter = true;
+        if (_this.startDate) {
+          // let dateCompBefore = this.dateCompare(this.startDate, fullDate)
+          // disableBefore = this.dateCompare(dateCompBefore ? this.startDate : fullDate, nowDate)
+          disableBefore = _this.dateCompare(_this.startDate, nowDate);
+        }
+        if (_this.endDate) {
+          // let dateCompAfter = this.dateCompare(fullDate, this.endDate)
+          // disableAfter = this.dateCompare(nowDate, dateCompAfter ? this.endDate : fullDate)
+          disableAfter = _this.dateCompare(nowDate, _this.endDate);
+        }
+        var multiples = _this.multipleStatus.data;
+        var checked = false;
+        var multiplesStatus = -1;
+        if (_this.range) {
+          if (multiples) {
+            multiplesStatus = multiples.findIndex(function (item) {
+              return _this.dateEqual(item, nowDate);
+            });
+          }
+          if (multiplesStatus !== -1) {
+            checked = true;
+          }
+        }
+        var data = {
+          fullDate: nowDate,
+          year: full.year,
+          date: i,
+          multiple: _this.range ? checked : false,
+          beforeMultiple: _this.dateEqual(_this.multipleStatus.before, nowDate),
+          afterMultiple: _this.dateEqual(_this.multipleStatus.after, nowDate),
+          month: full.month,
+          lunar: _this.getlunar(full.year, full.month, i),
+          disable: !(disableBefore && disableAfter),
+          isDay: isDay
         };
-      } else {
-        styles = aniObj;
-      }
-      if (animateTypes1.includes(type)) {
-        if (!styles.styles.transform) {
-          styles.styles.transform = '';
+        if (info) {
+          data.extraInfo = info;
         }
-        var unit = '';
-        if (type === 'rotate') {
-          unit = 'deg';
-        }
-        styles.styles.transform += "".concat(type, "(").concat(args + unit, ") ");
-      } else {
-        styles.styles[type] = "".concat(args);
+        dateArr.push(data);
+      };
+      for (var i = 1; i <= dateData; i++) {
+        _loop(i);
       }
-      this.currentStepAnimates[this.next] = styles;
+      return dateArr;
     }
+    /**
+     * 获取下月天数
+     */
   }, {
-    key: "_animateRun",
-    value: function _animateRun() {
-      var styles = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var ref = this.$.$refs['ani'].ref;
-      if (!ref) return;
-      return new Promise(function (resolve, reject) {
-        nvueAnimation.transition(ref, _objectSpread({
-          styles: styles
-        }, config), function (res) {
-          resolve();
+    key: "_getNextMonthDays",
+    value: function _getNextMonthDays(surplus, full) {
+      var dateArr = [];
+      for (var i = 1; i < surplus + 1; i++) {
+        dateArr.push({
+          date: i,
+          month: Number(full.month) + 1,
+          lunar: this.getlunar(full.year, Number(full.month) + 1, i),
+          disable: true
         });
-      });
+      }
+      return dateArr;
     }
+
+    /**
+     * 获取当前日期详情
+     * @param {Object} date
+     */
   }, {
-    key: "_nvueNextAnimate",
-    value: function _nvueNextAnimate(animates) {
+    key: "getInfo",
+    value: function getInfo(date) {
       var _this2 = this;
-      var step = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      var fn = arguments.length > 2 ? arguments[2] : undefined;
-      var obj = animates[step];
-      if (obj) {
-        var styles = obj.styles,
-          config = obj.config;
-        this._animateRun(styles, config).then(function () {
-          step += 1;
-          _this2._nvueNextAnimate(animates, step, fn);
-        });
+      if (!date) {
+        date = new Date();
+      }
+      var dateInfo = this.canlender.find(function (item) {
+        return item.fullDate === _this2.getDate(date).fullDate;
+      });
+      return dateInfo;
+    }
+
+    /**
+     * 比较时间大小
+     */
+  }, {
+    key: "dateCompare",
+    value: function dateCompare(startDate, endDate) {
+      // 计算截止时间
+      startDate = new Date(startDate.replace('-', '/').replace('-', '/'));
+      // 计算详细项的截止时间
+      endDate = new Date(endDate.replace('-', '/').replace('-', '/'));
+      if (startDate <= endDate) {
+        return true;
       } else {
-        this.currentStepAnimates = {};
-        typeof fn === 'function' && fn();
-        this.isEnd = true;
+        return false;
       }
     }
+
+    /**
+     * 比较时间是否相等
+     */
   }, {
-    key: "step",
-    value: function step() {
-      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      this.animation.step(config);
-      return this;
+    key: "dateEqual",
+    value: function dateEqual(before, after) {
+      // 计算截止时间
+      before = new Date(before.replace('-', '/').replace('-', '/'));
+      // 计算详细项的截止时间
+      after = new Date(after.replace('-', '/').replace('-', '/'));
+      if (before.getTime() - after.getTime() === 0) {
+        return true;
+      } else {
+        return false;
+      }
     }
+
+    /**
+     * 获取日期范围内所有日期
+     * @param {Object} begin
+     * @param {Object} end
+     */
   }, {
-    key: "run",
-    value: function run(fn) {
-      this.$.animationData = this.animation.export();
-      this.$.timer = setTimeout(function () {
-        typeof fn === 'function' && fn();
-      }, this.$.durationTime);
+    key: "geDateAll",
+    value: function geDateAll(begin, end) {
+      var arr = [];
+      var ab = begin.split('-');
+      var ae = end.split('-');
+      var db = new Date();
+      db.setFullYear(ab[0], ab[1] - 1, ab[2]);
+      var de = new Date();
+      de.setFullYear(ae[0], ae[1] - 1, ae[2]);
+      var unixDb = db.getTime() - 24 * 60 * 60 * 1000;
+      var unixDe = de.getTime() - 24 * 60 * 60 * 1000;
+      for (var k = unixDb; k <= unixDe;) {
+        k = k + 24 * 60 * 60 * 1000;
+        arr.push(this.getDate(new Date(parseInt(k))).fullDate);
+      }
+      return arr;
     }
+    /**
+     * 计算阴历日期显示
+     */
+  }, {
+    key: "getlunar",
+    value: function getlunar(year, month, date) {
+      return _calendar.default.solar2lunar(year, month, date);
+    }
+    /**
+     * 设置打点
+     */
+  }, {
+    key: "setSelectInfo",
+    value: function setSelectInfo(data, value) {
+      this.selected = value;
+      this._getWeek(data);
+    }
+
+    /**
+     *  获取多选状态
+     */
+  }, {
+    key: "setMultiple",
+    value: function setMultiple(fullDate) {
+      var _this$multipleStatus = this.multipleStatus,
+        before = _this$multipleStatus.before,
+        after = _this$multipleStatus.after;
+      if (!this.range) return;
+      if (before && after) {
+        this.multipleStatus.before = fullDate;
+        this.multipleStatus.after = '';
+        this.multipleStatus.data = [];
+      } else {
+        if (!before) {
+          this.multipleStatus.before = fullDate;
+        } else {
+          this.multipleStatus.after = fullDate;
+          if (this.dateCompare(this.multipleStatus.before, this.multipleStatus.after)) {
+            this.multipleStatus.data = this.geDateAll(this.multipleStatus.before, this.multipleStatus.after);
+          } else {
+            this.multipleStatus.data = this.geDateAll(this.multipleStatus.after, this.multipleStatus.before);
+          }
+        }
+      }
+      this._getWeek(fullDate);
+    }
+
+    /**
+     * 获取每周数据
+     * @param {Object} dateData
+     */
+  }, {
+    key: "_getWeek",
+    value: function _getWeek(dateData) {
+      var _this$getDate = this.getDate(dateData),
+        year = _this$getDate.year,
+        month = _this$getDate.month;
+      var firstDay = new Date(year, month - 1, 1).getDay();
+      var currentDay = new Date(year, month, 0).getDate();
+      var dates = {
+        lastMonthDays: this._getLastMonthDays(firstDay, this.getDate(dateData)),
+        // 上个月末尾几天
+        currentMonthDys: this._currentMonthDys(currentDay, this.getDate(dateData)),
+        // 本月天数
+        nextMonthDays: [],
+        // 下个月开始几天
+        weeks: []
+      };
+      var canlender = [];
+      var surplus = 42 - (dates.lastMonthDays.length + dates.currentMonthDys.length);
+      dates.nextMonthDays = this._getNextMonthDays(surplus, this.getDate(dateData));
+      canlender = canlender.concat(dates.lastMonthDays, dates.currentMonthDys, dates.nextMonthDays);
+      var weeks = {};
+      // 拼接数组  上个月开始几天 + 本月天数+ 下个月开始几天
+      for (var i = 0; i < canlender.length; i++) {
+        if (i % 7 === 0) {
+          weeks[parseInt(i / 7)] = new Array(7);
+        }
+        weeks[parseInt(i / 7)][i % 7] = canlender[i];
+      }
+      this.canlender = canlender;
+      this.weeks = weeks;
+    }
+
+    //静态方法
+    // static init(date) {
+    // 	if (!this.instance) {
+    // 		this.instance = new Calendar(date);
+    // 	}
+    // 	return this.instance;
+    // }
   }]);
-  return MPAnimation;
+  return Calendar;
 }();
-var animateTypes1 = ['matrix', 'matrix3d', 'rotate', 'rotate3d', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scale3d', 'scaleX', 'scaleY', 'scaleZ', 'skew', 'skewX', 'skewY', 'translate', 'translate3d', 'translateX', 'translateY', 'translateZ'];
-var animateTypes2 = ['opacity', 'backgroundColor'];
-var animateTypes3 = ['width', 'height', 'left', 'right', 'top', 'bottom'];
-animateTypes1.concat(animateTypes2, animateTypes3).forEach(function (type) {
-  MPAnimation.prototype[type] = function () {
-    var _this$animation;
-    (_this$animation = this.animation)[type].apply(_this$animation, arguments);
-    return this;
-  };
-});
-function createAnimation(option, _this) {
-  if (!_this) return;
-  clearTimeout(_this.timer);
-  return new MPAnimation(option, _this);
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+var _default = Calendar;
+exports.default = _default;
 
 /***/ }),
 
-/***/ 544:
+/***/ 507:
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/calendar.js ***!
+  \****************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+/**
+* @1900-2100区间内的公历、农历互转
+* @charset UTF-8
+* @github  https://github.com/jjonline/calendar.js
+* @Author  Jea杨(JJonline@JJonline.Cn)
+* @Time    2014-7-21
+* @Time    2016-8-13 Fixed 2033hex、Attribution Annals
+* @Time    2016-9-25 Fixed lunar LeapMonth Param Bug
+* @Time    2017-7-24 Fixed use getTerm Func Param Error.use solar year,NOT lunar year
+* @Version 1.0.3
+* @公历转农历：calendar.solar2lunar(1987,11,01); //[you can ignore params of prefix 0]
+* @农历转公历：calendar.lunar2solar(1987,09,10); //[you can ignore params of prefix 0]
+*/
+/* eslint-disable */
+var calendar = {
+  /**
+      * 农历1900-2100的润大小信息表
+      * @Array Of Property
+      * @return Hex
+      */
+  lunarInfo: [0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
+  // 1900-1909
+  0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
+  // 1910-1919
+  0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,
+  // 1920-1929
+  0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950,
+  // 1930-1939
+  0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557,
+  // 1940-1949
+  0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5b0, 0x14573, 0x052b0, 0x0a9a8, 0x0e950, 0x06aa0,
+  // 1950-1959
+  0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0,
+  // 1960-1969
+  0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b6a0, 0x195a6,
+  // 1970-1979
+  0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570,
+  // 1980-1989
+  0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x05ac0, 0x0ab60, 0x096d5, 0x092e0,
+  // 1990-1999
+  0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5,
+  // 2000-2009
+  0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930,
+  // 2010-2019
+  0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,
+  // 2020-2029
+  0x05aa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,
+  // 2030-2039
+  0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0,
+  // 2040-2049
+  /** Add By JJonline@JJonline.Cn**/
+  0x14b63, 0x09370, 0x049f8, 0x04970, 0x064b0, 0x168a6, 0x0ea50, 0x06b20, 0x1a6c4, 0x0aae0,
+  // 2050-2059
+  0x0a2e0, 0x0d2e3, 0x0c960, 0x0d557, 0x0d4a0, 0x0da50, 0x05d55, 0x056a0, 0x0a6d0, 0x055d4,
+  // 2060-2069
+  0x052d0, 0x0a9b8, 0x0a950, 0x0b4a0, 0x0b6a6, 0x0ad50, 0x055a0, 0x0aba4, 0x0a5b0, 0x052b0,
+  // 2070-2079
+  0x0b273, 0x06930, 0x07337, 0x06aa0, 0x0ad50, 0x14b55, 0x04b60, 0x0a570, 0x054e4, 0x0d160,
+  // 2080-2089
+  0x0e968, 0x0d520, 0x0daa0, 0x16aa6, 0x056d0, 0x04ae0, 0x0a9d4, 0x0a2d0, 0x0d150, 0x0f252,
+  // 2090-2099
+  0x0d520],
+  // 2100
+
+  /**
+      * 公历每个月份的天数普通表
+      * @Array Of Property
+      * @return Number
+      */
+  solarMonth: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+  /**
+      * 天干地支之天干速查表
+      * @Array Of Property trans["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"]
+      * @return Cn string
+      */
+  Gan: ["\u7532", "\u4E59", "\u4E19", "\u4E01", "\u620A", "\u5DF1", "\u5E9A", "\u8F9B", "\u58EC", "\u7678"],
+  /**
+      * 天干地支之地支速查表
+      * @Array Of Property
+      * @trans["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]
+      * @return Cn string
+      */
+  Zhi: ["\u5B50", "\u4E11", "\u5BC5", "\u536F", "\u8FB0", "\u5DF3", "\u5348", "\u672A", "\u7533", "\u9149", "\u620C", "\u4EA5"],
+  /**
+      * 天干地支之地支速查表<=>生肖
+      * @Array Of Property
+      * @trans["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"]
+      * @return Cn string
+      */
+  Animals: ["\u9F20", "\u725B", "\u864E", "\u5154", "\u9F99", "\u86C7", "\u9A6C", "\u7F8A", "\u7334", "\u9E21", "\u72D7", "\u732A"],
+  /**
+      * 24节气速查表
+      * @Array Of Property
+      * @trans["小寒","大寒","立春","雨水","惊蛰","春分","清明","谷雨","立夏","小满","芒种","夏至","小暑","大暑","立秋","处暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至"]
+      * @return Cn string
+      */
+  solarTerm: ["\u5C0F\u5BD2", "\u5927\u5BD2", "\u7ACB\u6625", "\u96E8\u6C34", "\u60CA\u86F0", "\u6625\u5206", "\u6E05\u660E", "\u8C37\u96E8", "\u7ACB\u590F", "\u5C0F\u6EE1", "\u8292\u79CD", "\u590F\u81F3", "\u5C0F\u6691", "\u5927\u6691", "\u7ACB\u79CB", "\u5904\u6691", "\u767D\u9732", "\u79CB\u5206", "\u5BD2\u9732", "\u971C\u964D", "\u7ACB\u51AC", "\u5C0F\u96EA", "\u5927\u96EA", "\u51AC\u81F3"],
+  /**
+      * 1900-2100各年的24节气日期速查表
+      * @Array Of Property
+      * @return 0x string For splice
+      */
+  sTermInfo: ['9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c3598082c95f8c965cc920f', '97bd0b06bdb0722c965ce1cfcc920f', 'b027097bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c359801ec95f8c965cc920f', '97bd0b06bdb0722c965ce1cfcc920f', 'b027097bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c359801ec95f8c965cc920f', '97bd0b06bdb0722c965ce1cfcc920f', 'b027097bd097c36b0b6fc9274c91aa', '9778397bd19801ec9210c965cc920e', '97b6b97bd19801ec95f8c965cc920f', '97bd09801d98082c95f8e1cfcc920f', '97bd097bd097c36b0b6fc9210c8dc2', '9778397bd197c36c9210c9274c91aa', '97b6b97bd19801ec95f8c965cc920e', '97bd09801d98082c95f8e1cfcc920f', '97bd097bd097c36b0b6fc9210c8dc2', '9778397bd097c36c9210c9274c91aa', '97b6b97bd19801ec95f8c965cc920e', '97bcf97c3598082c95f8e1cfcc920f', '97bd097bd097c36b0b6fc9210c8dc2', '9778397bd097c36c9210c9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c3598082c95f8c965cc920f', '97bd097bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c3598082c95f8c965cc920f', '97bd097bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c359801ec95f8c965cc920f', '97bd097bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c359801ec95f8c965cc920f', '97bd097bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf97c359801ec95f8c965cc920f', '97bd097bd07f595b0b6fc920fb0722', '9778397bd097c36b0b6fc9210c8dc2', '9778397bd19801ec9210c9274c920e', '97b6b97bd19801ec95f8c965cc920f', '97bd07f5307f595b0b0bc920fb0722', '7f0e397bd097c36b0b6fc9210c8dc2', '9778397bd097c36c9210c9274c920e', '97b6b97bd19801ec95f8c965cc920f', '97bd07f5307f595b0b0bc920fb0722', '7f0e397bd097c36b0b6fc9210c8dc2', '9778397bd097c36c9210c9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bd07f1487f595b0b0bc920fb0722', '7f0e397bd097c36b0b6fc9210c8dc2', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf7f1487f595b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf7f1487f595b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf7f1487f531b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c965cc920e', '97bcf7f1487f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b97bd19801ec9210c9274c920e', '97bcf7f0e47f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '9778397bd097c36b0b6fc9210c91aa', '97b6b97bd197c36c9210c9274c920e', '97bcf7f0e47f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '9778397bd097c36b0b6fc9210c8dc2', '9778397bd097c36c9210c9274c920e', '97b6b7f0e47f531b0723b0b6fb0722', '7f0e37f5307f595b0b0bc920fb0722', '7f0e397bd097c36b0b6fc9210c8dc2', '9778397bd097c36b0b70c9274c91aa', '97b6b7f0e47f531b0723b0b6fb0721', '7f0e37f1487f595b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc9210c8dc2', '9778397bd097c36b0b6fc9274c91aa', '97b6b7f0e47f531b0723b0b6fb0721', '7f0e27f1487f595b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '9778397bd097c36b0b6fc9274c91aa', '97b6b7f0e47f531b0723b0787b0721', '7f0e27f0e47f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '9778397bd097c36b0b6fc9210c91aa', '97b6b7f0e47f149b0723b0787b0721', '7f0e27f0e47f531b0723b0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '9778397bd097c36b0b6fc9210c8dc2', '977837f0e37f149b0723b0787b0721', '7f07e7f0e47f531b0723b0b6fb0722', '7f0e37f5307f595b0b0bc920fb0722', '7f0e397bd097c35b0b6fc9210c8dc2', '977837f0e37f14998082b0787b0721', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e37f1487f595b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc9210c8dc2', '977837f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '977837f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e397bd097c35b0b6fc920fb0722', '977837f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '977837f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '977837f0e37f14998082b0787b06bd', '7f07e7f0e47f149b0723b0787b0721', '7f0e27f0e47f531b0b0bb0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '977837f0e37f14998082b0723b06bd', '7f07e7f0e37f149b0723b0787b0721', '7f0e27f0e47f531b0723b0b6fb0722', '7f0e397bd07f595b0b0bc920fb0722', '977837f0e37f14898082b0723b02d5', '7ec967f0e37f14998082b0787b0721', '7f07e7f0e47f531b0723b0b6fb0722', '7f0e37f1487f595b0b0bb0b6fb0722', '7f0e37f0e37f14898082b0723b02d5', '7ec967f0e37f14998082b0787b0721', '7f07e7f0e47f531b0723b0b6fb0722', '7f0e37f1487f531b0b0bb0b6fb0722', '7f0e37f0e37f14898082b0723b02d5', '7ec967f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e37f1487f531b0b0bb0b6fb0722', '7f0e37f0e37f14898082b072297c35', '7ec967f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e37f0e37f14898082b072297c35', '7ec967f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e37f0e366aa89801eb072297c35', '7ec967f0e37f14998082b0787b06bd', '7f07e7f0e47f149b0723b0787b0721', '7f0e27f1487f531b0b0bb0b6fb0722', '7f0e37f0e366aa89801eb072297c35', '7ec967f0e37f14998082b0723b06bd', '7f07e7f0e47f149b0723b0787b0721', '7f0e27f0e47f531b0723b0b6fb0722', '7f0e37f0e366aa89801eb072297c35', '7ec967f0e37f14998082b0723b06bd', '7f07e7f0e37f14998083b0787b0721', '7f0e27f0e47f531b0723b0b6fb0722', '7f0e37f0e366aa89801eb072297c35', '7ec967f0e37f14898082b0723b02d5', '7f07e7f0e37f14998082b0787b0721', '7f07e7f0e47f531b0723b0b6fb0722', '7f0e36665b66aa89801e9808297c35', '665f67f0e37f14898082b0723b02d5', '7ec967f0e37f14998082b0787b0721', '7f07e7f0e47f531b0723b0b6fb0722', '7f0e36665b66a449801e9808297c35', '665f67f0e37f14898082b0723b02d5', '7ec967f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e36665b66a449801e9808297c35', '665f67f0e37f14898082b072297c35', '7ec967f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e26665b66a449801e9808297c35', '665f67f0e37f1489801eb072297c35', '7ec967f0e37f14998082b0787b06bd', '7f07e7f0e47f531b0723b0b6fb0721', '7f0e27f1487f531b0b0bb0b6fb0722'],
+  /**
+      * 数字转中文速查表
+      * @Array Of Property
+      * @trans ['日','一','二','三','四','五','六','七','八','九','十']
+      * @return Cn string
+      */
+  nStr1: ["\u65E5", "\u4E00", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D", "\u4E03", "\u516B", "\u4E5D", "\u5341"],
+  /**
+      * 日期转农历称呼速查表
+      * @Array Of Property
+      * @trans ['初','十','廿','卅']
+      * @return Cn string
+      */
+  nStr2: ["\u521D", "\u5341", "\u5EFF", "\u5345"],
+  /**
+      * 月份转农历称呼速查表
+      * @Array Of Property
+      * @trans ['正','一','二','三','四','五','六','七','八','九','十','冬','腊']
+      * @return Cn string
+      */
+  nStr3: ["\u6B63", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D", "\u4E03", "\u516B", "\u4E5D", "\u5341", "\u51AC", "\u814A"],
+  /**
+      * 返回农历y年一整年的总天数
+      * @param lunar Year
+      * @return Number
+      * @eg:var count = calendar.lYearDays(1987) ;//count=387
+      */
+  lYearDays: function lYearDays(y) {
+    var i;
+    var sum = 348;
+    for (i = 0x8000; i > 0x8; i >>= 1) {
+      sum += this.lunarInfo[y - 1900] & i ? 1 : 0;
+    }
+    return sum + this.leapDays(y);
+  },
+  /**
+      * 返回农历y年闰月是哪个月；若y年没有闰月 则返回0
+      * @param lunar Year
+      * @return Number (0-12)
+      * @eg:var leapMonth = calendar.leapMonth(1987) ;//leapMonth=6
+      */
+  leapMonth: function leapMonth(y) {
+    // 闰字编码 \u95f0
+    return this.lunarInfo[y - 1900] & 0xf;
+  },
+  /**
+      * 返回农历y年闰月的天数 若该年没有闰月则返回0
+      * @param lunar Year
+      * @return Number (0、29、30)
+      * @eg:var leapMonthDay = calendar.leapDays(1987) ;//leapMonthDay=29
+      */
+  leapDays: function leapDays(y) {
+    if (this.leapMonth(y)) {
+      return this.lunarInfo[y - 1900] & 0x10000 ? 30 : 29;
+    }
+    return 0;
+  },
+  /**
+      * 返回农历y年m月（非闰月）的总天数，计算m为闰月时的天数请使用leapDays方法
+      * @param lunar Year
+      * @return Number (-1、29、30)
+      * @eg:var MonthDay = calendar.monthDays(1987,9) ;//MonthDay=29
+      */
+  monthDays: function monthDays(y, m) {
+    if (m > 12 || m < 1) {
+      return -1;
+    } // 月份参数从1至12，参数错误返回-1
+    return this.lunarInfo[y - 1900] & 0x10000 >> m ? 30 : 29;
+  },
+  /**
+      * 返回公历(!)y年m月的天数
+      * @param solar Year
+      * @return Number (-1、28、29、30、31)
+      * @eg:var solarMonthDay = calendar.leapDays(1987) ;//solarMonthDay=30
+      */
+  solarDays: function solarDays(y, m) {
+    if (m > 12 || m < 1) {
+      return -1;
+    } // 若参数错误 返回-1
+    var ms = m - 1;
+    if (ms == 1) {
+      // 2月份的闰平规律测算后确认返回28或29
+      return y % 4 == 0 && y % 100 != 0 || y % 400 == 0 ? 29 : 28;
+    } else {
+      return this.solarMonth[ms];
+    }
+  },
+  /**
+     * 农历年份转换为干支纪年
+     * @param  lYear 农历年的年份数
+     * @return Cn string
+     */
+  toGanZhiYear: function toGanZhiYear(lYear) {
+    var ganKey = (lYear - 3) % 10;
+    var zhiKey = (lYear - 3) % 12;
+    if (ganKey == 0) ganKey = 10; // 如果余数为0则为最后一个天干
+    if (zhiKey == 0) zhiKey = 12; // 如果余数为0则为最后一个地支
+    return this.Gan[ganKey - 1] + this.Zhi[zhiKey - 1];
+  },
+  /**
+     * 公历月、日判断所属星座
+     * @param  cMonth [description]
+     * @param  cDay [description]
+     * @return Cn string
+     */
+  toAstro: function toAstro(cMonth, cDay) {
+    var s = "\u9B54\u7FAF\u6C34\u74F6\u53CC\u9C7C\u767D\u7F8A\u91D1\u725B\u53CC\u5B50\u5DE8\u87F9\u72EE\u5B50\u5904\u5973\u5929\u79E4\u5929\u874E\u5C04\u624B\u9B54\u7FAF";
+    var arr = [20, 19, 21, 21, 21, 22, 23, 23, 23, 23, 22, 22];
+    return s.substr(cMonth * 2 - (cDay < arr[cMonth - 1] ? 2 : 0), 2) + "\u5EA7"; // 座
+  },
+
+  /**
+      * 传入offset偏移量返回干支
+      * @param offset 相对甲子的偏移量
+      * @return Cn string
+      */
+  toGanZhi: function toGanZhi(offset) {
+    return this.Gan[offset % 10] + this.Zhi[offset % 12];
+  },
+  /**
+      * 传入公历(!)y年获得该年第n个节气的公历日期
+      * @param y公历年(1900-2100)；n二十四节气中的第几个节气(1~24)；从n=1(小寒)算起
+      * @return day Number
+      * @eg:var _24 = calendar.getTerm(1987,3) ;//_24=4;意即1987年2月4日立春
+      */
+  getTerm: function getTerm(y, n) {
+    if (y < 1900 || y > 2100) {
+      return -1;
+    }
+    if (n < 1 || n > 24) {
+      return -1;
+    }
+    var _table = this.sTermInfo[y - 1900];
+    var _info = [parseInt('0x' + _table.substr(0, 5)).toString(), parseInt('0x' + _table.substr(5, 5)).toString(), parseInt('0x' + _table.substr(10, 5)).toString(), parseInt('0x' + _table.substr(15, 5)).toString(), parseInt('0x' + _table.substr(20, 5)).toString(), parseInt('0x' + _table.substr(25, 5)).toString()];
+    var _calday = [_info[0].substr(0, 1), _info[0].substr(1, 2), _info[0].substr(3, 1), _info[0].substr(4, 2), _info[1].substr(0, 1), _info[1].substr(1, 2), _info[1].substr(3, 1), _info[1].substr(4, 2), _info[2].substr(0, 1), _info[2].substr(1, 2), _info[2].substr(3, 1), _info[2].substr(4, 2), _info[3].substr(0, 1), _info[3].substr(1, 2), _info[3].substr(3, 1), _info[3].substr(4, 2), _info[4].substr(0, 1), _info[4].substr(1, 2), _info[4].substr(3, 1), _info[4].substr(4, 2), _info[5].substr(0, 1), _info[5].substr(1, 2), _info[5].substr(3, 1), _info[5].substr(4, 2)];
+    return parseInt(_calday[n - 1]);
+  },
+  /**
+      * 传入农历数字月份返回汉语通俗表示法
+      * @param lunar month
+      * @return Cn string
+      * @eg:var cnMonth = calendar.toChinaMonth(12) ;//cnMonth='腊月'
+      */
+  toChinaMonth: function toChinaMonth(m) {
+    // 月 => \u6708
+    if (m > 12 || m < 1) {
+      return -1;
+    } // 若参数错误 返回-1
+    var s = this.nStr3[m - 1];
+    s += "\u6708"; // 加上月字
+    return s;
+  },
+  /**
+      * 传入农历日期数字返回汉字表示法
+      * @param lunar day
+      * @return Cn string
+      * @eg:var cnDay = calendar.toChinaDay(21) ;//cnMonth='廿一'
+      */
+  toChinaDay: function toChinaDay(d) {
+    // 日 => \u65e5
+    var s;
+    switch (d) {
+      case 10:
+        s = "\u521D\u5341";
+        break;
+      case 20:
+        s = "\u4E8C\u5341";
+        break;
+      case 30:
+        s = "\u4E09\u5341";
+        break;
+      default:
+        s = this.nStr2[Math.floor(d / 10)];
+        s += this.nStr1[d % 10];
+    }
+    return s;
+  },
+  /**
+      * 年份转生肖[!仅能大致转换] => 精确划分生肖分界线是“立春”
+      * @param y year
+      * @return Cn string
+      * @eg:var animal = calendar.getAnimal(1987) ;//animal='兔'
+      */
+  getAnimal: function getAnimal(y) {
+    return this.Animals[(y - 4) % 12];
+  },
+  /**
+      * 传入阳历年月日获得详细的公历、农历object信息 <=>JSON
+      * @param y  solar year
+      * @param m  solar month
+      * @param d  solar day
+      * @return JSON object
+      * @eg:console.log(calendar.solar2lunar(1987,11,01));
+      */
+  solar2lunar: function solar2lunar(y, m, d) {
+    // 参数区间1900.1.31~2100.12.31
+    // 年份限定、上限
+    if (y < 1900 || y > 2100) {
+      return -1; // undefined转换为数字变为NaN
+    }
+    // 公历传参最下限
+    if (y == 1900 && m == 1 && d < 31) {
+      return -1;
+    }
+    // 未传参  获得当天
+    if (!y) {
+      var objDate = new Date();
+    } else {
+      var objDate = new Date(y, parseInt(m) - 1, d);
+    }
+    var i;
+    var leap = 0;
+    var temp = 0;
+    // 修正ymd参数
+    var y = objDate.getFullYear();
+    var m = objDate.getMonth() + 1;
+    var d = objDate.getDate();
+    var offset = (Date.UTC(objDate.getFullYear(), objDate.getMonth(), objDate.getDate()) - Date.UTC(1900, 0, 31)) / 86400000;
+    for (i = 1900; i < 2101 && offset > 0; i++) {
+      temp = this.lYearDays(i);
+      offset -= temp;
+    }
+    if (offset < 0) {
+      offset += temp;
+      i--;
+    }
+
+    // 是否今天
+    var isTodayObj = new Date();
+    var isToday = false;
+    if (isTodayObj.getFullYear() == y && isTodayObj.getMonth() + 1 == m && isTodayObj.getDate() == d) {
+      isToday = true;
+    }
+    // 星期几
+    var nWeek = objDate.getDay();
+    var cWeek = this.nStr1[nWeek];
+    // 数字表示周几顺应天朝周一开始的惯例
+    if (nWeek == 0) {
+      nWeek = 7;
+    }
+    // 农历年
+    var year = i;
+    var leap = this.leapMonth(i); // 闰哪个月
+    var isLeap = false;
+
+    // 效验闰月
+    for (i = 1; i < 13 && offset > 0; i++) {
+      // 闰月
+      if (leap > 0 && i == leap + 1 && isLeap == false) {
+        --i;
+        isLeap = true;
+        temp = this.leapDays(year); // 计算农历闰月天数
+      } else {
+        temp = this.monthDays(year, i); // 计算农历普通月天数
+      }
+      // 解除闰月
+      if (isLeap == true && i == leap + 1) {
+        isLeap = false;
+      }
+      offset -= temp;
+    }
+    // 闰月导致数组下标重叠取反
+    if (offset == 0 && leap > 0 && i == leap + 1) {
+      if (isLeap) {
+        isLeap = false;
+      } else {
+        isLeap = true;
+        --i;
+      }
+    }
+    if (offset < 0) {
+      offset += temp;
+      --i;
+    }
+    // 农历月
+    var month = i;
+    // 农历日
+    var day = offset + 1;
+    // 天干地支处理
+    var sm = m - 1;
+    var gzY = this.toGanZhiYear(year);
+
+    // 当月的两个节气
+    // bugfix-2017-7-24 11:03:38 use lunar Year Param `y` Not `year`
+    var firstNode = this.getTerm(y, m * 2 - 1); // 返回当月「节」为几日开始
+    var secondNode = this.getTerm(y, m * 2); // 返回当月「节」为几日开始
+
+    // 依据12节气修正干支月
+    var gzM = this.toGanZhi((y - 1900) * 12 + m + 11);
+    if (d >= firstNode) {
+      gzM = this.toGanZhi((y - 1900) * 12 + m + 12);
+    }
+
+    // 传入的日期的节气与否
+    var isTerm = false;
+    var Term = null;
+    if (firstNode == d) {
+      isTerm = true;
+      Term = this.solarTerm[m * 2 - 2];
+    }
+    if (secondNode == d) {
+      isTerm = true;
+      Term = this.solarTerm[m * 2 - 1];
+    }
+    // 日柱 当月一日与 1900/1/1 相差天数
+    var dayCyclical = Date.UTC(y, sm, 1, 0, 0, 0, 0) / 86400000 + 25567 + 10;
+    var gzD = this.toGanZhi(dayCyclical + d - 1);
+    // 该日期所属的星座
+    var astro = this.toAstro(m, d);
+    return {
+      'lYear': year,
+      'lMonth': month,
+      'lDay': day,
+      'Animal': this.getAnimal(year),
+      'IMonthCn': (isLeap ? "\u95F0" : '') + this.toChinaMonth(month),
+      'IDayCn': this.toChinaDay(day),
+      'cYear': y,
+      'cMonth': m,
+      'cDay': d,
+      'gzYear': gzY,
+      'gzMonth': gzM,
+      'gzDay': gzD,
+      'isToday': isToday,
+      'isLeap': isLeap,
+      'nWeek': nWeek,
+      'ncWeek': "\u661F\u671F" + cWeek,
+      'isTerm': isTerm,
+      'Term': Term,
+      'astro': astro
+    };
+  },
+  /**
+      * 传入农历年月日以及传入的月份是否闰月获得详细的公历、农历object信息 <=>JSON
+      * @param y  lunar year
+      * @param m  lunar month
+      * @param d  lunar day
+      * @param isLeapMonth  lunar month is leap or not.[如果是农历闰月第四个参数赋值true即可]
+      * @return JSON object
+      * @eg:console.log(calendar.lunar2solar(1987,9,10));
+      */
+  lunar2solar: function lunar2solar(y, m, d, isLeapMonth) {
+    // 参数区间1900.1.31~2100.12.1
+    var isLeapMonth = !!isLeapMonth;
+    var leapOffset = 0;
+    var leapMonth = this.leapMonth(y);
+    var leapDay = this.leapDays(y);
+    if (isLeapMonth && leapMonth != m) {
+      return -1;
+    } // 传参要求计算该闰月公历 但该年得出的闰月与传参的月份并不同
+    if (y == 2100 && m == 12 && d > 1 || y == 1900 && m == 1 && d < 31) {
+      return -1;
+    } // 超出了最大极限值
+    var day = this.monthDays(y, m);
+    var _day = day;
+    // bugFix 2016-9-25
+    // if month is leap, _day use leapDays method
+    if (isLeapMonth) {
+      _day = this.leapDays(y, m);
+    }
+    if (y < 1900 || y > 2100 || d > _day) {
+      return -1;
+    } // 参数合法性效验
+
+    // 计算农历的时间差
+    var offset = 0;
+    for (var i = 1900; i < y; i++) {
+      offset += this.lYearDays(i);
+    }
+    var leap = 0;
+    var isAdd = false;
+    for (var i = 1; i < m; i++) {
+      leap = this.leapMonth(y);
+      if (!isAdd) {
+        // 处理闰月
+        if (leap <= i && leap > 0) {
+          offset += this.leapDays(y);
+          isAdd = true;
+        }
+      }
+      offset += this.monthDays(y, i);
+    }
+    // 转换闰月农历 需补充该年闰月的前一个月的时差
+    if (isLeapMonth) {
+      offset += day;
+    }
+    // 1900年农历正月一日的公历时间为1900年1月30日0时0分0秒(该时间也是本农历的最开始起始点)
+    var stmap = Date.UTC(1900, 1, 30, 0, 0, 0);
+    var calObj = new Date((offset + d - 31) * 86400000 + stmap);
+    var cY = calObj.getUTCFullYear();
+    var cM = calObj.getUTCMonth() + 1;
+    var cD = calObj.getUTCDate();
+    return this.solar2lunar(cY, cM, cD);
+  }
+};
+var _default = calendar;
+exports.default = _default;
+
+/***/ }),
+
+/***/ 508:
+/*!******************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/index.js ***!
+  \******************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 509));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 510));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 511));
+var _default = {
+  en: _en.default,
+  'zh-Hans': _zhHans.default,
+  'zh-Hant': _zhHant.default
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 509:
+/*!*****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/en.json ***!
+  \*****************************************************************************************************************************************/
+/*! exports provided: uni-calender.ok, uni-calender.cancel, uni-calender.today, uni-calender.MON, uni-calender.TUE, uni-calender.WED, uni-calender.THU, uni-calender.FRI, uni-calender.SAT, uni-calender.SUN, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-calender.ok\":\"ok\",\"uni-calender.cancel\":\"cancel\",\"uni-calender.today\":\"today\",\"uni-calender.MON\":\"MON\",\"uni-calender.TUE\":\"TUE\",\"uni-calender.WED\":\"WED\",\"uni-calender.THU\":\"THU\",\"uni-calender.FRI\":\"FRI\",\"uni-calender.SAT\":\"SAT\",\"uni-calender.SUN\":\"SUN\"}");
+
+/***/ }),
+
+/***/ 510:
+/*!**********************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/zh-Hans.json ***!
+  \**********************************************************************************************************************************************/
+/*! exports provided: uni-calender.ok, uni-calender.cancel, uni-calender.today, uni-calender.SUN, uni-calender.MON, uni-calender.TUE, uni-calender.WED, uni-calender.THU, uni-calender.FRI, uni-calender.SAT, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-calender.ok\":\"确定\",\"uni-calender.cancel\":\"取消\",\"uni-calender.today\":\"今日\",\"uni-calender.SUN\":\"日\",\"uni-calender.MON\":\"一\",\"uni-calender.TUE\":\"二\",\"uni-calender.WED\":\"三\",\"uni-calender.THU\":\"四\",\"uni-calender.FRI\":\"五\",\"uni-calender.SAT\":\"六\"}");
+
+/***/ }),
+
+/***/ 511:
+/*!**********************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/zh-Hant.json ***!
+  \**********************************************************************************************************************************************/
+/*! exports provided: uni-calender.ok, uni-calender.cancel, uni-calender.today, uni-calender.SUN, uni-calender.MON, uni-calender.TUE, uni-calender.WED, uni-calender.THU, uni-calender.FRI, uni-calender.SAT, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-calender.ok\":\"確定\",\"uni-calender.cancel\":\"取消\",\"uni-calender.today\":\"今日\",\"uni-calender.SUN\":\"日\",\"uni-calender.MON\":\"一\",\"uni-calender.TUE\":\"二\",\"uni-calender.WED\":\"三\",\"uni-calender.THU\":\"四\",\"uni-calender.FRI\":\"五\",\"uni-calender.SAT\":\"六\"}");
+
+/***/ }),
+
+/***/ 519:
 /*!*******************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
   \*******************************************************************************************************************************************/
@@ -24144,6 +25357,397 @@ exports.fontData = fontData;
 
 /***/ }),
 
+/***/ 576:
+/*!**************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
+  \**************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.calcImageOffset = calcImageOffset;
+exports.calcImageScale = calcImageScale;
+exports.calcImageSize = calcImageSize;
+exports.calcPythagoreanTheorem = calcPythagoreanTheorem;
+exports.clipTouchMoveOfCalculate = clipTouchMoveOfCalculate;
+exports.determineDirection = determineDirection;
+exports.imageTouchMoveOfCalcOffset = imageTouchMoveOfCalcOffset;
+/**
+ * 判断手指触摸位置
+ */
+function determineDirection(clipX, clipY, clipWidth, clipHeight, currentX, currentY) {
+  /*
+   * (右下>>1 右上>>2 左上>>3 左下>>4)
+   */
+  var corner;
+  /**
+   * 思路：（利用直角坐标系）
+   *  1.找出裁剪框中心点
+   *  2.如点击坐标在上方点与左方点区域内，则点击为左上角
+   *  3.如点击坐标在下方点与右方点区域内，则点击为右下角
+   *  4.其他角同理
+   */
+  var mainPoint = [clipX + clipWidth / 2, clipY + clipHeight / 2]; // 中心点
+  var currentPoint = [currentX, currentY]; // 触摸点
+
+  if (currentPoint[0] <= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
+    corner = 3; // 左上
+  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
+    corner = 2; // 右上
+  } else if (currentPoint[0] <= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
+    corner = 4; // 左下
+  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
+    corner = 1; // 右下
+  }
+
+  return corner;
+}
+
+/**
+ * 图片边缘检测检测时，计算图片偏移量
+ */
+function calcImageOffset(data, scale) {
+  var left = data.imageLeft;
+  var top = data.imageTop;
+  scale = scale || data.scale;
+  var imageWidth = data.imageWidth;
+  var imageHeight = data.imageHeight;
+  if (data.angle / 90 % 2) {
+    imageWidth = data.imageHeight;
+    imageHeight = data.imageWidth;
+  }
+  var clipX = data.clipX,
+    clipWidth = data.clipWidth,
+    clipY = data.clipY,
+    clipHeight = data.clipHeight;
+
+  // 当前图片宽度/高度
+  var currentImageSize = function currentImageSize(size) {
+    return size * scale / 2;
+  };
+  var currentImageWidth = currentImageSize(imageWidth);
+  var currentImageHeight = currentImageSize(imageHeight);
+  left = clipX + currentImageWidth >= left ? left : clipX + currentImageWidth;
+  left = clipX + clipWidth - currentImageWidth <= left ? left : clipX + clipWidth - currentImageWidth;
+  top = clipY + currentImageHeight >= top ? top : clipY + currentImageHeight;
+  top = clipY + clipHeight - currentImageHeight <= top ? top : clipY + clipHeight - currentImageHeight;
+  return {
+    left: left,
+    top: top,
+    scale: scale
+  };
+}
+
+/**
+ * 图片边缘检测时，计算图片缩放比例
+ */
+function calcImageScale(data, scale) {
+  scale = scale || data.scale;
+  var imageWidth = data.imageWidth,
+    imageHeight = data.imageHeight,
+    clipWidth = data.clipWidth,
+    clipHeight = data.clipHeight,
+    angle = data.angle;
+  if (angle / 90 % 2) {
+    imageWidth = imageHeight;
+    imageHeight = imageWidth;
+  }
+  if (imageWidth * scale < clipWidth) {
+    scale = clipWidth / imageWidth;
+  }
+  if (imageHeight * scale < clipHeight) {
+    scale = Math.max(scale, clipHeight / imageHeight);
+  }
+  return scale;
+}
+
+/**
+ * 计算图片尺寸
+ */
+function calcImageSize(width, height, data) {
+  var imageWidth = width,
+    imageHeight = height;
+  var clipWidth = data.clipWidth,
+    clipHeight = data.clipHeight,
+    sysinfo = data.sysinfo,
+    originWidth = data.width,
+    originHeight = data.height;
+  if (imageWidth && imageHeight) {
+    if (imageWidth / imageHeight > (clipWidth || originWidth) / (clipWidth || originHeight)) {
+      imageHeight = clipHeight || originHeight;
+      imageWidth = width / height * imageHeight;
+    } else {
+      imageWidth = clipWidth || originWidth;
+      imageHeight = height / width * imageWidth;
+    }
+  } else {
+    var sys = sysinfo || uni.getSystemInfoSync();
+    imageWidth = sys.windowWidth;
+    imageHeight = 0;
+  }
+  return {
+    imageWidth: imageWidth,
+    imageHeight: imageHeight
+  };
+}
+
+/**
+ * 勾股定理求斜边
+ */
+function calcPythagoreanTheorem(width, height) {
+  return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+}
+
+/**
+ * 拖动裁剪框时计算
+ */
+function clipTouchMoveOfCalculate(data, event) {
+  var clientX = event.touches[0].clientX;
+  var clientY = event.touches[0].clientY;
+  var clipWidth = data.clipWidth,
+    clipHeight = data.clipHeight,
+    oldClipY = data.clipY,
+    oldClipX = data.clipX,
+    clipStart = data.clipStart,
+    isLockRatio = data.isLockRatio,
+    maxWidth = data.maxWidth,
+    minWidth = data.minWidth,
+    maxHeight = data.maxHeight,
+    minHeight = data.minHeight;
+  maxWidth = maxWidth / 2;
+  minWidth = minWidth / 2;
+  minHeight = minHeight / 2;
+  maxHeight = maxHeight / 2;
+  var width = clipWidth,
+    height = clipHeight,
+    clipY = oldClipY,
+    clipX = oldClipX,
+    // 获取裁剪框实际宽度/高度
+    // 如果大于最大值则使用最大值
+    // 如果小于最小值则使用最小值
+    sizecorrect = function sizecorrect() {
+      width = width <= maxWidth ? width >= minWidth ? width : minWidth : maxWidth;
+      height = height <= maxHeight ? height >= minHeight ? height : minHeight : maxHeight;
+    },
+    sizeinspect = function sizeinspect() {
+      sizecorrect();
+      if ((width > maxWidth || width < minWidth || height > maxHeight || height < minHeight) && isLockRatio) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+  //if (clipStart.corner) {
+  height = clipStart.height + (clipStart.corner > 1 && clipStart.corner < 4 ? 1 : -1) * (clipStart.y - clientY);
+  //}
+  switch (clipStart.corner) {
+    case 1:
+      width = clipStart.width - clipStart.x + clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) return;
+      break;
+    case 2:
+      width = clipStart.width - clipStart.x + clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) {
+        return;
+      } else {
+        clipY = clipStart.clipY - (height - clipStart.height);
+      }
+      break;
+    case 3:
+      width = clipStart.width + clipStart.x - clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) {
+        return;
+      } else {
+        clipY = clipStart.clipY - (height - clipStart.height);
+        clipX = clipStart.clipX - (width - clipStart.width);
+      }
+      break;
+    case 4:
+      width = clipStart.width + clipStart.x - clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) {
+        return;
+      } else {
+        clipX = clipStart.clipX - (width - clipStart.width);
+      }
+      break;
+    default:
+      break;
+  }
+  return {
+    width: width,
+    height: height,
+    clipX: clipX,
+    clipY: clipY
+  };
+}
+
+/**
+ * 单指拖动图片计算偏移
+ */
+function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
+  var left = clientXForLeft - data.touchRelative[0].x,
+    top = clientYForLeft - data.touchRelative[0].y;
+  return {
+    left: left,
+    top: top
+  };
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
+/***/ 584:
+/*!***************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
+  \***************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createAnimation = createAnimation;
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+// const defaultOption = {
+// 	duration: 300,
+// 	timingFunction: 'linear',
+// 	delay: 0,
+// 	transformOrigin: '50% 50% 0'
+// }
+var MPAnimation = /*#__PURE__*/function () {
+  function MPAnimation(options, _this) {
+    (0, _classCallCheck2.default)(this, MPAnimation);
+    this.options = options;
+    // 在iOS10+QQ小程序平台下，传给原生的对象一定是个普通对象而不是Proxy对象，否则会报parameter should be Object instead of ProxyObject的错误
+    this.animation = uni.createAnimation(_objectSpread({}, options));
+    this.currentStepAnimates = {};
+    this.next = 0;
+    this.$ = _this;
+  }
+  (0, _createClass2.default)(MPAnimation, [{
+    key: "_nvuePushAnimates",
+    value: function _nvuePushAnimates(type, args) {
+      var aniObj = this.currentStepAnimates[this.next];
+      var styles = {};
+      if (!aniObj) {
+        styles = {
+          styles: {},
+          config: {}
+        };
+      } else {
+        styles = aniObj;
+      }
+      if (animateTypes1.includes(type)) {
+        if (!styles.styles.transform) {
+          styles.styles.transform = '';
+        }
+        var unit = '';
+        if (type === 'rotate') {
+          unit = 'deg';
+        }
+        styles.styles.transform += "".concat(type, "(").concat(args + unit, ") ");
+      } else {
+        styles.styles[type] = "".concat(args);
+      }
+      this.currentStepAnimates[this.next] = styles;
+    }
+  }, {
+    key: "_animateRun",
+    value: function _animateRun() {
+      var styles = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var ref = this.$.$refs['ani'].ref;
+      if (!ref) return;
+      return new Promise(function (resolve, reject) {
+        nvueAnimation.transition(ref, _objectSpread({
+          styles: styles
+        }, config), function (res) {
+          resolve();
+        });
+      });
+    }
+  }, {
+    key: "_nvueNextAnimate",
+    value: function _nvueNextAnimate(animates) {
+      var _this2 = this;
+      var step = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var fn = arguments.length > 2 ? arguments[2] : undefined;
+      var obj = animates[step];
+      if (obj) {
+        var styles = obj.styles,
+          config = obj.config;
+        this._animateRun(styles, config).then(function () {
+          step += 1;
+          _this2._nvueNextAnimate(animates, step, fn);
+        });
+      } else {
+        this.currentStepAnimates = {};
+        typeof fn === 'function' && fn();
+        this.isEnd = true;
+      }
+    }
+  }, {
+    key: "step",
+    value: function step() {
+      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      this.animation.step(config);
+      return this;
+    }
+  }, {
+    key: "run",
+    value: function run(fn) {
+      this.$.animationData = this.animation.export();
+      this.$.timer = setTimeout(function () {
+        typeof fn === 'function' && fn();
+      }, this.$.durationTime);
+    }
+  }]);
+  return MPAnimation;
+}();
+var animateTypes1 = ['matrix', 'matrix3d', 'rotate', 'rotate3d', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scale3d', 'scaleX', 'scaleY', 'scaleZ', 'skew', 'skewX', 'skewY', 'translate', 'translate3d', 'translateX', 'translateY', 'translateZ'];
+var animateTypes2 = ['opacity', 'backgroundColor'];
+var animateTypes3 = ['width', 'height', 'left', 'right', 'top', 'bottom'];
+animateTypes1.concat(animateTypes2, animateTypes3).forEach(function (type) {
+  MPAnimation.prototype[type] = function () {
+    var _this$animation;
+    (_this$animation = this.animation)[type].apply(_this$animation, arguments);
+    return this;
+  };
+});
+function createAnimation(option, _this) {
+  if (!_this) return;
+  clearTimeout(_this.timer);
+  return new MPAnimation(option, _this);
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
 /***/ 6:
 /*!***************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
@@ -24237,9 +25841,9 @@ module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exp
 /***/ }),
 
 /***/ 90:
-/*!************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/index.js ***!
-  \************************************************************************/
+/*!****************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/index.js ***!
+  \****************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -24647,6 +26251,15 @@ var userApi = {
     }).then(function (res) {
       return debugAPI('checkFavorite返回', res);
     });
+  },
+  // 获取用户的所有预约记录
+  getUserBookings: function getUserBookings(userId) {
+    return (0, _request.default)({
+      name: 'getUserBookings',
+      data: {
+        userId: userId
+      }
+    });
   }
 };
 
@@ -24836,9 +26449,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 91:
-/*!**************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/request.js ***!
-  \**************************************************************************/
+/*!******************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/request.js ***!
+  \******************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -25067,9 +26680,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 92:
-/*!**********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/api/modules/subject.js ***!
-  \**********************************************************************************/
+/*!**************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/subject.js ***!
+  \**************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -25105,9 +26718,9 @@ exports.default = _default;
 /***/ }),
 
 /***/ 93:
-/*!*********************************************************************************!*\
-  !*** C:/Users/Administrator/Desktop/YueKe/siwei_chuzhong/utils/cloud-config.js ***!
-  \*********************************************************************************/
+/*!*************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/utils/cloud-config.js ***!
+  \*************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 

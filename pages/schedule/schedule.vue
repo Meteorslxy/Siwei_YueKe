@@ -51,7 +51,12 @@
               <text class="teacher">{{ item.teacher }}</text>
               <text class="location">{{ item.location }}</text>
             </view>
-            <view class="status-box" :class="getStatusClass(item.status)">
+            <view class="status-box" :class="{
+              'status-upcoming': item.status === 'upcoming',
+              'status-ongoing': item.status === 'ongoing',
+              'status-completed': item.status === 'completed',
+              'status-cancelled': item.status === 'cancelled'
+            }">
               {{ getStatusText(item.status) }}
             </view>
           </view>
@@ -242,21 +247,6 @@ export default {
     // 格式化显示日期
     formatDay(day) {
       return `${day.month}月${day.day}日 ${this.weekDays[new Date(day.year, day.month - 1, day.day).getDay()]}`
-    },
-    // 获取课程状态样式
-    getStatusClass(status) {
-      switch (status) {
-        case 'upcoming':
-          return 'status-upcoming'
-        case 'ongoing':
-          return 'status-ongoing'
-        case 'completed':
-          return 'status-completed'
-        case 'cancelled':
-          return 'status-cancelled'
-        default:
-          return ''
-      }
     },
     // 获取课程状态文字
     getStatusText(status) {

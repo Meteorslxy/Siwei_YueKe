@@ -1,0 +1,82 @@
+{
+    "bsonType": "object",
+    "required": [],
+    "permission": {
+        "read": true,
+        "create": false,
+        "update": false,
+        "delete": false
+    },
+    "properties": {
+        "_id": {
+            "description": "ID，系统自动生成"
+        },
+        "courseId": {
+            "bsonType": "string",
+            "description": "课程ID"
+        },
+        "teacherId": {
+            "bsonType": "string",
+            "description": "授课教师ID"
+        },
+        "timeSlots": {
+            "bsonType": "array",
+            "items": {
+                "bsonType": "object",
+                "required": [
+                    "start",
+                    "end"
+                ],
+                "properties": {
+                    "start": {
+                        "bsonType": "date"
+                    },
+                    "end": {
+                        "bsonType": "date"
+                    },
+                    "status": {
+                        "bsonType": "string",
+                        "enum": [
+                            "scheduled",
+                            "cancelled",
+                            "adjusted"
+                        ],
+                        "default": "scheduled"
+                    }
+                }
+            }
+        },
+        "timeHash": {
+            "bsonType": "array",
+            "items": {
+                "bsonType": "string",
+                "pattern": "^\\d{8}T\\d{4}-\\d{4}(?:\\+[a-zA-Z0-9]+)?$"
+            },
+            "description": "时间指纹（可扩展校区\/教室标识）"
+        },
+        "version": {
+            "bsonType": "int",
+            "description": "版本号（用于乐观锁）"
+        }
+    },
+    "indexes": [
+        {
+            "name": "course_timeslot_index",
+            "key": {
+                "courseId": 1,
+                "timeHash": 1
+            },
+            "unique": true
+        },
+        {
+            "name": "time_range_index",
+            "key": {
+                "timeSlots.start": 1,
+                "timeSlots.end": 1
+            },
+            "partialFilterExpression": {
+                "timeSlots.status": "scheduled"
+            }
+        }
+    ]
+}

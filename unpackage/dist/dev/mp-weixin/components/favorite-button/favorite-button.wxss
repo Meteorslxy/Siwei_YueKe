@@ -107,4 +107,3 @@
 .favorite-button:active .cart-text {
   opacity: 1;
 }
-

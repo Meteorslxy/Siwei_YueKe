@@ -1,0 +1,6 @@
+{
+  "name": "getUserBookings",
+  "version": "1.0.0",
+  "description": "获取用户预约的课程",
+  "main": "index.js"
+} 
