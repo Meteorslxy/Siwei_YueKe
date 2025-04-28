@@ -274,6 +274,14 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -303,7 +311,17 @@ var _default = {
       // 是否全选
       currentBookingCourseId: null,
       currentSelectedCourseIds: [],
-      userInfo: null // 添加用户信息
+      userInfo: null,
+      // 添加用户信息
+      rightOptions: [{
+        text: '删除',
+        style: {
+          backgroundColor: '#FF3B30'
+        }
+      }],
+      startX: 0,
+      // 记录触摸开始的X坐标
+      startY: 0 // 记录触摸开始的Y坐标
     };
   },
 
@@ -358,6 +376,42 @@ var _default = {
       if (this.currentTab === index) return;
       this.currentTab = index;
       this.refreshList();
+    },
+    // 触摸开始事件
+    touchStart: function touchStart(index, event) {
+      this.startX = event.touches[0].clientX;
+      this.startY = event.touches[0].clientY;
+    },
+    // 触摸移动事件
+    touchMove: function touchMove(index, event) {
+      var moveX = event.touches[0].clientX;
+      var moveY = event.touches[0].clientY;
+
+      // 计算X和Y方向的移动距离
+      var deltaX = this.startX - moveX;
+      var deltaY = this.startY - moveY;
+
+      // 如果Y方向移动大于X方向，则认为是上下滑动，不处理
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return;
+      }
+
+      // 左滑显示删除按钮
+      if (deltaX > 50) {
+        // 防止在滑动过程中频繁更新视图
+        if (!this.favoriteList[index].swipeActive) {
+          this.$set(this.favoriteList[index], 'swipeActive', true);
+        }
+      } else if (deltaX < -50) {
+        // 右滑隐藏删除按钮
+        if (this.favoriteList[index].swipeActive) {
+          this.$set(this.favoriteList[index], 'swipeActive', false);
+        }
+      }
+    },
+    // 触摸结束事件
+    touchEnd: function touchEnd(index) {
+      // 记录最后的滑动状态即可，无需额外操作
     },
     // 刷新列表
     refreshList: function refreshList() {
@@ -1513,22 +1567,41 @@ var _default = {
         this.getFavoriteList();
       }
     },
-    // 处理点击项目
+    // 处理点击事件
     handleClick: function handleClick(index) {
-      if (index < 0 || index >= this.favoriteList.length) {
-        console.error('无效的索引:', index);
+      // 如果当前项目处于滑动状态，先关闭
+      if (this.favoriteList[index].swipeActive) {
+        this.$set(this.favoriteList[index], 'swipeActive', false);
         return;
       }
+
+      // 关闭所有已打开的滑动项
+      this.closeAllSwipeItems();
+
+      // 跳转到课程详情
       var item = this.favoriteList[index];
-      if (!item) {
-        console.error('索引对应的收藏项为空:', index);
-        return;
+      if (item.itemId && item.itemType === 'course') {
+        uni.navigateTo({
+          url: "/pages/course/detail?id=".concat(item.itemId)
+        });
+      } else if (item.itemType === 'teacher' && item.itemId) {
+        uni.navigateTo({
+          url: "/pages/teacher/detail?id=".concat(item.itemId)
+        });
       }
-      console.log('点击收藏项, 索引:', index);
-      this.openDetail(index);
+    },
+    // 关闭所有已打开的滑动项
+    closeAllSwipeItems: function closeAllSwipeItems() {
+      var _this10 = this;
+      this.favoriteList.forEach(function (item, i) {
+        if (item.swipeActive) {
+          _this10.$set(_this10.favoriteList[i], 'swipeActive', false);
+        }
+      });
     },
     // 处理删除
     handleDelete: function handleDelete(index) {
+      if (!this.favoriteList[index]) return;
       if (index < 0 || index >= this.favoriteList.length) {
         console.error('无效的索引:', index);
         return;
@@ -1541,70 +1614,16 @@ var _default = {
       console.log('删除收藏项, 索引:', index);
       this.cancelFavorite(index);
     },
-    // 打开详情页
-    openDetail: function openDetail(index) {
-      var item = this.favoriteList[index];
-      if (!item) {
-        uni.showToast({
-          title: '收藏项不存在',
-          icon: 'none'
-        });
-        return;
-      }
-
-      // 构建跳转URL
-      var url = '';
-      if (item.itemUrl) {
-        url = item.itemUrl;
-      } else if (item.itemType && item.itemId) {
-        // 根据类型和ID构建URL
-        switch (item.itemType) {
-          case 'course':
-            url = "/pages/course/detail?id=".concat(item.itemId);
-            break;
-          case 'lecture':
-            url = "/pages/course/lecture-detail?id=".concat(item.itemId);
-            break;
-          case 'teacher':
-            url = "/pages/teacher/detail?id=".concat(item.itemId);
-            break;
-          default:
-            url = '';
-        }
-      }
-
-      // 检查url是否有效
-      if (!url) {
-        uni.showToast({
-          title: '链接无效',
-          icon: 'none'
-        });
-        return;
-      }
-
-      // 执行跳转
-      console.log('跳转到:', url);
-      uni.navigateTo({
-        url: url,
-        fail: function fail(err) {
-          console.error('页面跳转失败:', err);
-          uni.showToast({
-            title: '页面不存在',
-            icon: 'none'
-          });
-        }
-      });
-    },
     // 取消收藏
     cancelFavorite: function cancelFavorite(index) {
-      var _this10 = this;
+      var _this11 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee13() {
         var item;
         return _regenerator.default.wrap(function _callee13$(_context13) {
           while (1) {
             switch (_context13.prev = _context13.next) {
               case 0:
-                item = _this10.favoriteList[index];
+                item = _this11.favoriteList[index];
                 if (item) {
                   _context13.next = 4;
                   break;
@@ -1648,12 +1667,12 @@ var _default = {
 
                               // 直接传递ID字符串，而不是包含ID的对象
                               _context12.next = 7;
-                              return _this10.$api.user.removeFavorite(favoriteId);
+                              return _this11.$api.user.removeFavorite(favoriteId);
                             case 7:
                               result = _context12.sent;
                               if (result && result.code === 0) {
                                 // 从列表中移除
-                                _this10.favoriteList.splice(index, 1);
+                                _this11.favoriteList.splice(index, 1);
                                 uni.showToast({
                                   title: '已取消收藏',
                                   icon: 'success'
@@ -1732,7 +1751,7 @@ var _default = {
     // 预约成功后从购物车中移除
     removeFromCartAfterBooking: function removeFromCartAfterBooking(favoriteId) {
       var _arguments3 = arguments,
-        _this11 = this;
+        _this12 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee14() {
         var showToast, result, index;
         return _regenerator.default.wrap(function _callee14$(_context14) {
@@ -1752,7 +1771,7 @@ var _default = {
 
                 // 直接传递ID字符串，而不是包含ID的对象
                 _context14.next = 8;
-                return _this11.$api.user.removeFavorite(favoriteId);
+                return _this12.$api.user.removeFavorite(favoriteId);
               case 8:
                 result = _context14.sent;
                 if (!(result && result.code === 0)) {
@@ -1760,11 +1779,11 @@ var _default = {
                   break;
                 }
                 // 从列表中移除
-                index = _this11.favoriteList.findIndex(function (item) {
+                index = _this12.favoriteList.findIndex(function (item) {
                   return item._id === favoriteId;
                 });
                 if (index !== -1) {
-                  _this11.favoriteList.splice(index, 1);
+                  _this12.favoriteList.splice(index, 1);
                 }
                 if (showToast) {
                   uni.showToast({
@@ -1774,8 +1793,8 @@ var _default = {
                 }
 
                 // 清除当前处理的ID
-                _this11.currentBookingCourseId = null;
-                _this11.currentSelectedCourseIds = [];
+                _this12.currentBookingCourseId = null;
+                _this12.currentSelectedCourseIds = [];
                 return _context14.abrupt("return", true);
               case 16:
                 return _context14.abrupt("return", false);
@@ -1791,6 +1810,11 @@ var _default = {
           }
         }, _callee14, null, [[4, 19]]);
       }))();
+    },
+    // 处理页面点击事件
+    onPageClick: function onPageClick() {
+      // 关闭所有已打开的滑动项
+      this.closeAllSwipeItems();
     }
   }
 };

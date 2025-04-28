@@ -1330,19 +1330,38 @@ export default {
         return;
       }
 
+      // 显示加载提示
+      uni.showLoading({
+        title: '检查课程冲突...'
+      });
+
       // 课程冲突检测
       this.checkCourseConflict().then(conflictResult => {
+        uni.hideLoading();
+        
         if (conflictResult.hasConflict) {
-          // 有冲突，显示冲突信息
+          // 有冲突，显示冲突信息，但不自动继续预约
+          console.log('检测到课程冲突，显示冲突对话框');
           this.showConflictDialog(conflictResult);
         } else {
           // 无冲突，继续预约流程
+          console.log('未检测到课程冲突，继续预约流程');
           this.proceedWithBooking();
         }
       }).catch(err => {
+        uni.hideLoading();
         console.error('课程冲突检测失败:', err);
-        // 出错时也继续预约流程，但记录错误
-        this.proceedWithBooking();
+        
+        // 提示用户检测失败
+        uni.showModal({
+          title: '课程冲突检测失败',
+          content: '无法完成课程冲突检测，您仍要继续预约吗？',
+          success: (res) => {
+            if (res.confirm) {
+              this.proceedWithBooking();
+            }
+          }
+        });
       });
     },
 
@@ -1358,7 +1377,7 @@ export default {
           name: 'getUserBookings',
           data: { 
             userId, 
-            status: 'confirmed' // 只检查已确认的预约
+            status: ['pending', 'confirmed'] // 检查所有进行中的预约，不仅是已确认的
           },
           success: res => {
             console.log('获取用户预约成功:', res.result);
@@ -1538,20 +1557,14 @@ export default {
         conflictMessage += '\n';
       });
       
-      conflictMessage += '确定要继续预约吗？';
+      conflictMessage += '课程时间冲突，请选择其他课程。';
       
-      // 显示确认对话框
+      // 显示提示对话框
       uni.showModal({
         title: '课程时间冲突',
         content: conflictMessage,
-        confirmText: '继续预约',
-        cancelText: '取消',
-        success: res => {
-          if (res.confirm) {
-            // 用户确认继续预约
-            this.proceedWithBooking();
-          }
-        }
+        showCancel: false,
+        confirmText: '我知道了'
       });
     },
     

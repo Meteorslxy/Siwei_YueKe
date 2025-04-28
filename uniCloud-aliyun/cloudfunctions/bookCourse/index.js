@@ -96,6 +96,13 @@ const checkCoursesConflict = (course1, course2) => {
           const time2Start = new Date(slot2.start);
           const time2End = new Date(slot2.end);
           
+          // 检查日期时间是否有效
+          if (isNaN(time1Start.getTime()) || isNaN(time1End.getTime()) || 
+              isNaN(time2Start.getTime()) || isNaN(time2End.getTime())) {
+            console.error('无效的日期时间:', slot1, slot2);
+            continue;
+          }
+          
           // 确保start早于end（处理可能颠倒的情况）
           const slot1Start = time1Start < time1End ? time1Start : time1End;
           const slot1End = time1Start < time1End ? time1End : time1Start;
@@ -108,12 +115,16 @@ const checkCoursesConflict = (course1, course2) => {
           const date2 = new Date(slot2Start);
           date2.setHours(0, 0, 0, 0);
           
+          console.log(`比较日期: ${formatDate(date1)} vs ${formatDate(date2)}`);
+          console.log(`比较时间: ${slot1Start.getHours()}:${slot1Start.getMinutes()}-${slot1End.getHours()}:${slot1End.getMinutes()} vs ${slot2Start.getHours()}:${slot2Start.getMinutes()}-${slot2End.getHours()}:${slot2End.getMinutes()}`);
+          
           if (date1.getTime() === date2.getTime()) {
             // 同一天，检查时间是否重叠
             const hasTimeOverlap = (slot1Start < slot2End && slot1End > slot2Start);
             
             if (hasTimeOverlap) {
               console.log('检测到冲突日期:', formatDate(date1));
+              console.log(`冲突时间段: ${slot1Start.getHours()}:${slot1Start.getMinutes()}-${slot1End.getHours()}:${slot1End.getMinutes()} 与 ${slot2Start.getHours()}:${slot2Start.getMinutes()}-${slot2End.getHours()}:${slot2End.getMinutes()}`);
               
               // 添加到冲突日期列表
               conflictDates.push(new Date(date1));
@@ -367,7 +378,7 @@ exports.main = async (event, context) => {
       name: 'getUserBookings',
       data: {
         userId: realUserId,
-        status: 'confirmed' // 只检查已确认的预约
+        status: ['pending', 'confirmed'] // 检查待确认和已确认的预约，避免用户重复预约
       }
     });
     
@@ -389,14 +400,18 @@ exports.main = async (event, context) => {
     // 如果找到排课数据，添加到课程对象中
     if (courseScheduleData && courseScheduleData.timeSlots) {
       course.timeSlots = courseScheduleData.timeSlots;
+      console.log('当前预约课程的排课时间槽数量:', course.timeSlots.length);
     }
     
+    // 检查用户已预约的课程
     if (bookedCoursesResult.result && bookedCoursesResult.result.success && bookedCoursesResult.result.data) {
       const bookedCourses = bookedCoursesResult.result.data;
       console.log(`用户已预约${bookedCourses.length}个课程，开始检查冲突`);
       
       // 3. 获取已预约课程的排课信息
       const bookedCourseIds = bookedCourses.map(booking => booking.courseId).filter(id => id);
+      console.log('待检查冲突的已预约课程IDs:', bookedCourseIds);
+      
       let scheduleMap = {};
       
       if (bookedCourseIds.length > 0) {
@@ -418,15 +433,32 @@ exports.main = async (event, context) => {
       
       // 4. 检查每个已预约课程是否与当前课程冲突
       for (const booking of bookedCourses) {
+        // 排除当前正在预约的课程
+        if (booking.courseId === courseId) {
+          console.log('跳过当前正在预约的课程');
+          continue;
+        }
+        
         const existingCourse = booking.courseInfo || {};
-        console.log('检查与已预约课程的冲突:', existingCourse.title || existingCourse.courseTitle || '未命名课程');
+        console.log('检查与已预约课程的冲突:', existingCourse.title || existingCourse.courseTitle || booking.courseTitle || '未命名课程');
         
         // 添加排课数据
         if (scheduleMap[booking.courseId]) {
           existingCourse.timeSlots = scheduleMap[booking.courseId].timeSlots;
+          console.log('已预约课程的排课时间槽数量:', existingCourse.timeSlots ? existingCourse.timeSlots.length : 0);
         }
         
+        // 确保两个课程至少有一个带有timeSlots
+        if ((!course.timeSlots || course.timeSlots.length === 0) && 
+            (!existingCourse.timeSlots || existingCourse.timeSlots.length === 0)) {
+          console.log('两个课程均无时间槽数据，跳过冲突检测');
+          continue;
+        }
+        
+        // 执行课程冲突检测
+        console.log('执行课程冲突检测');
         const conflictResult = checkCoursesConflict(course, existingCourse);
+        
         if (conflictResult.hasConflict) {
           console.log('检测到课程时间冲突:', conflictResult);
           return {
@@ -434,8 +466,61 @@ exports.main = async (event, context) => {
             success: false,
             message: '您已预约的课程与此课程时间冲突，请选择其他时间段的课程'
           };
+        } else {
+          console.log('未检测到与课程的时间冲突');
         }
       }
+    } else {
+      console.log('用户没有已预约的课程或获取失败');
+    }
+    
+    // 还需要检查课程日程表中可能存在的冲突
+    try {
+      console.log('检查课程日程表中的冲突');
+      // 从课程日程表中获取用户课程
+      const userScheduleResult = await db.collection('course_schedule')
+        .where({
+          students: dbCmd.all([realUserId])
+        })
+        .get();
+        
+      if (userScheduleResult.data && userScheduleResult.data.length > 0) {
+        console.log('用户在课程日程表中有记录，数量:', userScheduleResult.data.length);
+        
+        for (const schedule of userScheduleResult.data) {
+          // 排除当前正在预约的课程
+          if (schedule.courseId === courseId) {
+            console.log('跳过当前正在预约的课程');
+            continue;
+          }
+          
+          const existingCourse = {
+            _id: schedule.courseId,
+            courseId: schedule.courseId,
+            title: schedule.courseName,
+            timeSlots: schedule.timeSlots || []
+          };
+          
+          console.log('检查与课程日程表中课程的冲突:', existingCourse.title || '未命名课程');
+          
+          if (existingCourse.timeSlots && existingCourse.timeSlots.length > 0) {
+            const conflictResult = checkCoursesConflict(course, existingCourse);
+            
+            if (conflictResult.hasConflict) {
+              console.log('检测到与课程日程表中课程的时间冲突:', conflictResult);
+              return {
+                code: -1,
+                success: false,
+                message: '您已安排的课程与此课程时间冲突，请选择其他时间段的课程'
+              };
+            }
+          }
+        }
+      } else {
+        console.log('用户在课程日程表中没有记录');
+      }
+    } catch (err) {
+      console.error('检查课程日程表冲突失败:', err);
     }
     
     // 生成预约编号

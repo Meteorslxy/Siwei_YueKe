@@ -191,97 +191,18 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
-var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
-var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ 5));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
 var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
 var courseCalendarUtils = _interopRequireWildcard(__webpack_require__(/*! @/utils/courseCalendar.js */ 126));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof3(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-// 导入课程日历功能
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 var uniCalendar = function uniCalendar() {
   Promise.all(/*! require.ensure | uni_modules/uni-calendar/components/uni-calendar/uni-calendar */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-calendar/components/uni-calendar/uni-calendar")]).then((function () {
     return resolve(__webpack_require__(/*! @/uni_modules/uni-calendar/components/uni-calendar/uni-calendar.vue */ 501));
@@ -314,15 +235,22 @@ var _default = {
       // 课程日期缓存，避免重复计算
       courseDateCache: {},
       loading: false,
-      loadingText: ''
+      loadingText: '',
+      userInfo: null,
+      calendarLoaded: false
     };
   },
   onLoad: function onLoad() {
-    var _this = this;
     // 设置导航栏标题
     uni.setNavigationBarTitle({
       title: '课程日历'
     });
+
+    // 同步全局用户信息
+    this.syncGlobalUserInfo();
+
+    // 清除所有日历相关缓存（解决5月1日错误显示课程问题）
+    this.clearAllCalendarCache();
 
     // 设置默认日期为今天
     var today = new Date();
@@ -330,84 +258,878 @@ var _default = {
     this.currentYear = today.getFullYear();
     this.currentMonth = today.getMonth() + 1;
 
-    // 加载用户已预约课程
-    this.loadBookings();
+    // 清理过期缓存
+    this.cleanExpiredCache();
 
-    // 添加延迟确保日历组件渲染完毕后刷新数据
-    setTimeout(function () {
-      if (_this.bookedCourses.length > 0) {
-        _this.updateCalendarCourseDates();
-      }
-    }, 1000);
+    // 检查用户页面是否已经获取了预约数据
+    this.checkUserPageBookings();
+
+    // 加载用户已预约课程
+    this.initCalendarPage();
+
+    // 从课程排期表获取时间段
+    this.fetchCourseSchedules();
   },
   onShow: function onShow() {
-    var _this2 = this;
     // 页面显示时重新加载课程数据
-    this.loadBookings();
+    this.initCalendarPage();
 
-    // 添加延迟确保日历组件渲染完毕后刷新数据
-    setTimeout(function () {
-      if (_this2.bookedCourses.length > 0) {
-        _this2.updateCalendarCourseDates();
-      }
-    }, 500);
+    // 添加示例课程排期数据（默认情况下不执行，仅供测试）
+    // this.addExampleCourseSchedule();
   },
+
   methods: {
-    // 获取用户预约
-    loadBookings: function loadBookings() {
-      var _this3 = this;
+    // 初始化日历页面
+    initCalendarPage: function initCalendarPage() {
+      var _this = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var _yield$uniCloud$callF, result;
+        var userInfo;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.prev = 0;
-                if (_this3.isUserLoggedIn()) {
-                  _context.next = 4;
+                uni.showLoading({
+                  title: '加载中...'
+                });
+
+                // 获取用户信息
+                userInfo = uni.getStorageSync('userInfo');
+                _this.userInfo = userInfo;
+
+                // 检查用户登录状态 - 修复判断逻辑
+                if (_this.isUserLoggedIn()) {
+                  _context.next = 9;
                   break;
                 }
-                console.log('用户未登录，无法加载预约数据');
+                console.log('用户未登录，显示登录提示');
+                uni.hideLoading();
+                _this.showLoginTip();
                 return _context.abrupt("return");
-              case 4:
-                _this3.loading = true;
-                _this3.loadingText = '加载预约数据中...';
-                _context.next = 8;
-                return uniCloud.callFunction({
-                  name: 'getUserBookings',
-                  data: {
-                    userId: _this3.userInfo._id,
-                    status: 'pending' // 过滤未参加的预约
-                  }
-                });
-              case 8:
-                _yield$uniCloud$callF = _context.sent;
-                result = _yield$uniCloud$callF.result;
-                if (result.code === 0) {
-                  _this3.bookings = result.data;
-                  console.log("\u6210\u529F\u52A0\u8F7D\u9884\u7EA6\u6570\u636E: ".concat(_this3.bookings.length, "\u6761\u8BB0\u5F55"));
-                  _this3.updateCalendarCourseDates();
-                } else {
-                  console.error('加载预约失败：', result.message);
-                }
-                _context.next = 16;
+              case 9:
+                console.log('用户已登录，ID:', _this.getUserId());
+
+                // 清除无效的课程缓存
+                _this.clearInvalidCoursesCache();
+
+                // 重新获取数据，不使用缓存
+                console.log('重新从服务器获取数据');
+
+                // 获取用户已预约的课程和详情
+                _context.next = 14;
+                return _this.fetchBookedCourses();
+              case 14:
+                _this.calendarLoaded = true;
+                _context.next = 21;
                 break;
-              case 13:
-                _context.prev = 13;
+              case 17:
+                _context.prev = 17;
                 _context.t0 = _context["catch"](0);
-                console.error('加载预约出错:', _context.t0);
-              case 16:
-                _context.prev = 16;
-                _this3.loading = false;
-                _this3.loadingText = '';
-                return _context.finish(16);
-              case 20:
+                console.error('初始化日历页面失败:', _context.t0);
+                // 显示错误信息
+                _this.showNetworkError(_context.t0);
+              case 21:
+                _context.prev = 21;
+                uni.hideLoading();
+                return _context.finish(21);
+              case 24:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[0, 13, 16, 20]]);
+        }, _callee, null, [[0, 17, 21, 24]]);
       }))();
+    },
+    // 保存数据到本地缓存
+    saveDataToCache: function saveDataToCache() {
+      try {
+        if (!this.bookedCourses || this.bookedCourses.length === 0) {
+          console.log('无数据需要缓存');
+          return;
+        }
+        var cacheData = {
+          bookedCourses: this.bookedCourses,
+          timestamp: Date.now()
+        };
+        uni.setStorageSync('calendar_booked_courses_cache', cacheData);
+        console.log('课程数据已保存到本地缓存');
+      } catch (error) {
+        console.error('保存缓存数据失败:', error);
+      }
+    },
+    // 从本地缓存加载数据
+    loadDataFromCache: function loadDataFromCache() {
+      try {
+        var cacheData = uni.getStorageSync('calendar_booked_courses_cache');
+        if (!cacheData || !cacheData.bookedCourses) {
+          console.log('没有找到缓存数据');
+          return false;
+        }
+
+        // 检查缓存是否过期（24小时）
+        var now = Date.now();
+        var cacheTime = cacheData.timestamp || 0;
+        var cacheAgeHours = (now - cacheTime) / (1000 * 60 * 60);
+        if (cacheAgeHours > 24) {
+          console.log('缓存数据已过期（超过24小时）');
+          return false;
+        }
+
+        // 使用缓存数据
+        this.bookedCourses = cacheData.bookedCourses;
+        console.log("\u5DF2\u4ECE\u7F13\u5B58\u52A0\u8F7D ".concat(this.bookedCourses.length, " \u4E2A\u8BFE\u7A0B"));
+
+        // 更新日历标记
+        this.updateCalendarCourseMarkers();
+        return true;
+      } catch (error) {
+        console.error('读取缓存数据失败:', error);
+        return false;
+      }
+    },
+    // 显示网络错误提示
+    showNetworkError: function showNetworkError(error) {
+      var message = '网络连接失败，请检查网络设置';
+      if (error && error.message) {
+        if (error.message.includes('ENOTFOUND') || error.message.includes('getaddrinfo')) {
+          message = '无法连接到服务器，请检查网络连接';
+        } else if (error.message.includes('timeout')) {
+          message = '服务器响应超时，请稍后重试';
+        } else if (error.message.includes('Network Error')) {
+          message = '网络错误，请检查网络连接后重试';
+        }
+      }
+      uni.showToast({
+        title: message,
+        icon: 'none',
+        duration: 3000
+      });
+    },
+    // 获取用户已预约的课程
+    fetchBookedCourses: function fetchBookedCourses() {
+      var _this2 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+        var userId, globalBookings, app, userPageData, db, bookingsResult, bookings, _db, bookingsCollection, _yield$bookingsCollec, result, _db2, _result, _bookings, loadedFromCache;
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (_this2.isUserLoggedIn()) {
+                  _context2.next = 3;
+                  break;
+                }
+                console.log('用户未登录，无法获取预约课程');
+                return _context2.abrupt("return");
+              case 3:
+                // 显示加载提示
+                uni.showLoading({
+                  title: '加载课程中...',
+                  mask: true
+                });
+                _context2.prev = 4;
+                // 获取用户ID
+                userId = _this2.getUserId();
+                console.log('正在获取预约课程，用户ID:', userId);
+                if (userId) {
+                  _context2.next = 9;
+                  break;
+                }
+                throw new Error('无法获取用户ID');
+              case 9:
+                // 方法1: 先查看是否已有预约数据 - 从全局数据获取
+                globalBookings = getApp().globalData.bookings;
+                if (!(globalBookings && globalBookings.data && globalBookings.data.length > 0)) {
+                  _context2.next = 14;
+                  break;
+                }
+                console.log('使用全局已有的预约数据:', globalBookings.data.length, '条记录');
+                _this2.processBookingsData(globalBookings.data);
+                return _context2.abrupt("return");
+              case 14:
+                _context2.prev = 14;
+                app = getApp();
+                if (!(app && app.globalData && app.globalData.userBookings)) {
+                  _context2.next = 20;
+                  break;
+                }
+                console.log('使用全局用户预约数据');
+                _this2.processBookingsData(app.globalData.userBookings);
+                return _context2.abrupt("return");
+              case 20:
+                _context2.next = 25;
+                break;
+              case 22:
+                _context2.prev = 22;
+                _context2.t0 = _context2["catch"](14);
+                console.error('获取全局用户预约数据出错:', _context2.t0);
+              case 25:
+                _context2.prev = 25;
+                userPageData = uni.getStorageSync('user_bookings_data');
+                if (!(userPageData && Array.isArray(userPageData))) {
+                  _context2.next = 31;
+                  break;
+                }
+                console.log('使用用户页面缓存的预约数据:', userPageData.length, '条记录');
+                _this2.processBookingsData(userPageData);
+                return _context2.abrupt("return");
+              case 31:
+                _context2.next = 36;
+                break;
+              case 33:
+                _context2.prev = 33;
+                _context2.t1 = _context2["catch"](25);
+                console.error('获取用户页面预约数据出错:', _context2.t1);
+              case 36:
+                _context2.prev = 36;
+                console.log('尝试使用备用API获取用户预约...');
+                db = uniCloud.database(); // 首先尝试 getBookings 云函数 (如果存在)
+                _context2.next = 41;
+                return db.callFunction({
+                  name: 'getBookings',
+                  data: {
+                    userId: userId,
+                    status: 'all'
+                  }
+                });
+              case 41:
+                bookingsResult = _context2.sent;
+                if (!(bookingsResult && bookingsResult.result && (bookingsResult.result.data || bookingsResult.result.bookings))) {
+                  _context2.next = 47;
+                  break;
+                }
+                bookings = bookingsResult.result.data || bookingsResult.result.bookings || [];
+                console.log('从getBookings获取到预约数据:', bookings.length, '条记录');
+                _this2.processBookingsData(bookings);
+                return _context2.abrupt("return");
+              case 47:
+                _context2.next = 52;
+                break;
+              case 49:
+                _context2.prev = 49;
+                _context2.t2 = _context2["catch"](36);
+                console.log('备用API getBookings 不可用:', _context2.t2.message);
+              case 52:
+                _context2.prev = 52;
+                console.log('尝试直接查询预约表...');
+                _db = uniCloud.database();
+                bookingsCollection = _db.collection('bookings');
+                _context2.next = 58;
+                return bookingsCollection.where({
+                  userId: userId
+                }).get();
+              case 58:
+                _yield$bookingsCollec = _context2.sent;
+                result = _yield$bookingsCollec.result;
+                if (!(result && result.data && result.data.length > 0)) {
+                  _context2.next = 64;
+                  break;
+                }
+                console.log('从数据库直接获取到预约数据:', result.data.length, '条记录');
+                _this2.processBookingsData(result.data);
+                return _context2.abrupt("return");
+              case 64:
+                _context2.next = 69;
+                break;
+              case 66:
+                _context2.prev = 66;
+                _context2.t3 = _context2["catch"](52);
+                console.log('直接查询数据库失败:', _context2.t3.message);
+              case 69:
+                _context2.prev = 69;
+                console.log('尝试原始getUserCourses云函数...');
+                _db2 = uniCloud.database();
+                _context2.next = 74;
+                return _db2.callFunction({
+                  name: 'getUserCourses',
+                  data: {
+                    userId: userId
+                  }
+                });
+              case 74:
+                _result = _context2.sent;
+                if (!(_result && _result.result && _result.result.success)) {
+                  _context2.next = 82;
+                  break;
+                }
+                // 更新预约课程列表
+                _bookings = _result.result.data || [];
+                console.log('从getUserCourses获取到预约数据:', _bookings.length, '条记录');
+                _this2.processBookingsData(_bookings);
+                return _context2.abrupt("return");
+              case 82:
+                throw new Error(_result && _result.result && _result.result.message || '获取预约课程失败');
+              case 83:
+                _context2.next = 89;
+                break;
+              case 85:
+                _context2.prev = 85;
+                _context2.t4 = _context2["catch"](69);
+                console.error('getUserCourses云函数调用失败:', _context2.t4);
+                throw _context2.t4;
+              case 89:
+                _context2.next = 96;
+                break;
+              case 91:
+                _context2.prev = 91;
+                _context2.t5 = _context2["catch"](4);
+                console.error('获取预约课程异常:', _context2.t5);
+
+                // 处理网络错误
+                _this2.showNetworkError(_context2.t5);
+
+                // 网络连接失败时，尝试从本地缓存加载数据
+                if (_this2.bookedCourses.length === 0) {
+                  loadedFromCache = _this2.loadDataFromCache();
+                  if (loadedFromCache) {
+                    uni.showToast({
+                      title: '已加载本地缓存数据',
+                      icon: 'none',
+                      duration: 2000
+                    });
+                  } else {
+                    // 如果没有缓存，显示友好提示
+                    uni.showToast({
+                      title: '暂无课程数据，请稍后再试',
+                      icon: 'none',
+                      duration: 2000
+                    });
+                  }
+                }
+              case 96:
+                _context2.prev = 96;
+                // 隐藏加载提示
+                uni.hideLoading();
+
+                // 更新选中日期的课程列表
+                _this2.updateSelectedDateCourses();
+                return _context2.finish(96);
+              case 100:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[4, 91, 96, 100], [14, 22], [25, 33], [36, 49], [52, 66], [69, 85]]);
+      }))();
+    },
+    // 处理预约数据
+    processBookingsData: function processBookingsData(bookings) {
+      console.log('处理预约数据:', bookings.length, '条记录');
+      if (!bookings || bookings.length === 0) return;
+      try {
+        // 过滤掉已取消的课程
+        var validBookings = bookings.filter(function (booking) {
+          var status = booking.status || booking.course && booking.course.status;
+          return status !== 'cancelled' && status !== 'canceled';
+        });
+        console.log("\u8FC7\u6EE4\u540E\u7684\u6709\u6548\u9884\u7EA6: ".concat(validBookings.length, "/").concat(bookings.length, " (\u6392\u9664\u5DF2\u53D6\u6D88)"));
+        if (validBookings.length === 0) {
+          console.log('没有有效的预约课程（全部为已取消状态）');
+          return;
+        }
+
+        // 转换为课程数据格式
+        var processedCourses = validBookings.map(function (booking) {
+          // 提取课程信息
+          var course = booking.course || {};
+
+          // 确保有课程名称，优先使用course.title，然后是booking.courseName，最后是course.name
+          var courseName = course.title || booking.courseName || course.name || (booking.course_name ? booking.course_name : '未命名课程');
+
+          // 确保有课程ID
+          var courseId = booking.courseId || course._id || booking._id || booking.course_id;
+
+          // 确保有教师姓名
+          var teacherName = course.teacherName || booking.teacherName || course.teacher_name || booking.teacher_name || '未指定';
+
+          // 创建基本课程对象，初始没有schedules，将在后续从course_schedule表获取
+          return {
+            _id: courseId,
+            courseId: courseId,
+            title: courseName,
+            teacherName: teacherName,
+            location: course.location || booking.location || course.place || booking.place || '未指定',
+            bookingId: booking._id,
+            bookingStatus: booking.status || 'pending',
+            status: booking.status || 'pending',
+            schedules: [],
+            // 初始化为空数组，后续从course_schedule表获取
+            timeSlots: [] // 初始化为空数组，后续从course_schedule表获取
+          };
+        });
+
+        console.log('处理后的课程数据:', processedCourses);
+
+        // 更新预约课程列表
+        this.bookedCourses = processedCourses;
+
+        // 保存到本地缓存，便于后续离线访问
+        this.saveDataToCache();
+
+        // 从课程排期表获取时间段 - 最关键的一步
+        this.fetchCourseSchedules();
+      } catch (error) {
+        console.error('处理预约数据出错:', error);
+      }
+    },
+    // 导航到有课程的月份
+    navigateToMonthWithCourses: function navigateToMonthWithCourses() {
+      var _this3 = this;
+      if (!this.bookedCourses || this.bookedCourses.length === 0) return;
+      try {
+        // 获取所有课程日期
+        var allDates = [];
+
+        // 遍历所有课程
+        var _iterator = _createForOfIteratorHelper(this.bookedCourses),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var course = _step.value;
+            var schedules = course.schedules || [];
+
+            // 提取所有日期
+            var _iterator2 = _createForOfIteratorHelper(schedules),
+              _step2;
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                var schedule = _step2.value;
+                var dateStr = '';
+                if (schedule.date) {
+                  dateStr = this.formatDateForComparison(schedule.date);
+                } else if (schedule.startDate) {
+                  dateStr = this.formatDateForComparison(schedule.startDate);
+                }
+                if (dateStr) {
+                  allDates.push(dateStr);
+                }
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+        if (allDates.length === 0) return;
+
+        // 按日期排序
+        allDates.sort();
+
+        // 找出最近的日期（优先当月或未来的月份）
+        var today = new Date();
+        var currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+
+        // 尝试找当月或未来的日期
+        var futureDates = allDates.filter(function (date) {
+          return date >= _this3.formatDateString(today);
+        });
+        var targetDate;
+        if (futureDates.length > 0) {
+          // 使用未来最近的日期
+          targetDate = futureDates[0];
+        } else {
+          // 如果没有未来日期，使用最近的过去日期
+          targetDate = allDates[allDates.length - 1];
+        }
+        if (!targetDate) return;
+
+        // 解析目标日期
+        var parts = targetDate.split('-');
+        if (parts.length !== 3) return;
+        var year = parseInt(parts[0]);
+        var month = parseInt(parts[1]);
+
+        // 检查是否需要切换月份
+        if (year !== this.currentYear || month !== this.currentMonth) {
+          console.log("\u5207\u6362\u5230\u6709\u8BFE\u7A0B\u7684\u6708\u4EFD: ".concat(year, "\u5E74").concat(month, "\u6708\uFF08\u6709\u8BFE\u7A0B\u7684\u65E5\u671F: ").concat(targetDate, "\uFF09"));
+
+          // 更新当前显示的年月
+          this.currentYear = year;
+          this.currentMonth = month;
+
+          // 选中该日期
+          this.selectedDate = targetDate;
+
+          // 通知日历组件更新
+          this.$nextTick(function () {
+            // 强制刷新日历标记
+            _this3.updateCalendarCourseMarkers();
+
+            // 获取该日期的课程
+            _this3.fetchCourseList(targetDate);
+          });
+        }
+      } catch (error) {
+        console.error('导航到有课程的月份出错:', error);
+      }
+    },
+    // 从预约信息中提取日程安排
+    extractSchedulesFromBooking: function extractSchedulesFromBooking(booking) {
+      var _this4 = this;
+      var schedules = [];
+
+      // 如果预约记录中直接包含时间信息
+      if (booking.date || booking.startDate || booking.courseDate) {
+        var date = booking.date || booking.startDate || booking.courseDate || '';
+        var startTime = booking.startTime || '00:00';
+        var endTime = booking.endTime || '23:59';
+        if (date) {
+          schedules.push({
+            date: date,
+            startTime: startTime,
+            endTime: endTime
+          });
+        }
+      }
+
+      // 如果有timeSlots字段
+      if (booking.timeSlots && Array.isArray(booking.timeSlots) && booking.timeSlots.length > 0) {
+        booking.timeSlots.forEach(function (slot) {
+          // 如果时间槽包含完整日期和时间
+          if (slot.start && slot.end) {
+            try {
+              var startDate = new Date(slot.start);
+              var endDate = new Date(slot.end);
+              if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                schedules.push({
+                  date: _this4.formatDate(startDate),
+                  startTime: "".concat(startDate.getHours().toString().padStart(2, '0'), ":").concat(startDate.getMinutes().toString().padStart(2, '0')),
+                  endTime: "".concat(endDate.getHours().toString().padStart(2, '0'), ":").concat(endDate.getMinutes().toString().padStart(2, '0'))
+                });
+              }
+            } catch (e) {
+              console.error('解析时间槽日期时出错:', e);
+            }
+          }
+          // 如果时间槽分别包含日期和时间字段
+          else if (slot.date || slot.startDate) {
+            schedules.push({
+              date: slot.date || slot.startDate,
+              startTime: slot.startTime || '00:00',
+              endTime: slot.endTime || '23:59'
+            });
+          }
+        });
+      }
+      return schedules;
+    },
+    // 获取预订课程的详情并处理为日历数据
+    fetchCourseDetailsAndSchedules: function fetchCourseDetailsAndSchedules() {
+      var _this5 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+        var courseIds, _yield$uniCloud$callF, result, courseMap, processedCourses;
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.prev = 0;
+                if (!(!_this5.bookedCourses || _this5.bookedCourses.length === 0)) {
+                  _context3.next = 4;
+                  break;
+                }
+                console.log('没有预约课程数据');
+                return _context3.abrupt("return");
+              case 4:
+                // 从预订记录中提取课程ID列表
+                courseIds = (0, _toConsumableArray2.default)(new Set(_this5.bookedCourses.map(function (booking) {
+                  return booking.courseId;
+                })));
+                if (!(courseIds.length === 0)) {
+                  _context3.next = 8;
+                  break;
+                }
+                console.log('没有有效的课程ID');
+                return _context3.abrupt("return");
+              case 8:
+                console.log("\u5F00\u59CB\u67E5\u8BE2".concat(courseIds.length, "\u4E2A\u8BFE\u7A0B\u7684\u8BE6\u7EC6\u4FE1\u606F"));
+
+                // 查询课程详情
+                _context3.next = 11;
+                return uniCloud.callFunction({
+                  name: 'getCoursesByIds',
+                  data: {
+                    courseIds: courseIds
+                  }
+                });
+              case 11:
+                _yield$uniCloud$callF = _context3.sent;
+                result = _yield$uniCloud$callF.result;
+                if (!(!result || !result.data || result.data.length === 0)) {
+                  _context3.next = 16;
+                  break;
+                }
+                console.log('未找到课程详情');
+                return _context3.abrupt("return");
+              case 16:
+                console.log("\u83B7\u53D6\u5230".concat(result.data.length, "\u4E2A\u8BFE\u7A0B\u8BE6\u60C5"));
+
+                // 创建课程ID到课程对象的映射
+                courseMap = {};
+                result.data.forEach(function (course) {
+                  courseMap[course._id] = course;
+                });
+
+                // 将课程详情与预订记录整合
+                processedCourses = _this5.bookedCourses.map(function (booking) {
+                  // 获取课程详情
+                  var courseDetail = courseMap[booking.courseId];
+                  if (!courseDetail) {
+                    console.warn("\u672A\u627E\u5230ID\u4E3A".concat(booking.courseId, "\u7684\u8BFE\u7A0B\u8BE6\u60C5"));
+                    return null;
+                  }
+
+                  // 整合课程详情和预订数据
+                  return _objectSpread(_objectSpread({}, courseDetail), {}, {
+                    bookingId: booking._id,
+                    bookingStatus: booking.status || '已预约',
+                    timeSlots: booking.timeSlots || (booking.startDate && booking.endDate ? _this5.generateTimeSlots(booking.startDate, booking.endDate, booking.startTime, booking.endTime) : [])
+                  });
+                }).filter(function (course) {
+                  return course !== null;
+                });
+                console.log('处理后的课程数据:', processedCourses);
+                _this5.bookedCourses = processedCourses;
+                _this5.updateCalendarCourseMarkers();
+                _context3.next = 29;
+                break;
+              case 25:
+                _context3.prev = 25;
+                _context3.t0 = _context3["catch"](0);
+                console.error('获取课程详情出错:', _context3.t0);
+                _this5.showNetworkError(_context3.t0);
+              case 29:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, null, [[0, 25]]);
+      }))();
+    },
+    // 生成标准化的时间插槽格式
+    generateTimeSlots: function generateTimeSlots(startDate, endDate, startTime, endTime) {
+      if (!startDate || !endDate || !startTime || !endTime) {
+        return [];
+      }
+
+      // 如果开始时间晚于结束时间，交换它们
+      if (startTime > endTime) {
+        var _ref = [endTime, startTime];
+        startTime = _ref[0];
+        endTime = _ref[1];
+      }
+      return [{
+        startDate: startDate,
+        endDate: endDate,
+        startTime: startTime,
+        endTime: endTime
+      }];
+    },
+    // 将日期对象格式化为字符串 YYYY-MM-DD
+    formatDate: function formatDate(date) {
+      if (!date) return '';
+      if (typeof date === 'string') {
+        // 如果已经是日期字符串，检查格式是否符合 YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+          return date;
+        }
+        // 尝试转换为Date对象
+        date = new Date(date);
+      }
+      var year = date.getFullYear();
+      var month = (date.getMonth() + 1).toString().padStart(2, '0');
+      var day = date.getDate().toString().padStart(2, '0');
+      return "".concat(year, "-").concat(month, "-").concat(day);
+    },
+    // 格式化时间显示 HH:MM
+    formatTimeDisplay: function formatTimeDisplay(time) {
+      if (!time) return '';
+
+      // 如果时间已经是格式化的字符串
+      if (typeof time === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
+        // 去掉秒数如果有
+        return time.substring(0, 5);
+      }
+      try {
+        // 尝试处理为Date对象
+        var date = typeof time === 'string' ? new Date(time) : time;
+        var hours = date.getHours().toString().padStart(2, '0');
+        var minutes = date.getMinutes().toString().padStart(2, '0');
+        return "".concat(hours, ":").concat(minutes);
+      } catch (e) {
+        console.error('无法格式化时间:', time, e);
+        return (time === null || time === void 0 ? void 0 : time.toString()) || '';
+      }
+    },
+    // 更新日历上的课程日期标记
+    updateCalendarCourseMarkers: function updateCalendarCourseMarkers() {
+      var _this6 = this;
+      console.log('开始更新日历课程标记，预约课程数量:', this.bookedCourses.length);
+
+      // 重置课程日期映射
+      this.courseDatesMap = {};
+      if (!this.bookedCourses || this.bookedCourses.length === 0) {
+        console.log('没有预约课程数据，无法更新日历标记');
+
+        // 清空日历标记
+        this.selectedInfo = {
+          selected: []
+        };
+        return;
+      }
+
+      // 处理所有已预订的课程
+      var _iterator3 = _createForOfIteratorHelper(this.bookedCourses),
+        _step3;
+      try {
+        var _loop = function _loop() {
+          var course = _step3.value;
+          // 跳过已取消课程
+          if (course.status === 'cancelled' || course.status === 'canceled') {
+            return "continue";
+          }
+
+          // 获取课程的日程安排
+          var schedules = course.schedules || [];
+          if (schedules.length === 0) {
+            console.log('课程没有日程安排:', course.title || course._id);
+            return "continue";
+          }
+          console.log("\u5904\u7406\u8BFE\u7A0B ".concat(course.title || '未命名', " \u7684 ").concat(schedules.length, " \u4E2A\u65E5\u7A0B"));
+
+          // 统计每个日期的课程数量，用于检查错误数据
+          var dateCount = {};
+
+          // 遍历每个日程
+          var _iterator4 = _createForOfIteratorHelper(schedules),
+            _step4;
+          try {
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+              var schedule = _step4.value;
+              try {
+                // 获取日期字符串
+                var dateStr = '';
+                if (schedule.date) {
+                  // 如果是日期字符串
+                  dateStr = _this6.formatDateForComparison(schedule.date);
+                } else if (schedule.startDate) {
+                  // 如果是开始日期
+                  dateStr = _this6.formatDateForComparison(schedule.startDate);
+                }
+                if (!dateStr) {
+                  console.log('日程没有有效日期:', schedule);
+                  continue;
+                }
+
+                // 更新日期计数
+                dateCount[dateStr] = (dateCount[dateStr] || 0) + 1;
+
+                // 获取时间信息
+                var startTime = schedule.startTime || '00:00';
+                var endTime = schedule.endTime || '23:59';
+
+                // 创建课程信息对象
+                var courseInfo = {
+                  courseId: course._id || course.courseId,
+                  courseTitle: course.title || '未命名课程',
+                  startTime: startTime,
+                  endTime: endTime,
+                  status: course.status,
+                  index: schedule.index,
+                  totalClasses: schedule.totalClasses
+                };
+
+                // 将课程信息添加到日期映射
+                if (!_this6.courseDatesMap[dateStr]) {
+                  _this6.courseDatesMap[dateStr] = {
+                    courses: [courseInfo],
+                    info: course.status === 'confirmed' ? 'booked' : 'pending'
+                  };
+                } else {
+                  // 已有该日期的记录，追加课程信息
+                  _this6.courseDatesMap[dateStr].courses.push(courseInfo);
+
+                  // 更新日期状态（优先显示已确认的课程）
+                  if (course.status === 'confirmed') {
+                    _this6.courseDatesMap[dateStr].info = 'booked';
+                  }
+                }
+                console.log("\u5DF2\u6DFB\u52A0\u8BFE\u7A0B\u5230\u65E5\u671F ".concat(dateStr, ", \u72B6\u6001: ").concat(course.status));
+              } catch (e) {
+                console.error('处理日程时出错:', e, schedule);
+              }
+            }
+
+            // 检查异常日期（同一天有多个课程）
+          } catch (err) {
+            _iterator4.e(err);
+          } finally {
+            _iterator4.f();
+          }
+          Object.keys(dateCount).forEach(function (date) {
+            if (dateCount[date] > 1) {
+              console.log("\u8B66\u544A: \u65E5\u671F ".concat(date, " \u6709 ").concat(dateCount[date], " \u4E2A\u8BFE\u7A0B\u5B89\u6392\uFF0C\u53EF\u80FD\u91CD\u590D"));
+            }
+          });
+        };
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var _ret = _loop();
+          if (_ret === "continue") continue;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      console.log('更新后的课程日期映射, 日期数量:', Object.keys(this.courseDatesMap).length);
+      if (Object.keys(this.courseDatesMap).length === 0) {
+        console.log('没有找到有效的课程日期');
+        this.selectedInfo = {
+          selected: []
+        };
+        return;
+      }
+
+      // 检查是否有"5月1日"的错误数据
+      if (this.courseDatesMap['2025-05-01']) {
+        // 检查这个日期是否真的在提供的课程数据中
+        var hasValidTimeSlot = this.bookedCourses.some(function (course) {
+          return course.timeSlots && course.timeSlots.some(function (slot) {
+            var slotDate = new Date(slot.start);
+            return _this6.formatDateForComparison(slotDate) === '2025-05-01';
+          });
+        });
+        if (!hasValidTimeSlot) {
+          console.log('检测到5月1日可能是错误数据，删除该日期标记');
+          delete this.courseDatesMap['2025-05-01'];
+        }
+      }
+
+      // 更新日历组件的选定日期
+      var markedDates = Object.keys(this.courseDatesMap).map(function (dateStr) {
+        return {
+          date: dateStr,
+          info: _this6.courseDatesMap[dateStr].info
+        };
+      });
+      console.log('标记的日期数量:', markedDates.length);
+      console.log('标记的具体日期:', markedDates.map(function (d) {
+        return d.date;
+      }).join(', '));
+      this.selectedInfo = {
+        selected: markedDates
+      };
+
+      // 刷新日历组件
+      this.$nextTick(function () {
+        // 如果有选中的日期，获取该日期的课程列表
+        if (_this6.selectedDate) {
+          _this6.fetchCourseList(_this6.selectedDate);
+        }
+      });
     },
     // 日期变更事件
     dateChange: function dateChange(e) {
@@ -422,8 +1144,10 @@ var _default = {
       if (year !== this.currentYear || month !== this.currentMonth) {
         this.currentYear = year;
         this.currentMonth = month;
-        this.updateCalendarCourseDates();
+        this.updateCalendarCourseMarkers();
       }
+
+      // 获取选中日期的课程
       this.fetchCourseList(this.selectedDate);
     },
     // 处理月份切换事件
@@ -437,575 +1161,7 @@ var _default = {
       this.currentMonth = month;
 
       // 更新日历标记
-      this.updateCalendarCourseDates();
-    },
-    // 加载用户已预约的课程
-    loadBookedCourses: function loadBookedCourses() {
-      var _this4 = this;
-      uni.showLoading({
-        title: '加载中...'
-      });
-
-      // 获取用户ID
-      var userId = '';
-      try {
-        var userInfoStorage = uni.getStorageSync('userInfo');
-        console.log('userInfo类型:', (0, _typeof2.default)(userInfoStorage));
-        if (userInfoStorage) {
-          if (typeof userInfoStorage === 'string') {
-            try {
-              var parsed = JSON.parse(userInfoStorage);
-              userId = parsed.userId || '';
-              console.log('从字符串解析的userId:', userId);
-            } catch (e) {
-              console.error('解析userInfo字符串出错:', e);
-            }
-          } else if ((0, _typeof2.default)(userInfoStorage) === 'object') {
-            userId = userInfoStorage.userId || '';
-            console.log('从对象获取的userId:', userId);
-          }
-        }
-      } catch (e) {
-        console.error('获取userInfo时出错:', e);
-      }
-      if (!userId) {
-        // 尝试从本地全局状态获取
-        var globalUserInfo = getApp().globalData ? getApp().globalData.userInfo : null;
-        if (globalUserInfo && globalUserInfo.userId) {
-          userId = globalUserInfo.userId;
-          console.log('从全局状态获取userId:', userId);
-        }
-      }
-      if (!userId) {
-        uni.hideLoading();
-        console.error('未找到用户ID');
-        this.showLoginTip();
-        return;
-      }
-
-      // 组织Promise队列，同时查询三个数据表的数据
-      Promise.all([
-      // 1. 获取用户预约课程 (getUserBookings云函数)
-      new Promise(function (resolve) {
-        uniCloud.callFunction({
-          name: 'getUserBookings',
-          data: {
-            userId: userId
-          },
-          success: function success(res) {
-            var _res$result;
-            console.log('获取用户预约课程成功:', res);
-            resolve(((_res$result = res.result) === null || _res$result === void 0 ? void 0 : _res$result.data) || []);
-          },
-          fail: function fail(err) {
-            console.error('获取用户预约课程失败:', err);
-            resolve([]);
-          }
-        });
-      }),
-      // 2. 查询课程的日程表 (course_schedule表)
-      new Promise(function (resolve) {
-        // 首先获取用户关联的课程ID
-        var db = uniCloud.database();
-        var courseScheduleDB = db.collection('course_schedule');
-
-        // 获取所有课程日程表数据，不进行过滤
-        courseScheduleDB.limit(500).get().then(function (res) {
-          var _res$result2;
-          console.log('获取课程日程表成功:', res);
-          resolve(((_res$result2 = res.result) === null || _res$result2 === void 0 ? void 0 : _res$result2.data) || []);
-        }).catch(function (err) {
-          console.error('获取课程日程表失败:', err);
-          resolve([]);
-        });
-      }),
-      // 3. 查询学生选课记录 (student_schedules表)
-      new Promise(function (resolve) {
-        var db = uniCloud.database();
-        var studentSchedulesDB = db.collection('student_schedules');
-        studentSchedulesDB.where({
-          studentId: userId
-        }).get().then(function (res) {
-          var _res$result3;
-          console.log('获取学生选课记录成功:', res);
-          resolve(((_res$result3 = res.result) === null || _res$result3 === void 0 ? void 0 : _res$result3.data) || []);
-        }).catch(function (err) {
-          console.error('获取学生选课记录失败:', err);
-          resolve([]);
-        });
-      }),
-      // 4. 直接查询预约表获取所有状态的预约
-      new Promise(function (resolve) {
-        var db = uniCloud.database();
-        db.collection('bookings').where({
-          userId: userId
-          // 不筛选状态，获取所有预约
-        }).get().then(function (res) {
-          var _res$result4;
-          console.log('获取所有预约记录成功:', res);
-          resolve(((_res$result4 = res.result) === null || _res$result4 === void 0 ? void 0 : _res$result4.data) || []);
-        }).catch(function (err) {
-          console.error('获取所有预约记录失败:', err);
-          resolve([]);
-        });
-      })]).then(function (_ref) {
-        var _ref2 = (0, _slicedToArray2.default)(_ref, 4),
-          bookingData = _ref2[0],
-          courseScheduleData = _ref2[1],
-          studentScheduleData = _ref2[2],
-          allBookingsData = _ref2[3];
-        // 重置数据
-        _this4.bookedCourses = [];
-        _this4.selectedInfo.selected = [];
-        _this4.courseDatesMap = {};
-        _this4.clearCourseDateCache();
-
-        // 从预约记录中提取课程ID
-        var courseIdsFromBooking = bookingData.map(function (booking) {
-          return booking.courseId || (booking.courseInfo ? booking.courseInfo._id : null);
-        }).filter(function (id) {
-          return id;
-        });
-
-        // 从直接查询的预约表中提取课程ID
-        var courseIdsFromAllBookings = allBookingsData.map(function (booking) {
-          return booking.courseId || (booking.courseInfo ? booking.courseInfo._id : null);
-        }).filter(function (id) {
-          return id;
-        });
-        console.log('从预约记录提取的课程ID:', courseIdsFromBooking);
-        console.log('从所有预约记录提取的课程ID:', courseIdsFromAllBookings);
-
-        // 从学生选课记录中提取课程ID
-        var courseIdsFromStudentSchedule = [];
-        if (studentScheduleData.length > 0) {
-          studentScheduleData.forEach(function (schedule) {
-            if (schedule.courses && Array.isArray(schedule.courses)) {
-              schedule.courses.forEach(function (course) {
-                if (course.courseId) {
-                  courseIdsFromStudentSchedule.push(course.courseId);
-                }
-              });
-            }
-          });
-        }
-        console.log('从学生选课记录提取的课程ID:', courseIdsFromStudentSchedule);
-
-        // 合并所有课程ID并去重
-        var allCourseIds = (0, _toConsumableArray2.default)(new Set([].concat((0, _toConsumableArray2.default)(courseIdsFromBooking), courseIdsFromStudentSchedule, (0, _toConsumableArray2.default)(courseIdsFromAllBookings))));
-        console.log('合并后的所有课程ID:', allCourseIds);
-        if (allCourseIds.length === 0) {
-          // 如果没有找到任何课程ID，尝试获取所有可用课程（测试用）
-          console.log('没有找到任何相关课程ID，尝试获取所有可用课程');
-          _this4.loadAllAvailableCourses();
-          return;
-        }
-
-        // 获取相关课程的详细信息
-        var db = uniCloud.database();
-        db.collection('courses').where({
-          _id: db.command.in(allCourseIds)
-        }).get().then(function (courseRes) {
-          var _courseRes$result;
-          console.log('获取课程详情成功:', courseRes);
-          var coursesData = ((_courseRes$result = courseRes.result) === null || _courseRes$result === void 0 ? void 0 : _courseRes$result.data) || [];
-
-          // 构建课程映射表
-          var courseMap = {};
-          coursesData.forEach(function (course) {
-            courseMap[course._id] = course;
-          });
-
-          // 提取并处理课程日程数据
-          var relevantSchedules = courseScheduleData.filter(function (schedule) {
-            return allCourseIds.includes(schedule.courseId);
-          });
-          console.log('相关的课程日程数据:', relevantSchedules);
-
-          // 处理学生具体选择的课程时间
-          var selectedTimeSlots = [];
-          studentScheduleData.forEach(function (studentSchedule) {
-            if (studentSchedule.courses && Array.isArray(studentSchedule.courses)) {
-              studentSchedule.courses.forEach(function (course) {
-                if (course.selectedSlots && Array.isArray(course.selectedSlots)) {
-                  selectedTimeSlots = [].concat((0, _toConsumableArray2.default)(selectedTimeSlots), (0, _toConsumableArray2.default)(course.selectedSlots));
-                }
-              });
-            }
-          });
-          console.log('学生选择的时间槽:', selectedTimeSlots);
-
-          // 构建预约课程列表
-          _this4.bookedCourses = allCourseIds.map(function (courseId) {
-            // 查找课程信息
-            var course = courseMap[courseId];
-            if (!course) return null;
-
-            // 查找对应的日程数据
-            var schedule = relevantSchedules.find(function (s) {
-              return s.courseId === courseId;
-            });
-            return {
-              _id: courseId,
-              status: 'confirmed',
-              // 默认为已确认状态
-              courseInfo: {
-                _id: courseId,
-                title: course.title || course.courseTitle || '未命名课程',
-                startDate: course.startDate,
-                endDate: course.endDate,
-                startTime: course.startTime,
-                endTime: course.endTime,
-                teacherName: course.teacherName || '未知',
-                schoolName: course.schoolName || course.location || '未知',
-                location: course.location || course.schoolName || '未知',
-                classTime: course.classTime
-              },
-              // 保存日程表的时间槽信息，用于日历显示
-              scheduleData: schedule ? {
-                timeSlots: schedule.timeSlots || [],
-                timeHash: schedule.timeHash || []
-              } : null,
-              // 记录学生选择的时间槽
-              selectedTimeSlots: selectedTimeSlots.filter(function (slot) {
-                // 只保留与当前课程相关的时间槽
-                if (!schedule || !schedule.timeSlots) return false;
-
-                // 检查该时间槽是否在课程的timeSlots中
-                return schedule.timeSlots.some(function (timeSlot) {
-                  var slotDate = new Date(timeSlot);
-                  var timeSlotStart = new Date(timeSlot.start);
-
-                  // 简单比较日期（忽略时间）
-                  return slotDate.toDateString() === timeSlotStart.toDateString();
-                });
-              })
-            };
-          }).filter(Boolean); // 过滤掉null值
-
-          console.log('处理后的预约课程:', _this4.bookedCourses);
-
-          // 更新日历上的课程标记
-          _this4.updateCalendarCourseDates();
-
-          // 如果当前有选中日期，刷新课程列表
-          if (_this4.selectedDate) {
-            _this4.fetchCourseList(_this4.selectedDate);
-          }
-          uni.hideLoading();
-        }).catch(function (err) {
-          console.error('获取课程详情失败:', err);
-          uni.hideLoading();
-        });
-      });
-    },
-    // 新增：加载所有可用课程（当用户没有任何预约或选课记录时使用）
-    loadAllAvailableCourses: function loadAllAvailableCourses() {
-      var _this5 = this;
-      var db = uniCloud.database();
-      db.collection('courses').limit(20).get().then(function (res) {
-        var _res$result5;
-        console.log('获取所有可用课程成功:', res);
-        var courses = ((_res$result5 = res.result) === null || _res$result5 === void 0 ? void 0 : _res$result5.data) || [];
-        if (courses.length === 0) {
-          uni.hideLoading();
-          return;
-        }
-
-        // 获取这些课程的日程表
-        var courseIds = courses.map(function (course) {
-          return course._id;
-        });
-        db.collection('course_schedule').where({
-          courseId: db.command.in(courseIds)
-        }).get().then(function (scheduleRes) {
-          var _scheduleRes$result;
-          console.log('获取可用课程日程表成功:', scheduleRes);
-          var schedulesData = ((_scheduleRes$result = scheduleRes.result) === null || _scheduleRes$result === void 0 ? void 0 : _scheduleRes$result.data) || [];
-
-          // 构建课程数据
-          _this5.bookedCourses = courses.map(function (course) {
-            // 查找对应的日程数据
-            var schedule = schedulesData.find(function (s) {
-              return s.courseId === course._id;
-            });
-            return {
-              _id: course._id,
-              status: 'available',
-              // 设置为可用状态
-              courseInfo: {
-                _id: course._id,
-                title: course.title || course.courseTitle || '未命名课程',
-                startDate: course.startDate,
-                endDate: course.endDate,
-                startTime: course.startTime,
-                endTime: course.endTime,
-                teacherName: course.teacherName || '未知',
-                schoolName: course.schoolName || course.location || '未知',
-                location: course.location || course.schoolName || '未知',
-                classTime: course.classTime
-              },
-              // 保存日程表的时间槽信息
-              scheduleData: schedule ? {
-                timeSlots: schedule.timeSlots || [],
-                timeHash: schedule.timeHash || []
-              } : null,
-              // 空的选择时间槽
-              selectedTimeSlots: []
-            };
-          }).filter(function (item) {
-            var _item$scheduleData, _item$scheduleData$ti;
-            return ((_item$scheduleData = item.scheduleData) === null || _item$scheduleData === void 0 ? void 0 : (_item$scheduleData$ti = _item$scheduleData.timeSlots) === null || _item$scheduleData$ti === void 0 ? void 0 : _item$scheduleData$ti.length) > 0;
-          }); // 只保留有时间槽的课程
-
-          console.log('处理后的可用课程:', _this5.bookedCourses);
-
-          // 更新日历上的课程标记
-          _this5.updateCalendarCourseDates();
-
-          // 如果当前有选中日期，刷新课程列表
-          if (_this5.selectedDate) {
-            _this5.fetchCourseList(_this5.selectedDate);
-          }
-          uni.hideLoading();
-        }).catch(function (err) {
-          console.error('获取可用课程日程表失败:', err);
-          uni.hideLoading();
-        });
-      }).catch(function (err) {
-        console.error('获取所有可用课程失败:', err);
-        uni.hideLoading();
-      });
-    },
-    // 更新日历中的课程日期标记
-    updateCalendarCourseDates: function updateCalendarCourseDates() {
-      var _this6 = this;
-      console.log('开始更新日历课程标记');
-      console.log("\u5F53\u524D\u663E\u793A\u6708\u4EFD: ".concat(this.currentYear, "\u5E74").concat(this.currentMonth, "\u6708"));
-      console.log('预约课程数量:', this.bookedCourses.length);
-
-      // 清空现有日期标记
-      this.courseDatesMap = {};
-      var selectedDates = [];
-
-      // 计算当前月的开始和结束日期
-      var monthStart = new Date(this.currentYear, this.currentMonth - 1, 1);
-      var nextMonth = new Date(this.currentYear, this.currentMonth, 1);
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      var monthEnd = new Date(nextMonth - 1); // 当前月的最后一天
-
-      // 为了显示完整的日历视图，我们需要包括前一个月和后一个月的部分日期
-      // 获取当前月第一天是星期几（0是星期日，6是星期六）
-      var firstDayOfWeek = monthStart.getDay();
-      // 获取显示的第一天（可能是上个月的日期）
-      var calendarStart = new Date(monthStart);
-      calendarStart.setDate(calendarStart.getDate() - firstDayOfWeek);
-
-      // 获取显示的最后一天（可能是下个月的日期）
-      // 通常日历会显示6周，所以我们加上42天（6周 * 7天）再减去已经显示的天数
-      var daysToShow = 42;
-      var calendarEnd = new Date(calendarStart);
-      calendarEnd.setDate(calendarStart.getDate() + daysToShow - 1);
-      console.log("\u65E5\u5386\u89C6\u56FE\u8303\u56F4: ".concat(calendarStart.toISOString().split('T')[0], " \u81F3 ").concat(calendarEnd.toISOString().split('T')[0]));
-
-      // 生成当前视图的月份标识，用于缓存
-      var currentViewKey = "".concat(this.currentYear, "-").concat(this.currentMonth);
-
-      // 遍历所有课程
-      this.bookedCourses.forEach(function (booking) {
-        // 跳过无效课程
-        if (!booking || !booking.courseInfo) return;
-        var course = booking.courseInfo;
-        console.log('处理课程:', course.title || course.courseTitle || '未命名课程');
-
-        // 生成课程的缓存键
-        var courseKey = "".concat(course._id || booking._id, "_").concat(currentViewKey);
-
-        // 第一部分：处理course_schedule中的时间槽
-        if (booking.scheduleData && booking.scheduleData.timeSlots && booking.scheduleData.timeSlots.length > 0) {
-          console.log("\u8BFE\u7A0B[".concat(course.title || '未命名课程', "]\u6709").concat(booking.scheduleData.timeSlots.length, "\u4E2A\u65F6\u95F4\u69FD"));
-          var courseDates = [];
-          var timeSlots = booking.scheduleData.timeSlots;
-
-          // 处理timeSlots中的每个时间槽
-          timeSlots.forEach(function (slot) {
-            // 检查时间槽状态，跳过已取消的课程
-            if (slot.status === 'cancelled') {
-              return;
-            }
-
-            // 从时间槽的开始时间提取日期
-            var slotDate;
-            try {
-              // 直接处理ISO格式的日期字符串
-              slotDate = new Date(slot.start);
-
-              // 确保slotDate是有效的Date对象
-              if (isNaN(slotDate.getTime())) {
-                console.log('无效的时间槽日期:', slot.start);
-                return;
-              }
-
-              // 检查日期是否在当前日历视图范围内
-              if (slotDate >= calendarStart && slotDate <= calendarEnd) {
-                var dateKey = _this6.formatDate(slotDate);
-                console.log("\u627E\u5230\u8BFE\u7A0B\u65F6\u95F4\u69FD: ".concat(dateKey, ", ").concat(course.title));
-
-                // 判断是否是学生选择的时间槽
-                var isSelected = booking.selectedTimeSlots && booking.selectedTimeSlots.some(function (selectedSlot) {
-                  var selectedDate = new Date(selectedSlot);
-                  return selectedDate.toDateString() === slotDate.toDateString();
-                });
-
-                // 如果该日期已经有其他课程，则合并信息
-                if (_this6.courseDatesMap[dateKey]) {
-                  // 如果该日期已经有课程记录，添加到courses数组
-                  if (!_this6.courseDatesMap[dateKey].courses) {
-                    _this6.courseDatesMap[dateKey].courses = [];
-                  }
-
-                  // 添加当前课程到courses数组
-                  _this6.courseDatesMap[dateKey].courses.push({
-                    courseId: course._id,
-                    courseTitle: course.title || course.courseTitle || '未命名课程',
-                    startTime: course.startTime || slotDate.getHours() + ':' + String(slotDate.getMinutes()).padStart(2, '0'),
-                    endTime: course.endTime || '--:--',
-                    isSelected: isSelected
-                  });
-                } else {
-                  // 根据是否被选择使用不同的标记颜色
-                  _this6.courseDatesMap[dateKey] = {
-                    info: {
-                      color: isSelected ? '#4CD964' : '#FF6B00',
-                      // 被选择的用绿色，未选择的用橙色
-                      text: isSelected ? '✓' : '●'
-                    },
-                    courseTitle: course.title || course.courseTitle || '未命名课程',
-                    courseTime: course.startTime + ' - ' + course.endTime,
-                    isSelected: isSelected,
-                    courses: [{
-                      courseId: course._id,
-                      courseTitle: course.title || course.courseTitle || '未命名课程',
-                      startTime: course.startTime || slotDate.getHours() + ':' + String(slotDate.getMinutes()).padStart(2, '0'),
-                      endTime: course.endTime || '--:--',
-                      isSelected: isSelected
-                    }]
-                  };
-                }
-                selectedDates.push(dateKey);
-                courseDates.push(dateKey);
-              }
-            } catch (e) {
-              console.log('处理时间槽时出错:', e);
-            }
-          });
-
-          // 缓存本次计算的日期
-          if (courseDates.length > 0) {
-            _this6.courseDateCache[courseKey] = courseDates;
-          }
-        } else {
-          // 第二部分：如果没有time_slots，尝试使用课程的开始日期、结束日期以及classTime
-          try {
-            // 解析开始和结束日期
-            var courseStartDate = courseCalendarUtils.parseDate(course.startDate);
-            var courseEndDate = courseCalendarUtils.parseDate(course.endDate);
-            if (!courseStartDate || !courseEndDate) {
-              console.log('课程没有有效的开始/结束日期');
-              return;
-            }
-
-            // 检查课程日期范围是否与当前日历视图有重叠
-            if (courseEndDate < calendarStart || courseStartDate > calendarEnd) {
-              return;
-            }
-
-            // 确定要处理的日期范围（课程日期范围与日历视图的交集）
-            var startDate = new Date(Math.max(courseStartDate.getTime(), calendarStart.getTime()));
-            var endDate = new Date(Math.min(courseEndDate.getTime(), calendarEnd.getTime()));
-
-            // 获取在日期范围内符合上课时间的所有日期
-            // 处理特殊情况：如果classTime为空数组或包含"每天"，则表示每天上课
-            var classTimeArray = course.classTime;
-            if (!Array.isArray(classTimeArray) || classTimeArray.length === 0) {
-              classTimeArray = ['每天'];
-            }
-            var classDates = courseCalendarUtils.getMatchingDates(startDate, endDate, classTimeArray);
-            console.log("\u6839\u636E\u8BFE\u7A0B\u65F6\u95F4\u5339\u914D\u5230".concat(classDates.length, "\u4E2A\u65E5\u671F"));
-
-            // 存储当前课程在当前视图的日期，用于缓存
-            var _courseDates = [];
-
-            // 标记每个上课日期
-            classDates.forEach(function (date) {
-              var dateKey = _this6.formatDate(date);
-              console.log("\u627E\u5230\u8BFE\u7A0B\u65E5\u671F: ".concat(dateKey, ", ").concat(course.title));
-
-              // 如果该日期已经有其他课程，则合并信息
-              if (_this6.courseDatesMap[dateKey]) {
-                // 如果该日期已经有课程记录，添加到courses数组
-                if (!_this6.courseDatesMap[dateKey].courses) {
-                  _this6.courseDatesMap[dateKey].courses = [];
-                }
-
-                // 添加当前课程到courses数组
-                _this6.courseDatesMap[dateKey].courses.push({
-                  courseId: course._id,
-                  courseTitle: course.title || course.courseTitle || '未命名课程',
-                  startTime: course.startTime || '--:--',
-                  endTime: course.endTime || '--:--',
-                  isSelected: false
-                });
-              } else {
-                _this6.courseDatesMap[dateKey] = {
-                  info: {
-                    color: '#FF6B00',
-                    text: '●'
-                  },
-                  courseTitle: course.title || course.courseTitle || '未命名课程',
-                  courseTime: course.startTime + ' - ' + course.endTime,
-                  courses: [{
-                    courseId: course._id,
-                    courseTitle: course.title || course.courseTitle || '未命名课程',
-                    startTime: course.startTime || '--:--',
-                    endTime: course.endTime || '--:--',
-                    isSelected: false
-                  }]
-                };
-              }
-              selectedDates.push(dateKey);
-              _courseDates.push(dateKey);
-            });
-
-            // 缓存本次计算的日期
-            if (_courseDates.length > 0) {
-              _this6.courseDateCache[courseKey] = _courseDates;
-            }
-          } catch (e) {
-            console.error('处理课程时出错:', e);
-          }
-        }
-      });
-
-      // 更新选中日期信息
-      var uniqueDates = Array.from(new Set(selectedDates));
-      console.log('标记的日期数量:', uniqueDates.length);
-
-      // 转换为uni-calendar组件需要的selected格式
-      this.selectedInfo = {
-        selected: uniqueDates.map(function (date) {
-          return {
-            date: date,
-            info: _this6.courseDatesMap[date].info
-          };
-        })
-      };
-      console.log('日历标记更新完成，标记天数:', this.selectedInfo.selected.length);
-
-      // 如果当前有选中日期，刷新课程列表
-      if (this.selectedDate) {
-        this.fetchCourseList(this.selectedDate);
-      }
+      this.updateCalendarCourseMarkers();
     },
     // 格式化日期字符串
     formatDateString: function formatDateString(date) {
@@ -1029,247 +1185,399 @@ var _default = {
     },
     // 检查用户是否已登录
     isUserLoggedIn: function isUserLoggedIn() {
-      return this.userInfo && this.userInfo._id && this.userInfo._id.length > 0;
+      // 从本地存储获取用户信息
+      var userInfo = this.userInfo || uni.getStorageSync('userInfo');
+      var userId = userInfo && (userInfo._id || userInfo.userId);
+
+      // 如果在本地存储中找不到用户ID，尝试从缓存获取
+      if (!userId) {
+        var _userId = uni.getStorageSync('userId') || uni.getStorageSync('uni_id_token');
+        return !!_userId;
+      }
+      return !!userId;
     },
-    // 格式化日期为YYYY-MM-DD格式
-    formatDate: function formatDate(date) {
+    // 获取用户ID
+    getUserId: function getUserId() {
       try {
-        // 如果是字符串，尝试转换为Date对象
-        if (typeof date === 'string') {
-          // 尝试转换字符串为Date对象
-          date = new Date(date);
+        // 尝试从存储中获取用户信息
+        var userInfo = this.userInfo || uni.getStorageSync('userInfo');
+        if (userInfo) {
+          // 提取用户ID
+          var userId = userInfo._id || userInfo.userId || userInfo.uid || userInfo.userInfo && userInfo.userInfo._id || userInfo.userInfo && userInfo.userInfo.uid;
+          if (userId) return userId;
         }
 
-        // 确保date是有效的Date对象
-        if (!(date instanceof Date) || isNaN(date.getTime())) {
-          console.error('无效的日期对象:', date);
-          return '无效日期';
-        }
-        var year = date.getFullYear();
-        var month = String(date.getMonth() + 1).padStart(2, '0');
-        var day = String(date.getDate()).padStart(2, '0');
-        return "".concat(year, "-").concat(month, "-").concat(day);
+        // 如果用户信息中没有ID，尝试直接从存储获取用户ID
+        return uni.getStorageSync('userId');
       } catch (e) {
-        console.error('日期格式化出错:', e);
-        return typeof date === 'string' ? date : '无效日期';
+        console.error('获取用户ID出错:', e);
+        return null;
       }
     },
     // 获取指定日期的课程列表
     fetchCourseList: function fetchCourseList(dateStr) {
       var _this7 = this;
-      console.log('获取日期课程列表:', dateStr);
-      // 初始化空列表
-      this.courseList = [];
-
-      // 如果没有课程或者没有日期标记，直接返回
-      if (!this.bookedCourses || this.bookedCourses.length === 0) {
-        console.log('没有可显示的课程数据');
-        return;
-      }
-      console.log('检查课程数据，预约课程数量:', this.bookedCourses.length);
-
-      // 解析选中日期
-      var selectedDateObj;
-      try {
-        // 先尝试使用Date构造函数直接解析
-        selectedDateObj = new Date(dateStr);
-
-        // 验证解析结果是否有效
-        if (isNaN(selectedDateObj.getTime())) {
-          // 如果无效，尝试替换分隔符后再解析
-          selectedDateObj = new Date(dateStr);
-
-          // 再次验证
-          if (isNaN(selectedDateObj.getTime())) {
-            console.error('无法解析选中的日期:', dateStr);
-            return;
-          }
-        }
-      } catch (e) {
-        console.error('解析选中日期出错:', e, dateStr);
-        return;
-      }
-      console.log('解析选中日期结果:', selectedDateObj);
-
-      // 获取选中日期是星期几
-      var weekDays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-      var dayOfWeek = weekDays[selectedDateObj.getDay()];
-
-      // 尝试直接从courseDatesMap获取该日期的课程列表
-      var formattedSelectedDate = this.formatDate(selectedDateObj);
-      if (this.courseDatesMap[formattedSelectedDate]) {
-        var dateInfo = this.courseDatesMap[formattedSelectedDate];
-        if (dateInfo.courses && dateInfo.courses.length > 0) {
-          console.log("\u4ECE\u65E5\u5386\u6807\u8BB0\u4E2D\u627E\u5230".concat(dateInfo.courses.length, "\u95E8\u8BFE\u7A0B"), dateInfo.courses);
-
-          // 转换为courseList格式
-          dateInfo.courses.forEach(function (course) {
-            _this7.courseList.push({
-              id: course.courseId,
-              name: course.courseTitle,
-              startTime: course.startTime,
-              endTime: course.endTime,
-              teacher: _this7.findCourseTeacherById(course.courseId),
-              location: _this7.findCourseLocationById(course.courseId),
-              status: course.status || 'pending' // 使用课程的实际状态
-            });
-          });
-
-          // 按时间排序
-          this.sortCourseList(this.courseList, formattedSelectedDate);
-          return;
-        }
-      }
-
-      // 如果从courseDatesMap中找不到，则回退到遍历课程查找
-      // 这部分查找已预约的课程
-      this.bookedCourses.forEach(function (booking) {
-        try {
-          if (!booking.courseInfo) {
-            return;
-          }
-          var course = booking.courseInfo;
-
-          // 首先检查日程表的时间槽
-          if (booking.scheduleData && booking.scheduleData.timeSlots) {
-            var _formattedSelectedDate = _this7.formatDate(selectedDateObj);
-
-            // 过滤出选中日期的时间槽
-            var matchingTimeSlots = booking.scheduleData.timeSlots.filter(function (slot) {
-              // 忽略已取消的时间槽
-              if (slot.status === 'cancelled') return false;
-
-              // 尝试解析slot.start
-              try {
-                var slotDate = new Date(slot.start);
-                if (isNaN(slotDate.getTime())) {
-                  return false;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
+        var formattedDate, todayCourses, courseItems;
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                console.log('获取日期课程列表:', dateStr);
+                if (dateStr) {
+                  _context4.next = 4;
+                  break;
                 }
-                var formattedSlotDate = _this7.formatDate(slotDate);
-                return formattedSlotDate === _formattedSelectedDate;
-              } catch (e) {
-                return false;
-              }
-            });
-            if (matchingTimeSlots.length > 0) {
-              console.log('找到匹配的时间槽数量:', matchingTimeSlots.length);
-              // 有匹配的时间槽，为每个时间槽添加一个课程
-              matchingTimeSlots.forEach(function (slot) {
-                // 从时间槽提取开始和结束时间
-                var startTime = course.startTime;
-                var endTime = course.endTime;
+                console.log('未指定日期，无法获取课程列表');
+                return _context4.abrupt("return");
+              case 4:
+                formattedDate = _this7.formatDateForComparison(dateStr);
+                console.log('格式化后的日期用于比较:', formattedDate);
+                uni.showLoading({
+                  title: '加载课程列表...',
+                  mask: true
+                });
                 try {
-                  if (slot.start) {
-                    var _startDate = new Date(slot.start);
-                    startTime = _startDate.getHours() + ':' + String(_startDate.getMinutes()).padStart(2, '0');
+                  // 清空现有列表
+                  _this7.courseList = [];
+
+                  // 从已加载的预约课程中筛选当天的课程
+                  if (_this7.bookedCourses && _this7.bookedCourses.length > 0) {
+                    console.log('从已加载的预约课程中筛选当天课程');
+
+                    // 从已加载的课程中筛选当天的课程（排除取消状态）
+                    todayCourses = _this7.bookedCourses.filter(function (course) {
+                      // 跳过已取消课程
+                      if (course.status === 'cancelled' || course.status === 'canceled') {
+                        return false;
+                      }
+
+                      // 检查课程是否有日程安排
+                      if (!course.schedules || !Array.isArray(course.schedules) || course.schedules.length === 0) {
+                        return false;
+                      }
+
+                      // 检查是否有匹配当天的日程
+                      return course.schedules.some(function (schedule) {
+                        // 获取日程日期
+                        var scheduleDate = '';
+                        if (schedule.date) {
+                          scheduleDate = _this7.formatDateForComparison(schedule.date);
+                        } else if (schedule.startDate) {
+                          scheduleDate = _this7.formatDateForComparison(schedule.startDate);
+                        }
+                        return formattedDate === scheduleDate;
+                      });
+                    });
+                    console.log('当天的课程数量:', todayCourses.length);
+
+                    // 将筛选出的课程转换为列表项格式
+                    courseItems = todayCourses.map(function (course) {
+                      // 找到对应日期的排期
+                      var schedules = course.schedules.filter(function (s) {
+                        var scheduleDate = '';
+                        if (s.date) {
+                          scheduleDate = _this7.formatDateForComparison(s.date);
+                        } else if (s.startDate) {
+                          scheduleDate = _this7.formatDateForComparison(s.startDate);
+                        }
+                        return formattedDate === scheduleDate;
+                      });
+                      if (!schedules || schedules.length === 0) {
+                        console.warn('未找到课程的排期:', course.title);
+                        return null;
+                      }
+
+                      // 可能有多个时间段，将每个时间段作为单独的课程项
+                      return schedules.map(function (schedule) {
+                        // 确保使用正确的课程名称
+                        var displayName = course.title || course.courseName || course.name || '未命名课程';
+                        // 如果有课程序号，显示在课程名称中
+                        var lessonTitle = schedule.index ? "".concat(displayName, " (\u7B2C").concat(schedule.index, "/").concat(schedule.totalClasses || '?', "\u8BFE)") : displayName;
+                        return {
+                          id: course._id || course.courseId,
+                          name: lessonTitle,
+                          teacher: course.teacherName || course.teacher || '未知',
+                          location: course.location || course.place || '未知',
+                          startTime: schedule.startTime || '--:--',
+                          endTime: schedule.endTime || '--:--',
+                          status: schedule.status || course.status || course.bookingStatus || 'confirmed',
+                          date: schedule.date || schedule.startDate || dateStr,
+                          index: schedule.index,
+                          totalClasses: schedule.totalClasses
+                        };
+                      });
+                    }).filter(function (item) {
+                      return item !== null;
+                    }).flat(); // 展平数组，因为可能一个课程有多个时间段
+                    console.log('转换后的课程列表项:', courseItems);
+                    if (courseItems.length > 0) {
+                      // 按照课程序号和开始时间排序
+                      courseItems.sort(function (a, b) {
+                        // 先按开始时间排序
+                        var timeA = _this7.parseTimeToMinutes(a.startTime);
+                        var timeB = _this7.parseTimeToMinutes(b.startTime);
+                        if (timeA !== timeB) {
+                          return timeA - timeB;
+                        }
+
+                        // 如果时间相同，按课程序号排序
+                        return (a.index || 0) - (b.index || 0);
+                      });
+                      _this7.courseList = courseItems;
+                    } else {
+                      console.log('当天无课程安排');
+                    }
+                  } else {
+                    console.log('本地无预约课程数据');
                   }
-                  if (slot.end) {
-                    var _endDate = new Date(slot.end);
-                    endTime = _endDate.getHours() + ':' + String(_endDate.getMinutes()).padStart(2, '0');
+
+                  // 如果列表为空，显示提示
+                  if (_this7.courseList.length === 0) {
+                    uni.showToast({
+                      title: '当天暂无课程安排',
+                      icon: 'none',
+                      duration: 2000
+                    });
                   }
-                } catch (e) {
-                  console.log('解析时间槽时间出错:', e);
+                } catch (error) {
+                  console.error('获取课程列表失败:', error);
+                  _this7.showNetworkError(error);
+                } finally {
+                  uni.hideLoading();
                 }
-
-                // 检查这个时间槽是否是学生选择的
-                var isSelected = booking.selectedTimeSlots && booking.selectedTimeSlots.some(function (selectedSlot) {
-                  var selectedDate = new Date(selectedSlot);
-                  var slotStartDate = new Date(slot.start);
-                  return selectedDate.toDateString() === slotStartDate.toDateString();
-                });
-
-                // 添加到课程列表
-                _this7.courseList.push({
-                  id: course._id,
-                  name: course.title || course.courseTitle || '未命名课程',
-                  startTime: startTime,
-                  endTime: endTime,
-                  teacher: course.teacherName || '未知',
-                  location: course.location || course.schoolName || '未知',
-                  status: isSelected ? 'confirmed' : 'available',
-                  // 根据是否选择设置状态
-                  isSelected: isSelected
-                });
-              });
-
-              // 这里不要return，还需要继续查找其他课程
+              case 8:
+              case "end":
+                return _context4.stop();
             }
           }
+        }, _callee4);
+      }))();
+    },
+    // 从服务器获取课程数据
+    fetchCoursesFromServer: function fetchCoursesFromServer(dateStr) {
+      var _this8 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
+        var todayCourses, skipServerRequest, _yield$uniCloud$callF2, result;
+        return _regenerator.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+                if (!(typeof navigator !== 'undefined' && 'onLine' in navigator && !navigator.onLine)) {
+                  _context5.next = 3;
+                  break;
+                }
+                throw new Error('NO_NETWORK');
+              case 3:
+                console.log('从服务器获取当天课程数据');
 
-          // 备选：回退到旧的处理方式
-          // 此部分代码已不再是主要逻辑，这里简化一下
-          var startDate = courseCalendarUtils.parseDate(course.startDate);
-          var endDate = courseCalendarUtils.parseDate(course.endDate);
-          if (!startDate || !endDate) {
-            return;
-          }
+                // 根据用户预约的课程过滤当天的课程
+                if (!(_this8.bookedCourses && _this8.bookedCourses.length > 0)) {
+                  _context5.next = 10;
+                  break;
+                }
+                todayCourses = _this8.filterTodayCourses(dateStr);
+                if (!(todayCourses.length > 0)) {
+                  _context5.next = 10;
+                  break;
+                }
+                console.log('从现有预约数据中筛选当天课程:', todayCourses);
+                _this8.courseList = todayCourses;
+                return _context5.abrupt("return");
+              case 10:
+                // 如果是可以预测的API错误，跳过以避免报错
+                skipServerRequest = true; // 根据前面的错误，我们知道API不存在
+                if (skipServerRequest) {
+                  _context5.next = 30;
+                  break;
+                }
+                _context5.prev = 12;
+                _context5.next = 15;
+                return uniCloud.callFunction({
+                  name: 'getCoursesForDate',
+                  data: {
+                    userId: _this8.getUserId(),
+                    date: dateStr
+                  }
+                });
+              case 15:
+                _yield$uniCloud$callF2 = _context5.sent;
+                result = _yield$uniCloud$callF2.result;
+                if (!(result && result.courses && Array.isArray(result.courses))) {
+                  _context5.next = 24;
+                  break;
+                }
+                console.log('从服务器获取到最新课程数据:', result.courses);
 
-          // 检查选中日期是否在课程日期范围内
-          if (selectedDateObj < startDate || selectedDateObj > endDate) {
-            return;
-          }
+                // 将云端数据替换本地数据
+                _this8.courseList = result.courses;
 
-          // 检查选中日期是否是课程上课日
-          var isClassDay = false;
-          if (!course.classTime || !Array.isArray(course.classTime) || course.classTime.length === 0 || course.classTime.includes('每天')) {
-            isClassDay = true;
-          } else if (course.classTime.includes(dayOfWeek)) {
-            isClassDay = true;
-          }
-          if (!isClassDay) {
-            return;
-          }
-          console.log('找到匹配课程(从课程日期):', course.title || course.courseTitle, '时间:', course.startTime, '-', course.endTime);
+                // 缓存到本地
+                _this8.saveCourseListToCache(dateStr, result.courses);
+                return _context5.abrupt("return");
+              case 24:
+                console.warn('服务器返回无效数据:', result);
+              case 25:
+                _context5.next = 30;
+                break;
+              case 27:
+                _context5.prev = 27;
+                _context5.t0 = _context5["catch"](12);
+                console.error('getCoursesForDate云函数不可用:', _context5.t0);
+              case 30:
+                // 如果没有课程数据，显示提示
+                if (_this8.courseList.length === 0) {
+                  uni.showToast({
+                    title: '当天暂无课程安排',
+                    icon: 'none',
+                    duration: 2000
+                  });
+                }
+                _context5.next = 37;
+                break;
+              case 33:
+                _context5.prev = 33;
+                _context5.t1 = _context5["catch"](0);
+                console.error('从服务器获取当天课程失败:', _context5.t1);
 
-          // 添加到课程列表
-          _this7.courseList.push({
-            id: course._id,
-            name: course.title || course.courseTitle || '未命名课程',
-            startTime: course.startTime || '--:--',
-            endTime: course.endTime || '--:--',
-            teacher: course.teacherName || '未知',
-            location: course.location || course.schoolName || '未知',
-            status: 'scheduled'
-          });
-        } catch (e) {
-          console.error('处理课程时出错:', e);
+                // 如果缓存中没有数据，显示错误信息
+                if (_this8.courseList.length === 0) {
+                  if (_context5.t1.message === 'NO_NETWORK') {
+                    uni.showToast({
+                      title: '网络连接失败，使用缓存数据',
+                      icon: 'none',
+                      duration: 2000
+                    });
+                  } else {
+                    _this8.showNetworkError(_context5.t1);
+                  }
+                }
+              case 37:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[0, 33], [12, 27]]);
+      }))();
+    },
+    // 从已有的预约数据中筛选特定日期的课程
+    filterTodayCourses: function filterTodayCourses(dateStr) {
+      var _this9 = this;
+      var formattedDate = this.formatDateForComparison(dateStr);
+
+      // 从已加载的课程中筛选当天的课程
+      var todayCourses = this.bookedCourses.filter(function (course) {
+        // 检查课程是否有日程安排
+        if (!course.schedules || !Array.isArray(course.schedules) || course.schedules.length === 0) {
+          return false;
         }
+
+        // 检查是否有匹配当天的日程
+        return course.schedules.some(function (schedule) {
+          // 获取日程日期
+          var scheduleDate = '';
+          if (schedule.date) {
+            scheduleDate = _this9.formatDateForComparison(schedule.date);
+          } else if (schedule.startDate) {
+            scheduleDate = _this9.formatDateForComparison(schedule.startDate);
+          }
+          return formattedDate === scheduleDate;
+        });
       });
 
-      // 按时间排序
-      this.sortCourseList(this.courseList, formattedSelectedDate);
+      // 将筛选出的课程转换为列表项格式
+      return todayCourses.map(function (course) {
+        // 找到对应日期的排期
+        var schedule = course.schedules.find(function (s) {
+          var scheduleDate = '';
+          if (s.date) {
+            scheduleDate = _this9.formatDateForComparison(s.date);
+          } else if (s.startDate) {
+            scheduleDate = _this9.formatDateForComparison(s.startDate);
+          }
+          return formattedDate === scheduleDate;
+        });
+        if (!schedule) return null;
+        return {
+          id: course._id || course.courseId,
+          name: course.title || '未命名课程',
+          teacher: course.teacherName || '未知',
+          location: course.location || '未知',
+          startTime: schedule.startTime || '--:--',
+          endTime: schedule.endTime || '--:--',
+          status: course.status || course.bookingStatus || 'confirmed',
+          date: schedule.date || schedule.startDate || dateStr
+        };
+      }).filter(function (item) {
+        return item !== null;
+      });
     },
-    // 根据开始时间排序课程列表
-    sortCourseList: function sortCourseList(courses, date) {
-      var _this8 = this;
-      if (!courses || !Array.isArray(courses) || courses.length === 0) {
-        return [];
+    /**
+     * 保存指定日期的课程列表到缓存
+     * @param {string} dateStr 日期字符串，格式为YYYY-MM-DD
+     * @param {Array} courseList 课程列表
+     */
+    saveCourseListToCache: function saveCourseListToCache(dateStr, courseList) {
+      if (!dateStr || !courseList || courseList.length === 0) {
+        return;
       }
       try {
-        return (0, _toConsumableArray2.default)(courses).sort(function (a, b) {
-          // 确保startTime存在并且是字符串
-          var timeA = a.startTime && typeof a.startTime === 'string' ? _this8.parseTimeToMinutes(a.startTime) : 0;
-          var timeB = b.startTime && typeof b.startTime === 'string' ? _this8.parseTimeToMinutes(b.startTime) : 0;
-          return timeA - timeB;
+        // 获取现有缓存
+        var cache = uni.getStorageSync('calendar_courses_cache') || {};
+
+        // 添加或更新日期数据
+        cache[dateStr] = {
+          courses: courseList,
+          timestamp: Date.now()
+        };
+
+        // 清理过期数据（保留30天内的数据）
+        var now = Date.now();
+        var thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+        Object.keys(cache).forEach(function (date) {
+          if (now - cache[date].timestamp > thirtyDaysInMs) {
+            delete cache[date];
+          }
         });
-      } catch (e) {
-        console.error('排序课程列表出错:', e);
-        return courses; // 出错时返回原始列表
+
+        // 保存回缓存
+        uni.setStorageSync('calendar_courses_cache', cache);
+        console.log("\u5DF2\u7F13\u5B58".concat(dateStr, "\u7684").concat(courseList.length, "\u4E2A\u8BFE\u7A0B"));
+      } catch (error) {
+        console.error('保存课程列表缓存失败:', error);
       }
     },
-    // 根据课程ID查找教师名称
-    findCourseTeacherById: function findCourseTeacherById(courseId) {
-      var course = this.bookedCourses.find(function (item) {
-        return item._id === courseId || item.courseInfo && item.courseInfo._id === courseId;
-      });
-      return course && course.courseInfo ? course.courseInfo.teacherName || '未知' : '未知';
-    },
-    // 根据课程ID查找地点
-    findCourseLocationById: function findCourseLocationById(courseId) {
-      var course = this.bookedCourses.find(function (item) {
-        return item._id === courseId || item.courseInfo && item.courseInfo._id === courseId;
-      });
-      return course && course.courseInfo ? course.courseInfo.location || course.courseInfo.schoolName || '未知' : '未知';
+    /**
+     * 从缓存加载指定日期的课程列表
+     * @param {string} dateStr 日期字符串，格式为YYYY-MM-DD
+     * @returns {Array|null} 课程列表或null
+     */
+    loadCoursesListFromCache: function loadCoursesListFromCache(dateStr) {
+      if (!dateStr) return null;
+      try {
+        // 获取缓存
+        var cache = uni.getStorageSync('calendar_courses_cache') || {};
+
+        // 检查是否有该日期的缓存
+        if (!cache[dateStr] || !cache[dateStr].courses) {
+          return null;
+        }
+
+        // 检查缓存是否过期（7天）
+        var now = Date.now();
+        var cacheTime = cache[dateStr].timestamp || 0;
+        var cacheAgeHours = (now - cacheTime) / (1000 * 60 * 60);
+        if (cacheAgeHours > 168) {
+          // 7天 = 168小时
+          console.log("".concat(dateStr, "\u7684\u8BFE\u7A0B\u5217\u8868\u7F13\u5B58\u5DF2\u8FC7\u671F"));
+          return null;
+        }
+        return cache[dateStr].courses;
+      } catch (error) {
+        console.error('读取课程列表缓存失败:', error);
+        return null;
+      }
     },
     // 获取课程状态文本
     getStatusText: function getStatusText(status) {
@@ -1291,6 +1599,7 @@ var _default = {
     },
     // 显示登录提示
     showLoginTip: function showLoginTip() {
+      console.log('显示登录提示对话框');
       uni.showModal({
         title: '提示',
         content: '请先登录后查看您的课程',
@@ -1307,6 +1616,523 @@ var _default = {
     // 清除课程日期缓存
     clearCourseDateCache: function clearCourseDateCache() {
       this.courseDateCache = {};
+    },
+    // 将时间字符串解析为分钟数
+    parseTimeToMinutes: function parseTimeToMinutes(timeStr) {
+      return (0, courseCalendarUtils.parseTimeToMinutes)(timeStr);
+    },
+    // 格式化日期为比较格式 YYYY-MM-DD
+    formatDateForComparison: function formatDateForComparison(dateStr) {
+      if (!dateStr) return '';
+
+      // 处理各种格式的日期字符串
+      var date;
+      if (dateStr instanceof Date) {
+        date = dateStr;
+      } else if (typeof dateStr === 'string') {
+        // 替换所有分隔符为'-'
+        var normalized = dateStr.replace(/[\/\.]/g, '-');
+        date = new Date(normalized);
+      } else {
+        return '';
+      }
+
+      // 检查日期是否有效
+      if (isNaN(date.getTime())) {
+        return '';
+      }
+      var year = date.getFullYear();
+      var month = String(date.getMonth() + 1).padStart(2, '0');
+      var day = String(date.getDate()).padStart(2, '0');
+      return "".concat(year, "-").concat(month, "-").concat(day);
+    },
+    // 更新选中日期的课程列表
+    updateSelectedDateCourses: function updateSelectedDateCourses() {
+      // 更新课程列表
+      this.fetchCourseList(this.selectedDate);
+    },
+    /**
+     * 清理所有过期的缓存数据
+     */
+    cleanExpiredCache: function cleanExpiredCache() {
+      try {
+        console.log('开始清理过期缓存数据');
+        var now = Date.now();
+
+        // 清理预约课程缓存（超过24小时）
+        var bookedCoursesCache = uni.getStorageSync('calendar_booked_courses_cache');
+        if (bookedCoursesCache && bookedCoursesCache.timestamp) {
+          var cacheAge = now - bookedCoursesCache.timestamp;
+          if (cacheAge > 24 * 60 * 60 * 1000) {
+            console.log('清理过期的预约课程缓存');
+            uni.removeStorageSync('calendar_booked_courses_cache');
+          }
+        }
+
+        // 清理日期课程列表缓存（超过7天的数据）
+        var coursesCache = uni.getStorageSync('calendar_courses_cache');
+        if (coursesCache && (0, _typeof2.default)(coursesCache) === 'object') {
+          var hasExpired = false;
+          var newCache = {};
+          Object.keys(coursesCache).forEach(function (date) {
+            var cacheData = coursesCache[date];
+            if (!cacheData || !cacheData.timestamp) {
+              hasExpired = true;
+              return;
+            }
+            var cacheAge = now - cacheData.timestamp;
+            if (cacheAge <= 7 * 24 * 60 * 60 * 1000) {
+              // 保留未过期的数据
+              newCache[date] = cacheData;
+            } else {
+              hasExpired = true;
+            }
+          });
+          if (hasExpired) {
+            console.log('清理过期的日期课程列表缓存');
+            uni.setStorageSync('calendar_courses_cache', newCache);
+          }
+        }
+        console.log('缓存清理完成');
+      } catch (error) {
+        console.error('清理过期缓存失败:', error);
+      }
+    },
+    // 如果有 globalData.userId，初始化时将其同步到存储
+    syncGlobalUserInfo: function syncGlobalUserInfo() {
+      try {
+        var app = getApp();
+        if (app && app.globalData) {
+          // 检查全局用户ID
+          if (app.globalData.userId && !this.userInfo) {
+            console.log('从全局数据同步用户ID:', app.globalData.userId);
+            uni.setStorageSync('userId', app.globalData.userId);
+
+            // 如果有用户信息对象，也同步
+            if (app.globalData.userInfo) {
+              console.log('从全局数据同步用户信息');
+              this.userInfo = app.globalData.userInfo;
+              uni.setStorageSync('userInfo', app.globalData.userInfo);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('同步全局用户信息出错:', error);
+      }
+    },
+    // 检查用户页面是否已经获取了预约数据
+    checkUserPageBookings: function checkUserPageBookings() {
+      try {
+        // 从user.vue页面检查是否已有预约数据（跨页面数据共享）
+        var app = getApp();
+        if (app && app.globalData) {
+          // 用户页面获取的预约数量
+          var bookingCounts = app.globalData.bookingCounts;
+          if (bookingCounts && (bookingCounts.all > 0 || bookingCounts.usable > 0)) {
+            console.log('检测到用户页面已获取预约数量:', bookingCounts);
+
+            // 如果已经有了预约数据，可以直接使用
+            if (app.globalData.bookings && app.globalData.bookings.data) {
+              var bookings = app.globalData.bookings.data;
+              console.log('从全局数据获取预约记录:', bookings.length, '条记录');
+
+              // 直接保存到本地存储以便跨页面使用
+              uni.setStorageSync('user_bookings_data', bookings);
+            } else {
+              console.log('用户有预约但全局数据中没有详细记录');
+            }
+          } else {
+            console.log('用户页面尚未获取预约数量或无预约');
+          }
+        }
+      } catch (error) {
+        console.error('检查用户页面预约数据出错:', error);
+      }
+    },
+    // 获取课程安排数据
+    fetchCourseSchedules: function fetchCourseSchedules() {
+      var _this10 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
+        var courseIds, db, schedulesCollection, _yield$schedulesColle, result;
+        return _regenerator.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                if (!(!_this10.bookedCourses || _this10.bookedCourses.length === 0)) {
+                  _context6.next = 3;
+                  break;
+                }
+                console.log('没有预约课程，不需要获取课程安排');
+                return _context6.abrupt("return");
+              case 3:
+                _context6.prev = 3;
+                // 获取所有预约课程的ID
+                courseIds = _this10.bookedCourses.map(function (course) {
+                  return course.courseId || course._id;
+                });
+                console.log('准备获取课程安排，课程IDs:', courseIds);
+                if (!(courseIds.length === 0)) {
+                  _context6.next = 9;
+                  break;
+                }
+                console.log('没有有效的课程ID，无法获取课程安排');
+                return _context6.abrupt("return");
+              case 9:
+                _context6.next = 11;
+                return _this10.fetchCourseDetails(courseIds);
+              case 11:
+                // 查询课程安排表
+                db = uniCloud.database();
+                schedulesCollection = db.collection('course_schedule'); // 使用courseId字段进行查询，这应与schema定义一致
+                _context6.next = 15;
+                return schedulesCollection.where({
+                  courseId: db.command.in(courseIds)
+                }).get();
+              case 15:
+                _yield$schedulesColle = _context6.sent;
+                result = _yield$schedulesColle.result;
+                if (result && result.data && result.data.length > 0) {
+                  console.log('获取到课程安排数据:', result.data.length, '条记录');
+                  _this10.processCourseSchedules(result.data);
+                } else {
+                  console.log('未找到相关课程的安排数据');
+                }
+                _context6.next = 23;
+                break;
+              case 20:
+                _context6.prev = 20;
+                _context6.t0 = _context6["catch"](3);
+                console.error('获取课程安排失败:', _context6.t0);
+              case 23:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, null, [[3, 20]]);
+      }))();
+    },
+    // 获取课程详细信息
+    fetchCourseDetails: function fetchCourseDetails(courseIds) {
+      var _this11 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
+        var db, coursesCollection, _yield$coursesCollect, result, courseDetailsMap;
+        return _regenerator.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                _context7.prev = 0;
+                if (!(!courseIds || courseIds.length === 0)) {
+                  _context7.next = 3;
+                  break;
+                }
+                return _context7.abrupt("return");
+              case 3:
+                console.log('获取课程详细信息:', courseIds);
+
+                // 查询课程表
+                db = uniCloud.database();
+                coursesCollection = db.collection('courses');
+                _context7.next = 8;
+                return coursesCollection.where({
+                  _id: db.command.in(courseIds)
+                }).get();
+              case 8:
+                _yield$coursesCollect = _context7.sent;
+                result = _yield$coursesCollect.result;
+                if (result && result.data && result.data.length > 0) {
+                  console.log('获取到课程详细信息:', result.data.length, '条记录');
+
+                  // 创建课程ID到详细信息的映射
+                  courseDetailsMap = {};
+                  result.data.forEach(function (course) {
+                    courseDetailsMap[course._id] = course;
+                  });
+
+                  // 更新已有课程的详细信息
+                  _this11.bookedCourses = _this11.bookedCourses.map(function (course) {
+                    var courseId = course.courseId || course._id;
+                    var details = courseDetailsMap[courseId];
+                    if (details) {
+                      return _objectSpread(_objectSpread({}, course), {}, {
+                        title: details.title || course.title,
+                        teacherName: details.teacherName || course.teacherName,
+                        location: details.location || course.location
+                      });
+                    }
+                    return course;
+                  });
+
+                  // 保存更新后的数据到缓存
+                  _this11.saveDataToCache();
+                } else {
+                  console.log('未找到相关课程的详细信息');
+                }
+                _context7.next = 16;
+                break;
+              case 13:
+                _context7.prev = 13;
+                _context7.t0 = _context7["catch"](0);
+                console.error('获取课程详细信息失败:', _context7.t0);
+              case 16:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7, null, [[0, 13]]);
+      }))();
+    },
+    // 处理课程安排数据
+    processCourseSchedules: function processCourseSchedules(schedules) {
+      var _this12 = this;
+      if (!schedules || schedules.length === 0) return;
+      try {
+        console.log('处理课程安排数据:', schedules);
+
+        // 匹配课程ID和安排数据
+        var _iterator5 = _createForOfIteratorHelper(schedules),
+          _step5;
+        try {
+          var _loop2 = function _loop2() {
+            var schedule = _step5.value;
+            var courseId = schedule.courseId;
+            var courseName = schedule.courseName || '';
+            var timeSlots = schedule.timeSlots || [];
+            console.log("\u5904\u7406\u8BFE\u7A0B\u5B89\u6392: ID=".concat(courseId, ", \u540D\u79F0=").concat(courseName, ", \u65F6\u95F4\u69FD\u6570\u91CF=").concat(timeSlots.length));
+            if (!courseId || !timeSlots || timeSlots.length === 0) {
+              console.log('跳过无效的课程安排数据');
+              return "continue";
+            }
+
+            // 查找对应的课程
+            var courseIndex = _this12.bookedCourses.findIndex(function (course) {
+              return course._id === courseId || course.courseId === courseId;
+            });
+            if (courseIndex >= 0) {
+              var course = _this12.bookedCourses[courseIndex];
+
+              // 如果未命名课程，但安排表中有课程名称，则更新课程名称
+              if ((course.title === '未命名课程' || !course.title) && courseName) {
+                course.title = courseName;
+              }
+
+              // 清空课程之前的schedules和timeSlots，确保只使用数据库中的课程时间
+              course.schedules = [];
+              course.timeSlots = [];
+
+              // 添加时间槽数据
+              var slotsAdded = 0;
+              timeSlots.forEach(function (slot) {
+                // 确保时间槽的start和end字段存在
+                if (!slot.start || !slot.end) {
+                  console.log('跳过无效的时间槽:', slot);
+                  return;
+                }
+                try {
+                  // 将UTC时间转换为本地时间
+                  var start = new Date(slot.start);
+                  var end = new Date(slot.end);
+
+                  // 确保时间有效
+                  if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                    // 添加到课程的timeSlots
+                    course.timeSlots.push({
+                      start: slot.start,
+                      end: slot.end,
+                      status: slot.status || 'scheduled',
+                      index: slot.index,
+                      totalClasses: slot.totalClasses
+                    });
+
+                    // 将日期格式化为本地日期
+                    var scheduleDate = _this12.formatDate(start);
+                    var startTime = "".concat(start.getHours().toString().padStart(2, '0'), ":").concat(start.getMinutes().toString().padStart(2, '0'));
+                    var endTime = "".concat(end.getHours().toString().padStart(2, '0'), ":").concat(end.getMinutes().toString().padStart(2, '0'));
+
+                    // 添加到课程的schedules数组，用于日历显示
+                    course.schedules.push({
+                      date: scheduleDate,
+                      startTime: startTime,
+                      endTime: endTime,
+                      status: slot.status || 'scheduled',
+                      index: slot.index,
+                      totalClasses: slot.totalClasses
+                    });
+                    slotsAdded++;
+                  }
+                } catch (error) {
+                  console.error('处理时间槽数据出错:', error);
+                }
+              });
+              console.log("\u4E3A\u8BFE\u7A0B ".concat(course.title || courseId, " \u6DFB\u52A0\u4E86 ").concat(slotsAdded, " \u4E2A\u65F6\u95F4\u69FD"));
+              if (slotsAdded === 0) {
+                console.log("\u8B66\u544A: \u8BFE\u7A0B ".concat(course.title || courseId, " \u6CA1\u6709\u6709\u6548\u7684\u65F6\u95F4\u69FD"));
+              }
+
+              // 更新课程数据
+              _this12.bookedCourses.splice(courseIndex, 1, course);
+            } else {
+              console.log("\u672A\u627E\u5230\u5339\u914D\u7684\u8BFE\u7A0B: ".concat(courseId));
+            }
+          };
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+            var _ret2 = _loop2();
+            if (_ret2 === "continue") continue;
+          }
+
+          // 更新日历标记
+        } catch (err) {
+          _iterator5.e(err);
+        } finally {
+          _iterator5.f();
+        }
+        this.updateCalendarCourseMarkers();
+
+        // 更新选中日期的课程列表
+        this.updateSelectedDateCourses();
+
+        // 保存更新后的数据到缓存
+        this.saveDataToCache();
+      } catch (error) {
+        console.error('处理课程安排数据出错:', error);
+      }
+    },
+    // 判断两个日期是否为同一天
+    isSameDay: function isSameDay(date1, date2) {
+      return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate();
+    },
+    // 添加示例课程安排数据（仅用于测试）
+    addExampleCourseSchedule: function addExampleCourseSchedule() {
+      // 如果没有预约课程数据，创建一个示例
+      if (!this.bookedCourses || this.bookedCourses.length === 0) {
+        this.bookedCourses = [{
+          _id: 'example_course_1',
+          courseId: 'example_course_1',
+          title: '示例数学课程',
+          teacherName: '王老师',
+          location: '教室A-101',
+          bookingId: 'example_booking_1',
+          bookingStatus: 'confirmed',
+          status: 'confirmed',
+          schedules: []
+        }];
+      }
+
+      // 创建一个示例课程安排
+      var exampleSchedule = {
+        courseId: this.bookedCourses[0]._id || this.bookedCourses[0].courseId,
+        timeSlots: [{
+          // 今天上午10点到11点
+          start: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
+          end: new Date(new Date().setHours(11, 0, 0, 0)).toISOString()
+        }, {
+          // 明天上午9点到10点
+          start: new Date(new Date().setDate(new Date().getDate() + 1)).setHours(9, 0, 0, 0).toISOString(),
+          end: new Date(new Date().setDate(new Date().getDate() + 1)).setHours(10, 0, 0, 0).toISOString()
+        }, {
+          // 后天下午2点到4点
+          start: new Date(new Date().setDate(new Date().getDate() + 2)).setHours(14, 0, 0, 0).toISOString(),
+          end: new Date(new Date().setDate(new Date().getDate() + 2)).setHours(16, 0, 0, 0).toISOString()
+        }]
+      };
+
+      // 处理示例数据
+      this.processCourseSchedules([exampleSchedule]);
+      console.log('已添加示例课程安排数据');
+    },
+    // 清除无效的课程缓存 - 新增方法
+    clearInvalidCoursesCache: function clearInvalidCoursesCache() {
+      try {
+        console.log('检查并清除无效的课程缓存');
+
+        // 获取本地缓存
+        var cacheData = uni.getStorageSync('calendar_booked_courses_cache');
+        if (!cacheData || !cacheData.bookedCourses || !Array.isArray(cacheData.bookedCourses)) {
+          console.log('无课程缓存数据需要清理');
+          return;
+        }
+
+        // 筛选有效的课程（具有完整信息和有效schedules的课程）
+        var validCourses = cacheData.bookedCourses.filter(function (course) {
+          // 必须有课程ID
+          if (!course.courseId && !course._id) {
+            return false;
+          }
+
+          // 必须有课程名称或能够从其它信息获取名称
+          var hasTitle = !!course.title || !!course.courseName;
+
+          // 必须有有效的日程安排
+          var hasValidSchedules = course.schedules && Array.isArray(course.schedules) && course.schedules.length > 0 && course.schedules.some(function (s) {
+            return s.date || s.startDate;
+          });
+          return hasTitle && hasValidSchedules;
+        });
+
+        // 如果有无效课程，重新保存有效课程
+        if (validCourses.length < cacheData.bookedCourses.length) {
+          console.log("\u6E05\u9664\u4E86 ".concat(cacheData.bookedCourses.length - validCourses.length, " \u6761\u65E0\u6548\u8BFE\u7A0B\u7F13\u5B58"));
+
+          // 更新缓存
+          var newCacheData = {
+            bookedCourses: validCourses,
+            timestamp: Date.now()
+          };
+          uni.setStorageSync('calendar_booked_courses_cache', newCacheData);
+        } else {
+          console.log('所有缓存课程均有效，无需清理');
+        }
+
+        // 清除特定日期的课程列表缓存
+        // this.clearSpecificDateCache('2025-05-01');
+      } catch (error) {
+        console.error('清除无效课程缓存出错:', error);
+      }
+    },
+    // 清除特定日期的课程列表缓存
+    clearSpecificDateCache: function clearSpecificDateCache(dateStr) {
+      try {
+        if (!dateStr) return;
+        console.log("\u6E05\u9664\u7279\u5B9A\u65E5\u671F\u7F13\u5B58: ".concat(dateStr));
+
+        // 获取日期课程缓存
+        var cache = uni.getStorageSync('calendar_courses_cache') || {};
+
+        // 如果有该日期的缓存，删除它
+        if (cache[dateStr]) {
+          console.log("\u5220\u9664\u65E5\u671F\u7F13\u5B58: ".concat(dateStr));
+          delete cache[dateStr];
+          uni.setStorageSync('calendar_courses_cache', cache);
+        }
+      } catch (error) {
+        console.error('清除特定日期缓存出错:', error);
+      }
+    },
+    // 完全清除日历相关缓存
+    clearAllCalendarCache: function clearAllCalendarCache() {
+      try {
+        console.log('清除所有日历相关缓存');
+
+        // 清除课程预约缓存
+        uni.removeStorageSync('calendar_booked_courses_cache');
+
+        // 清除日期课程列表缓存
+        uni.removeStorageSync('calendar_courses_cache');
+
+        // 重置内存中的数据
+        this.bookedCourses = [];
+        this.courseList = [];
+        this.courseDatesMap = {};
+        this.selectedInfo = {
+          selected: []
+        };
+        uni.showToast({
+          title: '日历缓存已清除',
+          icon: 'none',
+          duration: 2000
+        });
+      } catch (error) {
+        console.error('清除所有日历缓存出错:', error);
+      }
     }
   }
 };

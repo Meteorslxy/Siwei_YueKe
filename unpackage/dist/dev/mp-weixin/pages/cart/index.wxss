@@ -92,92 +92,133 @@
   padding: 20rpx;
   padding-bottom: 120rpx;
 }
-.favorite-list .favorite-item {
-  padding: 20rpx;
+.favorite-list .swipe-item-wrapper {
+  position: relative;
   margin-bottom: 20rpx;
   background-color: #fff;
   border-radius: 8rpx;
+  overflow: hidden;
+  height: 200rpx;
+  /* 设置固定高度 */
+}
+.favorite-list .swipe-item {
+  position: relative;
+  /* 改为相对定位 */
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  transition: -webkit-transform 0.3s ease;
+  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, -webkit-transform 0.3s ease;
+  -webkit-transform: translateX(0);
+          transform: translateX(0);
+  z-index: 1;
+}
+.favorite-list .swipe-item.swipe-active {
+  -webkit-transform: translateX(-140rpx);
+          transform: translateX(-140rpx);
+  /* 左滑距离 */
+}
+.favorite-list .favorite-item {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
+  padding: 20rpx;
+  box-sizing: border-box;
 }
 .favorite-list .favorite-item .checkbox-wrapper {
-  padding: 0 10rpx;
-  width: 60rpx;
-  min-width: 60rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin-right: 20rpx;
 }
 .favorite-list .favorite-item .item-content {
   flex: 1;
   display: flex;
-  margin-right: 20rpx;
+  height: 160rpx;
 }
 .favorite-list .favorite-item .item-content .item-image {
-  width: 150rpx;
-  height: 150rpx;
+  width: 160rpx;
+  height: 160rpx;
   margin-right: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background-color: #f5f5f5;
 }
 .favorite-list .favorite-item .item-content .item-image image {
   width: 100%;
   height: 100%;
-  border-radius: 8rpx;
 }
 .favorite-list .favorite-item .item-content .item-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
 }
 .favorite-list .favorite-item .item-content .item-info .item-title {
   font-size: 28rpx;
   font-weight: bold;
-  margin-bottom: 10rpx;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
 }
 .favorite-list .favorite-item .item-content .item-info .item-type {
   font-size: 24rpx;
-  color: #FF6B00;
-  background-color: rgba(255, 107, 0, 0.1);
-  padding: 6rpx 12rpx;
-  border-radius: 4rpx;
-  display: inline-block;
-  margin-bottom: 10rpx;
+  color: #999;
+  margin-top: 8rpx;
 }
 .favorite-list .favorite-item .item-content .item-info .item-price {
-  font-size: 32rpx;
-  color: #FF3B30;
+  font-size: 28rpx;
   font-weight: bold;
-  margin: 10rpx 0;
+  color: #FF6B00;
+  margin-top: 8rpx;
 }
 .favorite-list .favorite-item .item-content .item-info .item-time {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #999;
+  margin-top: 8rpx;
+}
+.favorite-list .favorite-item .item-action {
+  margin-left: 20rpx;
 }
 .favorite-list .favorite-item .item-action .action-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.favorite-list .favorite-item .item-action .action-btn.delete-btn {
-  color: #FF3B30;
+  padding: 0 30rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  border-radius: 30rpx;
+  font-size: 28rpx;
 }
 .favorite-list .favorite-item .item-action .action-btn.book-btn {
-  padding: 12rpx 24rpx;
-  background-color: #FF6B00;
   color: #fff;
-  border-radius: 40rpx;
-  font-size: 24rpx;
+  background-color: #FF6B00;
   border: none;
-  line-height: 1.5;
-  min-width: 140rpx;
-  text-align: center;
 }
-.favorite-list .favorite-item .item-action .action-btn .delete-text {
-  font-size: 24rpx;
-  margin-top: 8rpx;
+.favorite-list .favorite-item .item-action .action-btn.delete-btn {
+  display: flex;
+  align-items: center;
+  color: #FF3B30;
+}
+.favorite-list .favorite-item .item-action .action-btn.delete-btn .icon-delete {
+  margin-right: 8rpx;
+}
+.favorite-list .swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 140rpx;
+  /* 与左滑距离一致 */
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.favorite-list .swipe-actions .swipe-btn {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background-color: #FF3B30;
+  font-size: 28rpx;
 }
 .cart-footer {
   display: flex;

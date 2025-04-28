@@ -1,5 +1,5 @@
 <template>
-  <view class="favorite-page">
+  <view class="favorite-page" @click="onPageClick">
     <!-- 顶部栏 -->
     <view class="filter-bar">
       <view class="page-title">购物车</view>
@@ -9,36 +9,44 @@
     <!-- 购物车列表 -->
     <view class="favorite-list">
       <block v-if="favoriteList.length > 0">
-        <view 
-          class="favorite-item" 
-          v-for="(item, index) in favoriteList" 
-          :key="index"
-        >
-          <view class="checkbox-wrapper">
-            <checkbox :checked="item.selected" color="#FF6B00" @tap.stop="toggleSelect(index)" />
+        <view class="swipe-item-wrapper" v-for="(item, index) in favoriteList" :key="index">
+          <view class="swipe-item" 
+            :class="{'swipe-active': item.swipeActive}"
+            @touchstart.stop="touchStart(index, $event)"
+            @touchmove.stop="touchMove(index, $event)"
+            @touchend.stop="touchEnd(index)"
+          >
+            <view class="favorite-item">
+              <view class="checkbox-wrapper">
+                <checkbox :checked="item.selected" color="#FF6B00" @tap.stop="toggleSelect(index)" />
+              </view>
+              
+              <view class="item-content" @click.stop="handleClick(index)">
+                <view class="item-image">
+                  <image :src="item.itemCover || getDefaultImage(item.itemType)" 
+                    mode="aspectFill" 
+                    @error="handleImageError(index)"></image>
+                </view>
+                
+                <view class="item-info">
+                  <view class="item-title">{{item.itemTitle || '未命名'}}</view>
+                  <view class="item-type">{{getItemTypeName(item.itemType)}}</view>
+                  <view class="item-price">¥{{item.price || 0}}.00</view>
+                  <view class="item-time">{{formatDate(item.createTime)}}</view>
+                </view>
+              </view>
+              
+              <view class="item-action">
+                <button class="action-btn book-btn" @click.stop="bookCourse(item)" v-if="!isManageMode">立即预约</button>
+                <view class="action-btn delete-btn" @click.stop="handleDelete(index)" v-else>
+                  <text class="iconfont icon-delete"></text>
+                  <text class="delete-text">删除</text>
+                </view>
+              </view>
+            </view>
           </view>
-          
-          <view class="item-content" @click="handleClick(index)">
-            <view class="item-image">
-              <image :src="item.itemCover || getDefaultImage(item.itemType)" 
-                mode="aspectFill" 
-                @error="handleImageError(index)"></image>
-            </view>
-            
-            <view class="item-info">
-              <view class="item-title">{{item.itemTitle || '未命名'}}</view>
-              <view class="item-type">{{getItemTypeName(item.itemType)}}</view>
-              <view class="item-price">¥{{item.price || 0}}.00</view>
-              <view class="item-time">{{formatDate(item.createTime)}}</view>
-            </view>
-          </view>
-          
-          <view class="item-action">
-            <button class="action-btn book-btn" @click.stop="bookCourse(item)" v-if="!isManageMode">立即预约</button>
-            <view class="action-btn delete-btn" @click="handleDelete(index)" v-else>
-              <text class="iconfont icon-delete"></text>
-              <text class="delete-text">删除</text>
-            </view>
+          <view class="swipe-actions">
+            <view class="swipe-btn delete-btn" @click.stop="handleDelete(index)">删除</view>
           </view>
         </view>
       </block>
@@ -88,7 +96,17 @@ export default {
       isAllSelected: false, // 是否全选
       currentBookingCourseId: null,
       currentSelectedCourseIds: [],
-      userInfo: null  // 添加用户信息
+      userInfo: null,  // 添加用户信息
+      rightOptions: [
+        {
+          text: '删除',
+          style: {
+            backgroundColor: '#FF3B30'
+          }
+        }
+      ],
+      startX: 0, // 记录触摸开始的X坐标
+      startY: 0  // 记录触摸开始的Y坐标
     }
   },
   computed: {
@@ -140,6 +158,45 @@ export default {
       if (this.currentTab === index) return;
       this.currentTab = index;
       this.refreshList();
+    },
+    
+    // 触摸开始事件
+    touchStart(index, event) {
+      this.startX = event.touches[0].clientX;
+      this.startY = event.touches[0].clientY;
+    },
+    
+    // 触摸移动事件
+    touchMove(index, event) {
+      const moveX = event.touches[0].clientX;
+      const moveY = event.touches[0].clientY;
+      
+      // 计算X和Y方向的移动距离
+      const deltaX = this.startX - moveX;
+      const deltaY = this.startY - moveY;
+      
+      // 如果Y方向移动大于X方向，则认为是上下滑动，不处理
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return;
+      }
+      
+      // 左滑显示删除按钮
+      if (deltaX > 50) {
+        // 防止在滑动过程中频繁更新视图
+        if (!this.favoriteList[index].swipeActive) {
+          this.$set(this.favoriteList[index], 'swipeActive', true);
+        }
+      } else if (deltaX < -50) {
+        // 右滑隐藏删除按钮
+        if (this.favoriteList[index].swipeActive) {
+          this.$set(this.favoriteList[index], 'swipeActive', false);
+        }
+      }
+    },
+    
+    // 触摸结束事件
+    touchEnd(index) {
+      // 记录最后的滑动状态即可，无需额外操作
     },
     
     // 刷新列表
@@ -1065,25 +1122,43 @@ export default {
       }
     },
     
-    // 处理点击项目
+    // 处理点击事件
     handleClick(index) {
-      if (index < 0 || index >= this.favoriteList.length) {
-        console.error('无效的索引:', index);
+      // 如果当前项目处于滑动状态，先关闭
+      if (this.favoriteList[index].swipeActive) {
+        this.$set(this.favoriteList[index], 'swipeActive', false);
         return;
       }
       
+      // 关闭所有已打开的滑动项
+      this.closeAllSwipeItems();
+      
+      // 跳转到课程详情
       const item = this.favoriteList[index];
-      if (!item) {
-        console.error('索引对应的收藏项为空:', index);
-        return;
+      if (item.itemId && item.itemType === 'course') {
+        uni.navigateTo({
+          url: `/pages/course/detail?id=${item.itemId}`
+        });
+      } else if (item.itemType === 'teacher' && item.itemId) {
+        uni.navigateTo({
+          url: `/pages/teacher/detail?id=${item.itemId}`
+        });
       }
-      
-      console.log('点击收藏项, 索引:', index);
-      this.openDetail(index);
+    },
+    
+    // 关闭所有已打开的滑动项
+    closeAllSwipeItems() {
+      this.favoriteList.forEach((item, i) => {
+        if (item.swipeActive) {
+          this.$set(this.favoriteList[i], 'swipeActive', false);
+        }
+      });
     },
     
     // 处理删除
     handleDelete(index) {
+      if (!this.favoriteList[index]) return;
+      
       if (index < 0 || index >= this.favoriteList.length) {
         console.error('无效的索引:', index);
         return;
@@ -1097,63 +1172,6 @@ export default {
       
       console.log('删除收藏项, 索引:', index);
       this.cancelFavorite(index);
-    },
-    
-    // 打开详情页
-    openDetail(index) {
-      const item = this.favoriteList[index];
-      
-      if (!item) {
-        uni.showToast({
-          title: '收藏项不存在',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      // 构建跳转URL
-      let url = '';
-      
-      if (item.itemUrl) {
-        url = item.itemUrl;
-      } else if (item.itemType && item.itemId) {
-        // 根据类型和ID构建URL
-        switch (item.itemType) {
-          case 'course':
-            url = `/pages/course/detail?id=${item.itemId}`;
-            break;
-          case 'lecture':
-            url = `/pages/course/lecture-detail?id=${item.itemId}`;
-            break;
-          case 'teacher':
-            url = `/pages/teacher/detail?id=${item.itemId}`;
-            break;
-          default:
-            url = '';
-        }
-      }
-      
-      // 检查url是否有效
-      if (!url) {
-        uni.showToast({
-          title: '链接无效',
-          icon: 'none'
-        });
-        return;
-      }
-      
-      // 执行跳转
-      console.log('跳转到:', url);
-      uni.navigateTo({
-        url,
-        fail: (err) => {
-          console.error('页面跳转失败:', err);
-          uni.showToast({
-            title: '页面不存在',
-            icon: 'none'
-          });
-        }
-      });
     },
     
     // 取消收藏
@@ -1294,6 +1312,12 @@ export default {
         console.error('移除购物车项失败:', error);
         return false;
       }
+    },
+    
+    // 处理页面点击事件
+    onPageClick() {
+      // 关闭所有已打开的滑动项
+      this.closeAllSwipeItems();
     }
   }
 }
@@ -1332,106 +1356,143 @@ export default {
   padding: 20rpx;
   padding-bottom: 120rpx;
   
-  .favorite-item {
-    padding: 20rpx;
+  .swipe-item-wrapper {
+    position: relative;
     margin-bottom: 20rpx;
     background-color: #fff;
     border-radius: 8rpx;
+    overflow: hidden;
+    height: 200rpx; /* 设置固定高度 */
+  }
+  
+  .swipe-item {
+    position: relative; /* 改为相对定位 */
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+    z-index: 1;
+    
+    &.swipe-active {
+      transform: translateX(-140rpx); /* 左滑距离 */
+    }
+  }
+  
+  .favorite-item {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
+    padding: 20rpx;
+    box-sizing: border-box;
     
     .checkbox-wrapper {
-      padding: 0 10rpx;
-      width: 60rpx;
-      min-width: 60rpx;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      margin-right: 20rpx;
     }
     
     .item-content {
       flex: 1;
       display: flex;
-      margin-right: 20rpx;
+      height: 160rpx;
       
       .item-image {
-        width: 150rpx;
-        height: 150rpx;
+        width: 160rpx;
+        height: 160rpx;
         margin-right: 20rpx;
+        border-radius: 8rpx;
+        overflow: hidden;
+        background-color: #f5f5f5;
         
         image {
           width: 100%;
           height: 100%;
-          border-radius: 8rpx;
         }
       }
       
       .item-info {
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
         
         .item-title {
           font-size: 28rpx;
           font-weight: bold;
-          margin-bottom: 10rpx;
           overflow: hidden;
           text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+          white-space: nowrap;
         }
         
         .item-type {
           font-size: 24rpx;
-          color: #FF6B00;
-          background-color: rgba(255, 107, 0, 0.1);
-          padding: 6rpx 12rpx;
-          border-radius: 4rpx;
-          display: inline-block;
-          margin-bottom: 10rpx;
+          color: #999;
+          margin-top: 8rpx;
         }
         
         .item-price {
-          font-size: 32rpx;
-          color: #FF3B30;
+          font-size: 28rpx;
           font-weight: bold;
-          margin: 10rpx 0;
+          color: #FF6B00;
+          margin-top: 8rpx;
         }
         
         .item-time {
-          font-size: 22rpx;
+          font-size: 24rpx;
           color: #999;
+          margin-top: 8rpx;
         }
       }
     }
     
     .item-action {
+      margin-left: 20rpx;
+      
       .action-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        
-        &.delete-btn {
-          color: #FF3B30;
-        }
+        padding: 0 30rpx;
+        height: 60rpx;
+        line-height: 60rpx;
+        border-radius: 30rpx;
+        font-size: 28rpx;
         
         &.book-btn {
-          padding: 12rpx 24rpx;
-          background-color: #FF6B00;
           color: #fff;
-          border-radius: 40rpx;
-          font-size: 24rpx;
+          background-color: #FF6B00;
           border: none;
-          line-height: 1.5;
-          min-width: 140rpx;
-          text-align: center;
         }
         
-        .delete-text {
-          font-size: 24rpx;
-          margin-top: 8rpx;
+        &.delete-btn {
+          display: flex;
+          align-items: center;
+          color: #FF3B30;
+          
+          .icon-delete {
+            margin-right: 8rpx;
+          }
         }
       }
+    }
+  }
+  
+  .swipe-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 140rpx; /* 与左滑距离一致 */
+    height: 100%;
+    display: flex;
+    align-items: center;
+    
+    .swipe-btn {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background-color: #FF3B30;
+      font-size: 28rpx;
     }
   }
 }

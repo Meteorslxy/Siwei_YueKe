@@ -26,8 +26,21 @@ exports.main = async (event, context) => {
     
     // 如果指定了状态，则添加到查询条件
     if (status) {
-      where.status = status;
+      // 处理多状态查询，包括数组格式
+      if (typeof status === 'string' && status.includes(',')) {
+        const statusArray = status.split(',').map(s => s.trim());
+        console.log('处理字符串逗号分隔的多状态查询:', statusArray);
+        where.status = db.command.in(statusArray);
+      } else if (Array.isArray(status)) {
+        console.log('处理数组格式的多状态查询:', status);
+        where.status = db.command.in(status);
+      } else {
+        // 单个状态字符串
+        where.status = status;
+      }
     }
+    
+    console.log('最终查询条件:', where);
     
     // 查询用户所有预约记录
     const bookingRes = await bookingDB.where(where).get();

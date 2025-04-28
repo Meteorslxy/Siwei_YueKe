@@ -1558,19 +1558,37 @@ var _default = {
         return;
       }
 
+      // 显示加载提示
+      uni.showLoading({
+        title: '检查课程冲突...'
+      });
+
       // 课程冲突检测
       this.checkCourseConflict().then(function (conflictResult) {
+        uni.hideLoading();
         if (conflictResult.hasConflict) {
-          // 有冲突，显示冲突信息
+          // 有冲突，显示冲突信息，但不自动继续预约
+          console.log('检测到课程冲突，显示冲突对话框');
           _this12.showConflictDialog(conflictResult);
         } else {
           // 无冲突，继续预约流程
+          console.log('未检测到课程冲突，继续预约流程');
           _this12.proceedWithBooking();
         }
       }).catch(function (err) {
+        uni.hideLoading();
         console.error('课程冲突检测失败:', err);
-        // 出错时也继续预约流程，但记录错误
-        _this12.proceedWithBooking();
+
+        // 提示用户检测失败
+        uni.showModal({
+          title: '课程冲突检测失败',
+          content: '无法完成课程冲突检测，您仍要继续预约吗？',
+          success: function success(res) {
+            if (res.confirm) {
+              _this12.proceedWithBooking();
+            }
+          }
+        });
       });
     },
     // 检查课程冲突
@@ -1586,7 +1604,7 @@ var _default = {
           name: 'getUserBookings',
           data: {
             userId: userId,
-            status: 'confirmed' // 只检查已确认的预约
+            status: ['pending', 'confirmed'] // 检查所有进行中的预约，不仅是已确认的
           },
 
           success: function success(res) {
@@ -1751,7 +1769,6 @@ var _default = {
     },
     // 显示课程冲突提示对话框
     showConflictDialog: function showConflictDialog(conflictResult) {
-      var _this14 = this;
       // 构建冲突信息文本
       var conflictMessage = '您已预约的课程与此课程时间冲突：\n\n';
       conflictResult.conflictCourses.forEach(function (item, index) {
@@ -1768,25 +1785,19 @@ var _default = {
         }
         conflictMessage += '\n';
       });
-      conflictMessage += '确定要继续预约吗？';
+      conflictMessage += '课程时间冲突，请选择其他课程。';
 
-      // 显示确认对话框
+      // 显示提示对话框
       uni.showModal({
         title: '课程时间冲突',
         content: conflictMessage,
-        confirmText: '继续预约',
-        cancelText: '取消',
-        success: function success(res) {
-          if (res.confirm) {
-            // 用户确认继续预约
-            _this14.proceedWithBooking();
-          }
-        }
+        showCancel: false,
+        confirmText: '我知道了'
       });
     },
     // 继续预约流程
     proceedWithBooking: function proceedWithBooking() {
-      var _this15 = this;
+      var _this14 = this;
       // 删除跳转到预约页面的代码，直接在当前页面完成预约
       console.log('直接完成课程预约');
 
@@ -1816,21 +1827,21 @@ var _default = {
           uni.hideLoading();
           if (res.result && res.result.success) {
             // 预约成功
-            _this15.hasBooked = true;
+            _this14.hasBooked = true;
 
             // 更新预约人数
-            if (_this15.courseInfo) {
-              _this15.courseInfo.bookingCount = (_this15.courseInfo.bookingCount || 0) + 1;
+            if (_this14.courseInfo) {
+              _this14.courseInfo.bookingCount = (_this14.courseInfo.bookingCount || 0) + 1;
             }
 
             // 发送预约成功事件
             uni.$emit('booking:success', {
-              courseId: _this15.courseId,
+              courseId: _this14.courseId,
               userId: userId
             });
 
             // 如果是从购物车跳转来的，从购物车中移除该课程
-            if (_this15.fromCart) {
+            if (_this14.fromCart) {
               console.log('检测到从购物车跳转预约，准备从购物车移除课程');
 
               // 调用云函数或API移除购物车中的课程
@@ -1841,7 +1852,7 @@ var _default = {
                   data: {
                     userId: userId,
                     type: 'course',
-                    itemId: _this15.courseId
+                    itemId: _this14.courseId
                   },
                   success: function success(result) {
                     if (result.result && result.result.data && result.result.data.length > 0) {
@@ -1849,7 +1860,7 @@ var _default = {
                       console.log('找到购物车记录，ID:', favoriteId);
 
                       // 调用移除收藏API
-                      _this15.$api.user.removeFavorite(favoriteId).then(function () {
+                      _this14.$api.user.removeFavorite(favoriteId).then(function () {
                         console.log('成功从购物车移除课程');
                       }).catch(function (err) {
                         console.error('从购物车移除课程失败:', err);
@@ -1875,7 +1886,7 @@ var _default = {
 
             // 刷新页面以显示预约成功状态
             setTimeout(function () {
-              _this15.reloadPage();
+              _this14.reloadPage();
             }, 1500);
           } else {
             // 预约失败
@@ -1897,7 +1908,7 @@ var _default = {
     },
     // 重新加载页面
     reloadPage: function reloadPage() {
-      var _this16 = this;
+      var _this15 = this;
       console.log('重新加载页面以确保显示预约状态');
 
       // 先缓存必要数据
@@ -1924,15 +1935,15 @@ var _default = {
           uni.hideLoading();
 
           // 失败时，再次尝试强制更新状态
-          _this16.hasBooked = hasBooked;
+          _this15.hasBooked = hasBooked;
 
           // 立即更新按钮显示
-          _this16.$forceUpdate();
+          _this15.$forceUpdate();
 
           // 确保下一帧更新
-          _this16.$nextTick(function () {
-            _this16.hasBooked = hasBooked;
-            console.log('强制更新状态完成, hasBooked =', _this16.hasBooked);
+          _this15.$nextTick(function () {
+            _this15.hasBooked = hasBooked;
+            console.log('强制更新状态完成, hasBooked =', _this15.hasBooked);
           });
         }
       });
@@ -1945,7 +1956,7 @@ var _default = {
     },
     // 联系老师
     contactTeacher: function contactTeacher() {
-      var _this17 = this;
+      var _this16 = this;
       // 获取教师电话号码
       var teacherPhone = this.courseInfo.teacherPhone || '';
       console.log('尝试联系老师，电话:', teacherPhone);
@@ -1967,7 +1978,7 @@ var _default = {
           content: '电话号码格式可能不正确，是否继续拨打？',
           success: function success(res) {
             if (res.confirm) {
-              _this17.makePhoneCall(teacherPhone);
+              _this16.makePhoneCall(teacherPhone);
             }
           }
         });
@@ -2095,7 +2106,7 @@ var _default = {
     },
     // 添加强制刷新预约状态的方法
     forceRefreshStatus: function forceRefreshStatus() {
-      var _this18 = this;
+      var _this17 = this;
       console.log('手动强制刷新预约状态');
 
       // 从缓存中删除状态，强制重新检查
@@ -2125,12 +2136,12 @@ var _default = {
       this.checkBookingStatus().then(function () {
         uni.hideLoading();
         uni.showToast({
-          title: _this18.hasBooked ? '您已预约此课程' : '您未预约此课程',
+          title: _this17.hasBooked ? '您已预约此课程' : '您未预约此课程',
           icon: 'none'
         });
 
         // 强制刷新页面
-        _this18.$forceUpdate();
+        _this17.$forceUpdate();
       }).catch(function () {
         uni.hideLoading();
         uni.showToast({
@@ -2141,7 +2152,7 @@ var _default = {
     },
     // 处理预约取消事件
     handleBookingCancelled: function handleBookingCancelled(data) {
-      var _this19 = this;
+      var _this18 = this;
       console.log('收到预约取消事件:', data);
 
       // 判断是否是当前课程的预约取消
@@ -2181,10 +2192,10 @@ var _default = {
 
         // 确保下一帧状态一致
         this.$nextTick(function () {
-          if (_this19.hasBooked !== false) {
+          if (_this18.hasBooked !== false) {
             console.warn('状态未正确更新，强制再次设置为未预约');
-            _this19.hasBooked = false;
-            _this19.$forceUpdate();
+            _this18.hasBooked = false;
+            _this18.$forceUpdate();
           }
         });
         uni.showToast({
@@ -2194,7 +2205,7 @@ var _default = {
 
         // 刷新课程详情，获取最新的报名人数
         setTimeout(function () {
-          _this19.getCourseDetail();
+          _this18.getCourseDetail();
         }, 1000);
       }
     },
@@ -2231,7 +2242,7 @@ var _default = {
     },
     // 检查课程收藏状态
     checkFavoriteStatus: function checkFavoriteStatus() {
-      var _this20 = this;
+      var _this19 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
         var userInfo, result;
         return _regenerator.default.wrap(function _callee8$(_context8) {
@@ -2239,13 +2250,13 @@ var _default = {
             switch (_context8.prev = _context8.next) {
               case 0:
                 _context8.prev = 0;
-                if (!(!_this20.courseId || !_this20.$refs.favoriteBtn)) {
+                if (!(!_this19.courseId || !_this19.$refs.favoriteBtn)) {
                   _context8.next = 3;
                   break;
                 }
                 return _context8.abrupt("return");
               case 3:
-                console.log('检查课程购物车状态, courseId:', _this20.courseId);
+                console.log('检查课程购物车状态, courseId:', _this19.courseId);
 
                 // 调用API检查是否已加入购物车
                 userInfo = uni.getStorageSync('userInfo');
@@ -2256,9 +2267,9 @@ var _default = {
                 return _context8.abrupt("return");
               case 7:
                 _context8.next = 9;
-                return _this20.$api.user.checkFavorite({
-                  userId: _this20.getUserId(userInfo),
-                  itemId: _this20.courseId,
+                return _this19.$api.user.checkFavorite({
+                  userId: _this19.getUserId(userInfo),
+                  itemId: _this19.courseId,
                   itemType: 'course'
                 });
               case 9:
@@ -2267,8 +2278,8 @@ var _default = {
                   console.log('课程已在购物车中，更新按钮状态');
 
                   // 获取收藏按钮组件实例并更新状态
-                  if (_this20.$refs.favoriteBtn && typeof _this20.$refs.favoriteBtn.updateFavoriteStatus === 'function') {
-                    _this20.$refs.favoriteBtn.updateFavoriteStatus(true, result.data._id || '');
+                  if (_this19.$refs.favoriteBtn && typeof _this19.$refs.favoriteBtn.updateFavoriteStatus === 'function') {
+                    _this19.$refs.favoriteBtn.updateFavoriteStatus(true, result.data._id || '');
                   } else {
                     console.warn('收藏按钮组件实例或方法不存在');
                   }
@@ -2391,7 +2402,7 @@ var _default = {
     },
     // 检查教师收藏状态
     checkTeacherFavoriteStatus: function checkTeacherFavoriteStatus(teacherId) {
-      var _this21 = this;
+      var _this20 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
         var userInfo, userData, userId, checkData, res;
         return _regenerator.default.wrap(function _callee9$(_context9) {
@@ -2446,7 +2457,7 @@ var _default = {
                   itemId: teacherId
                 }; // 调用API检查是否已收藏
                 _context9.next = 24;
-                return _this21.$api.user.checkFavorite(checkData);
+                return _this20.$api.user.checkFavorite(checkData);
               case 24:
                 res = _context9.sent;
                 if (!(res && res.code === 0 && res.data)) {
@@ -2476,7 +2487,7 @@ var _default = {
     },
     // 添加一个显示登录提示的方法
     showLoginTip: function showLoginTip() {
-      var _this22 = this;
+      var _this21 = this;
       console.log('用户未登录，跳转到登录页面');
       uni.showToast({
         title: '请先登录',
@@ -2484,7 +2495,7 @@ var _default = {
       });
       setTimeout(function () {
         // 跳转到登录页面，并设置重定向回当前页面
-        var currentUrl = "/pages/course/detail?id=".concat(_this22.courseId);
+        var currentUrl = "/pages/course/detail?id=".concat(_this21.courseId);
         console.log('设置登录后重定向地址:', currentUrl);
         uni.navigateTo({
           url: "/pages/login/login?redirect=".concat(encodeURIComponent(currentUrl))
@@ -2493,7 +2504,7 @@ var _default = {
     },
     // 更新课程报名人数
     updateCourseBookingCount: function updateCourseBookingCount() {
-      var _this23 = this;
+      var _this22 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10() {
         var result, bookingCount;
         return _regenerator.default.wrap(function _callee10$(_context10) {
@@ -2501,10 +2512,10 @@ var _default = {
             switch (_context10.prev = _context10.next) {
               case 0:
                 _context10.prev = 0;
-                console.log('主动更新课程报名人数:', _this23.courseId);
+                console.log('主动更新课程报名人数:', _this22.courseId);
                 // 使用API更新课程报名人数
                 _context10.next = 4;
-                return _this23.$api.course.updateCourseBookingCount(_this23.courseId);
+                return _this22.$api.course.updateCourseBookingCount(_this22.courseId);
               case 4:
                 result = _context10.sent;
                 console.log('更新课程报名人数结果:', result);
@@ -2515,8 +2526,8 @@ var _default = {
                   console.log('获取到最新报名人数:', bookingCount);
 
                   // 更新本地courseInfo中的bookingCount
-                  _this23.courseInfo.bookingCount = bookingCount;
-                  _this23.$forceUpdate();
+                  _this22.courseInfo.bookingCount = bookingCount;
+                  _this22.$forceUpdate();
                 }
                 _context10.next = 12;
                 break;
