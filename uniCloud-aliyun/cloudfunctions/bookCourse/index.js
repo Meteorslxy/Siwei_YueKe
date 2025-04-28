@@ -3,6 +3,196 @@
 const db = uniCloud.database();
 const dbCmd = db.command;
 
+// 导入时间冲突检测工具函数
+const parseDate = (dateStr) => {
+  if (!dateStr) return null;
+  try {
+    // 尝试直接解析
+    const date = new Date(dateStr);
+    
+    // 判断是否为有效日期
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+    
+    // 处理常见的格式问题
+    if (dateStr.length === 10 && dateStr.includes('-')) {
+      // 处理YYYY-MM-DD格式
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // 月份从0开始
+        const day = parseInt(parts[2], 10);
+        
+        const parsedDate = new Date(year, month, day);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate;
+        }
+      }
+    }
+    
+    console.error('无法解析日期字符串:', dateStr);
+    return null;
+  } catch (e) {
+    console.error('解析日期出错:', e);
+    return null;
+  }
+};
+
+const parseTimeToMinutes = (timeStr) => {
+  if (!timeStr || timeStr === '--:--') return 0;
+  
+  try {
+    const parts = timeStr.split(':');
+    if (parts.length >= 2) {
+      const hours = parseInt(parts[0], 10) || 0;
+      const minutes = parseInt(parts[1], 10) || 0;
+      return hours * 60 + minutes;
+    }
+    return 0;
+  } catch (e) {
+    return 0;
+  }
+};
+
+const isTimeOverlap = (start1, end1, start2, end2) => {
+  start1 = Number(start1) || 0;
+  end1 = Number(end1) || 0;
+  start2 = Number(start2) || 0;
+  end2 = Number(end2) || 0;
+  
+  // 时间重叠的条件：A的开始时间小于B的结束时间，并且A的结束时间大于B的开始时间
+  return (start1 < end2 && end1 > start2);
+};
+
+/**
+ * 检测两个课程是否有时间冲突 - 支持处理timeSlots和常规时间字段
+ * @param {Object} course1 - 第一个课程
+ * @param {Object} course2 - 第二个课程
+ * @returns {Object} - 冲突检测结果
+ */
+const checkCoursesConflict = (course1, course2) => {
+  console.log('检测课程冲突');
+  
+  // 验证课程对象
+  if (!course1 || !course2) {
+    return { hasConflict: false };
+  }
+  
+  // 检查是否有timeSlots数据（来自course_schedule）
+  if (course1.timeSlots && course1.timeSlots.length > 0 && 
+      course2.timeSlots && course2.timeSlots.length > 0) {
+    console.log('使用timeSlots检测冲突');
+    
+    // 直接比较timeSlots中的时间，确保处理start和end可能颠倒的情况
+    const conflictDates = [];
+    
+    for (const slot1 of course1.timeSlots) {
+      for (const slot2 of course2.timeSlots) {
+        try {
+          // 获取两个时间
+          const time1Start = new Date(slot1.start);
+          const time1End = new Date(slot1.end);
+          const time2Start = new Date(slot2.start);
+          const time2End = new Date(slot2.end);
+          
+          // 确保start早于end（处理可能颠倒的情况）
+          const slot1Start = time1Start < time1End ? time1Start : time1End;
+          const slot1End = time1Start < time1End ? time1End : time1Start;
+          const slot2Start = time2Start < time2End ? time2Start : time2End;
+          const slot2End = time2Start < time2End ? time2End : time2Start;
+          
+          // 检查日期（忽略时间）是否相同
+          const date1 = new Date(slot1Start);
+          date1.setHours(0, 0, 0, 0);
+          const date2 = new Date(slot2Start);
+          date2.setHours(0, 0, 0, 0);
+          
+          if (date1.getTime() === date2.getTime()) {
+            // 同一天，检查时间是否重叠
+            const hasTimeOverlap = (slot1Start < slot2End && slot1End > slot2Start);
+            
+            if (hasTimeOverlap) {
+              console.log('检测到冲突日期:', formatDate(date1));
+              
+              // 添加到冲突日期列表
+              conflictDates.push(new Date(date1));
+            }
+          }
+        } catch (err) {
+          console.error('检测timeSlots冲突出错:', err);
+        }
+      }
+    }
+    
+    // 如果找到冲突，返回结果
+    if (conflictDates.length > 0) {
+      console.log('检测到冲突日期数:', conflictDates.length);
+      return { 
+        hasConflict: true, 
+        conflictDates: conflictDates,
+        conflictSource: 'timeSlots'
+      };
+    }
+    
+    return { hasConflict: false };
+  }
+  
+  // 使用常规字段检测冲突
+  // 解析课程1的日期和时间
+  const course1Start = parseDate(course1.startDate);
+  const course1End = parseDate(course1.endDate);
+  const course1StartMinutes = parseTimeToMinutes(course1.startTime);
+  const course1EndMinutes = parseTimeToMinutes(course1.endTime);
+  
+  // 解析课程2的日期和时间
+  const course2Start = parseDate(course2.startDate);
+  const course2End = parseDate(course2.endDate);
+  const course2StartMinutes = parseTimeToMinutes(course2.startTime);
+  const course2EndMinutes = parseTimeToMinutes(course2.endTime);
+  
+  // 验证解析结果
+  if (!course1Start || !course1End || !course2Start || !course2End) {
+    console.error('课程日期解析失败');
+    return { hasConflict: false };
+  }
+  
+  // 如果日期范围没有重叠，则没有冲突
+  const datesOverlap = !(course1End < course2Start || course2End < course1Start);
+  if (!datesOverlap) {
+    return { hasConflict: false };
+  }
+  
+  // 如果时间没有重叠，则没有冲突
+  const timesOverlap = isTimeOverlap(course1StartMinutes, course1EndMinutes, course2StartMinutes, course2EndMinutes);
+  if (!timesOverlap) {
+    return { hasConflict: false };
+  }
+  
+  // 确定重叠的日期范围
+  const overlapStart = new Date(Math.max(course1Start.getTime(), course2Start.getTime()));
+  const overlapEnd = new Date(Math.min(course1End.getTime(), course2End.getTime()));
+  
+  // 如果有时间和日期重叠，则认为有冲突
+  return {
+    hasConflict: true,
+    conflictPeriod: {
+      startDate: overlapStart,
+      endDate: overlapEnd
+    },
+    conflictSource: 'normal'
+  };
+};
+
+/**
+ * 格式化日期为 YYYY-MM-DD 格式
+ */
+const formatDate = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 // 云函数入口函数
 exports.main = async (event, context) => {
   console.log('bookCourse函数收到请求:', event);
@@ -147,13 +337,12 @@ exports.main = async (event, context) => {
       }
     }
     
-    // 检查用户是否已经预约过该课程
-    console.log('检查用户是否已预约过该课程');
-    
     // 保存用户的真实ID（可能是_id或uid）
     const realUserId = userData._id;
     console.log('使用真实用户ID:', realUserId);
     
+    // 检查用户是否已经预约过该课程
+    console.log('检查用户是否已预约过该课程');
     const existResult = await db.collection('bookings')
       .where({
         userId: realUserId,
@@ -169,6 +358,84 @@ exports.main = async (event, context) => {
         success: false,
         message: '您已预约过该课程'
       };
+    }
+    
+    // 检查课程时间冲突
+    console.log('检查课程时间冲突');
+    // 1. 获取用户已预约的课程
+    const bookedCoursesResult = await uniCloud.callFunction({
+      name: 'getUserBookings',
+      data: {
+        userId: realUserId,
+        status: 'confirmed' // 只检查已确认的预约
+      }
+    });
+    
+    // 2. 获取课程的详细排课信息
+    let courseScheduleData = null;
+    try {
+      const scheduleResult = await db.collection('course_schedule').where({
+        courseId: courseId
+      }).get();
+      
+      if (scheduleResult.data && scheduleResult.data.length > 0) {
+        courseScheduleData = scheduleResult.data[0];
+        console.log('找到课程排课数据:', courseId);
+      }
+    } catch (err) {
+      console.error('获取课程排课数据失败:', err);
+    }
+    
+    // 如果找到排课数据，添加到课程对象中
+    if (courseScheduleData && courseScheduleData.timeSlots) {
+      course.timeSlots = courseScheduleData.timeSlots;
+    }
+    
+    if (bookedCoursesResult.result && bookedCoursesResult.result.success && bookedCoursesResult.result.data) {
+      const bookedCourses = bookedCoursesResult.result.data;
+      console.log(`用户已预约${bookedCourses.length}个课程，开始检查冲突`);
+      
+      // 3. 获取已预约课程的排课信息
+      const bookedCourseIds = bookedCourses.map(booking => booking.courseId).filter(id => id);
+      let scheduleMap = {};
+      
+      if (bookedCourseIds.length > 0) {
+        try {
+          const schedulesResult = await db.collection('course_schedule').where({
+            courseId: dbCmd.in(bookedCourseIds)
+          }).get();
+          
+          if (schedulesResult.data && schedulesResult.data.length > 0) {
+            schedulesResult.data.forEach(schedule => {
+              scheduleMap[schedule.courseId] = schedule;
+            });
+            console.log('获取到已预约课程排课数据数量:', schedulesResult.data.length);
+          }
+        } catch (err) {
+          console.error('获取已预约课程排课数据失败:', err);
+        }
+      }
+      
+      // 4. 检查每个已预约课程是否与当前课程冲突
+      for (const booking of bookedCourses) {
+        const existingCourse = booking.courseInfo || {};
+        console.log('检查与已预约课程的冲突:', existingCourse.title || existingCourse.courseTitle || '未命名课程');
+        
+        // 添加排课数据
+        if (scheduleMap[booking.courseId]) {
+          existingCourse.timeSlots = scheduleMap[booking.courseId].timeSlots;
+        }
+        
+        const conflictResult = checkCoursesConflict(course, existingCourse);
+        if (conflictResult.hasConflict) {
+          console.log('检测到课程时间冲突:', conflictResult);
+          return {
+            code: -1,
+            success: false,
+            message: '您已预约的课程与此课程时间冲突，请选择其他时间段的课程'
+          };
+        }
+      }
     }
     
     // 生成预约编号

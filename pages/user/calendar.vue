@@ -59,12 +59,32 @@
         <text>已选择</text>
       </view>
     </view>
+    
+    <!-- 课程状态图例 -->
+    <view class="status-legend">
+      <view class="legend-title">课程状态说明</view>
+      <view class="legend-content">
+        <view class="status-item">
+          <view class="status-tag status-pending">待确认</view>
+        </view>
+        <view class="status-item">
+          <view class="status-tag status-confirmed">已确认</view>
+        </view>
+        <view class="status-item">
+          <view class="status-tag status-cancelled">已取消</view>
+        </view>
+        <view class="status-item">
+          <view class="status-tag status-available">可预约</view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script>
 // 导入课程日历功能
 import * as courseCalendarUtils from '@/utils/courseCalendar.js';
+import { parseTimeToMinutes } from '@/utils/courseCalendar.js';
 // 导入uni-calendar组件
 import uniCalendar from '@/uni_modules/uni-calendar/components/uni-calendar/uni-calendar.vue';
 
@@ -94,7 +114,9 @@ export default {
       currentYear: year,
       currentMonth: month + 1,
       // 课程日期缓存，避免重复计算
-      courseDateCache: {}
+      courseDateCache: {},
+      loading: false,
+      loadingText: ''
     }
   },
   onLoad() {
@@ -110,7 +132,7 @@ export default {
     this.currentMonth = today.getMonth() + 1;
     
     // 加载用户已预约课程
-    this.loadBookedCourses();
+    this.loadBookings();
     
     // 添加延迟确保日历组件渲染完毕后刷新数据
     setTimeout(() => {
@@ -121,7 +143,7 @@ export default {
   },
   onShow() {
     // 页面显示时重新加载课程数据
-    this.loadBookedCourses();
+    this.loadBookings();
     
     // 添加延迟确保日历组件渲染完毕后刷新数据
     setTimeout(() => {
@@ -131,6 +153,41 @@ export default {
     }, 500);
   },
   methods: {
+    // 获取用户预约
+    async loadBookings() {
+      try {
+        // 检查用户是否已登录
+        if (!this.isUserLoggedIn()) {
+          console.log('用户未登录，无法加载预约数据');
+          return;
+        }
+        
+        this.loading = true;
+        this.loadingText = '加载预约数据中...';
+        
+        const { result } = await uniCloud.callFunction({
+          name: 'getUserBookings',
+          data: {
+            userId: this.userInfo._id,
+            status: 'pending' // 过滤未参加的预约
+          }
+        });
+        
+        if (result.code === 0) {
+          this.bookings = result.data;
+          console.log(`成功加载预约数据: ${this.bookings.length}条记录`);
+          this.updateCalendarCourseDates();
+        } else {
+          console.error('加载预约失败：', result.message);
+        }
+      } catch (e) {
+        console.error('加载预约出错:', e);
+      } finally {
+        this.loading = false;
+        this.loadingText = '';
+      }
+    },
+    
     // 日期变更事件
     dateChange(e) {
       console.log('日期变更:', e);
@@ -617,7 +674,7 @@ export default {
             this.courseDateCache[courseKey] = courseDates;
           }
           
-        } else {
+      } else {
           // 第二部分：如果没有time_slots，尝试使用课程的开始日期、结束日期以及classTime
           try {
             // 解析开始和结束日期
@@ -748,50 +805,33 @@ export default {
       }
     },
     
-    // 格式化显示日期
+    // 检查用户是否已登录
+    isUserLoggedIn() {
+      return this.userInfo && this.userInfo._id && this.userInfo._id.length > 0;
+    },
+    
+    // 格式化日期为YYYY-MM-DD格式
     formatDate(date) {
-      // 检查参数是否为空
-      if (!date) {
-        console.error('formatDate: 参数为空');
-        return '';
-      }
-      
-      // 检查日期参数是否为字符串，如果是则尝试转换为Date对象
-      if (typeof date === 'string') {
-        try {
-          // 处理可能的日期格式
-          if (date.includes('-') || date.includes('/') || date.includes('.')) {
-            // 尝试直接使用Date构造函数处理ISO日期字符串
-            date = new Date(date.replace(/\//g, '-').replace(/\./g, '-'));
-          } else if (!isNaN(date)) {
-            // 如果是纯数字字符串，可能是时间戳
-            date = new Date(parseInt(date));
-          } else {
-            // 其他未知格式
-            console.error('formatDate: 无法解析的日期字符串格式:', date);
-            return date; // 无法解析时返回原始字符串
-          }
-        } catch (e) {
-          console.error('formatDate: 无法解析日期字符串:', date, e);
-          return date; // 如果无法解析，直接返回原始字符串
-        }
-      }
-      
-      // 确保date是有效的Date对象
-      if (!(date instanceof Date) || isNaN(date.getTime())) {
-        console.error('formatDate: 无效的日期对象:', date);
-        return typeof date === 'string' ? date : 'Invalid Date';
-      }
-      
       try {
+        // 如果是字符串，尝试转换为Date对象
+        if (typeof date === 'string') {
+          // 尝试转换字符串为Date对象
+          date = new Date(date);
+        }
+        
+        // 确保date是有效的Date对象
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+          console.error('无效的日期对象:', date);
+          return '无效日期';
+        }
+        
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        
         return `${year}-${month}-${day}`;
       } catch (e) {
-        console.error('formatDate: 格式化日期时出错:', e);
-        return typeof date === 'string' ? date : 'Error Date';
+        console.error('日期格式化出错:', e);
+        return typeof date === 'string' ? date : '无效日期';
       }
     },
     
@@ -853,12 +893,12 @@ export default {
               endTime: course.endTime,
               teacher: this.findCourseTeacherById(course.courseId),
               location: this.findCourseLocationById(course.courseId),
-              status: course.isSelected ? 'confirmed' : 'available'
+              status: course.status || 'pending' // 使用课程的实际状态
             });
           });
           
           // 按时间排序
-          this.sortCourseList();
+          this.sortCourseList(this.courseList, formattedSelectedDate);
           return;
         }
       }
@@ -987,23 +1027,25 @@ export default {
       });
       
       // 按时间排序
-      this.sortCourseList();
+      this.sortCourseList(this.courseList, formattedSelectedDate);
     },
     
-    // 排序课程列表
-    sortCourseList() {
-      if (this.courseList.length > 0) {
-        try {
-          this.courseList.sort((a, b) => {
-            return courseCalendarUtils.parseTimeToMinutes(a.startTime) - 
-                  courseCalendarUtils.parseTimeToMinutes(b.startTime);
-          });
-          console.log('排序后的课程列表:', this.courseList);
-        } catch (e) {
-          console.error('排序课程列表时出错:', e);
-        }
-      } else {
-        console.log('没有找到匹配的课程');
+    // 根据开始时间排序课程列表
+    sortCourseList(courses, date) {
+      if (!courses || !Array.isArray(courses) || courses.length === 0) {
+        return [];
+      }
+      
+      try {
+        return [...courses].sort((a, b) => {
+          // 确保startTime存在并且是字符串
+          const timeA = a.startTime && typeof a.startTime === 'string' ? this.parseTimeToMinutes(a.startTime) : 0;
+          const timeB = b.startTime && typeof b.startTime === 'string' ? this.parseTimeToMinutes(b.startTime) : 0;
+          return timeA - timeB;
+        });
+      } catch (e) {
+        console.error('排序课程列表出错:', e);
+        return courses; // 出错时返回原始列表
       }
     },
     
@@ -1025,7 +1067,8 @@ export default {
         'pending': '待确认',
         'confirmed': '已确认',
         'cancelled': '已取消',
-        'finished': '已完成'
+        'finished': '已完成',
+        'available': '可预约'
       };
       return statusMap[status] || '未知状态';
     },
@@ -1248,6 +1291,66 @@ export default {
     height: 8rpx;
     border-radius: 50%;
     background-color: #FF6B00;
+  }
+}
+
+// 课程状态图例样式
+.status-legend {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10rpx;
+  padding: 20rpx;
+  background-color: #ffffff;
+  border-radius: 10rpx;
+  margin: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  
+  .legend-title {
+    font-size: 28rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15rpx;
+    padding-bottom: 10rpx;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .legend-content {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  
+  .status-item {
+    display: flex;
+    align-items: center;
+    margin: 10rpx;
+    
+    .status-tag {
+      display: inline-block;
+      font-size: 22rpx;
+      padding: 4rpx 16rpx;
+      border-radius: 20rpx;
+      
+      &.status-pending {
+        background-color: #e6f7ff;
+        color: #1890ff;
+      }
+      
+      &.status-confirmed {
+        background-color: #f6ffed;
+        color: #52c41a;
+      }
+      
+      &.status-cancelled {
+        background-color: #fff2f0;
+        color: #ff4d4f;
+      }
+      
+      &.status-available {
+        background-color: #f0f0f0;
+        color: #999;
+      }
+    }
   }
 }
 </style> 

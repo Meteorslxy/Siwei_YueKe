@@ -1351,6 +1351,7 @@ export default {
       return new Promise((resolve, reject) => {
         // 获取用户ID
         const userId = this.userInfo.userId;
+        console.log('开始检查课程冲突，用户ID:', userId);
         
         // 调用云函数获取用户已预约的课程
         uniCloud.callFunction({
@@ -1360,6 +1361,8 @@ export default {
             status: 'confirmed' // 只检查已确认的预约
           },
           success: res => {
+            console.log('获取用户预约成功:', res.result);
+            
             if (!res.result || !res.result.data) {
               resolve({ hasConflict: false });
               return;
@@ -1367,29 +1370,144 @@ export default {
             
             const bookedCourses = res.result.data;
             
+            // 获取用户当前选择的课程信息
+            const currentCourse = this.courseInfo;
+            console.log('当前预约课程信息:', currentCourse);
+            
             // 检查每个已预约课程是否与当前课程冲突
             let conflictResult = { hasConflict: false, conflictCourses: [] };
             
-            for (const booking of bookedCourses) {
-              // 确保有课程信息
-              if (!booking.courseInfo) continue;
+            // 定义一个处理冲突检测的内部函数
+            const handleCourseConflictCheck = (existingCourse) => {
+              // 忽略无效课程
+              if (!existingCourse) return;
               
-              // 检测冲突
+              console.log('检查课程冲突 - 已预约课程:', existingCourse.title || existingCourse.courseTitle || '未命名课程');
+              
+              // 使用courseCalendar工具检测冲突
               const result = courseCalendarUtils.checkCoursesConflict(
-                this.courseInfo, 
-                booking.courseInfo
+                currentCourse, 
+                existingCourse
               );
               
               if (result.hasConflict) {
+                console.log('检测到课程冲突!', result);
                 conflictResult.hasConflict = true;
                 conflictResult.conflictCourses.push({
-                  course: booking.courseInfo,
+                  course: existingCourse,
                   conflictDates: result.conflictDates
                 });
               }
+            };
+            
+            // 遍历已预约的课程，检查冲突
+            for (const booking of bookedCourses) {
+              // 检查booking.courseInfo
+              if (booking.courseInfo) {
+                handleCourseConflictCheck(booking.courseInfo);
+              }
             }
             
-            resolve(conflictResult);
+            // 如果没有找到冲突，尝试从course_schedule表中查询
+            if (!conflictResult.hasConflict) {
+              console.log('从预约记录中未检测到冲突，准备从course_schedule表查询');
+              
+              // 从课程日程表中获取用户课程
+              const db = uniCloud.database();
+              db.collection('course_schedule')
+                .where({
+                  students: db.command.all([userId])
+                })
+                .get()
+                .then(scheduleRes => {
+                  console.log('获取课程日程表数据:', scheduleRes);
+                  
+                  if (scheduleRes.data && scheduleRes.data.length > 0) {
+                    const scheduleData = scheduleRes.data;
+                    
+                    // 获取所有相关课程ID
+                    const courseIds = scheduleData.map(schedule => schedule.courseId).filter(id => id);
+                    
+                    if (courseIds.length > 0) {
+                      // 查询这些课程的详细信息
+                      db.collection('course')
+                        .where({
+                          _id: db.command.in(courseIds)
+                        })
+                        .get()
+                        .then(courseRes => {
+                          console.log('获取课程详情数据:', courseRes);
+                          
+                          if (courseRes.data && courseRes.data.length > 0) {
+                            const courseMap = {};
+                            courseRes.data.forEach(course => {
+                              courseMap[course._id] = course;
+                            });
+                            
+                            // 检查课程日程表中的每个课程
+                            scheduleData.forEach(schedule => {
+                              if (schedule.courseId && courseMap[schedule.courseId]) {
+                                const course = courseMap[schedule.courseId];
+                                
+                                // 检查timeSlots是否有冲突
+                                if (schedule.timeSlots && schedule.timeSlots.length > 0) {
+                                  // 从timeSlots提取上课时间范围
+                                  const validTimeSlots = schedule.timeSlots.filter(slot => 
+                                    slot.status !== 'cancelled'
+                                  );
+                                  
+                                  if (validTimeSlots.length > 0) {
+                                    // 为course添加必要的时间字段
+                                    course.startDate = new Date(Math.min(...validTimeSlots.map(s => new Date(s.start).getTime())));
+                                    course.endDate = new Date(Math.max(...validTimeSlots.map(s => new Date(s.end).getTime())));
+                                    
+                                    // 从第一个时间槽提取上课时间
+                                    const firstSlot = validTimeSlots[0];
+                                    const firstStart = new Date(firstSlot.start);
+                                    const firstEnd = new Date(firstSlot.end);
+                                    
+                                    course.startTime = `${firstStart.getHours().toString().padStart(2, '0')}:${firstStart.getMinutes().toString().padStart(2, '0')}`;
+                                    course.endTime = `${firstEnd.getHours().toString().padStart(2, '0')}:${firstEnd.getMinutes().toString().padStart(2, '0')}`;
+                                    
+                                    // 提取classTime (星期几)
+                                    course.classTime = validTimeSlots.map(slot => {
+                                      const date = new Date(slot.start);
+                                      const weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+                                      return weekday;
+                                    }).filter((v, i, a) => a.indexOf(v) === i); // 去重
+                                    
+                                    console.log('从course_schedule提取的课程信息:', course);
+                                    
+                                    // 检查冲突
+                                    handleCourseConflictCheck(course);
+                                  }
+                                }
+                              }
+                            });
+                          }
+                          
+                          // 返回最终的冲突结果
+                          resolve(conflictResult);
+                        })
+                        .catch(err => {
+                          console.error('获取课程详情失败:', err);
+                          resolve(conflictResult);
+                        });
+                    } else {
+                      resolve(conflictResult);
+                    }
+                  } else {
+                    resolve(conflictResult);
+                  }
+                })
+                .catch(err => {
+                  console.error('获取课程日程表失败:', err);
+                  resolve(conflictResult);
+                });
+            } else {
+              // 已找到冲突，直接返回结果
+              resolve(conflictResult);
+            }
           },
           fail: err => {
             console.error('获取用户预约失败:', err);

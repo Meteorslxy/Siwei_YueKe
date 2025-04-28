@@ -215,3 +215,53 @@
   border-radius: 50%;
   background-color: #FF6B00;
 }
+.status-legend {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10rpx;
+  padding: 20rpx;
+  background-color: #ffffff;
+  border-radius: 10rpx;
+  margin: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.status-legend .legend-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+.status-legend .legend-content {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+.status-legend .status-item {
+  display: flex;
+  align-items: center;
+  margin: 10rpx;
+}
+.status-legend .status-item .status-tag {
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+.status-legend .status-item .status-tag.status-pending {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+.status-legend .status-item .status-tag.status-confirmed {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+.status-legend .status-item .status-tag.status-cancelled {
+  background-color: #fff2f0;
+  color: #ff4d4f;
+}
+.status-legend .status-item .status-tag.status-available {
+  background-color: #f0f0f0;
+  color: #999;
+}

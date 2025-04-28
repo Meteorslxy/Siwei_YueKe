@@ -15,7 +15,7 @@ const studentSchedulesCollection = db.collection('student_schedules');
 exports.main = async (event, context) => {
 	try {
 		// 获取参数
-		const { courseId, teacherId, studentIds, saveToDatabase = false, startDate, endDate, classTime, classTimes, name } = event;
+		const { courseId, teacherId, teacherName, studentIds, saveToDatabase = false, startDate, endDate, classTime, classTimes, name } = event;
 		
 		// 参数校验
 		if (!courseId) {
@@ -35,6 +35,7 @@ exports.main = async (event, context) => {
 			classTime: classTime || '',
 			classTimes: classTimes || [],
 			teacherId: teacherId || '',
+			teacherName: teacherName || '',  // 添加教师名称
 			name: name || ''  // 添加课程名称
 		};
 		
@@ -149,11 +150,21 @@ exports.main = async (event, context) => {
 			const classDate = classDates[i];
 			
 			// 创建开始和结束时间
-			const startDateTime = createDateTime(classDate, startTimeStr);
-			const endDateTime = createDateTime(classDate, endTimeStr);
+			let startDateTime = createDateTime(classDate, startTimeStr);
+			let endDateTime = createDateTime(classDate, endTimeStr);
 			
 			// 只有当开始和结束时间有效时才添加时间槽
 			if (startDateTime && endDateTime) {
+				// 确保开始时间早于结束时间
+				if (startDateTime > endDateTime) {
+					console.error('错误: 开始时间晚于结束时间', startDateTime, endDateTime);
+					console.log('尝试修正时间顺序');
+					// 交换时间
+					const temp = startDateTime;
+					startDateTime = endDateTime;
+					endDateTime = temp;
+				}
+				
 				// 创建时间槽
 				timeSlots.push({
 					start: startDateTime,
@@ -163,9 +174,12 @@ exports.main = async (event, context) => {
 					totalClasses: classDates.length  // 总课次
 				});
 				
-				// 创建时间哈希
+				// 创建时间哈希 - 使用交换后的正确时间顺序
 				const dateStr = formatDateForHash(classDate);
-				const timeRangeStr = formatTimeRangeForHash(startTimeStr, endTimeStr);
+				// 从交换后的DateTime对象提取时间字符串
+				const correctedStartTime = `${String(startDateTime.getHours()).padStart(2, '0')}:${String(startDateTime.getMinutes()).padStart(2, '0')}`;
+				const correctedEndTime = `${String(endDateTime.getHours()).padStart(2, '0')}:${String(endDateTime.getMinutes()).padStart(2, '0')}`;
+				const timeRangeStr = formatTimeRangeForHash(correctedStartTime, correctedEndTime);
 				timeHash.push(`${dateStr}T${timeRangeStr}`);
 			}
 		}
@@ -208,7 +222,9 @@ exports.main = async (event, context) => {
 		// 准备课程安排数据 - 按照course_schedule的schema结构
 		const courseScheduleData = {
 			courseId: courseId,
+			courseName: course.name || course.title || '未命名课程', // 添加课程名称
 			teacherId: teacherId || course.teacherId || '',
+			teacherName: teacherName || course.teacherName || '', // 添加教师名称
 			timeSlots: timeSlots,
 			timeHash: timeHash,
 			version: 1

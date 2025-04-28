@@ -578,9 +578,34 @@ var _default = {
     // 生成课程计划
     generateCourseSchedule: function generateCourseSchedule(course) {
       var previewOnly = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!course || !course._id) {
+      if (!course) {
         return uni.showToast({
-          title: '课程信息不完整',
+          title: '课程信息为空',
+          icon: 'none'
+        });
+      }
+      if (!course._id && !course.id) {
+        return uni.showToast({
+          title: '课程ID缺失',
+          icon: 'none'
+        });
+      }
+
+      // 确保课程有一个有效的ID
+      if (!course._id) {
+        course._id = course.id;
+      }
+
+      // 检查课程必要信息
+      if (!course.startDate || !course.endDate) {
+        return uni.showToast({
+          title: '课程缺少开始或结束日期',
+          icon: 'none'
+        });
+      }
+      if (!course.classTime && (!course.classTimes || course.classTimes.length === 0)) {
+        return uni.showToast({
+          title: '课程缺少上课时间或星期信息',
           icon: 'none'
         });
       }
@@ -595,15 +620,48 @@ var _default = {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!(!course || !course._id)) {
+                if (course) {
                   _context.next = 2;
                   break;
                 }
                 return _context.abrupt("return", uni.showToast({
-                  title: '课程信息不完整',
+                  title: '课程信息为空',
                   icon: 'none'
                 }));
               case 2:
+                if (!(!course._id && !course.id)) {
+                  _context.next = 4;
+                  break;
+                }
+                return _context.abrupt("return", uni.showToast({
+                  title: '课程ID缺失',
+                  icon: 'none'
+                }));
+              case 4:
+                // 确保课程有一个有效的ID
+                if (!course._id) {
+                  course._id = course.id;
+                }
+
+                // 检查课程必要信息
+                if (!(!course.startDate || !course.endDate)) {
+                  _context.next = 7;
+                  break;
+                }
+                return _context.abrupt("return", uni.showToast({
+                  title: '课程缺少开始或结束日期',
+                  icon: 'none'
+                }));
+              case 7:
+                if (!(!course.classTime && (!course.classTimes || course.classTimes.length === 0))) {
+                  _context.next = 9;
+                  break;
+                }
+                return _context.abrupt("return", uni.showToast({
+                  title: '课程缺少上课时间或星期信息',
+                  icon: 'none'
+                }));
+              case 9:
                 uni.showLoading({
                   title: '正在生成课程安排...',
                   mask: true
@@ -613,6 +671,14 @@ var _default = {
                   data: {
                     courseId: course._id,
                     teacherId: course.teacherId,
+                    teacherName: course.teacherName || '',
+                    // 添加教师姓名
+                    name: course.name || course.title || '未命名课程',
+                    // 添加课程名称
+                    startDate: course.startDate,
+                    endDate: course.endDate,
+                    classTime: course.classTime,
+                    classTimes: course.classTimes,
                     saveToDatabase: true
                   }
                 }).then(function (res) {
@@ -636,7 +702,7 @@ var _default = {
                     icon: 'none'
                   });
                 });
-              case 4:
+              case 11:
               case "end":
                 return _context.stop();
             }
@@ -683,6 +749,12 @@ var _default = {
                   data: {
                     courseId: course.id,
                     teacherId: course.teacherId,
+                    teacherName: course.teacherName || '',
+                    name: course.name || course.title || '未命名课程',
+                    startDate: course.startDate,
+                    endDate: course.endDate,
+                    classTime: course.classTime,
+                    classTimes: course.classTimes,
                     saveToDatabase: true
                   }
                 });

@@ -34,7 +34,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _index_vue_vue_type_template_id_457cfe48___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index.vue?vue&type=template&id=457cfe48& */ 122);
 /* harmony import */ var _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./index.vue?vue&type=script&lang=js& */ 124);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.vue?vue&type=style&index=0&lang=scss& */ 126);
+/* harmony import */ var _index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.vue?vue&type=style&index=0&lang=scss& */ 127);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 44);
 
 var renderjs
@@ -834,7 +834,7 @@ var _default = {
       var _arguments2 = arguments,
         _this6 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
-        var showLoading, userId, userName, phoneNumber, res;
+        var showLoading, userId, userName, phoneNumber, courseRes, course, conflictRes, res;
         return _regenerator.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -879,8 +879,43 @@ var _default = {
                 console.log('提交预约数据：用户ID:', userId, '课程ID:', courseId);
                 console.log('用户名称:', userName, '手机号:', phoneNumber || '(未提供)');
 
-                // 调用云函数预约课程
-                _context5.next = 19;
+                // 检查课程冲突
+                _context5.prev = 17;
+                _context5.next = 20;
+                return uniCloud.callFunction({
+                  name: 'getCourseDetail',
+                  data: {
+                    courseId: courseId
+                  }
+                });
+              case 20:
+                courseRes = _context5.sent;
+                if (!(courseRes.result && courseRes.result.data)) {
+                  _context5.next = 29;
+                  break;
+                }
+                course = courseRes.result.data; // 检查课程冲突
+                _context5.next = 25;
+                return _this6.checkCourseConflict(course, userId);
+              case 25:
+                conflictRes = _context5.sent;
+                if (!(conflictRes && conflictRes.hasConflict)) {
+                  _context5.next = 29;
+                  break;
+                }
+                // 有冲突，显示冲突对话框
+                if (showLoading) uni.hideLoading();
+                return _context5.abrupt("return", _this6.showConflictDialog(conflictRes, course, userId));
+              case 29:
+                _context5.next = 34;
+                break;
+              case 31:
+                _context5.prev = 31;
+                _context5.t0 = _context5["catch"](17);
+                console.error('检查课程冲突失败:', _context5.t0);
+                // 冲突检查失败，继续预约流程
+              case 34:
+                _context5.next = 36;
                 return uniCloud.callFunction({
                   name: 'bookCourse',
                   data: {
@@ -891,12 +926,12 @@ var _default = {
                     remark: ''
                   }
                 });
-              case 19:
+              case 36:
                 res = _context5.sent;
                 console.log('预约结果详情:', JSON.stringify(res.result));
                 if (showLoading) uni.hideLoading();
                 if (!(res.result && res.result.success)) {
-                  _context5.next = 31;
+                  _context5.next = 48;
                   break;
                 }
                 console.log('预约成功:', res.result);
@@ -942,7 +977,7 @@ var _default = {
                   }, 1500);
                 }
                 return _context5.abrupt("return", res.result);
-              case 31:
+              case 48:
                 console.error('预约失败:', res.result);
                 if (showLoading) {
                   uni.showToast({
@@ -951,14 +986,14 @@ var _default = {
                   });
                 }
                 return _context5.abrupt("return", res.result);
-              case 34:
-                _context5.next = 42;
+              case 51:
+                _context5.next = 59;
                 break;
-              case 36:
-                _context5.prev = 36;
-                _context5.t0 = _context5["catch"](2);
+              case 53:
+                _context5.prev = 53;
+                _context5.t1 = _context5["catch"](2);
                 if (showLoading) uni.hideLoading();
-                console.error('预约课程过程中发生异常:', _context5.t0);
+                console.error('预约课程过程中发生异常:', _context5.t1);
                 if (showLoading) {
                   uni.showToast({
                     title: '预约失败，请稍后重试',
@@ -966,58 +1001,386 @@ var _default = {
                   });
                 }
                 return _context5.abrupt("return", null);
-              case 42:
+              case 59:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, null, [[2, 36]]);
+        }, _callee5, null, [[2, 53], [17, 31]]);
       }))();
     },
-    // 批量删除
-    batchDelete: function batchDelete() {
+    // 检查课程冲突
+    checkCourseConflict: function checkCourseConflict(course, userId) {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
+        var bookedCoursesRes, conflictResult, courseCalendarUtils, handleCourseConflictCheck, bookedCourses, _iterator2, _step2, booking, db, scheduleRes, scheduleData, courseIds, courseRes, courseMap, _iterator3, _step3, schedule, existingCourse, validTimeSlots, firstSlot, firstStart, firstEnd;
+        return _regenerator.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                _context6.prev = 0;
+                console.log('开始检查课程冲突，课程:', course.title || course.courseTitle || '未命名课程', '用户ID:', userId);
+
+                // 1. 从预约表获取用户已确认的预约
+                _context6.next = 4;
+                return uniCloud.callFunction({
+                  name: 'getUserBookings',
+                  data: {
+                    userId: userId,
+                    status: 'confirmed' // 只检查已确认的预约
+                  }
+                });
+              case 4:
+                bookedCoursesRes = _context6.sent;
+                console.log('获取用户预约结果:', bookedCoursesRes.result);
+                conflictResult = {
+                  hasConflict: false,
+                  conflictCourses: []
+                };
+                courseCalendarUtils = __webpack_require__(/*! @/utils/courseCalendar.js */ 126); // 定义一个处理冲突检测的内部函数
+                handleCourseConflictCheck = function handleCourseConflictCheck(existingCourse) {
+                  // 忽略无效课程
+                  if (!existingCourse) return;
+                  console.log('检查课程冲突 - 已预约课程:', existingCourse.title || existingCourse.courseTitle || '未命名课程');
+
+                  // 使用courseCalendar工具检测冲突
+                  var result = courseCalendarUtils.checkCoursesConflict(course, existingCourse);
+                  if (result.hasConflict) {
+                    console.log('检测到课程冲突!', result);
+                    conflictResult.hasConflict = true;
+                    conflictResult.conflictCourses.push({
+                      course: existingCourse,
+                      conflictDates: result.conflictDates
+                    });
+                  }
+                }; // 2. 检查从预约表获取的课程冲突
+                if (bookedCoursesRes.result && bookedCoursesRes.result.data) {
+                  bookedCourses = bookedCoursesRes.result.data; // 遍历已预约的课程，检查冲突
+                  _iterator2 = _createForOfIteratorHelper(bookedCourses);
+                  try {
+                    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                      booking = _step2.value;
+                      // 检查booking.courseInfo
+                      if (booking.courseInfo) {
+                        handleCourseConflictCheck(booking.courseInfo);
+                      }
+                    }
+                  } catch (err) {
+                    _iterator2.e(err);
+                  } finally {
+                    _iterator2.f();
+                  }
+                }
+
+                // 3. 如果没有找到冲突，尝试从course_schedule表中查询
+                if (conflictResult.hasConflict) {
+                  _context6.next = 32;
+                  break;
+                }
+                console.log('从预约记录中未检测到冲突，准备从course_schedule表查询');
+                _context6.prev = 12;
+                // 从课程日程表中获取用户课程
+                db = uniCloud.database();
+                _context6.next = 16;
+                return db.collection('course_schedule').where({
+                  students: db.command.all([userId])
+                }).get();
+              case 16:
+                scheduleRes = _context6.sent;
+                console.log('获取课程日程表数据:', scheduleRes);
+                if (!(scheduleRes.data && scheduleRes.data.length > 0)) {
+                  _context6.next = 27;
+                  break;
+                }
+                scheduleData = scheduleRes.data; // 获取所有相关课程ID
+                courseIds = scheduleData.map(function (schedule) {
+                  return schedule.courseId;
+                }).filter(function (id) {
+                  return id;
+                });
+                if (!(courseIds.length > 0)) {
+                  _context6.next = 27;
+                  break;
+                }
+                _context6.next = 24;
+                return db.collection('course').where({
+                  _id: db.command.in(courseIds)
+                }).get();
+              case 24:
+                courseRes = _context6.sent;
+                console.log('获取课程详情数据:', courseRes);
+                if (courseRes.data && courseRes.data.length > 0) {
+                  courseMap = {};
+                  courseRes.data.forEach(function (course) {
+                    courseMap[course._id] = course;
+                  });
+
+                  // 检查课程日程表中的每个课程
+                  _iterator3 = _createForOfIteratorHelper(scheduleData);
+                  try {
+                    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+                      schedule = _step3.value;
+                      if (schedule.courseId && courseMap[schedule.courseId]) {
+                        existingCourse = courseMap[schedule.courseId]; // 检查timeSlots是否有冲突
+                        if (schedule.timeSlots && schedule.timeSlots.length > 0) {
+                          // 从timeSlots提取上课时间范围
+                          validTimeSlots = schedule.timeSlots.filter(function (slot) {
+                            return slot.status !== 'cancelled';
+                          });
+                          if (validTimeSlots.length > 0) {
+                            // 为course添加必要的时间字段
+                            existingCourse.startDate = new Date(Math.min.apply(Math, (0, _toConsumableArray2.default)(validTimeSlots.map(function (s) {
+                              return new Date(s.start).getTime();
+                            }))));
+                            existingCourse.endDate = new Date(Math.max.apply(Math, (0, _toConsumableArray2.default)(validTimeSlots.map(function (s) {
+                              return new Date(s.end).getTime();
+                            }))));
+
+                            // 从第一个时间槽提取上课时间
+                            firstSlot = validTimeSlots[0];
+                            firstStart = new Date(firstSlot.start);
+                            firstEnd = new Date(firstSlot.end);
+                            existingCourse.startTime = "".concat(firstStart.getHours().toString().padStart(2, '0'), ":").concat(firstStart.getMinutes().toString().padStart(2, '0'));
+                            existingCourse.endTime = "".concat(firstEnd.getHours().toString().padStart(2, '0'), ":").concat(firstEnd.getMinutes().toString().padStart(2, '0'));
+
+                            // 提取classTime (星期几)
+                            existingCourse.classTime = validTimeSlots.map(function (slot) {
+                              var date = new Date(slot.start);
+                              var weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+                              return weekday;
+                            }).filter(function (v, i, a) {
+                              return a.indexOf(v) === i;
+                            }); // 去重
+
+                            console.log('从course_schedule提取的课程信息:', existingCourse);
+
+                            // 检查冲突
+                            handleCourseConflictCheck(existingCourse);
+                          }
+                        }
+                      }
+                    }
+                  } catch (err) {
+                    _iterator3.e(err);
+                  } finally {
+                    _iterator3.f();
+                  }
+                }
+              case 27:
+                _context6.next = 32;
+                break;
+              case 29:
+                _context6.prev = 29;
+                _context6.t0 = _context6["catch"](12);
+                console.error('获取课程日程表失败:', _context6.t0);
+              case 32:
+                return _context6.abrupt("return", conflictResult);
+              case 35:
+                _context6.prev = 35;
+                _context6.t1 = _context6["catch"](0);
+                console.error('检查课程冲突出错:', _context6.t1);
+                return _context6.abrupt("return", {
+                  hasConflict: false
+                });
+              case 39:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, null, [[0, 35], [12, 29]]);
+      }))();
+    },
+    // 显示课程冲突提示对话框
+    showConflictDialog: function showConflictDialog(conflictResult, course, userId) {
       var _this7 = this;
+      // 构建冲突信息文本
+      var courseCalendarUtils = __webpack_require__(/*! @/utils/courseCalendar.js */ 126);
+      var conflictMessage = '您已预约的课程与此课程时间冲突：\n\n';
+      conflictResult.conflictCourses.forEach(function (item, index) {
+        var conflictCourse = item.course;
+        conflictMessage += "".concat(index + 1, ". ").concat(conflictCourse.title || conflictCourse.courseTitle, "\n");
+        conflictMessage += "   \u65F6\u95F4\uFF1A".concat(conflictCourse.startTime, "-").concat(conflictCourse.endTime, "\n");
+
+        // 添加冲突日期
+        if (item.conflictDates && item.conflictDates.length > 0) {
+          var formattedDates = item.conflictDates.map(function (date) {
+            return courseCalendarUtils.formatDate(date);
+          });
+          conflictMessage += "   \u51B2\u7A81\u65E5\u671F\uFF1A".concat(formattedDates.join('、'), "\n");
+        }
+        conflictMessage += '\n';
+      });
+      conflictMessage += '确定要继续预约吗？';
+
+      // 返回一个Promise
+      return new Promise(function (resolve) {
+        // 显示确认对话框
+        uni.showModal({
+          title: '课程时间冲突',
+          content: conflictMessage,
+          confirmText: '继续预约',
+          cancelText: '取消',
+          success: function () {
+            var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7(res) {
+              var result;
+              return _regenerator.default.wrap(function _callee7$(_context7) {
+                while (1) {
+                  switch (_context7.prev = _context7.next) {
+                    case 0:
+                      if (!res.confirm) {
+                        _context7.next = 7;
+                        break;
+                      }
+                      _context7.next = 3;
+                      return _this7.proceedWithBooking(course.id || course._id, userId);
+                    case 3:
+                      result = _context7.sent;
+                      resolve(result);
+                      _context7.next = 8;
+                      break;
+                    case 7:
+                      resolve({
+                        success: false,
+                        message: '用户取消预约'
+                      });
+                    case 8:
+                    case "end":
+                      return _context7.stop();
+                  }
+                }
+              }, _callee7);
+            }));
+            function success(_x) {
+              return _success.apply(this, arguments);
+            }
+            return success;
+          }()
+        });
+      });
+    },
+    // 继续预约流程
+    proceedWithBooking: function proceedWithBooking(courseId, userId) {
+      var _this8 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
+        var userName, phoneNumber, res;
         return _regenerator.default.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                _context8.prev = 0;
-                if (!(_this7.isManageMode && _this7.selectedCount === 0)) {
-                  _context8.next = 4;
+                // 获取用户名称
+                userName = _this8.userInfo.nickName || _this8.userInfo.nickname || _this8.userInfo.username || _this8.userInfo.userInfo && _this8.userInfo.userInfo.nickname || '微信用户'; // 获取手机号
+                phoneNumber = _this8.userInfo.phoneNumber || _this8.userInfo.mobile || _this8.userInfo.userInfo && _this8.userInfo.userInfo.mobile || '';
+                uni.showLoading({
+                  title: '预约中...'
+                });
+                _context8.prev = 3;
+                _context8.next = 6;
+                return uniCloud.callFunction({
+                  name: 'bookCourse',
+                  data: {
+                    userId: userId,
+                    courseId: courseId,
+                    userName: userName,
+                    phoneNumber: phoneNumber,
+                    remark: ''
+                  }
+                });
+              case 6:
+                res = _context8.sent;
+                uni.hideLoading();
+                if (!(res.result && res.result.success)) {
+                  _context8.next = 15;
+                  break;
+                }
+                uni.showToast({
+                  title: '预约成功',
+                  icon: 'success'
+                });
+
+                // 发送预约成功事件
+                uni.$emit('booking:success', {
+                  courseId: courseId,
+                  userId: userId
+                });
+
+                // 如果预约成功，从购物车中移除
+                if (_this8.currentBookingCourseId) {
+                  _this8.removeFromCartAfterBooking(_this8.currentBookingCourseId);
+                }
+                return _context8.abrupt("return", res.result);
+              case 15:
+                uni.showToast({
+                  title: res.result && res.result.message ? res.result.message : '预约失败',
+                  icon: 'none'
+                });
+                return _context8.abrupt("return", res.result);
+              case 17:
+                _context8.next = 25;
+                break;
+              case 19:
+                _context8.prev = 19;
+                _context8.t0 = _context8["catch"](3);
+                uni.hideLoading();
+                console.error('预约课程过程中发生异常:', _context8.t0);
+                uni.showToast({
+                  title: '预约失败，请稍后重试',
+                  icon: 'none'
+                });
+                return _context8.abrupt("return", {
+                  success: false,
+                  message: '预约过程发生异常'
+                });
+              case 25:
+              case "end":
+                return _context8.stop();
+            }
+          }
+        }, _callee8, null, [[3, 19]]);
+      }))();
+    },
+    // 批量删除
+    batchDelete: function batchDelete() {
+      var _this9 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee11() {
+        return _regenerator.default.wrap(function _callee11$(_context11) {
+          while (1) {
+            switch (_context11.prev = _context11.next) {
+              case 0:
+                _context11.prev = 0;
+                if (!(_this9.isManageMode && _this9.selectedCount === 0)) {
+                  _context11.next = 4;
                   break;
                 }
                 uni.showToast({
                   title: '请选择要删除的项目',
                   icon: 'none'
                 });
-                return _context8.abrupt("return");
+                return _context11.abrupt("return");
               case 4:
                 // 使用uni.showModal代替this.$helper.showModal
                 uni.showModal({
                   title: '确认删除',
                   content: '确定要删除选中的项目吗？',
                   success: function () {
-                    var _success = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7(result) {
+                    var _success2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10(result) {
                       var deleteItems, promises;
-                      return _regenerator.default.wrap(function _callee7$(_context7) {
+                      return _regenerator.default.wrap(function _callee10$(_context10) {
                         while (1) {
-                          switch (_context7.prev = _context7.next) {
+                          switch (_context10.prev = _context10.next) {
                             case 0:
                               if (!result.confirm) {
-                                _context7.next = 23;
+                                _context10.next = 23;
                                 break;
                               }
                               uni.showLoading({
                                 title: '处理中'
                               });
-                              deleteItems = _this7.isManageMode ? _this7.favoriteList.filter(function (item) {
+                              deleteItems = _this9.isManageMode ? _this9.favoriteList.filter(function (item) {
                                 return item.selected;
-                              }) : [_this7.favoriteList.find(function (item) {
-                                return item._id === _this7.currentBookingCourseId;
+                              }) : [_this9.favoriteList.find(function (item) {
+                                return item._id === _this9.currentBookingCourseId;
                               })];
                               if (!(!deleteItems.length || !deleteItems[0])) {
-                                _context7.next = 7;
+                                _context10.next = 7;
                                 break;
                               }
                               uni.hideLoading();
@@ -1025,52 +1388,52 @@ var _default = {
                                 title: '没有找到要删除的项目',
                                 icon: 'none'
                               });
-                              return _context7.abrupt("return");
+                              return _context10.abrupt("return");
                             case 7:
                               promises = deleteItems.map( /*#__PURE__*/function () {
-                                var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(item) {
+                                var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9(item) {
                                   var favoriteId;
-                                  return _regenerator.default.wrap(function _callee6$(_context6) {
+                                  return _regenerator.default.wrap(function _callee9$(_context9) {
                                     while (1) {
-                                      switch (_context6.prev = _context6.next) {
+                                      switch (_context9.prev = _context9.next) {
                                         case 0:
-                                          _context6.prev = 0;
+                                          _context9.prev = 0;
                                           if (!(!item || !item._id)) {
-                                            _context6.next = 4;
+                                            _context9.next = 4;
                                             break;
                                           }
                                           console.error('删除项目无效:', item);
-                                          return _context6.abrupt("return", Promise.reject(new Error('无效的删除项目')));
+                                          return _context9.abrupt("return", Promise.reject(new Error('无效的删除项目')));
                                         case 4:
                                           // 直接传递ID字符串
                                           favoriteId = item._id;
                                           console.log('准备删除收藏，ID:', favoriteId);
-                                          _context6.next = 8;
-                                          return _this7.$api.user.removeFavorite(favoriteId);
+                                          _context9.next = 8;
+                                          return _this9.$api.user.removeFavorite(favoriteId);
                                         case 8:
-                                          return _context6.abrupt("return", Promise.resolve());
+                                          return _context9.abrupt("return", Promise.resolve());
                                         case 11:
-                                          _context6.prev = 11;
-                                          _context6.t0 = _context6["catch"](0);
-                                          console.error('删除失败:', _context6.t0, 'item:', item);
-                                          return _context6.abrupt("return", Promise.reject(_context6.t0));
+                                          _context9.prev = 11;
+                                          _context9.t0 = _context9["catch"](0);
+                                          console.error('删除失败:', _context9.t0, 'item:', item);
+                                          return _context9.abrupt("return", Promise.reject(_context9.t0));
                                         case 15:
                                         case "end":
-                                          return _context6.stop();
+                                          return _context9.stop();
                                       }
                                     }
-                                  }, _callee6, null, [[0, 11]]);
+                                  }, _callee9, null, [[0, 11]]);
                                 }));
-                                return function (_x2) {
+                                return function (_x3) {
                                   return _ref.apply(this, arguments);
                                 };
                               }());
-                              _context7.prev = 8;
-                              _context7.next = 11;
+                              _context10.prev = 8;
+                              _context10.next = 11;
                               return Promise.allSettled(promises);
                             case 11:
                               // 更新列表
-                              _this7.favoriteList = _this7.favoriteList.filter(function (item) {
+                              _this9.favoriteList = _this9.favoriteList.filter(function (item) {
                                 return !deleteItems.some(function (deleteItem) {
                                   return deleteItem._id === item._id;
                                 });
@@ -1081,42 +1444,42 @@ var _default = {
                               });
 
                               // 退出管理模式
-                              if (_this7.isManageMode) {
-                                _this7.toggleManageMode();
+                              if (_this9.isManageMode) {
+                                _this9.toggleManageMode();
                               }
-                              _context7.next = 20;
+                              _context10.next = 20;
                               break;
                             case 16:
-                              _context7.prev = 16;
-                              _context7.t0 = _context7["catch"](8);
-                              console.error('执行删除操作失败:', _context7.t0);
+                              _context10.prev = 16;
+                              _context10.t0 = _context10["catch"](8);
+                              console.error('执行删除操作失败:', _context10.t0);
                               uni.showToast({
                                 title: '删除失败',
                                 icon: 'none'
                               });
                             case 20:
-                              _context7.prev = 20;
+                              _context10.prev = 20;
                               uni.hideLoading();
-                              return _context7.finish(20);
+                              return _context10.finish(20);
                             case 23:
                             case "end":
-                              return _context7.stop();
+                              return _context10.stop();
                           }
                         }
-                      }, _callee7, null, [[8, 16, 20, 23]]);
+                      }, _callee10, null, [[8, 16, 20, 23]]);
                     }));
-                    function success(_x) {
-                      return _success.apply(this, arguments);
+                    function success(_x2) {
+                      return _success2.apply(this, arguments);
                     }
                     return success;
                   }()
                 });
-                _context8.next = 12;
+                _context11.next = 12;
                 break;
               case 7:
-                _context8.prev = 7;
-                _context8.t0 = _context8["catch"](0);
-                console.error('批量删除失败:', _context8.t0);
+                _context11.prev = 7;
+                _context11.t0 = _context11["catch"](0);
+                console.error('批量删除失败:', _context11.t0);
                 uni.hideLoading();
                 uni.showToast({
                   title: '删除失败',
@@ -1124,10 +1487,10 @@ var _default = {
                 });
               case 12:
               case "end":
-                return _context8.stop();
+                return _context11.stop();
             }
           }
-        }, _callee8, null, [[0, 7]]);
+        }, _callee11, null, [[0, 7]]);
       }))();
     },
     // 获取默认图片
@@ -1234,49 +1597,49 @@ var _default = {
     },
     // 取消收藏
     cancelFavorite: function cancelFavorite(index) {
-      var _this8 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10() {
+      var _this10 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee13() {
         var item;
-        return _regenerator.default.wrap(function _callee10$(_context10) {
+        return _regenerator.default.wrap(function _callee13$(_context13) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context13.prev = _context13.next) {
               case 0:
-                item = _this8.favoriteList[index];
+                item = _this10.favoriteList[index];
                 if (item) {
-                  _context10.next = 4;
+                  _context13.next = 4;
                   break;
                 }
                 uni.showToast({
                   title: '收藏项不存在',
                   icon: 'none'
                 });
-                return _context10.abrupt("return");
+                return _context13.abrupt("return");
               case 4:
                 if (item._id) {
-                  _context10.next = 7;
+                  _context13.next = 7;
                   break;
                 }
                 uni.showToast({
                   title: '收藏ID不存在',
                   icon: 'none'
                 });
-                return _context10.abrupt("return");
+                return _context13.abrupt("return");
               case 7:
                 uni.showModal({
                   title: '提示',
                   content: '确定要取消收藏吗？',
                   success: function () {
-                    var _success2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9(res) {
+                    var _success3 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee12(res) {
                       var favoriteId, result;
-                      return _regenerator.default.wrap(function _callee9$(_context9) {
+                      return _regenerator.default.wrap(function _callee12$(_context12) {
                         while (1) {
-                          switch (_context9.prev = _context9.next) {
+                          switch (_context12.prev = _context12.next) {
                             case 0:
                               if (!res.confirm) {
-                                _context9.next = 18;
+                                _context12.next = 18;
                                 break;
                               }
-                              _context9.prev = 1;
+                              _context12.prev = 1;
                               uni.showLoading({
                                 title: '处理中'
                               });
@@ -1284,13 +1647,13 @@ var _default = {
                               console.log('准备删除收藏，ID:', favoriteId);
 
                               // 直接传递ID字符串，而不是包含ID的对象
-                              _context9.next = 7;
-                              return _this8.$api.user.removeFavorite(favoriteId);
+                              _context12.next = 7;
+                              return _this10.$api.user.removeFavorite(favoriteId);
                             case 7:
-                              result = _context9.sent;
+                              result = _context12.sent;
                               if (result && result.code === 0) {
                                 // 从列表中移除
-                                _this8.favoriteList.splice(index, 1);
+                                _this10.favoriteList.splice(index, 1);
                                 uni.showToast({
                                   title: '已取消收藏',
                                   icon: 'success'
@@ -1301,39 +1664,39 @@ var _default = {
                                   icon: 'none'
                                 });
                               }
-                              _context9.next = 15;
+                              _context12.next = 15;
                               break;
                             case 11:
-                              _context9.prev = 11;
-                              _context9.t0 = _context9["catch"](1);
-                              console.error('取消收藏失败:', _context9.t0);
+                              _context12.prev = 11;
+                              _context12.t0 = _context12["catch"](1);
+                              console.error('取消收藏失败:', _context12.t0);
                               uni.showToast({
                                 title: '操作失败',
                                 icon: 'none'
                               });
                             case 15:
-                              _context9.prev = 15;
+                              _context12.prev = 15;
                               uni.hideLoading();
-                              return _context9.finish(15);
+                              return _context12.finish(15);
                             case 18:
                             case "end":
-                              return _context9.stop();
+                              return _context12.stop();
                           }
                         }
-                      }, _callee9, null, [[1, 11, 15, 18]]);
+                      }, _callee12, null, [[1, 11, 15, 18]]);
                     }));
-                    function success(_x3) {
-                      return _success2.apply(this, arguments);
+                    function success(_x4) {
+                      return _success3.apply(this, arguments);
                     }
                     return success;
                   }()
                 });
               case 8:
               case "end":
-                return _context10.stop();
+                return _context13.stop();
             }
           }
-        }, _callee10);
+        }, _callee13);
       }))();
     },
     // 获取项目类型名称
@@ -1369,39 +1732,39 @@ var _default = {
     // 预约成功后从购物车中移除
     removeFromCartAfterBooking: function removeFromCartAfterBooking(favoriteId) {
       var _arguments3 = arguments,
-        _this9 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee11() {
+        _this11 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee14() {
         var showToast, result, index;
-        return _regenerator.default.wrap(function _callee11$(_context11) {
+        return _regenerator.default.wrap(function _callee14$(_context14) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context14.prev = _context14.next) {
               case 0:
                 showToast = _arguments3.length > 1 && _arguments3[1] !== undefined ? _arguments3[1] : true;
                 if (favoriteId) {
-                  _context11.next = 4;
+                  _context14.next = 4;
                   break;
                 }
                 console.error('移除购物车项失败: 缺少ID');
-                return _context11.abrupt("return");
+                return _context14.abrupt("return");
               case 4:
-                _context11.prev = 4;
+                _context14.prev = 4;
                 console.log('从购物车移除已预约课程，ID:', favoriteId);
 
                 // 直接传递ID字符串，而不是包含ID的对象
-                _context11.next = 8;
-                return _this9.$api.user.removeFavorite(favoriteId);
+                _context14.next = 8;
+                return _this11.$api.user.removeFavorite(favoriteId);
               case 8:
-                result = _context11.sent;
+                result = _context14.sent;
                 if (!(result && result.code === 0)) {
-                  _context11.next = 16;
+                  _context14.next = 16;
                   break;
                 }
                 // 从列表中移除
-                index = _this9.favoriteList.findIndex(function (item) {
+                index = _this11.favoriteList.findIndex(function (item) {
                   return item._id === favoriteId;
                 });
                 if (index !== -1) {
-                  _this9.favoriteList.splice(index, 1);
+                  _this11.favoriteList.splice(index, 1);
                 }
                 if (showToast) {
                   uni.showToast({
@@ -1411,22 +1774,22 @@ var _default = {
                 }
 
                 // 清除当前处理的ID
-                _this9.currentBookingCourseId = null;
-                _this9.currentSelectedCourseIds = [];
-                return _context11.abrupt("return", true);
+                _this11.currentBookingCourseId = null;
+                _this11.currentSelectedCourseIds = [];
+                return _context14.abrupt("return", true);
               case 16:
-                return _context11.abrupt("return", false);
+                return _context14.abrupt("return", false);
               case 19:
-                _context11.prev = 19;
-                _context11.t0 = _context11["catch"](4);
-                console.error('移除购物车项失败:', _context11.t0);
-                return _context11.abrupt("return", false);
+                _context14.prev = 19;
+                _context14.t0 = _context14["catch"](4);
+                console.error('移除购物车项失败:', _context14.t0);
+                return _context14.abrupt("return", false);
               case 23:
               case "end":
-                return _context11.stop();
+                return _context14.stop();
             }
           }
-        }, _callee11, null, [[4, 19]]);
+        }, _callee14, null, [[4, 19]]);
       }))();
     }
   }
@@ -1436,7 +1799,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 126:
+/***/ 127:
 /*!**********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages/cart/index.vue?vue&type=style&index=0&lang=scss& ***!
   \**********************************************************************************************************************************/
@@ -1445,14 +1808,14 @@ exports.default = _default;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./index.vue?vue&type=style&index=0&lang=scss& */ 127);
+/* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!./index.vue?vue&type=style&index=0&lang=scss& */ 128);
 /* harmony import */ var _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
  /* harmony default export */ __webpack_exports__["default"] = (_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_mini_css_extract_plugin_dist_loader_js_ref_8_oneOf_1_0_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_css_loader_dist_cjs_js_ref_8_oneOf_1_1_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_loaders_stylePostLoader_js_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_2_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_postcss_loader_src_index_js_ref_8_oneOf_1_3_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_sass_loader_dist_cjs_js_ref_8_oneOf_1_4_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_webpack_preprocess_loader_index_js_ref_8_oneOf_1_5_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_index_js_vue_loader_options_D_HBuilderX_4_55_2025030718_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_webpack_uni_mp_loader_lib_style_js_index_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
-/***/ 127:
+/***/ 128:
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/mini-css-extract-plugin/dist/loader.js??ref--8-oneOf-1-0!./node_modules/css-loader/dist/cjs.js??ref--8-oneOf-1-1!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-2!./node_modules/postcss-loader/src??ref--8-oneOf-1-3!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/sass-loader/dist/cjs.js??ref--8-oneOf-1-4!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/webpack-preprocess-loader??ref--8-oneOf-1-5!./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib??vue-loader-options!./node_modules/@dcloudio/webpack-uni-mp-loader/lib/style.js!C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages/cart/index.vue?vue&type=style&index=0&lang=scss& ***!
   \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/

@@ -383,9 +383,36 @@ export default {
 		},
 		// 生成课程计划
 		generateCourseSchedule(course, previewOnly = false) {
-			if (!course || !course._id) {
+			if (!course) {
 				return uni.showToast({
-					title: '课程信息不完整',
+					title: '课程信息为空',
+					icon: 'none'
+				});
+			}
+			
+			if (!course._id && !course.id) {
+				return uni.showToast({
+					title: '课程ID缺失',
+					icon: 'none'
+				});
+			}
+			
+			// 确保课程有一个有效的ID
+			if (!course._id) {
+				course._id = course.id;
+			}
+			
+			// 检查课程必要信息
+			if (!course.startDate || !course.endDate) {
+				return uni.showToast({
+					title: '课程缺少开始或结束日期',
+					icon: 'none'
+				});
+			}
+			
+			if (!course.classTime && (!course.classTimes || course.classTimes.length === 0)) {
+				return uni.showToast({
+					title: '课程缺少上课时间或星期信息',
 					icon: 'none'
 				});
 			}
@@ -396,9 +423,36 @@ export default {
 		
 		// 显示课程计划预览
 		async showSchedulePreview(course) {
-			if (!course || !course._id) {
+			if (!course) {
 				return uni.showToast({
-					title: '课程信息不完整',
+					title: '课程信息为空',
+					icon: 'none'
+				});
+			}
+			
+			if (!course._id && !course.id) {
+				return uni.showToast({
+					title: '课程ID缺失',
+					icon: 'none'
+				});
+			}
+			
+			// 确保课程有一个有效的ID
+			if (!course._id) {
+				course._id = course.id;
+			}
+			
+			// 检查课程必要信息
+			if (!course.startDate || !course.endDate) {
+				return uni.showToast({
+					title: '课程缺少开始或结束日期',
+					icon: 'none'
+				});
+			}
+			
+			if (!course.classTime && (!course.classTimes || course.classTimes.length === 0)) {
+				return uni.showToast({
+					title: '课程缺少上课时间或星期信息',
 					icon: 'none'
 				});
 			}
@@ -413,6 +467,12 @@ export default {
 				data: {
 					courseId: course._id,
 					teacherId: course.teacherId,
+					teacherName: course.teacherName || '', // 添加教师姓名
+					name: course.name || course.title || '未命名课程', // 添加课程名称
+					startDate: course.startDate,
+					endDate: course.endDate,
+					classTime: course.classTime,
+					classTimes: course.classTimes,
 					saveToDatabase: true
 				}
 			}).then(res => {
@@ -465,6 +525,12 @@ export default {
 					data: {
 						courseId: course.id,
 						teacherId: course.teacherId,
+						teacherName: course.teacherName || '',
+						name: course.name || course.title || '未命名课程',
+						startDate: course.startDate,
+						endDate: course.endDate,
+						classTime: course.classTime,
+						classTimes: course.classTimes,
 						saveToDatabase: true
 					}
 				});
