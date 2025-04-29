@@ -1080,7 +1080,7 @@ var _default = {
                   name: 'getUserBookings',
                   data: {
                     userId: userId,
-                    status: 'confirmed' // 只检查已确认的预约
+                    status: 'pending' || false // 检查非canceled的所有预约
                   }
                 });
               case 4:

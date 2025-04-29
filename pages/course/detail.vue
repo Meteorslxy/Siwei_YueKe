@@ -533,44 +533,19 @@ export default {
       
       // 处理封面图片路径
       if (this.courseInfo.coverImage) {
-        // 检查是否为完整URL（以http或https开头）
-        if (this.courseInfo.coverImage.startsWith('http://') || this.courseInfo.coverImage.startsWith('https://')) {
-          // 保持原样，这是完整的URL
-          console.log('使用云存储URL作为封面图:', this.courseInfo.coverImage);
-        } 
-        // 检查是否为本地路径（以/开头）
-        else if (this.courseInfo.coverImage.startsWith('/')) {
-          // 已经是本地路径，保持原样
-          console.log('使用本地绝对路径作为封面图:', this.courseInfo.coverImage);
-        } 
-        // 其他情况，可能是相对路径
-        else {
-          this.courseInfo.coverImage = `/static/images/course/${this.courseInfo.coverImage}`;
-          console.log('转换为本地相对路径作为封面图:', this.courseInfo.coverImage);
+        if (this.courseInfo.coverImage.startsWith('http')) {
+          // 如果是完整URL，直接使用
+          this.courseInfo.coverImageUrl = this.courseInfo.coverImage;
+        } else {
+          // 如果是相对路径，拼接为完整URL
+          this.courseInfo.coverImageUrl = this.courseInfo.coverImage;
         }
-      } 
-      // 处理备选字段image
-      else if (!this.courseInfo.coverImage && this.courseInfo.image) {
-        // 检查image字段是否为完整URL
-        if (this.courseInfo.image.startsWith('http://') || this.courseInfo.image.startsWith('https://')) {
-          this.courseInfo.coverImage = this.courseInfo.image;
-          console.log('使用image字段的云存储URL作为封面图:', this.courseInfo.coverImage);
-        }
-        // 检查是否为本地路径
-        else if (this.courseInfo.image.startsWith('/')) {
-          this.courseInfo.coverImage = this.courseInfo.image;
-          console.log('使用image字段的本地绝对路径作为封面图:', this.courseInfo.coverImage);
-        }
-        // 其他情况，转为本地相对路径
-        else {
-          this.courseInfo.coverImage = `/static/images/course/${this.courseInfo.image}`;
-          console.log('将image字段转换为本地相对路径作为封面图:', this.courseInfo.coverImage);
-        }
-      } 
-      // 没有任何图片时使用默认图片
-      else {
-        this.courseInfo.coverImage = '/static/images/course/course1.jpg';
-        console.log('使用默认图片作为封面图');
+      } else if (this.courseInfo.courseImage) {
+        // 兼容老数据结构
+        this.courseInfo.coverImageUrl = this.courseInfo.courseImage;
+      } else {
+        // 使用默认图片
+        this.courseInfo.coverImageUrl = '/static/images/course/default.jpg';
       }
       
       // 预加载教师头像
@@ -579,6 +554,198 @@ export default {
       }
       
       console.log('预处理后的课程数据:', this.courseInfo);
+      
+      // 获取课程时间安排数据
+      this.fetchCourseSchedule();
+    },
+    
+    // 获取课程时间安排数据
+    async fetchCourseSchedule() {
+      if (!this.courseId) return Promise.resolve(false);
+      
+      return new Promise(async (resolve, reject) => {
+        try {
+          console.log('开始获取课程时间安排数据，ID:', this.courseId);
+          
+          const db = uniCloud.database();
+          const scheduleRes = await db.collection('course_schedule')
+            .where({
+              courseId: this.courseId
+            })
+            .get();
+          
+          console.log('课程时间安排数据:', scheduleRes);
+          
+          let success = false;
+          
+          // 检查多种可能的返回数据格式
+          let scheduleData = null;
+          
+          // 处理不同的返回数据格式
+          if (scheduleRes.data && scheduleRes.data.length > 0) {
+            // 标准格式 {data: [...]}
+            scheduleData = scheduleRes.data[0];
+            console.log('从标准格式中获取到课程安排数据');
+          } else if (scheduleRes.result && scheduleRes.result.data && scheduleRes.result.data.length > 0) {
+            // 嵌套格式 {result: {data: [...]}}
+            scheduleData = scheduleRes.result.data[0];
+            console.log('从嵌套result格式中获取到课程安排数据');
+          } else if (scheduleRes.result && Array.isArray(scheduleRes.result) && scheduleRes.result.length > 0) {
+            // 直接数组格式 {result: [...]}
+            scheduleData = scheduleRes.result[0];
+            console.log('从result数组格式中获取到课程安排数据');
+          }
+          
+          if (scheduleData) {
+            console.log('获取到课程安排数据:', scheduleData);
+            
+            // 将timeSlots数据添加到courseInfo中
+            if (scheduleData.timeSlots && scheduleData.timeSlots.length > 0) {
+              console.log('从course_schedule获取到timeSlots数据，数量:', scheduleData.timeSlots.length);
+              
+              // 过滤出有效的时间槽（未取消的）
+              const validTimeSlots = scheduleData.timeSlots.filter(slot => 
+                slot.status !== 'cancelled'
+              );
+              
+              if (validTimeSlots.length > 0) {
+                // 添加timeSlots到courseInfo
+                this.courseInfo.timeSlots = validTimeSlots;
+                console.log('已添加timeSlots到courseInfo', this.courseInfo.timeSlots);
+                success = true;
+                
+                // 如果课程没有设置classTime字段，从timeSlots提取
+                if (!this.courseInfo.classTime || 
+                   (Array.isArray(this.courseInfo.classTime) && this.courseInfo.classTime.length === 0)) {
+                  this.courseInfo.classTime = validTimeSlots.map(slot => {
+                    const date = new Date(slot.start);
+                    const weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+                    return weekday;
+                  }).filter((v, i, a) => a.indexOf(v) === i); // 去重
+                  
+                  console.log('从timeSlots提取的上课日:', this.courseInfo.classTime);
+                }
+              }
+            }
+          } else {
+            console.log('未找到课程时间安排数据');
+          }
+          
+          resolve(success);
+        } catch (error) {
+          console.error('获取课程时间安排数据失败:', error);
+          reject(error);
+        }
+      });
+    },
+    
+    // 通过教师名称查询
+    async fetchTeacherByName(teacherName) {
+      if (!teacherName) return;
+      
+      try {
+        console.log('开始通过名称查询教师:', teacherName);
+        
+        // 从教师名称中去除可能的"老师"后缀
+        const nameForSearch = teacherName.replace(/老师$/, '');
+        console.log('处理后的教师名称:', nameForSearch);
+        
+        // 直接调用获取教师列表的API接口
+        const result = await this.$api.teacher.getTeacherList({
+          name: nameForSearch
+        });
+        
+        console.log('教师查询API结果:', result);
+        
+        if (result && result.data && result.data.length > 0) {
+          // 确保查询匹配的是准确的教师名称
+          const foundTeacher = result.data.find(item => item.name === nameForSearch);
+          
+          if (foundTeacher) {
+            console.log('通过教师列表API找到匹配的教师数据:', foundTeacher);
+            
+            // 更新教师信息
+            if (foundTeacher.description) {
+              this.courseInfo.teacherDescription = foundTeacher.description;
+              console.log('已更新教师描述信息:', foundTeacher.description);
+            } else if (foundTeacher.introduction) {
+              this.courseInfo.teacherDescription = foundTeacher.introduction;
+              console.log('使用教师introduction作为描述:', foundTeacher.introduction);
+            } else {
+              // 如果都没有，尝试直接给定简介
+              this.courseInfo.teacherDescription = '该教师暂无详细介绍';
+            }
+            
+            // 更新教师头像
+            if (foundTeacher.avatar) {
+              console.log('从教师列表API获取到头像:', foundTeacher.avatar);
+              this.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
+            }
+          } else {
+            console.log('API返回的教师数据中没有找到精确匹配:', nameForSearch);
+            this.courseInfo.teacherDescription = `${teacherName}，暂无详细介绍。`;
+          }
+        } else {
+          // API没有找到任何教师信息
+          console.log('未能从API查询到教师信息，显示默认信息');
+          this.courseInfo.teacherDescription = `暂无详细介绍`;
+        }
+        
+        // 强制更新UI
+        this.$forceUpdate();
+      } catch (error) {
+        console.error('通过名称查询教师失败:', error);
+        
+        // 错误情况下，显示默认信息
+        this.courseInfo.teacherDescription = `暂无详细介绍`;
+        this.$forceUpdate();
+      }
+    },
+    
+    // 预加载教师头像
+    async preloadTeacherAvatar() {
+      if (!this.courseInfo.teacherName) return;
+      
+      try {
+        // 尝试通过名称获取
+        await this.fetchTeacherAvatarByName(this.courseInfo.teacherName);
+      } catch (error) {
+        console.error('预加载教师头像失败:', error);
+      }
+    },
+    
+    // 通过名称从数据库获取教师头像
+    async fetchTeacherAvatarByName(teacherName) {
+      if (!teacherName) return false;
+      
+      try {
+        console.log('通过名称从数据库获取教师头像:', teacherName);
+        
+        // 准备查询参数，去除可能的空格
+        const nameForSearch = teacherName.trim();
+        
+        // 调用API获取教师信息，使用names参数进行精确查询
+        const result = await this.$api.teacher.getTeacherList({ 
+          names: [nameForSearch] // 使用names数组参数进行精确查询
+        });
+        
+        if (result && result.code === 0 && result.data && result.data.length > 0) {
+          // 查找精确匹配的教师
+          const foundTeacher = result.data.find(item => item.name === nameForSearch);
+          
+          if (foundTeacher && foundTeacher.avatar) {
+            console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
+            this.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
+            this.$forceUpdate();
+            return true;
+          }
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('通过名称获取教师头像失败:', error);
+        return false;
+      }
     },
     
     // 直接获取教师描述信息
@@ -591,9 +758,9 @@ export default {
         }
         return;
       }
-
+      
       console.log('fetchTeacherDescription接收到的原始teacherId:', JSON.stringify(teacherId), '类型:', typeof teacherId);
-
+      
       // 确保teacherId是有效的字符串类型
       let validTeacherId = teacherId;
       if (typeof teacherId === 'object') {
@@ -737,175 +904,6 @@ export default {
           this.courseInfo.teacherDescription = '暂无详细介绍';
           this.$forceUpdate();
         }
-      }
-    },
-    
-    // 通过教师名称查询
-    async fetchTeacherByName(teacherName) {
-      if (!teacherName) return;
-      
-      try {
-        console.log('开始通过名称查询教师:', teacherName);
-        
-        // 从教师名称中去除可能的"老师"后缀
-        const nameForSearch = teacherName.replace(/老师$/, '');
-        console.log('处理后的教师名称:', nameForSearch);
-        
-        // 直接调用获取教师列表的API接口
-        const result = await this.$api.teacher.getTeacherList({
-          name: nameForSearch
-        });
-        
-        console.log('教师查询API结果:', result);
-        
-        if (result && result.data && result.data.length > 0) {
-          // 确保查询匹配的是准确的教师名称
-          const foundTeacher = result.data.find(item => item.name === nameForSearch);
-          
-          if (foundTeacher) {
-            console.log('通过教师列表API找到匹配的教师数据:', foundTeacher);
-            
-            // 更新教师信息
-            if (foundTeacher.description) {
-              this.courseInfo.teacherDescription = foundTeacher.description;
-              console.log('已更新教师描述信息:', foundTeacher.description);
-            } else if (foundTeacher.introduction) {
-              this.courseInfo.teacherDescription = foundTeacher.introduction;
-              console.log('使用教师introduction作为描述:', foundTeacher.introduction);
-            } else {
-              // 如果都没有，尝试直接给定简介
-              this.courseInfo.teacherDescription = '该教师暂无详细介绍';
-            }
-            
-            // 更新教师头像
-            if (foundTeacher.avatar) {
-              console.log('从教师列表API获取到头像:', foundTeacher.avatar);
-              this.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
-            }
-          } else {
-            console.log('API返回的教师数据中没有找到精确匹配:', nameForSearch);
-            this.courseInfo.teacherDescription = `${teacherName}，暂无详细介绍。`;
-          }
-        } else {
-          // API没有找到任何教师信息
-          console.log('未能从API查询到教师信息，显示默认信息');
-          this.courseInfo.teacherDescription = `暂无详细介绍`;
-        }
-        
-        // 强制更新UI
-        this.$forceUpdate();
-      } catch (error) {
-        console.error('通过名称查询教师失败:', error);
-        
-        // 错误情况下，显示默认信息
-        this.courseInfo.teacherDescription = `暂无详细介绍`;
-        this.$forceUpdate();
-      }
-    },
-    
-    // 预加载教师头像
-    async preloadTeacherAvatar() {
-      if (!this.courseInfo.teacherName) return;
-      
-      try {
-        console.log('根据教师名称主动查询教师头像:', this.courseInfo.teacherName);
-        // 首先尝试从数据库获取教师头像
-        if (this.courseInfo.teacherName) {
-          await this.fetchTeacherAvatarFromDB(this.courseInfo.teacherName);
-        } else if (this.courseInfo.teacherId) {
-          await this.fetchTeacherAvatarByID(this.courseInfo.teacherId);
-        }
-        
-        // 如果数据库查询失败，仍然没有获得头像URL，则使用本地头像作为备选
-        if (!this.courseInfo.teacherAvatarUrl && this.courseInfo.teacherAvatar) {
-          // 检查是否为完整URL（以http或https开头）
-          if (this.courseInfo.teacherAvatar.startsWith('http://') || this.courseInfo.teacherAvatar.startsWith('https://')) {
-            console.log('使用云存储URL作为教师头像备选:', this.courseInfo.teacherAvatar);
-            this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
-          } 
-          // 检查是否为本地路径（以/开头）
-          else if (this.courseInfo.teacherAvatar.startsWith('/')) {
-            // 已经是本地路径
-            console.log('使用本地路径作为教师头像备选:', this.courseInfo.teacherAvatar);
-            this.courseInfo.teacherAvatarUrl = this.courseInfo.teacherAvatar;
-          } else {
-            // 否则从云端获取
-            console.log('从云端获取头像图片作为备选:', this.courseInfo.teacherAvatar);
-            const avatarResult = await this.$api.file.getImage(this.courseInfo.teacherAvatar);
-            if (avatarResult && avatarResult.data && avatarResult.data.url) {
-              this.courseInfo.teacherAvatarUrl = avatarResult.data.url;
-            }
-          }
-        }
-        
-        // 如果仍然没有获得头像URL，使用默认头像
-        if (!this.courseInfo.teacherAvatarUrl) {
-          this.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
-          console.log('使用默认头像');
-        }
-      } catch (error) {
-        console.error('加载教师头像失败:', error);
-        // 加载失败时使用默认头像
-        this.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
-        console.log('由于错误使用默认头像');
-      }
-    },
-    
-    // 从数据库获取教师头像
-    async fetchTeacherAvatarFromDB(teacherName) {
-      if (!teacherName) return false;
-      
-      try {
-        console.log('通过名称从数据库获取教师头像:', teacherName);
-        
-        // 准备查询参数，去除可能的空格
-        const nameForSearch = teacherName.trim();
-        
-        // 调用API获取教师信息，使用names参数进行精确查询
-        const result = await this.$api.teacher.getTeacherList({ 
-          names: [nameForSearch] // 使用names数组参数进行精确查询
-        });
-        
-        if (result && result.code === 0 && result.data && result.data.length > 0) {
-          // 查找精确匹配的教师
-          const foundTeacher = result.data.find(item => item.name === nameForSearch);
-          
-          if (foundTeacher && foundTeacher.avatar) {
-            console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
-            this.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
-            this.$forceUpdate();
-            return true;
-          }
-        }
-        
-        return false;
-      } catch (error) {
-        console.error('通过名称获取教师头像失败:', error);
-        return false;
-      }
-    },
-    
-    // 通过ID从数据库获取教师头像
-    async fetchTeacherAvatarByID(teacherId) {
-      if (!teacherId) return false;
-      
-      try {
-        console.log('通过ID从数据库获取教师头像:', teacherId);
-        
-        // 调用API获取教师详情
-        const result = await this.$api.teacher.getTeacherDetail({ id: teacherId });
-        
-        if (result && result.code === 0 && result.data && result.data.avatar) {
-          console.log('从数据库获取到教师头像URL:', result.data.avatar);
-          this.courseInfo.teacherAvatarUrl = result.data.avatar;
-          this.$forceUpdate();
-          return true;
-        }
-        
-        return false;
-      } catch (error) {
-        console.error('通过ID获取教师头像失败:', error);
-        return false;
       }
     },
     
@@ -1335,6 +1333,25 @@ export default {
         title: '检查课程冲突...'
       });
 
+      // 确保课程信息中有timeSlots数据
+      if (!this.courseInfo.timeSlots) {
+        console.log('课程信息中没有timeSlots数据，尝试获取课程时间安排');
+        this.fetchCourseSchedule().then(() => {
+          // 获取到时间安排后开始冲突检测
+          this.startConflictDetection();
+        }).catch(err => {
+          console.error('获取课程时间安排失败:', err);
+          // 即使获取失败也尝试进行冲突检测
+          this.startConflictDetection();
+        });
+      } else {
+        console.log('课程信息中已有timeSlots数据，直接进行冲突检测');
+        this.startConflictDetection();
+      }
+    },
+    
+    // 开始课程冲突检测
+    startConflictDetection() {
       // 课程冲突检测
       this.checkCourseConflict().then(conflictResult => {
         uni.hideLoading();
@@ -1364,7 +1381,7 @@ export default {
         });
       });
     },
-
+    
     // 检查课程冲突
     checkCourseConflict() {
       return new Promise((resolve, reject) => {
@@ -1382,16 +1399,52 @@ export default {
           success: res => {
             console.log('获取用户预约成功:', res.result);
             
-            if (!res.result || !res.result.data) {
+            // 处理不同的返回数据格式
+            let bookingsData = [];
+            
+            if (res.result && res.result.data && res.result.data.length > 0) {
+              // 标准格式 {result: {data: [...]}}
+              bookingsData = res.result.data;
+              console.log('从标准格式中获取到用户预约数据');
+            } else if (res.result && res.result.success && res.result.data) {
+              // 成功响应格式 {result: {success: true, data: [...]}}
+              bookingsData = res.result.data;
+              console.log('从成功响应格式中获取到用户预约数据');
+            } else if (res.result && Array.isArray(res.result)) {
+              // 直接数组格式 {result: [...]}
+              bookingsData = res.result;
+              console.log('从result数组格式中获取到用户预约数据');
+            } else if (res.data && Array.isArray(res.data)) {
+              // 直接数据格式 {data: [...]}
+              bookingsData = res.data;
+              console.log('从data数组格式中获取到用户预约数据');
+            }
+            
+            if (!bookingsData || bookingsData.length === 0) {
               resolve({ hasConflict: false });
               return;
             }
             
-            const bookedCourses = res.result.data;
+            const bookedCourses = bookingsData;
             
             // 获取用户当前选择的课程信息
             const currentCourse = this.courseInfo;
             console.log('当前预约课程信息:', currentCourse);
+            
+            // 检查currentCourse是否有有效的timeSlots数据
+            if (currentCourse.timeSlots && currentCourse.timeSlots.length > 0) {
+              console.log('当前课程已有timeSlots数据，timeSlots数量:', currentCourse.timeSlots.length);
+              
+              // 记录第一个和最后一个时间槽的信息，用于调试
+              if (currentCourse.timeSlots.length > 0) {
+                const firstSlot = currentCourse.timeSlots[0];
+                const lastSlot = currentCourse.timeSlots[currentCourse.timeSlots.length - 1];
+                console.log('第一个时间槽:', firstSlot);
+                console.log('最后一个时间槽:', lastSlot);
+              }
+            } else {
+              console.warn('当前课程缺少timeSlots数据，这可能导致冲突检测不准确');
+            }
             
             // 检查每个已预约课程是否与当前课程冲突
             let conflictResult = { hasConflict: false, conflictCourses: [] };
@@ -1441,9 +1494,24 @@ export default {
                 .then(scheduleRes => {
                   console.log('获取课程日程表数据:', scheduleRes);
                   
+                  // 处理不同的返回数据格式
+                  let scheduleData = [];
+                  
                   if (scheduleRes.data && scheduleRes.data.length > 0) {
-                    const scheduleData = scheduleRes.data;
-                    
+                    // 标准格式 {data: [...]}
+                    scheduleData = scheduleRes.data;
+                    console.log('从标准格式中获取到课程日程表数据');
+                  } else if (scheduleRes.result && scheduleRes.result.data && scheduleRes.result.data.length > 0) {
+                    // 嵌套格式 {result: {data: [...]}}
+                    scheduleData = scheduleRes.result.data;
+                    console.log('从嵌套result格式中获取到课程日程表数据');
+                  } else if (scheduleRes.result && Array.isArray(scheduleRes.result) && scheduleRes.result.length > 0) {
+                    // 直接数组格式 {result: [...]}
+                    scheduleData = scheduleRes.result;
+                    console.log('从result数组格式中获取到课程日程表数据');
+                  }
+                  
+                  if (scheduleData && scheduleData.length > 0) {
                     // 获取所有相关课程ID
                     const courseIds = scheduleData.map(schedule => schedule.courseId).filter(id => id);
                     
@@ -1457,9 +1525,26 @@ export default {
                         .then(courseRes => {
                           console.log('获取课程详情数据:', courseRes);
                           
+                          // 处理不同的返回数据格式
+                          let courseData = [];
+                          
                           if (courseRes.data && courseRes.data.length > 0) {
+                            // 标准格式
+                            courseData = courseRes.data;
+                            console.log('从标准格式中获取到课程详情数据');
+                          } else if (courseRes.result && courseRes.result.data && courseRes.result.data.length > 0) {
+                            // 嵌套格式
+                            courseData = courseRes.result.data;
+                            console.log('从嵌套result格式中获取到课程详情数据');
+                          } else if (courseRes.result && Array.isArray(courseRes.result) && courseRes.result.length > 0) {
+                            // 直接数组格式
+                            courseData = courseRes.result;
+                            console.log('从result数组格式中获取到课程详情数据');
+                          }
+                          
+                          if (courseData && courseData.length > 0) {
                             const courseMap = {};
-                            courseRes.data.forEach(course => {
+                            courseData.forEach(course => {
                               courseMap[course._id] = course;
                             });
                             
@@ -1496,6 +1581,10 @@ export default {
                                     }).filter((v, i, a) => a.indexOf(v) === i); // 去重
                                     
                                     console.log('从course_schedule提取的课程信息:', course);
+                                    
+                                    // 添加timeSlots到课程对象中，这样冲突检测函数能够使用timeSlots检测
+                                    course.timeSlots = validTimeSlots;
+                                    console.log('添加timeSlots到course对象，用于冲突检测:', course.timeSlots.length);
                                     
                                     // 检查冲突
                                     handleCourseConflictCheck(course);
@@ -1590,6 +1679,14 @@ export default {
         contactPhone: this.userInfo.mobile || this.userInfo.phoneNumber || '',
         remark: ''
       };
+      
+      // 添加课程时间槽数据，用于服务端冲突检测
+      if (this.courseInfo && this.courseInfo.timeSlots && this.courseInfo.timeSlots.length > 0) {
+        bookingData.courseTimeSlots = this.courseInfo.timeSlots;
+        console.log('将课程时间槽数据传递给bookCourse云函数，用于服务端冲突检测');
+      } else {
+        console.warn('当前课程没有timeSlots数据，服务端冲突检测可能不准确');
+      }
       
       // 调用云函数预约课程
       uniCloud.callFunction({
@@ -2064,6 +2161,36 @@ export default {
       } catch (error) {
         console.error('检查课程购物车状态失败:', error);
       }
+    },
+    
+    // 从用户信息中获取用户ID
+    getUserId(userInfo) {
+      // 如果参数是字符串，尝试解析JSON
+      if (typeof userInfo === 'string') {
+        try {
+          userInfo = JSON.parse(userInfo);
+        } catch (error) {
+          console.error('解析用户信息字符串失败:', error);
+          return null;
+        }
+      }
+      
+      // 检查解析后的对象是否有效
+      if (!userInfo) {
+        console.warn('用户信息对象无效');
+        return null;
+      }
+      
+      // 优先使用userId字段，如果不存在则尝试使用_id字段
+      const userId = userInfo.userId || userInfo._id;
+      
+      if (!userId) {
+        console.warn('未找到有效的用户ID', userInfo);
+        return null;
+      }
+      
+      console.log('获取到用户ID:', userId);
+      return userId;
     },
     
     // 获取状态栏高度

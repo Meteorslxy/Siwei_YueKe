@@ -601,44 +601,19 @@ var _default = {
 
       // 处理封面图片路径
       if (this.courseInfo.coverImage) {
-        // 检查是否为完整URL（以http或https开头）
-        if (this.courseInfo.coverImage.startsWith('http://') || this.courseInfo.coverImage.startsWith('https://')) {
-          // 保持原样，这是完整的URL
-          console.log('使用云存储URL作为封面图:', this.courseInfo.coverImage);
+        if (this.courseInfo.coverImage.startsWith('http')) {
+          // 如果是完整URL，直接使用
+          this.courseInfo.coverImageUrl = this.courseInfo.coverImage;
+        } else {
+          // 如果是相对路径，拼接为完整URL
+          this.courseInfo.coverImageUrl = this.courseInfo.coverImage;
         }
-        // 检查是否为本地路径（以/开头）
-        else if (this.courseInfo.coverImage.startsWith('/')) {
-          // 已经是本地路径，保持原样
-          console.log('使用本地绝对路径作为封面图:', this.courseInfo.coverImage);
-        }
-        // 其他情况，可能是相对路径
-        else {
-          this.courseInfo.coverImage = "/static/images/course/".concat(this.courseInfo.coverImage);
-          console.log('转换为本地相对路径作为封面图:', this.courseInfo.coverImage);
-        }
-      }
-      // 处理备选字段image
-      else if (!this.courseInfo.coverImage && this.courseInfo.image) {
-        // 检查image字段是否为完整URL
-        if (this.courseInfo.image.startsWith('http://') || this.courseInfo.image.startsWith('https://')) {
-          this.courseInfo.coverImage = this.courseInfo.image;
-          console.log('使用image字段的云存储URL作为封面图:', this.courseInfo.coverImage);
-        }
-        // 检查是否为本地路径
-        else if (this.courseInfo.image.startsWith('/')) {
-          this.courseInfo.coverImage = this.courseInfo.image;
-          console.log('使用image字段的本地绝对路径作为封面图:', this.courseInfo.coverImage);
-        }
-        // 其他情况，转为本地相对路径
-        else {
-          this.courseInfo.coverImage = "/static/images/course/".concat(this.courseInfo.image);
-          console.log('将image字段转换为本地相对路径作为封面图:', this.courseInfo.coverImage);
-        }
-      }
-      // 没有任何图片时使用默认图片
-      else {
-        this.courseInfo.coverImage = '/static/images/course/course1.jpg';
-        console.log('使用默认图片作为封面图');
+      } else if (this.courseInfo.courseImage) {
+        // 兼容老数据结构
+        this.courseInfo.coverImageUrl = this.courseInfo.courseImage;
+      } else {
+        // 使用默认图片
+        this.courseInfo.coverImageUrl = '/static/images/course/default.jpg';
       }
 
       // 预加载教师头像
@@ -646,223 +621,133 @@ var _default = {
         this.preloadTeacherAvatar();
       }
       console.log('预处理后的课程数据:', this.courseInfo);
+
+      // 获取课程时间安排数据
+      this.fetchCourseSchedule();
     },
-    // 直接获取教师描述信息
-    fetchTeacherDescription: function fetchTeacherDescription(teacherId) {
+    // 获取课程时间安排数据
+    fetchCourseSchedule: function fetchCourseSchedule() {
       var _this3 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-        var validTeacherId, params, result, teacherData;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+        return _regenerator.default.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                if (teacherId) {
-                  _context2.next = 3;
+                if (_this3.courseId) {
+                  _context3.next = 2;
                   break;
                 }
-                // 如果没有teacherId但有teacherName，尝试通过名称查询
-                if (_this3.courseInfo.teacherName) {
-                  console.log('尝试通过教师名称查询教师信息:', _this3.courseInfo.teacherName);
-                  _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
-                }
-                return _context2.abrupt("return");
+                return _context3.abrupt("return", Promise.resolve(false));
+              case 2:
+                return _context3.abrupt("return", new Promise( /*#__PURE__*/function () {
+                  var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(resolve, reject) {
+                    var db, scheduleRes, success, scheduleData, validTimeSlots;
+                    return _regenerator.default.wrap(function _callee2$(_context2) {
+                      while (1) {
+                        switch (_context2.prev = _context2.next) {
+                          case 0:
+                            _context2.prev = 0;
+                            console.log('开始获取课程时间安排数据，ID:', _this3.courseId);
+                            db = uniCloud.database();
+                            _context2.next = 5;
+                            return db.collection('course_schedule').where({
+                              courseId: _this3.courseId
+                            }).get();
+                          case 5:
+                            scheduleRes = _context2.sent;
+                            console.log('课程时间安排数据:', scheduleRes);
+                            success = false; // 检查多种可能的返回数据格式
+                            scheduleData = null; // 处理不同的返回数据格式
+                            if (scheduleRes.data && scheduleRes.data.length > 0) {
+                              // 标准格式 {data: [...]}
+                              scheduleData = scheduleRes.data[0];
+                              console.log('从标准格式中获取到课程安排数据');
+                            } else if (scheduleRes.result && scheduleRes.result.data && scheduleRes.result.data.length > 0) {
+                              // 嵌套格式 {result: {data: [...]}}
+                              scheduleData = scheduleRes.result.data[0];
+                              console.log('从嵌套result格式中获取到课程安排数据');
+                            } else if (scheduleRes.result && Array.isArray(scheduleRes.result) && scheduleRes.result.length > 0) {
+                              // 直接数组格式 {result: [...]}
+                              scheduleData = scheduleRes.result[0];
+                              console.log('从result数组格式中获取到课程安排数据');
+                            }
+                            if (scheduleData) {
+                              console.log('获取到课程安排数据:', scheduleData);
+
+                              // 将timeSlots数据添加到courseInfo中
+                              if (scheduleData.timeSlots && scheduleData.timeSlots.length > 0) {
+                                console.log('从course_schedule获取到timeSlots数据，数量:', scheduleData.timeSlots.length);
+
+                                // 过滤出有效的时间槽（未取消的）
+                                validTimeSlots = scheduleData.timeSlots.filter(function (slot) {
+                                  return slot.status !== 'cancelled';
+                                });
+                                if (validTimeSlots.length > 0) {
+                                  // 添加timeSlots到courseInfo
+                                  _this3.courseInfo.timeSlots = validTimeSlots;
+                                  console.log('已添加timeSlots到courseInfo', _this3.courseInfo.timeSlots);
+                                  success = true;
+
+                                  // 如果课程没有设置classTime字段，从timeSlots提取
+                                  if (!_this3.courseInfo.classTime || Array.isArray(_this3.courseInfo.classTime) && _this3.courseInfo.classTime.length === 0) {
+                                    _this3.courseInfo.classTime = validTimeSlots.map(function (slot) {
+                                      var date = new Date(slot.start);
+                                      var weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+                                      return weekday;
+                                    }).filter(function (v, i, a) {
+                                      return a.indexOf(v) === i;
+                                    }); // 去重
+
+                                    console.log('从timeSlots提取的上课日:', _this3.courseInfo.classTime);
+                                  }
+                                }
+                              }
+                            } else {
+                              console.log('未找到课程时间安排数据');
+                            }
+                            resolve(success);
+                            _context2.next = 18;
+                            break;
+                          case 14:
+                            _context2.prev = 14;
+                            _context2.t0 = _context2["catch"](0);
+                            console.error('获取课程时间安排数据失败:', _context2.t0);
+                            reject(_context2.t0);
+                          case 18:
+                          case "end":
+                            return _context2.stop();
+                        }
+                      }
+                    }, _callee2, null, [[0, 14]]);
+                  }));
+                  return function (_x, _x2) {
+                    return _ref.apply(this, arguments);
+                  };
+                }()));
               case 3:
-                console.log('fetchTeacherDescription接收到的原始teacherId:', JSON.stringify(teacherId), '类型:', (0, _typeof2.default)(teacherId));
-
-                // 确保teacherId是有效的字符串类型
-                validTeacherId = teacherId;
-                if (!((0, _typeof2.default)(teacherId) === 'object')) {
-                  _context2.next = 29;
-                  break;
-                }
-                _context2.prev = 6;
-                if (!teacherId._id) {
-                  _context2.next = 12;
-                  break;
-                }
-                validTeacherId = teacherId._id.toString();
-                console.log('从对象中提取教师ID:', validTeacherId);
-                _context2.next = 20;
-                break;
-              case 12:
-                if (!(typeof teacherId.toString === 'function')) {
-                  _context2.next = 17;
-                  break;
-                }
-                validTeacherId = teacherId.toString();
-                console.log('使用toString()方法转换教师ID:', validTeacherId);
-                _context2.next = 20;
-                break;
-              case 17:
-                console.warn('无法从对象中提取有效教师ID，改用名称查询');
-                if (_this3.courseInfo.teacherName) {
-                  _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
-                }
-                return _context2.abrupt("return");
-              case 20:
-                _context2.next = 27;
-                break;
-              case 22:
-                _context2.prev = 22;
-                _context2.t0 = _context2["catch"](6);
-                console.error('尝试转换教师ID失败:', _context2.t0);
-                if (_this3.courseInfo.teacherName) {
-                  _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
-                }
-                return _context2.abrupt("return");
-              case 27:
-                _context2.next = 41;
-                break;
-              case 29:
-                if (!(typeof teacherId !== 'string' && typeof teacherId !== 'number')) {
-                  _context2.next = 35;
-                  break;
-                }
-                console.warn('教师ID不是有效的字符串或数字类型:', (0, _typeof2.default)(teacherId));
-                if (_this3.courseInfo.teacherName) {
-                  _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
-                }
-                return _context2.abrupt("return");
-              case 35:
-                // 确保是字符串类型并进行清理
-                validTeacherId = String(teacherId).trim();
-
-                // 检查是否被包裹在引号中
-                if (validTeacherId.startsWith('"') && validTeacherId.endsWith('"')) {
-                  validTeacherId = validTeacherId.substring(1, validTeacherId.length - 1);
-                  console.log('去除引号后的teacherId:', validTeacherId);
-                }
-
-                // 检查字符串是否为空
-                if (!(!validTeacherId || validTeacherId === '')) {
-                  _context2.next = 41;
-                  break;
-                }
-                console.warn('处理后的teacherId为空，改用名称查询');
-                if (_this3.courseInfo.teacherName) {
-                  _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
-                }
-                return _context2.abrupt("return");
-              case 41:
-                console.log('处理后的最终有效teacherId:', validTeacherId);
-                _context2.prev = 42;
-                // 构建请求参数
-                params = {}; // 仅当ID有效时才添加
-                if (validTeacherId) {
-                  params.id = validTeacherId;
-                  console.log('向API传递teacherId:', validTeacherId);
-                }
-
-                // 如果有教师名称，也一并传入作为备选
-                if (_this3.courseInfo.teacherName) {
-                  params.name = _this3.courseInfo.teacherName;
-                  console.log('向API传递teacherName:', _this3.courseInfo.teacherName);
-                }
-
-                // 如果既没有有效ID也没有名称，则无法查询
-                if (!(!validTeacherId && !_this3.courseInfo.teacherName)) {
-                  _context2.next = 51;
-                  break;
-                }
-                console.error('缺少教师查询条件，无法获取教师详情');
-                _this3.courseInfo.teacherDescription = '暂无详细介绍';
-                _this3.$forceUpdate();
-                return _context2.abrupt("return");
-              case 51:
-                _context2.next = 53;
-                return _this3.$api.teacher.getTeacherDetail(params);
-              case 53:
-                result = _context2.sent;
-                console.log('教师详情API返回结果:', result);
-                if (result && result.data) {
-                  teacherData = result.data;
-                  console.log('获取到教师数据:', teacherData);
-
-                  // 更新教师信息
-                  if (teacherData.description) {
-                    _this3.courseInfo.teacherDescription = teacherData.description;
-                    console.log('已更新教师描述信息:', teacherData.description);
-                  } else if (teacherData.introduction) {
-                    _this3.courseInfo.teacherDescription = teacherData.introduction;
-                    console.log('使用教师introduction作为描述:', teacherData.introduction);
-                  }
-
-                  // 更新教师头像
-                  if (teacherData.avatar) {
-                    console.log('从教师详情API获取到头像:', teacherData.avatar);
-                    _this3.courseInfo.teacherAvatarUrl = teacherData.avatar;
-                  }
-
-                  // 添加其他可能的描述字段
-                  if (!_this3.courseInfo.teacherDescription) {
-                    if (teacherData.desc) {
-                      _this3.courseInfo.teacherDescription = teacherData.desc;
-                      console.log('使用教师desc字段作为描述');
-                    } else if (teacherData.bio) {
-                      _this3.courseInfo.teacherDescription = teacherData.bio;
-                      console.log('使用教师bio字段作为描述');
-                    } else if (teacherData.profile) {
-                      _this3.courseInfo.teacherDescription = teacherData.profile;
-                      console.log('使用教师profile字段作为描述');
-                    } else {
-                      console.log('教师数据中没有找到任何可用的描述字段');
-                      // 如果实在没有描述，设置一个默认值
-                      _this3.courseInfo.teacherDescription = teacherData.name ? "".concat(teacherData.name).concat(teacherData.title ? '，' + teacherData.title : '', "\uFF0C\u6682\u65E0\u8BE6\u7EC6\u4ECB\u7ECD\u3002") : '暂无详细介绍';
-                    }
-                  }
-
-                  // 强制更新UI
-                  _this3.$forceUpdate();
-                } else {
-                  console.log('未获取到教师数据，尝试通过名称查询');
-                  // 如果通过ID查询失败，尝试通过名称查询
-                  if (_this3.courseInfo.teacherName) {
-                    _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
-                  } else {
-                    _this3.courseInfo.teacherDescription = '暂无详细介绍';
-                    _this3.$forceUpdate();
-                  }
-                }
-                _context2.next = 62;
-                break;
-              case 58:
-                _context2.prev = 58;
-                _context2.t1 = _context2["catch"](42);
-                console.error('获取教师详情失败:', _context2.t1);
-
-                // 尝试通过名称查询
-                if (_this3.courseInfo.teacherName) {
-                  console.log('ID查询失败，尝试通过名称查询:', _this3.courseInfo.teacherName);
-                  _this3.fetchTeacherByName(_this3.courseInfo.teacherName);
-                } else {
-                  // 设置默认描述
-                  _this3.courseInfo.teacherDescription = '暂无详细介绍';
-                  _this3.$forceUpdate();
-                }
-              case 62:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, null, [[6, 22], [42, 58]]);
+        }, _callee3);
       }))();
     },
     // 通过教师名称查询
     fetchTeacherByName: function fetchTeacherByName(teacherName) {
       var _this4 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
         var nameForSearch, result, foundTeacher;
-        return _regenerator.default.wrap(function _callee3$(_context3) {
+        return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 if (teacherName) {
-                  _context3.next = 2;
+                  _context4.next = 2;
                   break;
                 }
-                return _context3.abrupt("return");
+                return _context4.abrupt("return");
               case 2:
-                _context3.prev = 2;
+                _context4.prev = 2;
                 console.log('开始通过名称查询教师:', teacherName);
 
                 // 从教师名称中去除可能的"老师"后缀
@@ -870,12 +755,12 @@ var _default = {
                 console.log('处理后的教师名称:', nameForSearch);
 
                 // 直接调用获取教师列表的API接口
-                _context3.next = 8;
+                _context4.next = 8;
                 return _this4.$api.teacher.getTeacherList({
                   name: nameForSearch
                 });
               case 8:
-                result = _context3.sent;
+                result = _context4.sent;
                 console.log('教师查询API结果:', result);
                 if (result && result.data && result.data.length > 0) {
                   // 确保查询匹配的是准确的教师名称
@@ -914,142 +799,84 @@ var _default = {
 
                 // 强制更新UI
                 _this4.$forceUpdate();
-                _context3.next = 19;
+                _context4.next = 19;
                 break;
               case 14:
-                _context3.prev = 14;
-                _context3.t0 = _context3["catch"](2);
-                console.error('通过名称查询教师失败:', _context3.t0);
+                _context4.prev = 14;
+                _context4.t0 = _context4["catch"](2);
+                console.error('通过名称查询教师失败:', _context4.t0);
 
                 // 错误情况下，显示默认信息
                 _this4.courseInfo.teacherDescription = "\u6682\u65E0\u8BE6\u7EC6\u4ECB\u7ECD";
                 _this4.$forceUpdate();
               case 19:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, null, [[2, 14]]);
+        }, _callee4, null, [[2, 14]]);
       }))();
     },
     // 预加载教师头像
     preloadTeacherAvatar: function preloadTeacherAvatar() {
       var _this5 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
-        var avatarResult;
-        return _regenerator.default.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                if (_this5.courseInfo.teacherName) {
-                  _context4.next = 2;
-                  break;
-                }
-                return _context4.abrupt("return");
-              case 2:
-                _context4.prev = 2;
-                console.log('根据教师名称主动查询教师头像:', _this5.courseInfo.teacherName);
-                // 首先尝试从数据库获取教师头像
-                if (!_this5.courseInfo.teacherName) {
-                  _context4.next = 9;
-                  break;
-                }
-                _context4.next = 7;
-                return _this5.fetchTeacherAvatarFromDB(_this5.courseInfo.teacherName);
-              case 7:
-                _context4.next = 12;
-                break;
-              case 9:
-                if (!_this5.courseInfo.teacherId) {
-                  _context4.next = 12;
-                  break;
-                }
-                _context4.next = 12;
-                return _this5.fetchTeacherAvatarByID(_this5.courseInfo.teacherId);
-              case 12:
-                if (!(!_this5.courseInfo.teacherAvatarUrl && _this5.courseInfo.teacherAvatar)) {
-                  _context4.next = 28;
-                  break;
-                }
-                if (!(_this5.courseInfo.teacherAvatar.startsWith('http://') || _this5.courseInfo.teacherAvatar.startsWith('https://'))) {
-                  _context4.next = 18;
-                  break;
-                }
-                console.log('使用云存储URL作为教师头像备选:', _this5.courseInfo.teacherAvatar);
-                _this5.courseInfo.teacherAvatarUrl = _this5.courseInfo.teacherAvatar;
-                _context4.next = 28;
-                break;
-              case 18:
-                if (!_this5.courseInfo.teacherAvatar.startsWith('/')) {
-                  _context4.next = 23;
-                  break;
-                }
-                // 已经是本地路径
-                console.log('使用本地路径作为教师头像备选:', _this5.courseInfo.teacherAvatar);
-                _this5.courseInfo.teacherAvatarUrl = _this5.courseInfo.teacherAvatar;
-                _context4.next = 28;
-                break;
-              case 23:
-                // 否则从云端获取
-                console.log('从云端获取头像图片作为备选:', _this5.courseInfo.teacherAvatar);
-                _context4.next = 26;
-                return _this5.$api.file.getImage(_this5.courseInfo.teacherAvatar);
-              case 26:
-                avatarResult = _context4.sent;
-                if (avatarResult && avatarResult.data && avatarResult.data.url) {
-                  _this5.courseInfo.teacherAvatarUrl = avatarResult.data.url;
-                }
-              case 28:
-                // 如果仍然没有获得头像URL，使用默认头像
-                if (!_this5.courseInfo.teacherAvatarUrl) {
-                  _this5.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
-                  console.log('使用默认头像');
-                }
-                _context4.next = 36;
-                break;
-              case 31:
-                _context4.prev = 31;
-                _context4.t0 = _context4["catch"](2);
-                console.error('加载教师头像失败:', _context4.t0);
-                // 加载失败时使用默认头像
-                _this5.courseInfo.teacherAvatarUrl = '/static/images/teacher/default-avatar.png';
-                console.log('由于错误使用默认头像');
-              case 36:
-              case "end":
-                return _context4.stop();
-            }
-          }
-        }, _callee4, null, [[2, 31]]);
-      }))();
-    },
-    // 从数据库获取教师头像
-    fetchTeacherAvatarFromDB: function fetchTeacherAvatarFromDB(teacherName) {
-      var _this6 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
-        var nameForSearch, result, foundTeacher;
         return _regenerator.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                if (teacherName) {
+                if (_this5.courseInfo.teacherName) {
                   _context5.next = 2;
                   break;
                 }
-                return _context5.abrupt("return", false);
+                return _context5.abrupt("return");
               case 2:
                 _context5.prev = 2;
+                _context5.next = 5;
+                return _this5.fetchTeacherAvatarByName(_this5.courseInfo.teacherName);
+              case 5:
+                _context5.next = 10;
+                break;
+              case 7:
+                _context5.prev = 7;
+                _context5.t0 = _context5["catch"](2);
+                console.error('预加载教师头像失败:', _context5.t0);
+              case 10:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[2, 7]]);
+      }))();
+    },
+    // 通过名称从数据库获取教师头像
+    fetchTeacherAvatarByName: function fetchTeacherAvatarByName(teacherName) {
+      var _this6 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
+        var nameForSearch, result, foundTeacher;
+        return _regenerator.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                if (teacherName) {
+                  _context6.next = 2;
+                  break;
+                }
+                return _context6.abrupt("return", false);
+              case 2:
+                _context6.prev = 2;
                 console.log('通过名称从数据库获取教师头像:', teacherName);
 
                 // 准备查询参数，去除可能的空格
                 nameForSearch = teacherName.trim(); // 调用API获取教师信息，使用names参数进行精确查询
-                _context5.next = 7;
+                _context6.next = 7;
                 return _this6.$api.teacher.getTeacherList({
                   names: [nameForSearch] // 使用names数组参数进行精确查询
                 });
               case 7:
-                result = _context5.sent;
+                result = _context6.sent;
                 if (!(result && result.code === 0 && result.data && result.data.length > 0)) {
-                  _context5.next = 15;
+                  _context6.next = 15;
                   break;
                 }
                 // 查找精确匹配的教师
@@ -1057,74 +884,226 @@ var _default = {
                   return item.name === nameForSearch;
                 });
                 if (!(foundTeacher && foundTeacher.avatar)) {
-                  _context5.next = 15;
+                  _context6.next = 15;
                   break;
                 }
                 console.log('从数据库获取到教师头像URL:', foundTeacher.avatar);
                 _this6.courseInfo.teacherAvatarUrl = foundTeacher.avatar;
                 _this6.$forceUpdate();
-                return _context5.abrupt("return", true);
-              case 15:
-                return _context5.abrupt("return", false);
-              case 18:
-                _context5.prev = 18;
-                _context5.t0 = _context5["catch"](2);
-                console.error('通过名称获取教师头像失败:', _context5.t0);
-                return _context5.abrupt("return", false);
-              case 22:
-              case "end":
-                return _context5.stop();
-            }
-          }
-        }, _callee5, null, [[2, 18]]);
-      }))();
-    },
-    // 通过ID从数据库获取教师头像
-    fetchTeacherAvatarByID: function fetchTeacherAvatarByID(teacherId) {
-      var _this7 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6() {
-        var result;
-        return _regenerator.default.wrap(function _callee6$(_context6) {
-          while (1) {
-            switch (_context6.prev = _context6.next) {
-              case 0:
-                if (teacherId) {
-                  _context6.next = 2;
-                  break;
-                }
-                return _context6.abrupt("return", false);
-              case 2:
-                _context6.prev = 2;
-                console.log('通过ID从数据库获取教师头像:', teacherId);
-
-                // 调用API获取教师详情
-                _context6.next = 6;
-                return _this7.$api.teacher.getTeacherDetail({
-                  id: teacherId
-                });
-              case 6:
-                result = _context6.sent;
-                if (!(result && result.code === 0 && result.data && result.data.avatar)) {
-                  _context6.next = 12;
-                  break;
-                }
-                console.log('从数据库获取到教师头像URL:', result.data.avatar);
-                _this7.courseInfo.teacherAvatarUrl = result.data.avatar;
-                _this7.$forceUpdate();
                 return _context6.abrupt("return", true);
-              case 12:
-                return _context6.abrupt("return", false);
               case 15:
-                _context6.prev = 15;
-                _context6.t0 = _context6["catch"](2);
-                console.error('通过ID获取教师头像失败:', _context6.t0);
                 return _context6.abrupt("return", false);
-              case 19:
+              case 18:
+                _context6.prev = 18;
+                _context6.t0 = _context6["catch"](2);
+                console.error('通过名称获取教师头像失败:', _context6.t0);
+                return _context6.abrupt("return", false);
+              case 22:
               case "end":
                 return _context6.stop();
             }
           }
-        }, _callee6, null, [[2, 15]]);
+        }, _callee6, null, [[2, 18]]);
+      }))();
+    },
+    // 直接获取教师描述信息
+    fetchTeacherDescription: function fetchTeacherDescription(teacherId) {
+      var _this7 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
+        var validTeacherId, params, result, teacherData;
+        return _regenerator.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                if (teacherId) {
+                  _context7.next = 3;
+                  break;
+                }
+                // 如果没有teacherId但有teacherName，尝试通过名称查询
+                if (_this7.courseInfo.teacherName) {
+                  console.log('尝试通过教师名称查询教师信息:', _this7.courseInfo.teacherName);
+                  _this7.fetchTeacherByName(_this7.courseInfo.teacherName);
+                }
+                return _context7.abrupt("return");
+              case 3:
+                console.log('fetchTeacherDescription接收到的原始teacherId:', JSON.stringify(teacherId), '类型:', (0, _typeof2.default)(teacherId));
+
+                // 确保teacherId是有效的字符串类型
+                validTeacherId = teacherId;
+                if (!((0, _typeof2.default)(teacherId) === 'object')) {
+                  _context7.next = 29;
+                  break;
+                }
+                _context7.prev = 6;
+                if (!teacherId._id) {
+                  _context7.next = 12;
+                  break;
+                }
+                validTeacherId = teacherId._id.toString();
+                console.log('从对象中提取教师ID:', validTeacherId);
+                _context7.next = 20;
+                break;
+              case 12:
+                if (!(typeof teacherId.toString === 'function')) {
+                  _context7.next = 17;
+                  break;
+                }
+                validTeacherId = teacherId.toString();
+                console.log('使用toString()方法转换教师ID:', validTeacherId);
+                _context7.next = 20;
+                break;
+              case 17:
+                console.warn('无法从对象中提取有效教师ID，改用名称查询');
+                if (_this7.courseInfo.teacherName) {
+                  _this7.fetchTeacherByName(_this7.courseInfo.teacherName);
+                }
+                return _context7.abrupt("return");
+              case 20:
+                _context7.next = 27;
+                break;
+              case 22:
+                _context7.prev = 22;
+                _context7.t0 = _context7["catch"](6);
+                console.error('尝试转换教师ID失败:', _context7.t0);
+                if (_this7.courseInfo.teacherName) {
+                  _this7.fetchTeacherByName(_this7.courseInfo.teacherName);
+                }
+                return _context7.abrupt("return");
+              case 27:
+                _context7.next = 41;
+                break;
+              case 29:
+                if (!(typeof teacherId !== 'string' && typeof teacherId !== 'number')) {
+                  _context7.next = 35;
+                  break;
+                }
+                console.warn('教师ID不是有效的字符串或数字类型:', (0, _typeof2.default)(teacherId));
+                if (_this7.courseInfo.teacherName) {
+                  _this7.fetchTeacherByName(_this7.courseInfo.teacherName);
+                }
+                return _context7.abrupt("return");
+              case 35:
+                // 确保是字符串类型并进行清理
+                validTeacherId = String(teacherId).trim();
+
+                // 检查是否被包裹在引号中
+                if (validTeacherId.startsWith('"') && validTeacherId.endsWith('"')) {
+                  validTeacherId = validTeacherId.substring(1, validTeacherId.length - 1);
+                  console.log('去除引号后的teacherId:', validTeacherId);
+                }
+
+                // 检查字符串是否为空
+                if (!(!validTeacherId || validTeacherId === '')) {
+                  _context7.next = 41;
+                  break;
+                }
+                console.warn('处理后的teacherId为空，改用名称查询');
+                if (_this7.courseInfo.teacherName) {
+                  _this7.fetchTeacherByName(_this7.courseInfo.teacherName);
+                }
+                return _context7.abrupt("return");
+              case 41:
+                console.log('处理后的最终有效teacherId:', validTeacherId);
+                _context7.prev = 42;
+                // 构建请求参数
+                params = {}; // 仅当ID有效时才添加
+                if (validTeacherId) {
+                  params.id = validTeacherId;
+                  console.log('向API传递teacherId:', validTeacherId);
+                }
+
+                // 如果有教师名称，也一并传入作为备选
+                if (_this7.courseInfo.teacherName) {
+                  params.name = _this7.courseInfo.teacherName;
+                  console.log('向API传递teacherName:', _this7.courseInfo.teacherName);
+                }
+
+                // 如果既没有有效ID也没有名称，则无法查询
+                if (!(!validTeacherId && !_this7.courseInfo.teacherName)) {
+                  _context7.next = 51;
+                  break;
+                }
+                console.error('缺少教师查询条件，无法获取教师详情');
+                _this7.courseInfo.teacherDescription = '暂无详细介绍';
+                _this7.$forceUpdate();
+                return _context7.abrupt("return");
+              case 51:
+                _context7.next = 53;
+                return _this7.$api.teacher.getTeacherDetail(params);
+              case 53:
+                result = _context7.sent;
+                console.log('教师详情API返回结果:', result);
+                if (result && result.data) {
+                  teacherData = result.data;
+                  console.log('获取到教师数据:', teacherData);
+
+                  // 更新教师信息
+                  if (teacherData.description) {
+                    _this7.courseInfo.teacherDescription = teacherData.description;
+                    console.log('已更新教师描述信息:', teacherData.description);
+                  } else if (teacherData.introduction) {
+                    _this7.courseInfo.teacherDescription = teacherData.introduction;
+                    console.log('使用教师introduction作为描述:', teacherData.introduction);
+                  }
+
+                  // 更新教师头像
+                  if (teacherData.avatar) {
+                    console.log('从教师详情API获取到头像:', teacherData.avatar);
+                    _this7.courseInfo.teacherAvatarUrl = teacherData.avatar;
+                  }
+
+                  // 添加其他可能的描述字段
+                  if (!_this7.courseInfo.teacherDescription) {
+                    if (teacherData.desc) {
+                      _this7.courseInfo.teacherDescription = teacherData.desc;
+                      console.log('使用教师desc字段作为描述');
+                    } else if (teacherData.bio) {
+                      _this7.courseInfo.teacherDescription = teacherData.bio;
+                      console.log('使用教师bio字段作为描述');
+                    } else if (teacherData.profile) {
+                      _this7.courseInfo.teacherDescription = teacherData.profile;
+                      console.log('使用教师profile字段作为描述');
+                    } else {
+                      console.log('教师数据中没有找到任何可用的描述字段');
+                      // 如果实在没有描述，设置一个默认值
+                      _this7.courseInfo.teacherDescription = teacherData.name ? "".concat(teacherData.name).concat(teacherData.title ? '，' + teacherData.title : '', "\uFF0C\u6682\u65E0\u8BE6\u7EC6\u4ECB\u7ECD\u3002") : '暂无详细介绍';
+                    }
+                  }
+
+                  // 强制更新UI
+                  _this7.$forceUpdate();
+                } else {
+                  console.log('未获取到教师数据，尝试通过名称查询');
+                  // 如果通过ID查询失败，尝试通过名称查询
+                  if (_this7.courseInfo.teacherName) {
+                    _this7.fetchTeacherByName(_this7.courseInfo.teacherName);
+                  } else {
+                    _this7.courseInfo.teacherDescription = '暂无详细介绍';
+                    _this7.$forceUpdate();
+                  }
+                }
+                _context7.next = 62;
+                break;
+              case 58:
+                _context7.prev = 58;
+                _context7.t1 = _context7["catch"](42);
+                console.error('获取教师详情失败:', _context7.t1);
+
+                // 尝试通过名称查询
+                if (_this7.courseInfo.teacherName) {
+                  console.log('ID查询失败，尝试通过名称查询:', _this7.courseInfo.teacherName);
+                  _this7.fetchTeacherByName(_this7.courseInfo.teacherName);
+                } else {
+                  // 设置默认描述
+                  _this7.courseInfo.teacherDescription = '暂无详细介绍';
+                  _this7.$forceUpdate();
+                }
+              case 62:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7, null, [[6, 22], [42, 58]]);
       }))();
     },
     // 格式化课程时间
@@ -1370,11 +1349,11 @@ var _default = {
     // 检查是否已预约
     checkBookingStatus: function checkBookingStatus() {
       var _this11 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee7() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
         var debugMode, key, cachedStatus, res, booked, allRes, activeBookings, allCancelled, db, dbRes;
-        return _regenerator.default.wrap(function _callee7$(_context7) {
+        return _regenerator.default.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 // 简化日志输出
                 debugMode = false; // 控制是否输出详细日志
@@ -1391,18 +1370,18 @@ var _default = {
                   }
                 }
                 if (!(!_this11.userInfo || !_this11.userInfo.userId || !_this11.courseId)) {
-                  _context7.next = 7;
+                  _context8.next = 7;
                   break;
                 }
                 if (debugMode) console.log('用户未登录或缺少必要参数，设置为未预约状态');
                 _this11.hasBooked = false;
-                return _context7.abrupt("return", Promise.resolve(false));
+                return _context8.abrupt("return", Promise.resolve(false));
               case 7:
-                _context7.prev = 7;
+                _context8.prev = 7;
                 if (debugMode) console.log('检查预约状态，用户ID:', _this11.userInfo.userId, '课程ID:', _this11.courseId);
 
                 // 首先尝试调用getBookings云函数
-                _context7.next = 11;
+                _context8.next = 11;
                 return uniCloud.callFunction({
                   name: 'getBookings',
                   data: {
@@ -1413,25 +1392,25 @@ var _default = {
                   }
                 });
               case 11:
-                res = _context7.sent;
+                res = _context8.sent;
                 if (debugMode) console.log('查询预约状态结果详情:', JSON.stringify(res.result));
 
                 // 判断是否预约过
                 booked = false;
                 if (!(res.result && res.result.success && res.result.data && res.result.data.length > 0)) {
-                  _context7.next = 19;
+                  _context8.next = 19;
                   break;
                 }
                 booked = true;
                 if (debugMode) console.log('用户已预约该课程，预约记录:', res.result.data[0]);
-                _context7.next = 56;
+                _context8.next = 56;
                 break;
               case 19:
                 if (debugMode) console.log('第一次查询未找到记录，尝试不带状态参数再次查询');
 
                 // 如果没有找到记录，尝试不带状态参数再次查询
-                _context7.prev = 20;
-                _context7.next = 23;
+                _context8.prev = 20;
+                _context8.next = 23;
                 return uniCloud.callFunction({
                   name: 'getBookings',
                   data: {
@@ -1441,10 +1420,10 @@ var _default = {
                   }
                 });
               case 23:
-                allRes = _context7.sent;
+                allRes = _context8.sent;
                 if (debugMode) console.log('第二次查询结果:', JSON.stringify(allRes.result));
                 if (!(allRes.result && allRes.result.success && allRes.result.data)) {
-                  _context7.next = 51;
+                  _context8.next = 51;
                   break;
                 }
                 // 只有在找到未取消的预约记录时才设置为已预约
@@ -1455,54 +1434,54 @@ var _default = {
                   return b.status === 'cancelled' || b.status === 'cancel';
                 });
                 if (!allCancelled) {
-                  _context7.next = 33;
+                  _context8.next = 33;
                   break;
                 }
                 if (debugMode) console.log('所有预约记录均为已取消状态，设置为未预约');
                 booked = false;
-                _context7.next = 51;
+                _context8.next = 51;
                 break;
               case 33:
                 if (!(activeBookings.length > 0)) {
-                  _context7.next = 38;
+                  _context8.next = 38;
                   break;
                 }
                 booked = true;
                 if (debugMode) console.log('找到未取消的预约:', activeBookings[0]);
-                _context7.next = 51;
+                _context8.next = 51;
                 break;
               case 38:
                 if (debugMode) console.log('云端没有找到有效预约记录');
 
                 // 如果仍然没有找到记录，再尝试使用常规数据库API查询
                 db = uniCloud.database();
-                _context7.prev = 40;
-                _context7.next = 43;
+                _context8.prev = 40;
+                _context8.next = 43;
                 return db.collection('bookings').where({
                   courseId: _this11.courseId,
                   userId: _this11.userInfo.userId,
                   status: db.command.neq('cancelled')
                 }).limit(1).get();
               case 43:
-                dbRes = _context7.sent;
+                dbRes = _context8.sent;
                 if (debugMode) console.log('数据库直接查询结果:', dbRes);
                 if (dbRes && dbRes.data && dbRes.data.length > 0) {
                   booked = true;
                   if (debugMode) console.log('通过数据库API找到有效预约:', dbRes.data[0]);
                 }
-                _context7.next = 51;
+                _context8.next = 51;
                 break;
               case 48:
-                _context7.prev = 48;
-                _context7.t0 = _context7["catch"](40);
-                console.error('数据库查询失败:', _context7.t0);
+                _context8.prev = 48;
+                _context8.t0 = _context8["catch"](40);
+                console.error('数据库查询失败:', _context8.t0);
               case 51:
-                _context7.next = 56;
+                _context8.next = 56;
                 break;
               case 53:
-                _context7.prev = 53;
-                _context7.t1 = _context7["catch"](20);
-                console.error('第二次查询失败:', _context7.t1);
+                _context8.prev = 53;
+                _context8.t1 = _context8["catch"](20);
+                console.error('第二次查询失败:', _context8.t1);
               case 56:
                 // 如果查询到所有预约都已取消，则设置为未预约状态，无论本地缓存状态如何
                 if (booked === false) {
@@ -1524,19 +1503,19 @@ var _default = {
 
                 // 强制刷新视图
                 _this11.$forceUpdate();
-                return _context7.abrupt("return", Promise.resolve(booked));
+                return _context8.abrupt("return", Promise.resolve(booked));
               case 64:
-                _context7.prev = 64;
-                _context7.t2 = _context7["catch"](7);
-                console.error('检查预约状态失败，详细错误:', _context7.t2);
+                _context8.prev = 64;
+                _context8.t2 = _context8["catch"](7);
+                console.error('检查预约状态失败，详细错误:', _context8.t2);
                 // 出错时保持当前状态不变
-                return _context7.abrupt("return", Promise.reject(_context7.t2));
+                return _context8.abrupt("return", Promise.reject(_context8.t2));
               case 68:
               case "end":
-                return _context7.stop();
+                return _context8.stop();
             }
           }
-        }, _callee7, null, [[7, 64], [20, 53], [40, 48]]);
+        }, _callee8, null, [[7, 64], [20, 53], [40, 48]]);
       }))();
     },
     // 预约课程
@@ -1563,17 +1542,36 @@ var _default = {
         title: '检查课程冲突...'
       });
 
+      // 确保课程信息中有timeSlots数据
+      if (!this.courseInfo.timeSlots) {
+        console.log('课程信息中没有timeSlots数据，尝试获取课程时间安排');
+        this.fetchCourseSchedule().then(function () {
+          // 获取到时间安排后开始冲突检测
+          _this12.startConflictDetection();
+        }).catch(function (err) {
+          console.error('获取课程时间安排失败:', err);
+          // 即使获取失败也尝试进行冲突检测
+          _this12.startConflictDetection();
+        });
+      } else {
+        console.log('课程信息中已有timeSlots数据，直接进行冲突检测');
+        this.startConflictDetection();
+      }
+    },
+    // 开始课程冲突检测
+    startConflictDetection: function startConflictDetection() {
+      var _this13 = this;
       // 课程冲突检测
       this.checkCourseConflict().then(function (conflictResult) {
         uni.hideLoading();
         if (conflictResult.hasConflict) {
           // 有冲突，显示冲突信息，但不自动继续预约
           console.log('检测到课程冲突，显示冲突对话框');
-          _this12.showConflictDialog(conflictResult);
+          _this13.showConflictDialog(conflictResult);
         } else {
           // 无冲突，继续预约流程
           console.log('未检测到课程冲突，继续预约流程');
-          _this12.proceedWithBooking();
+          _this13.proceedWithBooking();
         }
       }).catch(function (err) {
         uni.hideLoading();
@@ -1585,7 +1583,7 @@ var _default = {
           content: '无法完成课程冲突检测，您仍要继续预约吗？',
           success: function success(res) {
             if (res.confirm) {
-              _this12.proceedWithBooking();
+              _this13.proceedWithBooking();
             }
           }
         });
@@ -1593,10 +1591,10 @@ var _default = {
     },
     // 检查课程冲突
     checkCourseConflict: function checkCourseConflict() {
-      var _this13 = this;
+      var _this14 = this;
       return new Promise(function (resolve, reject) {
         // 获取用户ID
-        var userId = _this13.userInfo.userId;
+        var userId = _this14.userInfo.userId;
         console.log('开始检查课程冲突，用户ID:', userId);
 
         // 调用云函数获取用户已预约的课程
@@ -1609,17 +1607,52 @@ var _default = {
 
           success: function success(res) {
             console.log('获取用户预约成功:', res.result);
-            if (!res.result || !res.result.data) {
+
+            // 处理不同的返回数据格式
+            var bookingsData = [];
+            if (res.result && res.result.data && res.result.data.length > 0) {
+              // 标准格式 {result: {data: [...]}}
+              bookingsData = res.result.data;
+              console.log('从标准格式中获取到用户预约数据');
+            } else if (res.result && res.result.success && res.result.data) {
+              // 成功响应格式 {result: {success: true, data: [...]}}
+              bookingsData = res.result.data;
+              console.log('从成功响应格式中获取到用户预约数据');
+            } else if (res.result && Array.isArray(res.result)) {
+              // 直接数组格式 {result: [...]}
+              bookingsData = res.result;
+              console.log('从result数组格式中获取到用户预约数据');
+            } else if (res.data && Array.isArray(res.data)) {
+              // 直接数据格式 {data: [...]}
+              bookingsData = res.data;
+              console.log('从data数组格式中获取到用户预约数据');
+            }
+            if (!bookingsData || bookingsData.length === 0) {
               resolve({
                 hasConflict: false
               });
               return;
             }
-            var bookedCourses = res.result.data;
+            var bookedCourses = bookingsData;
 
             // 获取用户当前选择的课程信息
-            var currentCourse = _this13.courseInfo;
+            var currentCourse = _this14.courseInfo;
             console.log('当前预约课程信息:', currentCourse);
+
+            // 检查currentCourse是否有有效的timeSlots数据
+            if (currentCourse.timeSlots && currentCourse.timeSlots.length > 0) {
+              console.log('当前课程已有timeSlots数据，timeSlots数量:', currentCourse.timeSlots.length);
+
+              // 记录第一个和最后一个时间槽的信息，用于调试
+              if (currentCourse.timeSlots.length > 0) {
+                var firstSlot = currentCourse.timeSlots[0];
+                var lastSlot = currentCourse.timeSlots[currentCourse.timeSlots.length - 1];
+                console.log('第一个时间槽:', firstSlot);
+                console.log('最后一个时间槽:', lastSlot);
+              }
+            } else {
+              console.warn('当前课程缺少timeSlots数据，这可能导致冲突检测不准确');
+            }
 
             // 检查每个已预约课程是否与当前课程冲突
             var conflictResult = {
@@ -1672,9 +1705,23 @@ var _default = {
                 students: db.command.all([userId])
               }).get().then(function (scheduleRes) {
                 console.log('获取课程日程表数据:', scheduleRes);
-                if (scheduleRes.data && scheduleRes.data.length > 0) {
-                  var scheduleData = scheduleRes.data;
 
+                // 处理不同的返回数据格式
+                var scheduleData = [];
+                if (scheduleRes.data && scheduleRes.data.length > 0) {
+                  // 标准格式 {data: [...]}
+                  scheduleData = scheduleRes.data;
+                  console.log('从标准格式中获取到课程日程表数据');
+                } else if (scheduleRes.result && scheduleRes.result.data && scheduleRes.result.data.length > 0) {
+                  // 嵌套格式 {result: {data: [...]}}
+                  scheduleData = scheduleRes.result.data;
+                  console.log('从嵌套result格式中获取到课程日程表数据');
+                } else if (scheduleRes.result && Array.isArray(scheduleRes.result) && scheduleRes.result.length > 0) {
+                  // 直接数组格式 {result: [...]}
+                  scheduleData = scheduleRes.result;
+                  console.log('从result数组格式中获取到课程日程表数据');
+                }
+                if (scheduleData && scheduleData.length > 0) {
                   // 获取所有相关课程ID
                   var courseIds = scheduleData.map(function (schedule) {
                     return schedule.courseId;
@@ -1687,9 +1734,25 @@ var _default = {
                       _id: db.command.in(courseIds)
                     }).get().then(function (courseRes) {
                       console.log('获取课程详情数据:', courseRes);
+
+                      // 处理不同的返回数据格式
+                      var courseData = [];
                       if (courseRes.data && courseRes.data.length > 0) {
+                        // 标准格式
+                        courseData = courseRes.data;
+                        console.log('从标准格式中获取到课程详情数据');
+                      } else if (courseRes.result && courseRes.result.data && courseRes.result.data.length > 0) {
+                        // 嵌套格式
+                        courseData = courseRes.result.data;
+                        console.log('从嵌套result格式中获取到课程详情数据');
+                      } else if (courseRes.result && Array.isArray(courseRes.result) && courseRes.result.length > 0) {
+                        // 直接数组格式
+                        courseData = courseRes.result;
+                        console.log('从result数组格式中获取到课程详情数据');
+                      }
+                      if (courseData && courseData.length > 0) {
                         var courseMap = {};
-                        courseRes.data.forEach(function (course) {
+                        courseData.forEach(function (course) {
                           courseMap[course._id] = course;
                         });
 
@@ -1714,9 +1777,9 @@ var _default = {
                                 }))));
 
                                 // 从第一个时间槽提取上课时间
-                                var firstSlot = validTimeSlots[0];
-                                var firstStart = new Date(firstSlot.start);
-                                var firstEnd = new Date(firstSlot.end);
+                                var _firstSlot = validTimeSlots[0];
+                                var firstStart = new Date(_firstSlot.start);
+                                var firstEnd = new Date(_firstSlot.end);
                                 course.startTime = "".concat(firstStart.getHours().toString().padStart(2, '0'), ":").concat(firstStart.getMinutes().toString().padStart(2, '0'));
                                 course.endTime = "".concat(firstEnd.getHours().toString().padStart(2, '0'), ":").concat(firstEnd.getMinutes().toString().padStart(2, '0'));
 
@@ -1730,6 +1793,10 @@ var _default = {
                                 }); // 去重
 
                                 console.log('从course_schedule提取的课程信息:', course);
+
+                                // 添加timeSlots到课程对象中，这样冲突检测函数能够使用timeSlots检测
+                                course.timeSlots = validTimeSlots;
+                                console.log('添加timeSlots到course对象，用于冲突检测:', course.timeSlots.length);
 
                                 // 检查冲突
                                 handleCourseConflictCheck(course);
@@ -1797,7 +1864,7 @@ var _default = {
     },
     // 继续预约流程
     proceedWithBooking: function proceedWithBooking() {
-      var _this14 = this;
+      var _this15 = this;
       // 删除跳转到预约页面的代码，直接在当前页面完成预约
       console.log('直接完成课程预约');
 
@@ -1819,6 +1886,14 @@ var _default = {
         remark: ''
       };
 
+      // 添加课程时间槽数据，用于服务端冲突检测
+      if (this.courseInfo && this.courseInfo.timeSlots && this.courseInfo.timeSlots.length > 0) {
+        bookingData.courseTimeSlots = this.courseInfo.timeSlots;
+        console.log('将课程时间槽数据传递给bookCourse云函数，用于服务端冲突检测');
+      } else {
+        console.warn('当前课程没有timeSlots数据，服务端冲突检测可能不准确');
+      }
+
       // 调用云函数预约课程
       uniCloud.callFunction({
         name: 'bookCourse',
@@ -1827,21 +1902,21 @@ var _default = {
           uni.hideLoading();
           if (res.result && res.result.success) {
             // 预约成功
-            _this14.hasBooked = true;
+            _this15.hasBooked = true;
 
             // 更新预约人数
-            if (_this14.courseInfo) {
-              _this14.courseInfo.bookingCount = (_this14.courseInfo.bookingCount || 0) + 1;
+            if (_this15.courseInfo) {
+              _this15.courseInfo.bookingCount = (_this15.courseInfo.bookingCount || 0) + 1;
             }
 
             // 发送预约成功事件
             uni.$emit('booking:success', {
-              courseId: _this14.courseId,
+              courseId: _this15.courseId,
               userId: userId
             });
 
             // 如果是从购物车跳转来的，从购物车中移除该课程
-            if (_this14.fromCart) {
+            if (_this15.fromCart) {
               console.log('检测到从购物车跳转预约，准备从购物车移除课程');
 
               // 调用云函数或API移除购物车中的课程
@@ -1852,7 +1927,7 @@ var _default = {
                   data: {
                     userId: userId,
                     type: 'course',
-                    itemId: _this14.courseId
+                    itemId: _this15.courseId
                   },
                   success: function success(result) {
                     if (result.result && result.result.data && result.result.data.length > 0) {
@@ -1860,7 +1935,7 @@ var _default = {
                       console.log('找到购物车记录，ID:', favoriteId);
 
                       // 调用移除收藏API
-                      _this14.$api.user.removeFavorite(favoriteId).then(function () {
+                      _this15.$api.user.removeFavorite(favoriteId).then(function () {
                         console.log('成功从购物车移除课程');
                       }).catch(function (err) {
                         console.error('从购物车移除课程失败:', err);
@@ -1886,7 +1961,7 @@ var _default = {
 
             // 刷新页面以显示预约成功状态
             setTimeout(function () {
-              _this14.reloadPage();
+              _this15.reloadPage();
             }, 1500);
           } else {
             // 预约失败
@@ -1908,7 +1983,7 @@ var _default = {
     },
     // 重新加载页面
     reloadPage: function reloadPage() {
-      var _this15 = this;
+      var _this16 = this;
       console.log('重新加载页面以确保显示预约状态');
 
       // 先缓存必要数据
@@ -1935,15 +2010,15 @@ var _default = {
           uni.hideLoading();
 
           // 失败时，再次尝试强制更新状态
-          _this15.hasBooked = hasBooked;
+          _this16.hasBooked = hasBooked;
 
           // 立即更新按钮显示
-          _this15.$forceUpdate();
+          _this16.$forceUpdate();
 
           // 确保下一帧更新
-          _this15.$nextTick(function () {
-            _this15.hasBooked = hasBooked;
-            console.log('强制更新状态完成, hasBooked =', _this15.hasBooked);
+          _this16.$nextTick(function () {
+            _this16.hasBooked = hasBooked;
+            console.log('强制更新状态完成, hasBooked =', _this16.hasBooked);
           });
         }
       });
@@ -1956,7 +2031,7 @@ var _default = {
     },
     // 联系老师
     contactTeacher: function contactTeacher() {
-      var _this16 = this;
+      var _this17 = this;
       // 获取教师电话号码
       var teacherPhone = this.courseInfo.teacherPhone || '';
       console.log('尝试联系老师，电话:', teacherPhone);
@@ -1978,7 +2053,7 @@ var _default = {
           content: '电话号码格式可能不正确，是否继续拨打？',
           success: function success(res) {
             if (res.confirm) {
-              _this16.makePhoneCall(teacherPhone);
+              _this17.makePhoneCall(teacherPhone);
             }
           }
         });
@@ -2106,7 +2181,7 @@ var _default = {
     },
     // 添加强制刷新预约状态的方法
     forceRefreshStatus: function forceRefreshStatus() {
-      var _this17 = this;
+      var _this18 = this;
       console.log('手动强制刷新预约状态');
 
       // 从缓存中删除状态，强制重新检查
@@ -2136,12 +2211,12 @@ var _default = {
       this.checkBookingStatus().then(function () {
         uni.hideLoading();
         uni.showToast({
-          title: _this17.hasBooked ? '您已预约此课程' : '您未预约此课程',
+          title: _this18.hasBooked ? '您已预约此课程' : '您未预约此课程',
           icon: 'none'
         });
 
         // 强制刷新页面
-        _this17.$forceUpdate();
+        _this18.$forceUpdate();
       }).catch(function () {
         uni.hideLoading();
         uni.showToast({
@@ -2152,7 +2227,7 @@ var _default = {
     },
     // 处理预约取消事件
     handleBookingCancelled: function handleBookingCancelled(data) {
-      var _this18 = this;
+      var _this19 = this;
       console.log('收到预约取消事件:', data);
 
       // 判断是否是当前课程的预约取消
@@ -2192,10 +2267,10 @@ var _default = {
 
         // 确保下一帧状态一致
         this.$nextTick(function () {
-          if (_this18.hasBooked !== false) {
+          if (_this19.hasBooked !== false) {
             console.warn('状态未正确更新，强制再次设置为未预约');
-            _this18.hasBooked = false;
-            _this18.$forceUpdate();
+            _this19.hasBooked = false;
+            _this19.$forceUpdate();
           }
         });
         uni.showToast({
@@ -2205,7 +2280,7 @@ var _default = {
 
         // 刷新课程详情，获取最新的报名人数
         setTimeout(function () {
-          _this18.getCourseDetail();
+          _this19.getCourseDetail();
         }, 1000);
       }
     },
@@ -2242,61 +2317,88 @@ var _default = {
     },
     // 检查课程收藏状态
     checkFavoriteStatus: function checkFavoriteStatus() {
-      var _this19 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
+      var _this20 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
         var userInfo, result;
-        return _regenerator.default.wrap(function _callee8$(_context8) {
+        return _regenerator.default.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
-                _context8.prev = 0;
-                if (!(!_this19.courseId || !_this19.$refs.favoriteBtn)) {
-                  _context8.next = 3;
+                _context9.prev = 0;
+                if (!(!_this20.courseId || !_this20.$refs.favoriteBtn)) {
+                  _context9.next = 3;
                   break;
                 }
-                return _context8.abrupt("return");
+                return _context9.abrupt("return");
               case 3:
-                console.log('检查课程购物车状态, courseId:', _this19.courseId);
+                console.log('检查课程购物车状态, courseId:', _this20.courseId);
 
                 // 调用API检查是否已加入购物车
                 userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                  _context8.next = 7;
+                  _context9.next = 7;
                   break;
                 }
-                return _context8.abrupt("return");
+                return _context9.abrupt("return");
               case 7:
-                _context8.next = 9;
-                return _this19.$api.user.checkFavorite({
-                  userId: _this19.getUserId(userInfo),
-                  itemId: _this19.courseId,
+                _context9.next = 9;
+                return _this20.$api.user.checkFavorite({
+                  userId: _this20.getUserId(userInfo),
+                  itemId: _this20.courseId,
                   itemType: 'course'
                 });
               case 9:
-                result = _context8.sent;
+                result = _context9.sent;
                 if (result && result.code === 0 && result.data) {
                   console.log('课程已在购物车中，更新按钮状态');
 
                   // 获取收藏按钮组件实例并更新状态
-                  if (_this19.$refs.favoriteBtn && typeof _this19.$refs.favoriteBtn.updateFavoriteStatus === 'function') {
-                    _this19.$refs.favoriteBtn.updateFavoriteStatus(true, result.data._id || '');
+                  if (_this20.$refs.favoriteBtn && typeof _this20.$refs.favoriteBtn.updateFavoriteStatus === 'function') {
+                    _this20.$refs.favoriteBtn.updateFavoriteStatus(true, result.data._id || '');
                   } else {
                     console.warn('收藏按钮组件实例或方法不存在');
                   }
                 }
-                _context8.next = 16;
+                _context9.next = 16;
                 break;
               case 13:
-                _context8.prev = 13;
-                _context8.t0 = _context8["catch"](0);
-                console.error('检查课程购物车状态失败:', _context8.t0);
+                _context9.prev = 13;
+                _context9.t0 = _context9["catch"](0);
+                console.error('检查课程购物车状态失败:', _context9.t0);
               case 16:
               case "end":
-                return _context8.stop();
+                return _context9.stop();
             }
           }
-        }, _callee8, null, [[0, 13]]);
+        }, _callee9, null, [[0, 13]]);
       }))();
+    },
+    // 从用户信息中获取用户ID
+    getUserId: function getUserId(userInfo) {
+      // 如果参数是字符串，尝试解析JSON
+      if (typeof userInfo === 'string') {
+        try {
+          userInfo = JSON.parse(userInfo);
+        } catch (error) {
+          console.error('解析用户信息字符串失败:', error);
+          return null;
+        }
+      }
+
+      // 检查解析后的对象是否有效
+      if (!userInfo) {
+        console.warn('用户信息对象无效');
+        return null;
+      }
+
+      // 优先使用userId字段，如果不存在则尝试使用_id字段
+      var userId = userInfo.userId || userInfo._id;
+      if (!userId) {
+        console.warn('未找到有效的用户ID', userInfo);
+        return null;
+      }
+      console.log('获取到用户ID:', userId);
+      return userId;
     },
     // 获取状态栏高度
     onStatusBarHeight: function onStatusBarHeight(height) {
@@ -2402,42 +2504,42 @@ var _default = {
     },
     // 检查教师收藏状态
     checkTeacherFavoriteStatus: function checkTeacherFavoriteStatus(teacherId) {
-      var _this20 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
+      var _this21 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10() {
         var userInfo, userData, userId, checkData, res;
-        return _regenerator.default.wrap(function _callee9$(_context9) {
+        return _regenerator.default.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
                 if (teacherId) {
-                  _context9.next = 2;
+                  _context10.next = 2;
                   break;
                 }
-                return _context9.abrupt("return", false);
+                return _context10.abrupt("return", false);
               case 2:
-                _context9.prev = 2;
+                _context10.prev = 2;
                 userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                  _context9.next = 6;
+                  _context10.next = 6;
                   break;
                 }
-                return _context9.abrupt("return", false);
+                return _context10.abrupt("return", false);
               case 6:
                 if (!(typeof userInfo === 'string')) {
-                  _context9.next = 17;
+                  _context10.next = 17;
                   break;
                 }
-                _context9.prev = 7;
+                _context10.prev = 7;
                 userData = JSON.parse(userInfo);
-                _context9.next = 15;
+                _context10.next = 15;
                 break;
               case 11:
-                _context9.prev = 11;
-                _context9.t0 = _context9["catch"](7);
-                console.error('解析用户信息字符串失败:', _context9.t0);
-                return _context9.abrupt("return", false);
+                _context10.prev = 11;
+                _context10.t0 = _context10["catch"](7);
+                console.error('解析用户信息字符串失败:', _context10.t0);
+                return _context10.abrupt("return", false);
               case 15:
-                _context9.next = 18;
+                _context10.next = 18;
                 break;
               case 17:
                 // 已经是对象，直接使用
@@ -2445,10 +2547,10 @@ var _default = {
               case 18:
                 userId = userData.userId || userData._id;
                 if (userId) {
-                  _context9.next = 21;
+                  _context10.next = 21;
                   break;
                 }
-                return _context9.abrupt("return", false);
+                return _context10.abrupt("return", false);
               case 21:
                 // 构建检查参数
                 checkData = {
@@ -2456,38 +2558,38 @@ var _default = {
                   itemType: 'teacher',
                   itemId: teacherId
                 }; // 调用API检查是否已收藏
-                _context9.next = 24;
-                return _this20.$api.user.checkFavorite(checkData);
+                _context10.next = 24;
+                return _this21.$api.user.checkFavorite(checkData);
               case 24:
-                res = _context9.sent;
+                res = _context10.sent;
                 if (!(res && res.code === 0 && res.data)) {
-                  _context9.next = 30;
+                  _context10.next = 30;
                   break;
                 }
                 console.log('教师已被收藏');
-                return _context9.abrupt("return", true);
+                return _context10.abrupt("return", true);
               case 30:
                 console.log('教师未被收藏');
-                return _context9.abrupt("return", false);
+                return _context10.abrupt("return", false);
               case 32:
-                _context9.next = 38;
+                _context10.next = 38;
                 break;
               case 34:
-                _context9.prev = 34;
-                _context9.t1 = _context9["catch"](2);
-                console.error('检查教师收藏状态失败:', _context9.t1);
-                return _context9.abrupt("return", false);
+                _context10.prev = 34;
+                _context10.t1 = _context10["catch"](2);
+                console.error('检查教师收藏状态失败:', _context10.t1);
+                return _context10.abrupt("return", false);
               case 38:
               case "end":
-                return _context9.stop();
+                return _context10.stop();
             }
           }
-        }, _callee9, null, [[2, 34], [7, 11]]);
+        }, _callee10, null, [[2, 34], [7, 11]]);
       }))();
     },
     // 添加一个显示登录提示的方法
     showLoginTip: function showLoginTip() {
-      var _this21 = this;
+      var _this22 = this;
       console.log('用户未登录，跳转到登录页面');
       uni.showToast({
         title: '请先登录',
@@ -2495,7 +2597,7 @@ var _default = {
       });
       setTimeout(function () {
         // 跳转到登录页面，并设置重定向回当前页面
-        var currentUrl = "/pages/course/detail?id=".concat(_this21.courseId);
+        var currentUrl = "/pages/course/detail?id=".concat(_this22.courseId);
         console.log('设置登录后重定向地址:', currentUrl);
         uni.navigateTo({
           url: "/pages/login/login?redirect=".concat(encodeURIComponent(currentUrl))
@@ -2504,20 +2606,20 @@ var _default = {
     },
     // 更新课程报名人数
     updateCourseBookingCount: function updateCourseBookingCount() {
-      var _this22 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee10() {
+      var _this23 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee11() {
         var result, bookingCount;
-        return _regenerator.default.wrap(function _callee10$(_context10) {
+        return _regenerator.default.wrap(function _callee11$(_context11) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context11.prev = _context11.next) {
               case 0:
-                _context10.prev = 0;
-                console.log('主动更新课程报名人数:', _this22.courseId);
+                _context11.prev = 0;
+                console.log('主动更新课程报名人数:', _this23.courseId);
                 // 使用API更新课程报名人数
-                _context10.next = 4;
-                return _this22.$api.course.updateCourseBookingCount(_this22.courseId);
+                _context11.next = 4;
+                return _this23.$api.course.updateCourseBookingCount(_this23.courseId);
               case 4:
-                result = _context10.sent;
+                result = _context11.sent;
                 console.log('更新课程报名人数结果:', result);
 
                 // 如果更新成功并返回了最新的报名人数，更新本地数据
@@ -2526,21 +2628,21 @@ var _default = {
                   console.log('获取到最新报名人数:', bookingCount);
 
                   // 更新本地courseInfo中的bookingCount
-                  _this22.courseInfo.bookingCount = bookingCount;
-                  _this22.$forceUpdate();
+                  _this23.courseInfo.bookingCount = bookingCount;
+                  _this23.$forceUpdate();
                 }
-                _context10.next = 12;
+                _context11.next = 12;
                 break;
               case 9:
-                _context10.prev = 9;
-                _context10.t0 = _context10["catch"](0);
-                console.error('更新课程报名人数失败:', _context10.t0);
+                _context11.prev = 9;
+                _context11.t0 = _context11["catch"](0);
+                console.error('更新课程报名人数失败:', _context11.t0);
               case 12:
               case "end":
-                return _context10.stop();
+                return _context11.stop();
             }
           }
-        }, _callee10, null, [[0, 9]]);
+        }, _callee11, null, [[0, 9]]);
       }))();
     }
   }

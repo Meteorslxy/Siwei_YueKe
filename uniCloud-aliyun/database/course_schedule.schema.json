@@ -34,10 +34,10 @@
 				"required": ["start", "end"],
 				"properties": {
 					"start": {
-						"bsonType": "date"
+						"bsonType": "string"
 					},
 					"end": {
-						"bsonType": "date"
+						"bsonType": "string"
 					},
 					"status": {
 						"bsonType": "string",

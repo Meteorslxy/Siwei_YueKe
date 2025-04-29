@@ -1635,326 +1635,241 @@ function getMatchingDates(startDate, endDate, weekDays) {
 }
 
 /**
- * 检测两个课程是否有时间冲突
- * @param {Object} course1 - 第一个课程
- * @param {Object} course2 - 第二个课程
- * @returns {Object} - 冲突信息，如果有冲突返回 {hasConflict: true, conflictDates: [...]}，否则返回 {hasConflict: false}
+ * 检测新课程与用户所有已有课程的时间冲突（支持批量检测）
+ * @param {Object} newCourse - 待检测的新课程
+ * @param {Array} existingCourses - 用户已预约的所有课程数组
+ * @returns {Object} - 返回冲突检测结果
+ *                    { 
+ *                      hasConflict: boolean,
+ *                      conflicts: [{
+ *                        courseId: string,
+ *                        courseName: string,
+ *                        conflictSlots: Array<{newSlot: TimeSlot, existingSlot: TimeSlot}>
+ *                      }]
+ *                    }
  */
-function checkCoursesConflict(course1, course2) {
-  console.log('======= 开始检测课程冲突 =======');
-  console.log('课程1:', course1 ? course1.title || course1.courseTitle || '未命名课程1' : '无效课程1', course1 ? "ID: ".concat(course1._id || '未知') : '');
-  console.log('课程2:', course2 ? course2.title || course2.courseTitle || '未命名课程2' : '无效课程2', course2 ? "ID: ".concat(course2._id || '未知') : '');
-
-  // 验证课程对象
-  if (!course1 || !course2) {
-    console.error('无效的课程对象');
-    return {
-      hasConflict: false
-    };
-  }
-
-  // 检查是否有timeSlots数据（来自course_schedule）
-  if (course1.timeSlots && course1.timeSlots.length > 0 && course2.timeSlots && course2.timeSlots.length > 0) {
-    console.log('检测到两个课程都有timeSlots数据，使用timeSlots进行冲突检测');
-
-    // 直接比较timeSlots中的时间，确保处理start和end可能颠倒的情况
-    var _conflictDates = [];
-    var _iterator3 = _createForOfIteratorHelper(course1.timeSlots),
-      _step3;
-    try {
-      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-        var slot1 = _step3.value;
-        var _iterator4 = _createForOfIteratorHelper(course2.timeSlots),
-          _step4;
-        try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-            var slot2 = _step4.value;
-            // 获取两个时间
-            var time1Start = new Date(slot1.start);
-            var time1End = new Date(slot1.end);
-            var time2Start = new Date(slot2.start);
-            var time2End = new Date(slot2.end);
-
-            // 确保start早于end（处理可能颠倒的情况）
-            var slot1Start = time1Start < time1End ? time1Start : time1End;
-            var slot1End = time1Start < time1End ? time1End : time1Start;
-            var slot2Start = time2Start < time2End ? time2Start : time2End;
-            var slot2End = time2Start < time2End ? time2End : time2Start;
-
-            // 检查日期（忽略时间）是否相同
-            var date1 = new Date(slot1Start);
-            date1.setHours(0, 0, 0, 0);
-            var date2 = new Date(slot2Start);
-            date2.setHours(0, 0, 0, 0);
-            if (date1.getTime() === date2.getTime()) {
-              // 同一天，检查时间是否重叠
-              var hasTimeOverlap = slot1Start < slot2End && slot1End > slot2Start;
-              if (hasTimeOverlap) {
-                console.log('检测到冲突:', formatDate(slot1Start), "".concat(formatTime(slot1Start), "-").concat(formatTime(slot1End), " vs ").concat(formatTime(slot2Start), "-").concat(formatTime(slot2End)));
-
-                // 添加到冲突日期列表
-                _conflictDates.push(new Date(date1));
-              }
-            }
-          }
-        } catch (err) {
-          _iterator4.e(err);
-        } finally {
-          _iterator4.f();
-        }
-      }
-
-      // 如果找到冲突，返回结果
-    } catch (err) {
-      _iterator3.e(err);
-    } finally {
-      _iterator3.f();
-    }
-    if (_conflictDates.length > 0) {
-      console.log('通过timeSlots检测到冲突，冲突日期数:', _conflictDates.length);
-      return {
-        hasConflict: true,
-        conflictDates: _conflictDates
-      };
-    }
-
-    // 没有找到冲突
-    console.log('通过timeSlots未检测到冲突');
-    return {
-      hasConflict: false
-    };
-  }
-
-  // 如果没有timeSlots数据，使用原有的冲突检测逻辑
-  console.log('使用常规方法检测冲突');
-
-  // 记录所有相关字段，便于调试
-  console.log('课程1字段:');
-  console.log('  开始日期:', course1.startDate, (0, _typeof2.default)(course1.startDate));
-  console.log('  结束日期:', course1.endDate, (0, _typeof2.default)(course1.endDate));
-  console.log('  开始时间:', course1.startTime, (0, _typeof2.default)(course1.startTime));
-  console.log('  结束时间:', course1.endTime, (0, _typeof2.default)(course1.endTime));
-  console.log('  上课日:', course1.classTime, Array.isArray(course1.classTime) ? course1.classTime.join(',') : course1.classTime);
-  console.log('课程2字段:');
-  console.log('  开始日期:', course2.startDate, (0, _typeof2.default)(course2.startDate));
-  console.log('  结束日期:', course2.endDate, (0, _typeof2.default)(course2.endDate));
-  console.log('  开始时间:', course2.startTime, (0, _typeof2.default)(course2.startTime));
-  console.log('  结束时间:', course2.endTime, (0, _typeof2.default)(course2.endTime));
-  console.log('  上课日:', course2.classTime, Array.isArray(course2.classTime) ? course2.classTime.join(',') : course2.classTime);
-
-  // 验证必要字段
-  if (!course1.startDate || !course1.endDate || !course1.startTime || !course1.endTime || !course2.startDate || !course2.endDate || !course2.startTime || !course2.endTime) {
-    console.error('课程缺少必要的时间字段');
-    return {
-      hasConflict: false
-    };
-  }
-
-  // 确保classTime字段存在且为数组
-  if (!course1.classTime) course1.classTime = ['每天'];
-  if (!course2.classTime) course2.classTime = ['每天'];
-  if (!Array.isArray(course1.classTime)) course1.classTime = [course1.classTime];
-  if (!Array.isArray(course2.classTime)) course2.classTime = [course2.classTime];
-  if (course1.classTime.length === 0) course1.classTime = ['每天'];
-  if (course2.classTime.length === 0) course2.classTime = ['每天'];
-
-  // 解析课程1的日期和时间
-  var course1Start = parseDate(course1.startDate);
-  var course1End = parseDate(course1.endDate);
-  var course1StartMinutes = parseTimeToMinutes(course1.startTime);
-  var course1EndMinutes = parseTimeToMinutes(course1.endTime);
-  var course1WeekDays = course1.classTime;
-
-  // 解析课程2的日期和时间
-  var course2Start = parseDate(course2.startDate);
-  var course2End = parseDate(course2.endDate);
-  var course2StartMinutes = parseTimeToMinutes(course2.startTime);
-  var course2EndMinutes = parseTimeToMinutes(course2.endTime);
-  var course2WeekDays = course2.classTime;
-  console.log('解析后的课程1时间:');
-  console.log('  开始日期:', course1Start ? course1Start.toISOString() : null);
-  console.log('  结束日期:', course1End ? course1End.toISOString() : null);
-  console.log('  开始时间(分钟):', course1StartMinutes);
-  console.log('  结束时间(分钟):', course1EndMinutes);
-  console.log('  上课日:', course1WeekDays);
-  console.log('解析后的课程2时间:');
-  console.log('  开始日期:', course2Start ? course2Start.toISOString() : null);
-  console.log('  结束日期:', course2End ? course2End.toISOString() : null);
-  console.log('  开始时间(分钟):', course2StartMinutes);
-  console.log('  结束时间(分钟):', course2EndMinutes);
-  console.log('  上课日:', course2WeekDays);
-
-  // 验证解析结果
-  if (!course1Start || !course1End || !course2Start || !course2End) {
-    console.error('课程日期解析失败');
-    return {
-      hasConflict: false
-    };
-  }
-
-  // 如果日期范围没有重叠，则没有冲突
-  var datesOverlap = !(course1End < course2Start || course2End < course1Start);
-  console.log('日期范围是否重叠:', datesOverlap ? '是' : '否');
-  if (!datesOverlap) {
-    console.log('课程日期范围无重叠，无冲突');
-    return {
-      hasConflict: false
-    };
-  }
-
-  // 如果时间没有重叠，则没有冲突
-  var timesOverlap = isTimeOverlap(course1StartMinutes, course1EndMinutes, course2StartMinutes, course2EndMinutes);
-  console.log('时间段是否重叠:', timesOverlap ? '是' : '否');
-  if (!timesOverlap) {
-    console.log('课程时间段无重叠，无冲突');
-    return {
-      hasConflict: false
-    };
-  }
-
-  // 检查上课日是否有重叠（例如都在周一上课）
-  var hasWeekDayOverlap = false;
-  var overlappingDays = [];
-  var _iterator5 = _createForOfIteratorHelper(course1WeekDays),
-    _step5;
-  try {
-    for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-      var day1 = _step5.value;
-      var _iterator7 = _createForOfIteratorHelper(course2WeekDays),
-        _step7;
-      try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-          var day2 = _step7.value;
-          // 标准化星期几表示
-          var weekDayMap = {
-            // 中文格式
-            "周日": "周日",
-            "周一": "周一",
-            "周二": "周二",
-            "周三": "周三",
-            "周四": "周四",
-            "周五": "周五",
-            "周六": "周六",
-            "星期日": "周日",
-            "星期一": "周一",
-            "星期二": "周二",
-            "星期三": "周三",
-            "星期四": "周四",
-            "星期五": "周五",
-            "星期六": "周六",
-            "礼拜日": "周日",
-            "礼拜一": "周一",
-            "礼拜二": "周二",
-            "礼拜三": "周三",
-            "礼拜四": "周四",
-            "礼拜五": "周五",
-            "礼拜六": "周六",
-            "日": "周日",
-            "一": "周一",
-            "二": "周二",
-            "三": "周三",
-            "四": "周四",
-            "五": "周五",
-            "六": "周六",
-            // 英文格式
-            "Sun": "周日",
-            "Mon": "周一",
-            "Tue": "周二",
-            "Wed": "周三",
-            "Thu": "周四",
-            "Fri": "周五",
-            "Sat": "周六",
-            "Sunday": "周日",
-            "Monday": "周一",
-            "Tuesday": "周二",
-            "Wednesday": "周三",
-            "Thursday": "周四",
-            "Friday": "周五",
-            "Saturday": "周六",
-            // 如果是每天，则特殊处理
-            "每天": "每天"
-          };
-          var normalizedDay1 = weekDayMap[day1] || day1;
-          var normalizedDay2 = weekDayMap[day2] || day2;
-
-          // 如果任一为"每天"或两个值相等，则认为有重叠
-          if (normalizedDay1 === "每天" || normalizedDay2 === "每天" || normalizedDay1 === normalizedDay2) {
-            hasWeekDayOverlap = true;
-            overlappingDays.push(normalizedDay1 === "每天" ? normalizedDay2 : normalizedDay1);
-          }
-        }
-      } catch (err) {
-        _iterator7.e(err);
-      } finally {
-        _iterator7.f();
-      }
-    }
-  } catch (err) {
-    _iterator5.e(err);
-  } finally {
-    _iterator5.f();
-  }
-  console.log('上课日是否有重叠:', hasWeekDayOverlap ? "\u662F\uFF0C\u91CD\u53E0\u65E5: ".concat(overlappingDays.join(', ')) : '否');
-  if (!hasWeekDayOverlap) {
-    console.log('课程上课日无重叠，无冲突');
-    return {
-      hasConflict: false
-    };
-  }
-
-  // 确定重叠的日期范围
-  var overlapStart = new Date(Math.max(course1Start.getTime(), course2Start.getTime()));
-  var overlapEnd = new Date(Math.min(course1End.getTime(), course2End.getTime()));
-  console.log("\u91CD\u53E0\u65E5\u671F\u8303\u56F4: ".concat(overlapStart.toISOString().split('T')[0], " \u81F3 ").concat(overlapEnd.toISOString().split('T')[0]));
-
-  // 获取课程1在重叠日期范围内的所有上课日期
-  var course1Dates = getMatchingDates(overlapStart, overlapEnd, course1WeekDays);
-  console.log("\u8BFE\u7A0B1\u5728\u91CD\u53E0\u8303\u56F4\u5185\u7684\u4E0A\u8BFE\u65E5\u671F\u6570\u91CF: ".concat(course1Dates.length));
-
-  // 获取课程2在重叠日期范围内的所有上课日期
-  var course2Dates = getMatchingDates(overlapStart, overlapEnd, course2WeekDays);
-  console.log("\u8BFE\u7A0B2\u5728\u91CD\u53E0\u8303\u56F4\u5185\u7684\u4E0A\u8BFE\u65E5\u671F\u6570\u91CF: ".concat(course2Dates.length));
-
-  // 查找冲突的日期
-  var conflictDates = [];
-
-  // 优化: 创建一个映射来快速查找课程2的日期
-  var course2DateMap = new Map();
-  course2Dates.forEach(function (date) {
-    var key = formatDate(date);
-    course2DateMap.set(key, date);
+function checkCoursesConflict(newCourse) {
+  var existingCourses = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  console.log('开始执行checkCoursesConflict函数:', {
+    newCourse: newCourse,
+    existingCourses: existingCourses
   });
 
-  // 遍历课程1的日期，查找与课程2日期相同的
-  var _iterator6 = _createForOfIteratorHelper(course1Dates),
-    _step6;
-  try {
-    for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-      var _date = _step6.value;
-      var key = formatDate(_date);
-      if (course2DateMap.has(key)) {
-        // 日期相同，且之前已确认时间有重叠，存在冲突
-        conflictDates.push(new Date(_date));
-        console.log("\u53D1\u73B0\u51B2\u7A81\u65E5\u671F: ".concat(key));
-      }
+  // 输入验证增强版
+  if (!newCourse) {
+    console.error('新课程对象为空');
+    return {
+      hasConflict: false,
+      conflicts: []
+    };
+  }
+
+  // 兼容单个课程和多个课程的情况
+  if (!Array.isArray(existingCourses)) {
+    if (existingCourses && (0, _typeof2.default)(existingCourses) === 'object') {
+      existingCourses = [existingCourses];
+    } else {
+      existingCourses = [];
     }
-  } catch (err) {
-    _iterator6.e(err);
-  } finally {
-    _iterator6.f();
   }
-  var result = {
-    hasConflict: conflictDates.length > 0,
-    conflictDates: conflictDates
+  console.log("\u5F00\u59CB\u68C0\u6D4B\u8BFE\u7A0B\u51B2\u7A81: \u65B0\u8BFE\u7A0B=\"".concat(newCourse.title || newCourse.name || '未命名', "\", \u5DF2\u6709\u8BFE\u7A0B\u6570\u91CF=").concat(existingCourses.length));
+
+  // 处理timeSlots和time_slots字段兼容性
+  var getTimeSlots = function getTimeSlots(course) {
+    return course.timeSlots || course.time_slots || [];
   };
-  console.log("\u51B2\u7A81\u68C0\u6D4B\u7ED3\u679C: ".concat(result.hasConflict ? '有冲突' : '无冲突', ", \u51B2\u7A81\u65E5\u671F\u6570\u91CF: ").concat(conflictDates.length));
-  if (result.hasConflict) {
-    console.log('冲突日期列表:', conflictDates.map(function (d) {
-      return formatDate(d);
-    }).join(', '));
+
+  // 检查新课程是否有时间槽
+  var newCourseTimeSlots = getTimeSlots(newCourse);
+  console.log('新课程的时间槽:', newCourseTimeSlots);
+  if (!newCourseTimeSlots.length) {
+    console.error('新课程缺少有效时间槽');
+    return {
+      hasConflict: false,
+      conflicts: []
+    };
   }
-  console.log('======= 结束检测课程冲突 =======');
+
+  // 预处理新课程时间槽（带缓存）
+  var newSlots = preprocessSlots(newCourseTimeSlots);
+  console.log('预处理后的新课程时间槽:', newSlots);
+  if (!newSlots.length) {
+    console.warn('新课程无有效时间槽');
+    return {
+      hasConflict: false,
+      conflicts: []
+    };
+  }
+
+  // 冲突结果容器
+  var conflicts = [];
+
+  // 优化后的检测流程
+  existingCourses.forEach(function (existingCourse) {
+    if (!existingCourse) return;
+    var courseName = existingCourse.title || existingCourse.name || existingCourse.courseTitle || '未命名课程';
+    var courseId = existingCourse._id || existingCourse.id || existingCourse.courseId || '';
+    console.log("\u68C0\u67E5\u4E0E\u8BFE\u7A0B\"".concat(courseName, "\"(").concat(courseId, ")\u7684\u51B2\u7A81"));
+    var existingTimeSlots = getTimeSlots(existingCourse);
+    console.log('现有课程的时间槽:', existingTimeSlots);
+    var existingSlots = preprocessSlots(existingTimeSlots);
+    console.log('预处理后的现有课程时间槽:', existingSlots);
+    if (!existingSlots.length) {
+      console.log("\u8BFE\u7A0B\"".concat(courseName, "\"\u65E0\u6709\u6548\u65F6\u95F4\u69FD\uFF0C\u8DF3\u8FC7\u51B2\u7A81\u68C0\u6D4B"));
+      return;
+    }
+
+    // 构建日期索引加速检测
+    var dateIndex = buildDateIndex(existingSlots);
+    console.log('构建的日期索引:', dateIndex);
+    var courseConflicts = [];
+
+    // 对每个新课程时间槽检查冲突
+    newSlots.forEach(function (newSlot) {
+      // 使用日期索引快速筛选可能冲突的时段
+      var date = newSlot.date;
+      console.log("\u68C0\u67E5\u65E5\u671F ".concat(date, " \u7684\u65F6\u95F4\u69FD"));
+      var candidateSlots = dateIndex[date] || [];
+      console.log("\u65E5\u671F ".concat(date, " \u6709 ").concat(candidateSlots.length, " \u4E2A\u5019\u9009\u65F6\u95F4\u69FD"));
+
+      // 对每个候选时间槽检查时间重叠
+      candidateSlots.forEach(function (existingSlot) {
+        console.log('检查时间重叠:', {
+          新课程: "".concat(formatTime(newSlot.start), "-").concat(formatTime(newSlot.end)),
+          现有课程: "".concat(formatTime(existingSlot.start), "-").concat(formatTime(existingSlot.end))
+        });
+
+        // 更健壮的时间重叠检测
+        if (checkTimeOverlap(newSlot, existingSlot)) {
+          console.log("\u68C0\u6D4B\u5230\u65F6\u95F4\u51B2\u7A81: ".concat(newSlot.date, " ").concat(formatTime(newSlot.start), "-").concat(formatTime(newSlot.end), " vs ").concat(formatTime(existingSlot.start), "-").concat(formatTime(existingSlot.end)));
+          courseConflicts.push({
+            newSlot: formatSlot(newSlot),
+            existingSlot: formatSlot(existingSlot)
+          });
+        } else {
+          console.log('时间无重叠，无冲突');
+        }
+      });
+    });
+
+    // 如果有冲突，添加到结果中
+    if (courseConflicts.length > 0) {
+      conflicts.push({
+        courseId: courseId,
+        courseName: courseName,
+        conflictSlots: courseConflicts
+      });
+    }
+  });
+
+  // 构建最终结果
+  var result = {
+    hasConflict: conflicts.length > 0,
+    conflicts: conflicts
+  };
+  console.log("\u51B2\u7A81\u68C0\u6D4B\u7ED3\u679C: ".concat(result.hasConflict ? '有冲突' : '无冲突', ", \u51B2\u7A81\u8BFE\u7A0B\u6570: ").concat(conflicts.length));
   return result;
+}
+
+// 工具函数集
+var SLOT_CACHE = new WeakMap();
+
+// 带缓存的时间槽预处理
+function preprocessSlots(slots) {
+  if (!slots || !Array.isArray(slots)) return [];
+  if (SLOT_CACHE.has(slots)) return SLOT_CACHE.get(slots);
+  console.log('预处理时间槽，原始数据:', JSON.stringify(slots));
+  var validSlots = slots.map(function (slot) {
+    try {
+      if (!slot || !slot.start || !slot.end) {
+        console.log('时间槽缺少开始或结束时间:', slot);
+        return null;
+      }
+
+      // 转换开始和结束时间为Date对象
+      var start, end;
+      try {
+        start = slot.start instanceof Date ? slot.start : new Date(slot.start);
+        end = slot.end instanceof Date ? slot.end : new Date(slot.end);
+      } catch (err) {
+        console.error('转换日期对象失败:', err, slot);
+        return null;
+      }
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        console.log('无效的日期格式:', {
+          start: start,
+          end: end,
+          slot: slot
+        });
+        return null;
+      }
+
+      // 允许开始时间和结束时间相等，但不能结束时间早于开始时间
+      if (start > end) {
+        console.log('开始时间晚于结束时间:', {
+          start: start,
+          end: end,
+          slot: slot
+        });
+        return null;
+      }
+      var date = formatDate(start);
+      console.log("\u5904\u7406\u65F6\u95F4\u69FD: ".concat(date, " ").concat(formatTime(start), "-").concat(formatTime(end)));
+      return {
+        start: start,
+        end: end,
+        date: date,
+        // YYYY-MM-DD
+        timestamp: start.getTime(),
+        originalSlot: slot
+      };
+    } catch (e) {
+      console.error('处理时间槽出错:', e, slot);
+      return null;
+    }
+  }).filter(Boolean).sort(function (a, b) {
+    return a.timestamp - b.timestamp;
+  });
+  console.log("\u9884\u5904\u7406\u540E\u7684\u6709\u6548\u65F6\u95F4\u69FD\u6570\u91CF: ".concat(validSlots.length));
+  SLOT_CACHE.set(slots, validSlots);
+  return validSlots;
+}
+
+// 构建日期索引 { YYYY-MM-DD: [slots] }
+function buildDateIndex(slots) {
+  return slots.reduce(function (acc, slot) {
+    if (!acc[slot.date]) {
+      acc[slot.date] = [];
+    }
+    acc[slot.date].push(slot);
+    return acc;
+  }, {});
+}
+
+// 精确时间重叠检测（处理时间槽对象）
+function checkTimeOverlap(a, b) {
+  // 更严格的时间重叠检测
+  var result = a.start < b.end && a.end > b.start;
+  console.log('时间重叠检测:', {
+    时间a: "".concat(formatTime(a.start), "-").concat(formatTime(a.end)),
+    时间b: "".concat(formatTime(b.start), "-").concat(formatTime(b.end)),
+    重叠: result,
+    详细: {
+      'a.start < b.end': a.start < b.end,
+      'a.end > b.start': a.end > b.start
+    }
+  });
+  return result;
+}
+
+// 格式化输出
+function formatSlot(slot) {
+  return {
+    date: slot.date,
+    start: slot.start.toISOString(),
+    end: slot.end.toISOString(),
+    timeRange: "".concat(formatTime(slot.start), " - ").concat(formatTime(slot.end))
+  };
 }
 
 /**
@@ -1963,10 +1878,23 @@ function checkCoursesConflict(course1, course2) {
  * @returns {string} - 格式化后的日期字符串
  */
 function formatDate(date) {
-  var year = date.getFullYear();
-  var month = String(date.getMonth() + 1).padStart(2, '0');
-  var day = String(date.getDate()).padStart(2, '0');
-  return "".concat(year, "-").concat(month, "-").concat(day);
+  if (!date) return '';
+  var dateObj;
+  if (date instanceof Date) {
+    dateObj = date;
+  } else {
+    try {
+      dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        console.error('无效的日期输入:', date);
+        return '';
+      }
+    } catch (e) {
+      console.error('日期转换错误:', e, '输入:', date);
+      return '';
+    }
+  }
+  return "".concat(dateObj.getFullYear(), "-").concat(String(dateObj.getMonth() + 1).padStart(2, '0'), "-").concat(String(dateObj.getDate()).padStart(2, '0'));
 }
 
 /**
