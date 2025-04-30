@@ -5,158 +5,113 @@ const bookingsCollection = db.collection('bookings');
 const coursesCollection = db.collection('courses');
 
 exports.main = async (event, context) => {
-  // 解析请求参数
-  const { userId, status } = event;
-  console.log('getUserBookings 请求参数:', event);
+  console.log('getUserBookings函数接收参数:', event);
   
+  // 从请求体提取参数
+  const { userId, status = [] } = event;
+  
+  // 参数校验
   if (!userId) {
     return {
       success: false,
-      message: '请提供用户ID',
+      message: "缺少用户ID参数",
       data: []
     };
   }
   
   try {
-    const bookingDB = db.collection('booking');
-    const courseScheduleDB = db.collection('course_schedule');
+    const db = uniCloud.database();
+    const $ = db.command.aggregate;
     
-    // 查询条件
-    let where = { userId };
+    // 构建查询条件
+    const whereCondition = { userId };
     
-    // 如果指定了状态，则添加到查询条件
-    if (status) {
-      // 处理多状态查询，包括数组格式
-      if (typeof status === 'string' && status.includes(',')) {
-        const statusArray = status.split(',').map(s => s.trim());
-        console.log('处理字符串逗号分隔的多状态查询:', statusArray);
-        where.status = db.command.in(statusArray);
-      } else if (Array.isArray(status)) {
-        console.log('处理数组格式的多状态查询:', status);
-        where.status = db.command.in(status);
-      } else {
-        // 单个状态字符串
-        where.status = status;
-      }
+    // 根据参数添加状态筛选
+    if (status && status.length > 0) {
+      // 使用 in 操作符筛选多个状态
+      whereCondition.status = db.command.in(status);
+      console.log('按指定状态筛选预约:', status);
+    } else {
+      // 如果没有指定状态，默认排除已取消的预约
+      whereCondition.status = db.command.nin(['cancelled', 'cancel']);
+      console.log('默认查询所有非取消状态的预约');
     }
     
-    console.log('最终查询条件:', where);
+    console.log('查询条件:', whereCondition);
     
-    // 查询用户所有预约记录
-    const bookingRes = await bookingDB.where(where).get();
-    console.log('预约记录查询结果:', bookingRes);
+    // 获取用户的预约记录
+    const bookingsResult = await db.collection('bookings')
+      .where(whereCondition)
+      .orderBy('createTime', 'desc')
+      .get();
     
-    // 获取用户的学生ID，用于查询课程日程表
-    let studentId = userId;
-    // 如果需要，可以从用户表查询学生ID
-    // const userDB = db.collection('user');
-    // const userRes = await userDB.where({ _id: userId }).get();
-    // if (userRes && userRes.data && userRes.data.length > 0) {
-    //   studentId = userRes.data[0].studentId || userId;
-    // }
+    // 从预约记录中提取课程ID
+    const bookings = bookingsResult.data;
+    console.log('查询到预约记录数量:', bookings.length);
     
-    // 查询用户在课程日程表中的记录
-    const scheduleRes = await courseScheduleDB.where({
-      students: studentId
-    }).get();
-    console.log('课程日程表查询结果:', scheduleRes);
-    
-    // 创建课程ID集合，用于去重
-    const courseIdSet = new Set();
-    
-    // 处理预约记录
-    const bookingData = bookingRes.data || [];
-    bookingData.forEach(booking => {
-      if (booking.courseId) {
-        courseIdSet.add(booking.courseId);
-      } else if (booking.courseInfo && booking.courseInfo._id) {
-        courseIdSet.add(booking.courseInfo._id);
-      }
-    });
-    
-    // 处理课程日程表记录
-    const scheduleData = scheduleRes.data || [];
-    scheduleData.forEach(schedule => {
-      if (schedule.courseId) {
-        courseIdSet.add(schedule.courseId);
-      }
-    });
-    
-    // 将课程ID集合转换为数组
-    const courseIds = Array.from(courseIdSet);
-    
-    // 如果没有课程ID，直接返回预约记录
-    if (courseIds.length === 0) {
+    if (bookings.length === 0) {
       return {
         success: true,
-        message: '查询成功',
-        data: bookingData
+        message: "未查询到预约记录",
+        data: []
       };
     }
     
-    // 查询所有相关课程的详细信息
-    const courseDB = db.collection('course');
-    const courseRes = await courseDB.where({
-      _id: db.command.in(courseIds)
-    }).get();
-    console.log('课程详情查询结果:', courseRes);
+    // 提取所有课程ID
+    const courseIds = bookings.map(booking => booking.courseId).filter(id => id);
     
-    // 课程映射表，方便查找
+    // 获取所有课程详情
+    const coursesResult = await db.collection('courses')
+      .where({
+        _id: db.command.in(courseIds)
+      })
+      .get();
+    
+    // 创建课程ID到课程信息的映射
     const courseMap = {};
-    if (courseRes && courseRes.data) {
-      courseRes.data.forEach(course => {
-        courseMap[course._id] = course;
-      });
-    }
-    
-    // 合并结果
-    let result = [...bookingData];
-    
-    // 为结果中没有完整课程信息的记录添加详细信息
-    result.forEach(item => {
-      if (!item.courseInfo && item.courseId && courseMap[item.courseId]) {
-        item.courseInfo = courseMap[item.courseId];
-      }
+    coursesResult.data.forEach(course => {
+      courseMap[course._id] = course;
     });
     
-    // 添加日程表中的课程（如果预约记录中没有）
-    scheduleData.forEach(schedule => {
-      if (!schedule.courseId) return;
-      
-      // 检查该课程是否已经在结果中
-      const existsInResult = result.some(item => 
-        (item.courseId === schedule.courseId) || 
-        (item.courseInfo && item.courseInfo._id === schedule.courseId)
-      );
-      
-      // 如果不在结果中，添加一条记录
-      if (!existsInResult && courseMap[schedule.courseId]) {
-        result.push({
-          _id: 'schedule_' + schedule._id, // 添加前缀防止ID冲突
-          courseId: schedule.courseId,
-          userId: userId,
-          status: 'confirmed', // 日程表中的课程默认为已确认状态
-          courseInfo: courseMap[schedule.courseId],
-          createdDate: schedule.createdDate || new Date(),
-          fromSchedule: true, // 标记来源于日程表
-          scheduleId: schedule._id
-        });
+    // 获取课程的排课信息
+    const scheduleResult = await db.collection('course_schedule')
+      .where({
+        courseId: db.command.in(courseIds)
+      })
+      .get();
+    
+    // 创建课程ID到排课信息的映射
+    const scheduleMap = {};
+    scheduleResult.data.forEach(schedule => {
+      // 只保留未取消的时间槽
+      if (schedule.timeSlots && schedule.timeSlots.length > 0) {
+        schedule.timeSlots = schedule.timeSlots.filter(slot => slot.status !== 'cancelled');
       }
+      scheduleMap[schedule.courseId] = schedule;
     });
     
-    console.log('合并后的结果数量:', result.length);
+    // 为每个预约记录添加课程详情和排课信息
+    bookings.forEach(booking => {
+      if (booking.courseId && courseMap[booking.courseId]) {
+        booking.courseInfo = courseMap[booking.courseId];
+        
+        // 添加排课信息中的时间槽到课程信息中
+        if (scheduleMap[booking.courseId] && scheduleMap[booking.courseId].timeSlots) {
+          booking.courseInfo.timeSlots = scheduleMap[booking.courseId].timeSlots;
+        }
+      }
+    });
     
     return {
       success: true,
-      message: '查询成功',
-      data: result
+      message: "查询成功",
+      data: bookings
     };
-    
-  } catch (e) {
-    console.error('getUserBookings 错误:', e);
+  } catch (error) {
+    console.error('获取用户预约记录失败:', error);
     return {
       success: false,
-      message: '查询失败: ' + e.message,
+      message: error.message || "获取预约记录失败",
       data: []
     };
   }

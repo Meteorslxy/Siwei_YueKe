@@ -48,7 +48,6 @@
             <view class="booking-tab-item" @click="navigateTo('/pages/user/booking?status=all')">
               <image class="tab-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/all.png" mode="aspectFit" @error="handleImageError"></image>
               <text class="tab-text">全部</text>
-              <text v-if="bookingCounts.all > 0" class="tab-badge">{{bookingCounts.all}}</text>
             </view>
             <view class="booking-tab-item" @click="navigateTo('/pages/user/booking?status=usable')">
               <image class="tab-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/my/use.png" mode="aspectFit" @error="handleImageError"></image>

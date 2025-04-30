@@ -337,12 +337,10 @@ export function getMatchingDates(startDate, endDate, weekDays) {
  *                    }
  */
 function checkCoursesConflict(newCourse, existingCourses = []) {
-  console.log('开始执行checkCoursesConflict函数:', { newCourse, existingCourses });
-  
   // 输入验证增强版
   if (!newCourse) {
     console.error('新课程对象为空');
-    return { hasConflict: false, conflicts: [] };
+    return { hasConflict: false, conflicts: [], conflictDays: [] };
   }
   
   // 兼容单个课程和多个课程的情况
@@ -354,207 +352,176 @@ function checkCoursesConflict(newCourse, existingCourses = []) {
     }
   }
   
-  console.log(`开始检测课程冲突: 新课程="${newCourse.title || newCourse.name || '未命名'}", 已有课程数量=${existingCourses.length}`);
-  
-  // 处理timeSlots和time_slots字段兼容性
-  const getTimeSlots = (course) => course.timeSlots || course.time_slots || [];
-  
-  // 检查新课程是否有时间槽
-  const newCourseTimeSlots = getTimeSlots(newCourse);
-  console.log('新课程的时间槽:', newCourseTimeSlots);
-  
-  if (!newCourseTimeSlots.length) {
-    console.error('新课程缺少有效时间槽');
-    return { hasConflict: false, conflicts: [] };
-  }
+  const allConflicts = [];
 
-  // 预处理新课程时间槽（带缓存）
-  const newSlots = preprocessSlots(newCourseTimeSlots);
-  console.log('预处理后的新课程时间槽:', newSlots);
-  
-  if (!newSlots.length) {
-    console.warn('新课程无有效时间槽');
-    return { hasConflict: false, conflicts: [] };
-  }
-
-  // 冲突结果容器
-  const conflicts = [];
-
-  // 优化后的检测流程
+  // 为每个现有课程检查冲突
   existingCourses.forEach(existingCourse => {
     if (!existingCourse) return;
     
-    const courseName = existingCourse.title || existingCourse.name || existingCourse.courseTitle || '未命名课程';
-    const courseId = existingCourse._id || existingCourse.id || existingCourse.courseId || '';
+    // 使用课程字段的多种可能名称
+    const course1 = {
+      courseId: newCourse._id || newCourse.id || newCourse.courseId || '',
+      courseName: newCourse.title || newCourse.name || newCourse.courseTitle || '未命名课程',
+      timeSlots: newCourse.timeSlots || newCourse.time_slots || []
+    };
     
-    console.log(`检查与课程"${courseName}"(${courseId})的冲突`);
+    const course2 = {
+      courseId: existingCourse._id || existingCourse.id || existingCourse.courseId || '',
+      courseName: existingCourse.title || existingCourse.name || existingCourse.courseTitle || '未命名课程',
+      timeSlots: existingCourse.timeSlots || existingCourse.time_slots || []
+    };
     
-    const existingTimeSlots = getTimeSlots(existingCourse);
-    console.log('现有课程的时间槽:', existingTimeSlots);
-    
-    const existingSlots = preprocessSlots(existingTimeSlots);
-    console.log('预处理后的现有课程时间槽:', existingSlots);
-    
-    if (!existingSlots.length) {
-      console.log(`课程"${courseName}"无有效时间槽，跳过冲突检测`);
+    // 如果是同一个课程，跳过
+    if (course1.courseId && course2.courseId && course1.courseId === course2.courseId) {
+      console.log('相同课程ID，不判断冲突');
       return;
     }
 
-    // 构建日期索引加速检测
-    const dateIndex = buildDateIndex(existingSlots);
-    console.log('构建的日期索引:', dateIndex);
-    
-    const courseConflicts = [];
+    console.log(`开始检测课程冲突: 
+  ${course1.courseName} (${course1.courseId})
+  vs 
+  ${course2.courseName} (${course2.courseId})`);
 
-    // 对每个新课程时间槽检查冲突
-    newSlots.forEach(newSlot => {
-      // 使用日期索引快速筛选可能冲突的时段
-      const date = newSlot.date;
-      console.log(`检查日期 ${date} 的时间槽`);
-      
-      const candidateSlots = dateIndex[date] || [];
-      console.log(`日期 ${date} 有 ${candidateSlots.length} 个候选时间槽`);
-      
-      // 对每个候选时间槽检查时间重叠
-      candidateSlots.forEach(existingSlot => {
-        console.log('检查时间重叠:', { 
-          新课程: `${formatTime(newSlot.start)}-${formatTime(newSlot.end)}`,
-          现有课程: `${formatTime(existingSlot.start)}-${formatTime(existingSlot.end)}`
-        });
-        
-        // 更健壮的时间重叠检测
-        if (checkTimeOverlap(newSlot, existingSlot)) {
-          console.log(`检测到时间冲突: ${newSlot.date} ${formatTime(newSlot.start)}-${formatTime(newSlot.end)} vs ${formatTime(existingSlot.start)}-${formatTime(existingSlot.end)}`);
+    // 优化后的日期映射表结构
+    const buildDateMap = (course) => {
+      const dateMap = new Map();
+      (course.timeSlots || []).forEach(slot => {
+        try {
+          const start = new Date(slot.start);
+          const end = new Date(slot.end);
+          if (start >= end) {
+            console.warn(`无效时间槽：开始时间晚于结束时间，课程 ${course.courseId}`, slot);
+            return;
+          }
           
-          courseConflicts.push({
-            newSlot: formatSlot(newSlot),
-            existingSlot: formatSlot(existingSlot)
+          const dateKey = start.toISOString().split('T')[0]; // 按UTC日期分组
+          const timeKey = `${start.getUTCHours().toString().padStart(2,'0')}${start.getUTCMinutes().toString().padStart(2,'0')}-${end.getUTCHours().toString().padStart(2,'0')}${end.getUTCMinutes().toString().padStart(2,'0')}`;
+          
+          if (!dateMap.has(dateKey)) {
+            dateMap.set(dateKey, []);
+          }
+          dateMap.get(dateKey).push({
+            start: start.getTime(),
+            end: end.getTime(),
+            timeKey, // 用于快速匹配相同时间段
+            originalSlot: slot
           });
-        } else {
-          console.log('时间无重叠，无冲突');
+        } catch (e) {
+          console.error(`解析时间槽失败，课程 ${course.courseId}`, slot, e);
         }
+      });
+      return dateMap;
+    };
+
+    // 构建日期索引
+    const course1Map = buildDateMap(course1);
+    const course2Map = buildDateMap(course2);
+    
+    const conflicts = [];
+    
+    // 只比较存在相同日期的槽位
+    course1Map.forEach((slots1, date) => {
+      if (!course2Map.has(date)) return;
+      
+      const slots2 = course2Map.get(date);
+      console.log(`检测 ${date} 的潜在冲突，课程1有${slots1.length}个时段，课程2有${slots2.length}个时段`);
+
+      // 双重循环检测同日期冲突
+      slots1.forEach(s1 => {
+        slots2.forEach(s2 => {
+          // 快速匹配：先检查timeHash是否相同
+          if (s1.timeKey === s2.timeKey) {
+            conflicts.push({
+              date,
+              conflictType: '完全重叠',
+              course1Time: formatUTCTime(s1.start, s1.end),
+              course2Time: formatUTCTime(s2.start, s2.end),
+              duration: (Math.min(s1.end, s2.end) - Math.max(s1.start, s2.start)) / 60000,
+              newSlot: {
+                date,
+                start: new Date(s1.start).toISOString(),
+                end: new Date(s1.end).toISOString(),
+                timeRange: formatUTCTime(s1.start, s1.end)
+              },
+              existingSlot: {
+                date,
+                start: new Date(s2.start).toISOString(),
+                end: new Date(s2.end).toISOString(),
+                timeRange: formatUTCTime(s2.start, s2.end)
+              }
+            });
+            return;
+          }
+          
+          // 精确时间重叠检测
+          if (s1.start < s2.end && s1.end > s2.start) {
+            conflicts.push({
+              date,
+              conflictType: '部分重叠',
+              course1Time: formatUTCTime(s1.start, s1.end),
+              course2Time: formatUTCTime(s2.start, s2.end),
+              duration: (Math.min(s1.end, s2.end) - Math.max(s1.start, s2.start)) / 60000,
+              newSlot: {
+                date,
+                start: new Date(s1.start).toISOString(),
+                end: new Date(s1.end).toISOString(),
+                timeRange: formatUTCTime(s1.start, s1.end)
+              },
+              existingSlot: {
+                date,
+                start: new Date(s2.start).toISOString(),
+                end: new Date(s2.end).toISOString(),
+                timeRange: formatUTCTime(s2.start, s2.end)
+              }
+            });
+          }
+        });
       });
     });
     
-    // 如果有冲突，添加到结果中
-    if (courseConflicts.length > 0) {
-      conflicts.push({
-        courseId: courseId,
-        courseName: courseName,
-        conflictSlots: courseConflicts
+    // 辅助格式化函数
+    function formatUTCTime(start, end) {
+      const format = (ts) => {
+        const d = new Date(ts);
+        return `${d.getUTCHours().toString().padStart(2,'0')}:${d.getUTCMinutes().toString().padStart(2,'0')}`;
+      };
+      return `${format(start)}-${format(end)}`;
+    }
+
+    console.log('检测完成，发现冲突数量:', conflicts.length);
+    
+    if (conflicts.length > 0) {
+      // 将冲突数据转换为旧格式，兼容其他地方用法
+      allConflicts.push({
+        courseId: course2.courseId,
+        courseName: course2.courseName,
+        conflictSlots: conflicts.map(c => ({
+          newSlot: c.newSlot,
+          existingSlot: c.existingSlot
+        })),
+        conflictDates: [...new Set(conflicts.map(c => c.date))]
       });
     }
   });
   
   // 构建最终结果
   const result = {
-    hasConflict: conflicts.length > 0,
-    conflicts: conflicts
+    hasConflict: allConflicts.length > 0,
+    conflicts: allConflicts,
+    conflictDays: [...new Set(allConflicts.flatMap(c => c.conflictDates))]
   };
   
-  console.log(`冲突检测结果: ${result.hasConflict ? '有冲突' : '无冲突'}, 冲突课程数: ${conflicts.length}`);
-  return result;
-}
-
-// 工具函数集
-const SLOT_CACHE = new WeakMap();
-
-// 带缓存的时间槽预处理
-function preprocessSlots(slots) {
-  if (!slots || !Array.isArray(slots)) return [];
-  if (SLOT_CACHE.has(slots)) return SLOT_CACHE.get(slots);
-  
-  console.log('预处理时间槽，原始数据:', JSON.stringify(slots));
-  
-  const validSlots = slots
-    .map(slot => {
-      try {
-        if (!slot || !slot.start || !slot.end) {
-          console.log('时间槽缺少开始或结束时间:', slot);
-          return null;
-        }
-        
-        // 转换开始和结束时间为Date对象
-        let start, end;
-        
-        try {
-          start = slot.start instanceof Date ? slot.start : new Date(slot.start);
-          end = slot.end instanceof Date ? slot.end : new Date(slot.end);
-        } catch (err) {
-          console.error('转换日期对象失败:', err, slot);
-          return null;
-        }
-        
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          console.log('无效的日期格式:', { start, end, slot });
-          return null;
-        }
-        
-        // 允许开始时间和结束时间相等，但不能结束时间早于开始时间
-        if (start > end) {
-          console.log('开始时间晚于结束时间:', { start, end, slot });
-          return null;
-        }
-        
-        const date = formatDate(start);
-        console.log(`处理时间槽: ${date} ${formatTime(start)}-${formatTime(end)}`);
-        
-        return {
-          start,
-          end,
-          date,  // YYYY-MM-DD
-          timestamp: start.getTime(),
-          originalSlot: slot
-        };
-      } catch (e) {
-        console.error('处理时间槽出错:', e, slot);
-        return null;
-      }
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.timestamp - b.timestamp);
-
-  console.log(`预处理后的有效时间槽数量: ${validSlots.length}`);
-  SLOT_CACHE.set(slots, validSlots);
-  return validSlots;
-}
-
-// 构建日期索引 { YYYY-MM-DD: [slots] }
-function buildDateIndex(slots) {
-  return slots.reduce((acc, slot) => {
-    if (!acc[slot.date]) {
-      acc[slot.date] = [];
-    }
-    acc[slot.date].push(slot);
-    return acc;
-  }, {});
-}
-
-// 精确时间重叠检测（处理时间槽对象）
-function checkTimeOverlap(a, b) {
-  // 更严格的时间重叠检测
-  const result = a.start < b.end && a.end > b.start;
-  
-  console.log('时间重叠检测:', {
-    时间a: `${formatTime(a.start)}-${formatTime(a.end)}`,
-    时间b: `${formatTime(b.start)}-${formatTime(b.end)}`,
-    重叠: result,
-    详细: {
-      'a.start < b.end': a.start < b.end,
-      'a.end > b.start': a.end > b.start
-    }
-  });
-  
+  console.log(`冲突检测结果: ${result.hasConflict ? '有冲突' : '无冲突'}, 冲突课程数: ${allConflicts.length}`);
   return result;
 }
 
 // 格式化输出
 function formatSlot(slot) {
   return {
-    date: slot.date,
-    start: slot.start.toISOString(),
-    end: slot.end.toISOString(),
-    timeRange: `${formatTime(slot.start)} - ${formatTime(slot.end)}`
+    date: slot.date || (slot.start ? new Date(slot.start).toISOString().split('T')[0] : ''),
+    start: slot.start,
+    end: slot.end,
+    timeRange: `${formatTime(new Date(slot.start))} - ${formatTime(new Date(slot.end))}`
   };
 }
 

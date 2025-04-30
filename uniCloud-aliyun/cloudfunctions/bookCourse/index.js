@@ -121,95 +121,183 @@ const validateTimeSlot = (slot) => {
  * @param {Object} course2 - 第二个课程
  * @returns {Object} - 冲突检测结果
  */
-const checkCoursesConflict = (course1, course2) => {
-  // 如果是同一个课程则不冲突
-  console.log(`检查课程冲突: ${course1.title || '未命名课程1'} (ID: ${course1._id}) vs ${course2.title || '未命名课程2'} (ID: ${course2._id})`);
-  
-  if (course1._id && course2._id && course1._id === course2._id) {
-    console.log('相同课程ID，不判断冲突');
-    return { hasConflict: false };
+const checkCoursesConflict = (course1, existingCourses = []) => {
+  // 如果existingCourses不是数组，则转为数组
+  if (!Array.isArray(existingCourses)) {
+    if (existingCourses && typeof existingCourses === 'object') {
+      existingCourses = [existingCourses];
+    } else {
+      existingCourses = [];
+    }
   }
+  
+  // 处理单课程情况
+  if (existingCourses.length === 0) {
+    return { hasConflict: false, conflicts: [], conflictDays: [] };
+  }
+  
+  const allConflicts = [];
 
-  try {
-    // 处理字段名不一致问题
-    const course1TimeSlots = course1.timeSlots || course1.time_slots || [];
-    const course2TimeSlots = course2.timeSlots || course2.time_slots || [];
+  // 为每个现有课程检查冲突
+  existingCourses.forEach(existingCourse => {
+    if (!existingCourse) return;
     
-    // 检查timeSlots
-    if (course1TimeSlots.length > 0 && course2TimeSlots.length > 0) {
-      console.log(`课程1有${course1TimeSlots.length}个时间槽，课程2有${course2TimeSlots.length}个时间槽`);
-      
-      // 检查任意两个时间槽是否冲突
-      for (const slot1 of course1TimeSlots) {
-        const validatedSlot1 = validateTimeSlot(slot1);
-        if (!validatedSlot1.valid) {
-          console.log('课程1时间槽无效，跳过该时间槽');
-          continue;
+    // 提取课程字段
+    const courseInfo1 = {
+      courseId: course1._id || course1.id || course1.courseId || '',
+      courseName: course1.title || course1.name || course1.courseTitle || '未命名课程',
+      timeSlots: course1.timeSlots || course1.time_slots || []
+    };
+    
+    const courseInfo2 = {
+      courseId: existingCourse._id || existingCourse.id || existingCourse.courseId || '',
+      courseName: existingCourse.title || existingCourse.name || existingCourse.courseTitle || '未命名课程',
+      timeSlots: existingCourse.timeSlots || existingCourse.time_slots || []
+    };
+    
+    // 如果是同一个课程则不冲突
+    if (courseInfo1.courseId && courseInfo2.courseId && courseInfo1.courseId === courseInfo2.courseId) {
+      console.log('相同课程ID，不判断冲突');
+      return;
+    }
+    
+    console.log(`开始检测课程冲突: 
+  ${courseInfo1.courseName} (${courseInfo1.courseId})
+  vs 
+  ${courseInfo2.courseName} (${courseInfo2.courseId})`);
+
+  // 优化后的日期映射表结构
+  const buildDateMap = (course) => {
+    const dateMap = new Map();
+    (course.timeSlots || []).forEach(slot => {
+      try {
+        const start = new Date(slot.start);
+        const end = new Date(slot.end);
+        if (start >= end) {
+          console.warn(`无效时间槽：开始时间晚于结束时间，课程 ${course.courseId}`, slot);
+          return;
         }
         
-        for (const slot2 of course2TimeSlots) {
-          const validatedSlot2 = validateTimeSlot(slot2);
-          if (!validatedSlot2.valid) {
-            console.log('课程2时间槽无效，跳过该时间槽');
-            continue;
-          }
-          
-          const start1 = validatedSlot1.start.getTime();
-          const end1 = validatedSlot1.end.getTime();
-          const start2 = validatedSlot2.start.getTime();
-          const end2 = validatedSlot2.end.getTime();
-          
-          console.log(`比较时间槽: 
-            课程1: ${new Date(start1).toLocaleString()} - ${new Date(end1).toLocaleString()}
-            课程2: ${new Date(start2).toLocaleString()} - ${new Date(end2).toLocaleString()}`);
-          
-          // 检查日期（忽略时间）是否相同
-          const date1 = new Date(start1);
-          date1.setHours(0, 0, 0, 0);
-          const date2 = new Date(start2);
-          date2.setHours(0, 0, 0, 0);
-          
-          console.log(`比较日期: ${formatDate(date1)} vs ${formatDate(date2)}`);
-          console.log(`日期时间戳比较: ${date1.getTime()} vs ${date2.getTime()}`);
-          
-          if (date1.getTime() === date2.getTime()) {
-            console.log('日期相同，检查时间重叠');
-            
-            // 检查时间重叠 - 使用更精确的算法
-            const hasOverlap = Math.max(start1, start2) < Math.min(end1, end2);
-            
-            console.log('时间重叠检查详情:');
-            console.log(`- 课程1开始时间: ${new Date(start1).toISOString()}, 时间戳: ${start1}`);
-            console.log(`- 课程1结束时间: ${new Date(end1).toISOString()}, 时间戳: ${end1}`);
-            console.log(`- 课程2开始时间: ${new Date(start2).toISOString()}, 时间戳: ${start2}`);
-            console.log(`- 课程2结束时间: ${new Date(end2).toISOString()}, 时间戳: ${end2}`);
-            console.log(`- 最大开始时间: ${Math.max(start1, start2)}, 最小结束时间: ${Math.min(end1, end2)}`);
-            console.log(`- 重叠检测结果: ${hasOverlap ? '有重叠' : '无重叠'}`);
-            
-            if (hasOverlap) {
-              console.log('检测到冲突日期:', formatDate(date1));
-              return { hasConflict: true, conflictDate: formatDate(date1) };
-            }
-          }
+        const dateKey = start.toISOString().split('T')[0]; // 按UTC日期分组
+        const timeKey = `${start.getUTCHours().toString().padStart(2,'0')}${start.getUTCMinutes().toString().padStart(2,'0')}-${end.getUTCHours().toString().padStart(2,'0')}${end.getUTCMinutes().toString().padStart(2,'0')}`;
+        
+        if (!dateMap.has(dateKey)) {
+          dateMap.set(dateKey, []);
         }
+        dateMap.get(dateKey).push({
+          start: start.getTime(),
+          end: end.getTime(),
+          timeKey, // 用于快速匹配相同时间段
+          originalSlot: slot,
+          date: dateKey, // 添加日期字段
+          timeRange: `${start.getUTCHours().toString().padStart(2,'0')}:${start.getUTCMinutes().toString().padStart(2,'0')}-${end.getUTCHours().toString().padStart(2,'0')}:${end.getUTCMinutes().toString().padStart(2,'0')}` // 添加时间范围字段
+        });
+      } catch (e) {
+        console.error(`解析时间槽失败，课程 ${course.courseId}`, slot, e);
       }
-      
-      console.log('没有发现时间冲突');
-      return { hasConflict: false };
-    }
+    });
+    return dateMap;
+  };
+
+  // 构建日期索引
+  const course1Map = buildDateMap(courseInfo1);
+  const course2Map = buildDateMap(courseInfo2);
+  
+  const conflicts = [];
+  const conflictSlots = [];
+  
+  // 只比较存在相同日期的槽位
+  course1Map.forEach((slots1, date) => {
+    if (!course2Map.has(date)) return;
     
-    // 如果没有time_slots，则检查time字段
-    if (course1.time && course2.time) {
-      // 其他冲突检测逻辑
-      // ... 保留原有处理逻辑
-    }
-    
-    console.log('没有足够的时间信息进行冲突检测');
-    return { hasConflict: false };
-  } catch (error) {
-    console.error('检查课程冲突时发生错误:', error);
-    return { hasConflict: false };
+    const slots2 = course2Map.get(date);
+    console.log(`检测 ${date} 的潜在冲突，课程1有${slots1.length}个时段，课程2有${slots2.length}个时段`);
+
+    // 双重循环检测同日期冲突
+    slots1.forEach(s1 => {
+      slots2.forEach(s2 => {
+        // 快速匹配：先检查timeHash是否相同
+        if (s1.timeKey === s2.timeKey) {
+          conflicts.push({
+            date,
+            conflictType: '完全重叠',
+            course1Time: formatUTCTime(s1.start, s1.end),
+            course2Time: formatUTCTime(s2.start, s2.end),
+            duration: (Math.min(s1.end, s2.end) - Math.max(s1.start, s2.start)) / 60000
+          });
+          
+          // 保存冲突的时间槽
+          conflictSlots.push({
+            newSlot: {
+              date: date,
+              timeRange: s1.timeRange
+            },
+            existingSlot: {
+              date: date,
+              timeRange: s2.timeRange
+            }
+          });
+          
+          return;
+        }
+        
+        // 精确时间重叠检测
+        if (s1.start < s2.end && s1.end > s2.start) {
+          conflicts.push({
+            date,
+            conflictType: '部分重叠',
+            course1Time: formatUTCTime(s1.start, s1.end),
+            course2Time: formatUTCTime(s2.start, s2.end),
+            duration: (Math.min(s1.end, s2.end) - Math.max(s1.start, s2.start)) / 60000
+          });
+          
+          // 保存冲突的时间槽
+          conflictSlots.push({
+            newSlot: {
+              date: date,
+              timeRange: s1.timeRange
+            },
+            existingSlot: {
+              date: date,
+              timeRange: s2.timeRange
+            }
+          });
+        }
+      });
+    });
+  });
+
+  // 辅助格式化函数
+  function formatUTCTime(start, end) {
+    const format = (ts) => {
+      const d = new Date(ts);
+      return `${d.getUTCHours().toString().padStart(2,'0')}:${d.getUTCMinutes().toString().padStart(2,'0')}`;
+    };
+    return `${format(start)}-${format(end)}`;
   }
+
+  console.log('检测完成，发现冲突数量:', conflicts.length);
+  
+  if (conflicts.length > 0) {
+    allConflicts.push({
+      courseId: courseInfo2.courseId,
+      courseName: courseInfo2.courseName,
+      conflictDates: [...new Set(conflicts.map(c => c.date))],
+      conflictSlots: conflictSlots // 添加冲突时间槽信息
+    });
+  }
+  });
+  
+  // 返回冲突结果
+  const result = {
+    hasConflict: allConflicts.length > 0,
+    conflicts: allConflicts,
+    conflictDays: [...new Set(allConflicts.flatMap(c => c.conflictDates ? c.conflictDates : []))],
+    conflictDate: allConflicts.length > 0 && Array.isArray(allConflicts[0].conflictDates) && allConflicts[0].conflictDates.length > 0 ? allConflicts[0].conflictDates[0] : null
+  };
+  
+  console.log(`冲突检测结果: ${result.hasConflict ? '有冲突' : '无冲突'}, 冲突课程数: ${allConflicts.length}`);
+  return result;
 };
 
 /**
@@ -294,17 +382,31 @@ exports.main = async (event, context) => {
       };
     }
     
-    if (userResult.data.length === 0) {
-      console.log('用户数据为空数组');
+    // 确保userResult.data是数组或对象
+    let userData;
+    if (Array.isArray(userResult.data)) {
+      if (userResult.data.length === 0) {
+        console.log('用户数据为空数组');
+        return {
+          code: -1,
+          success: false,
+          message: '用户不存在'
+        };
+      }
+      userData = userResult.data[0];
+    } else {
+      userData = userResult.data;
+    }
+    
+    if (!userData) {
+      console.error('无法获取有效的用户数据');
       return {
         code: -1,
         success: false,
-        message: '用户不存在'
+        message: '用户数据异常'
       };
     }
     
-    // 获取用户数据
-    const userData = userResult.data[0] || userResult.data;
     console.log('查询到的用户数据:', userData);
     
     // 使用uni-id-users的字段名
@@ -318,8 +420,8 @@ exports.main = async (event, context) => {
     console.log('检查课程信息:', courseId);
     const courseResult = await db.collection('courses').doc(courseId).get();
     
-    if (!courseResult.data || courseResult.data.length === 0) {
-      console.log('课程不存在');
+    if (!courseResult.data) {
+      console.log('课程数据为空');
       return {
         code: -1,
         success: false,
@@ -327,7 +429,30 @@ exports.main = async (event, context) => {
       };
     }
     
-    const course = courseResult.data[0] || courseResult.data;
+    // 确保courseResult.data是对象或者从数组中提取第一个元素
+    let course;
+    if (Array.isArray(courseResult.data)) {
+      if (courseResult.data.length === 0) {
+        console.log('课程数据为空数组');
+        return {
+          code: -1,
+          success: false,
+          message: '课程不存在'
+        };
+      }
+      course = courseResult.data[0];
+    } else {
+      course = courseResult.data;
+    }
+    
+    if (!course) {
+      console.log('无法获取有效的课程数据');
+      return {
+        code: -1,
+        success: false,
+        message: '课程数据异常'
+      };
+    }
     
     // 检查课程是否有名额
     const capacity = course.courseCount || course.capacity || 200; // 优先使用courseCount
@@ -353,11 +478,22 @@ exports.main = async (event, context) => {
       try {
         console.log('从teachers集合获取教师信息:', course.teacherId);
         const teacherResult = await db.collection('teachers').doc(course.teacherId).get();
+        
         if (teacherResult.data) {
-          const teacher = teacherResult.data[0] || teacherResult.data;
-          teacherName = teacher.name || teacher.fullName || '';
-          teacherPhone = teacher.phone || teacher.phoneNumber || teacher.mobile || '';
-          console.log('获取到教师信息:', teacherName, teacherPhone);
+          let teacher;
+          if (Array.isArray(teacherResult.data)) {
+            if (teacherResult.data.length > 0) {
+              teacher = teacherResult.data[0];
+            }
+          } else {
+            teacher = teacherResult.data;
+          }
+          
+          if (teacher) {
+            teacherName = teacher.name || teacher.fullName || '';
+            teacherPhone = teacher.phone || teacher.phoneNumber || teacher.mobile || '';
+            console.log('获取到教师信息:', teacherName, teacherPhone);
+          }
         }
       } catch (err) {
         console.error('获取教师信息失败:', err);
@@ -425,8 +561,16 @@ exports.main = async (event, context) => {
       const bookedCourses = bookedCoursesResult.result.data;
       console.log(`用户已预约${bookedCourses.length}个课程，开始检查冲突`);
       
+      // 确保bookedCourses是数组
+      if (!Array.isArray(bookedCourses)) {
+        console.warn('bookedCourses不是数组，将其转换为数组');
+        bookedCourses = [bookedCourses].filter(Boolean);
+      }
+      
       // 3. 获取已预约课程的排课信息
-      const bookedCourseIds = bookedCourses.map(booking => booking.courseId).filter(id => id);
+      const bookedCourseIds = bookedCourses
+        .map(booking => booking?.courseId)
+        .filter(id => id);
       console.log('待检查冲突的已预约课程IDs:', bookedCourseIds);
       
       let scheduleMap = {};
@@ -437,9 +581,11 @@ exports.main = async (event, context) => {
             courseId: dbCmd.in(bookedCourseIds)
           }).get();
           
-          if (schedulesResult.data && schedulesResult.data.length > 0) {
+          if (schedulesResult.data && Array.isArray(schedulesResult.data) && schedulesResult.data.length > 0) {
             schedulesResult.data.forEach(schedule => {
-              scheduleMap[schedule.courseId] = schedule;
+              if (schedule && schedule.courseId) {
+                scheduleMap[schedule.courseId] = schedule;
+              }
             });
             console.log('获取到已预约课程排课数据数量:', schedulesResult.data.length);
           }
@@ -450,30 +596,55 @@ exports.main = async (event, context) => {
       
       // 准备已预约课程列表
       const existingCourses = bookedCourses.map(booking => {
+        if (!booking) return null;
+        
         const existingCourse = booking.courseInfo || {};
         existingCourse._id = booking.courseId;
         existingCourse.title = existingCourse.title || existingCourse.courseTitle || booking.courseTitle || '未命名课程';
         
         // 添加排课数据
-        if (scheduleMap[booking.courseId]) {
+        if (booking.courseId && scheduleMap[booking.courseId]) {
           existingCourse.timeSlots = scheduleMap[booking.courseId].timeSlots;
         }
         
         return existingCourse;
-      }).filter(course => course._id && course._id !== courseId); // 排除当前正在预约的课程
+      }).filter(course => course && course._id && course._id !== courseId); // 排除当前正在预约的课程和无效数据
       
       // 使用优化后的冲突检测
-      console.log('执行课程冲突检测');
+      console.log('执行课程冲突检测, 已筛选出有效课程数:', existingCourses.length);
       const conflictResult = checkCoursesConflict(course, existingCourses);
       
       if (conflictResult.hasConflict) {
         console.log('检测到课程时间冲突:', conflictResult);
-        const firstConflict = conflictResult.conflicts[0];
-        const conflictSlot = firstConflict.conflictSlots[0];
+        // 安全获取冲突信息
+        let conflictMessage = "检测到课程时间冲突，请选择其他时间段的课程";
+        
+        if (Array.isArray(conflictResult.conflicts) && conflictResult.conflicts.length > 0) {
+          const firstConflict = conflictResult.conflicts[0];
+          
+          if (firstConflict) {
+            const courseName = firstConflict.courseName || '未命名课程';
+            
+            if (Array.isArray(firstConflict.conflictSlots) && firstConflict.conflictSlots.length > 0) {
+              const conflictSlot = firstConflict.conflictSlots[0];
+              if (conflictSlot && conflictSlot.newSlot) {
+                conflictMessage = `您已预约的课程"${courseName}"在 ${conflictSlot.newSlot.date} 的时间段 ${conflictSlot.newSlot.timeRange} 与此课程冲突，请选择其他时间段的课程`;
+              } else {
+                conflictMessage = `您已预约的课程"${courseName}"与此课程时间冲突，请选择其他时间段的课程`;
+              }
+            } else if (Array.isArray(firstConflict.conflictDates) && firstConflict.conflictDates.length > 0) {
+              const conflictDate = firstConflict.conflictDates[0] || '';
+              conflictMessage = `您已预约的课程"${courseName}"在 ${conflictDate} 与此课程时间冲突，请选择其他时间段的课程`;
+            } else {
+              conflictMessage = `您已预约的课程"${courseName}"与此课程时间冲突，请选择其他时间段的课程`;
+            }
+          }
+        }
+        
         return {
           code: -1,
           success: false,
-          message: `您已预约的课程"${firstConflict.courseName}"在 ${conflictSlot.newSlot.date} 的时间段 ${conflictSlot.newSlot.timeRange} 与此课程冲突，请选择其他时间段的课程`
+          message: conflictMessage
         };
       } else {
         console.log('未检测到与已预约课程的时间冲突');
@@ -510,12 +681,35 @@ exports.main = async (event, context) => {
           
           if (scheduleConflictResult.hasConflict) {
             console.log('检测到与课程日程表中课程的时间冲突:', scheduleConflictResult);
-            const firstConflict = scheduleConflictResult.conflicts[0];
-            const conflictSlot = firstConflict.conflictSlots[0];
+            // 安全获取冲突信息
+            let conflictMessage = "检测到课程时间冲突，请选择其他时间段的课程";
+            
+            if (Array.isArray(scheduleConflictResult.conflicts) && scheduleConflictResult.conflicts.length > 0) {
+              const firstConflict = scheduleConflictResult.conflicts[0];
+              
+              if (firstConflict) {
+                const courseName = firstConflict.courseName || '未命名课程';
+                
+                if (Array.isArray(firstConflict.conflictSlots) && firstConflict.conflictSlots.length > 0) {
+                  const conflictSlot = firstConflict.conflictSlots[0];
+                  if (conflictSlot && conflictSlot.newSlot) {
+                    conflictMessage = `您已安排的课程"${courseName}"在 ${conflictSlot.newSlot.date} 的时间段 ${conflictSlot.newSlot.timeRange} 与此课程冲突，请选择其他时间段的课程`;
+                  } else {
+                    conflictMessage = `您已安排的课程"${courseName}"与此课程时间冲突，请选择其他时间段的课程`;
+                  }
+                } else if (Array.isArray(firstConflict.conflictDates) && firstConflict.conflictDates.length > 0) {
+                  const conflictDate = firstConflict.conflictDates[0] || '';
+                  conflictMessage = `您已安排的课程"${courseName}"在 ${conflictDate} 与此课程时间冲突，请选择其他时间段的课程`;
+                } else {
+                  conflictMessage = `您已安排的课程"${courseName}"与此课程时间冲突，请选择其他时间段的课程`;
+                }
+              }
+            }
+            
             return {
               code: -1,
               success: false,
-              message: `您已安排的课程"${firstConflict.courseName}"在 ${conflictSlot.newSlot.date} 的时间段 ${conflictSlot.newSlot.timeRange} 与此课程冲突，请选择其他时间段的课程`
+              message: conflictMessage
             };
           }
         }
@@ -559,7 +753,7 @@ exports.main = async (event, context) => {
     const bookingResult = await db.collection('bookings').add(bookingData);
     console.log('预约记录创建结果:', bookingResult);
     
-    if (!bookingResult.id) {
+    if (!bookingResult || !bookingResult.id) {
       console.error('创建预约记录失败');
       return {
         code: -1,
