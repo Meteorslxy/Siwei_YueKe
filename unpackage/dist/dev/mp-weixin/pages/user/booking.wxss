@@ -199,6 +199,14 @@
 .payment-countdown .countdown-time {
   font-weight: bold;
 }
+.payment-time {
+  font-size: 22rpx;
+  color: #52C41A;
+  margin-bottom: 12rpx;
+}
+.payment-time .payment-time-value {
+  font-weight: bold;
+}
 .booking-time {
   font-size: 20rpx;
   color: #999;

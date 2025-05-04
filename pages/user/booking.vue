@@ -42,6 +42,12 @@
               <text class="countdown-time">{{formatCountdown(getPaymentCountdown(item))}}</text>
             </view>
             
+            <!-- 添加支付时间显示 -->
+            <view class="payment-time" v-if="item.paymentStatus === 'paid' || item.isPaid === true">
+              <text class="payment-time-label">支付时间：</text>
+              <text class="payment-time-value">{{formatPaymentTime(item.paidTime)}}</text>
+            </view>
+            
             <view class="booking-time">
               预约时间：{{formatBookingTime(item.createTime || item.create_time)}}
             </view>
@@ -94,7 +100,10 @@
                 
           <!-- 退费按钮 -->
           <view class="action-btn refund-btn"
-                v-if="item.paymentStatus === 'paid' || item.isPaid === true"
+                v-if="(item.paymentStatus === 'paid' || item.isPaid === true) && 
+                      item.status !== 'cancelled' && 
+                      item.status !== 'cancel' && 
+                      item.paymentStatus !== 'refunded'"
                 @click.stop="$event => handleRefund(item, $event)">申请退费</view>
         </view>
       </view>
@@ -109,7 +118,7 @@
     <!-- 二维码支付弹窗 -->
     <uni-popup ref="qrcodePopup" type="center">
       <view class="qrcode-popup">
-        <view class="qrcode-title">扫码缴费</view>
+        <view class="qrcode-title">{{ isRefunding ? '扫码退费' : '扫码缴费' }}</view>
         <image class="qrcode-image" :src="qrcodeUrl" mode="aspectFit"></image>
         <view class="qrcode-contact">
           <text>如有问题，请联系老师</text>
@@ -172,7 +181,8 @@ export default {
       
       // 二维码相关
       qrcodeUrl: '', // 二维码URL
-      currentPayingBookingId: '' // 当前正在支付的预约ID
+      currentPayingBookingId: '', // 当前正在支付的预约ID
+      isRefunding: false // 是否是申请退费操作
     }
   },
   computed: {
@@ -541,6 +551,24 @@ export default {
           // 确保每个预约都有_id字段
           allBookings = allBookings.filter(item => item && item._id);
           
+          // 规范化数据，确保支付状态和显示状态一致
+          allBookings.forEach(booking => {
+            // 检查是否有支付状态不一致的情况
+            if ((booking.paymentStatus === 'paid' || booking.isPaid === true) && 
+                (booking.status === 'pending' || booking.status === 'confirmed_unpaid')) {
+              // 如果已支付但状态仍为待支付，则更新状态
+              console.log(`发现状态不一致：${booking._id} 已支付但状态为 ${booking.status}，修正为confirmed`);
+              booking.status = 'confirmed';
+            }
+            
+            // 标准化支付状态字段
+            if (booking.isPaid === true && booking.paymentStatus !== 'paid') {
+              booking.paymentStatus = 'paid';
+            } else if (booking.paymentStatus === 'paid' && booking.isPaid !== true) {
+              booking.isPaid = true;
+            }
+          });
+          
           // 更新自动取消标记信息
           allBookings.forEach(booking => {
             if (booking.status === 'cancelled') {
@@ -848,6 +876,11 @@ export default {
     getStatusText(booking) {
       if (!booking || !booking.status) return '未知状态';
       
+      // 优先判断支付状态，如果已支付，直接显示已缴费
+      if (booking.paymentStatus === 'paid' || booking.isPaid === true) {
+        return '已缴费';
+      }
+      
       // 根据预约的状态返回对应的文本
       switch (booking.status) {
         case 'pending':
@@ -855,7 +888,7 @@ export default {
         case 'confirmed_unpaid':
           return '未缴费';
         case 'confirmed':
-          return booking.paymentStatus === 'paid' || booking.isPaid ? '已缴费' : '未缴费';
+          return '未缴费';
         case 'cancelled':
         case 'cancel':
           return '已取消';
@@ -1775,6 +1808,9 @@ export default {
         return;
       }
       
+      // 设置操作状态为缴费
+      this.isRefunding = false;
+      
       // 根据课程的grade字段确定二维码URL
       let grade = booking.grade || '';
       // 从课程标题中尝试提取年级信息（如果grade字段为空）
@@ -1811,6 +1847,8 @@ export default {
     // 关闭二维码弹窗
     closeQrcodePopup() {
       this.$refs.qrcodePopup.close();
+      // 重置退费状态
+      this.isRefunding = false;
     },
     
     // 处理申请退费
@@ -1827,78 +1865,40 @@ export default {
         return;
       }
       
-      // 确认是否退费
-      uni.showModal({
-        title: '申请退费',
-        content: '确认要申请退费吗？退费后将无法恢复。',
-        success: async (res) => {
-          if (res.confirm) {
-            uni.showLoading({
-              title: '处理中...'
-            });
-            
-            try {
-              // 获取当前用户ID
-              const userId = this.getUserId();
-              
-              if (!userId) {
-                uni.showToast({
-                  title: '用户未登录',
-                  icon: 'none'
-                });
-                uni.hideLoading();
-                return;
-              }
-              
-              // 调用退款云函数
-              const result = await uniCloud.callFunction({
-                name: 'refundBookingPayment',
-                data: {
-                  bookingId: booking._id,
-                  userId,
-                  refundReason: '用户申请退款'
-                }
-              });
-              
-              console.log('退款处理结果:', result);
-              
-              if (result.result && result.result.success) {
-                // 更新本地数据
-                booking.paymentStatus = 'refunded';
-                booking.refundTime = new Date();
-                booking.refundReason = '用户申请退款';
-                
-                // 设置标记，通知列表页刷新
-                this.markBookingChanged();
-                
-                uni.showToast({
-                  title: '退费申请已处理',
-                  icon: 'success'
-                });
-                
-                // 刷新页面数据
-                setTimeout(() => {
-                  this.resetList();
-                  this.loadBookingList();
-                }, 1500);
-              } else {
-                uni.showToast({
-                  title: result.result?.message || '处理失败',
-                  icon: 'none'
-                });
-              }
-            } catch (error) {
-              console.error('退款处理出错:', error);
-              uni.showToast({
-                title: '处理失败，请重试',
-                icon: 'none'
-              });
-            } finally {
-              uni.hideLoading();
-            }
-          }
+      // 设置操作状态为退费
+      this.isRefunding = true;
+      
+      // 根据课程的grade字段确定二维码URL
+      let grade = booking.grade || '';
+      // 从课程标题中尝试提取年级信息（如果grade字段为空）
+      if (!grade && booking.courseTitle) {
+        const title = booking.courseTitle;
+        if (title.includes('初一') || title.includes('七年级')) {
+          grade = '初一';
+        } else if (title.includes('初二') || title.includes('八年级')) {
+          grade = '初二';
+        } else if (title.includes('初三') || title.includes('九年级')) {
+          grade = '初三';
         }
-      });
+      }
+      
+      // 设置二维码URL
+      if (grade === '初一') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+      } else if (grade === '初二') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初二.png';
+      } else if (grade === '初三') {
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初三.png';
+      } else {
+        // 如果未找到匹配的年级，使用初一年级的二维码作为默认
+        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+      }
+      
+      // 保存当前正在退费的预约ID，用于可能的后续操作
+      this.currentPayingBookingId = booking._id;
+      
+      // 显示二维码弹窗
+      this.$refs.qrcodePopup.open();
     },
     
     // 判断是否应该显示倒计时
@@ -2288,6 +2288,11 @@ export default {
         // 更新支付状态
         this.bookingList[bookingIndex].paymentStatus = 'paid';
         
+        // 添加支付时间（如果没有）
+        if (!this.bookingList[bookingIndex].paidTime) {
+          this.bookingList[bookingIndex].paidTime = new Date().toISOString();
+        }
+        
         // 清除该预约的倒计时
         this.clearCountdown(this.bookingList[bookingIndex]._id);
         
@@ -2384,7 +2389,19 @@ export default {
       }
       
       return '暂无';
-    }
+    },
+    
+    // 添加格式化支付时间的方法
+    formatPaymentTime(timeStr) {
+      if (!timeStr) return '未知'
+      
+      const date = new Date(timeStr)
+      if (isNaN(date.getTime())) {
+        return '未知'
+      }
+      
+      return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    },
   }
 }
 </script>
@@ -2540,6 +2557,16 @@ export default {
   margin-bottom: 12rpx;
   
   .countdown-time {
+    font-weight: bold;
+  }
+}
+
+.payment-time {
+  font-size: 22rpx;
+  color: #52C41A;
+  margin-bottom: 12rpx;
+  
+  .payment-time-value {
     font-weight: bold;
   }
 }
