@@ -1811,7 +1811,7 @@ export default {
       // 设置操作状态为缴费
       this.isRefunding = false;
       
-      // 根据课程的grade字段确定二维码URL
+      // 根据课程的grade字段确定年级
       let grade = booking.grade || '';
       // 从课程标题中尝试提取年级信息（如果grade字段为空）
       if (!grade && booking.courseTitle) {
@@ -1825,23 +1825,57 @@ export default {
         }
       }
       
-      // 设置二维码URL
-      if (grade === '初一') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      } else if (grade === '初二') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初二.png';
-      } else if (grade === '初三') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初三.png';
-      } else {
-        // 如果未找到匹配的年级，使用初一年级的二维码作为默认
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      }
+      // 显示加载提示
+      uni.showLoading({
+        title: '获取支付码中...'
+      });
       
-      // 保存当前正在支付的预约ID，用于可能的后续操作
-      this.currentPayingBookingId = booking._id;
-      
-      // 显示二维码弹窗
-      this.$refs.qrcodePopup.open();
+      // 从云数据库查询二维码
+      const db = uniCloud.database();
+      db.collection('payment_codes')
+        .where({
+          grade: grade || '初一', // 如果没有年级信息，使用初一作为默认
+          paymentStatus: 'unpaid'
+        })
+        .get()
+        .then(res => {
+          uni.hideLoading();
+          if (res.result.data && res.result.data.length > 0) {
+            // 获取二维码地址
+            this.qrcodeUrl = res.result.data[0].qrcode;
+            console.log('获取到支付二维码:', this.qrcodeUrl);
+            
+            // 保存当前正在支付的预约ID，用于可能的后续操作
+            this.currentPayingBookingId = booking._id;
+            
+            // 显示二维码弹窗
+            this.$refs.qrcodePopup.open();
+          } else {
+            console.error('未找到匹配的支付二维码');
+            uni.showToast({
+              title: '获取支付码失败',
+              icon: 'none'
+            });
+            
+            // 使用默认二维码
+            this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+            this.currentPayingBookingId = booking._id;
+            this.$refs.qrcodePopup.open();
+          }
+        })
+        .catch(err => {
+          uni.hideLoading();
+          console.error('获取支付二维码失败:', err);
+          uni.showToast({
+            title: '获取支付码失败',
+            icon: 'none'
+          });
+          
+          // 使用默认二维码
+          this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+          this.currentPayingBookingId = booking._id;
+          this.$refs.qrcodePopup.open();
+        });
     },
     
     // 关闭二维码弹窗
@@ -1868,7 +1902,7 @@ export default {
       // 设置操作状态为退费
       this.isRefunding = true;
       
-      // 根据课程的grade字段确定二维码URL
+      // 根据课程的grade字段确定年级
       let grade = booking.grade || '';
       // 从课程标题中尝试提取年级信息（如果grade字段为空）
       if (!grade && booking.courseTitle) {
@@ -1882,23 +1916,57 @@ export default {
         }
       }
       
-      // 设置二维码URL
-      if (grade === '初一') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      } else if (grade === '初二') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初二.png';
-      } else if (grade === '初三') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初三.png';
-      } else {
-        // 如果未找到匹配的年级，使用初一年级的二维码作为默认
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      }
+      // 显示加载提示
+      uni.showLoading({
+        title: '获取退费码中...'
+      });
       
-      // 保存当前正在退费的预约ID，用于可能的后续操作
-      this.currentPayingBookingId = booking._id;
-      
-      // 显示二维码弹窗
-      this.$refs.qrcodePopup.open();
+      // 从云数据库查询二维码
+      const db = uniCloud.database();
+      db.collection('payment_codes')
+        .where({
+          grade: grade || '初一', // 如果没有年级信息，使用初一作为默认
+          paymentStatus: 'paid'
+        })
+        .get()
+        .then(res => {
+          uni.hideLoading();
+          if (res.result.data && res.result.data.length > 0) {
+            // 获取二维码地址
+            this.qrcodeUrl = res.result.data[0].qrcode;
+            console.log('获取到退费二维码:', this.qrcodeUrl);
+            
+            // 保存当前正在退费的预约ID，用于可能的后续操作
+            this.currentPayingBookingId = booking._id;
+            
+            // 显示二维码弹窗
+            this.$refs.qrcodePopup.open();
+          } else {
+            console.error('未找到匹配的退费二维码');
+            uni.showToast({
+              title: '获取退费码失败',
+              icon: 'none'
+            });
+            
+            // 使用默认二维码
+            this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+            this.currentPayingBookingId = booking._id;
+            this.$refs.qrcodePopup.open();
+          }
+        })
+        .catch(err => {
+          uni.hideLoading();
+          console.error('获取退费二维码失败:', err);
+          uni.showToast({
+            title: '获取退费码失败',
+            icon: 'none'
+          });
+          
+          // 使用默认二维码
+          this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+          this.currentPayingBookingId = booking._id;
+          this.$refs.qrcodePopup.open();
+        });
     },
     
     // 判断是否应该显示倒计时

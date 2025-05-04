@@ -2036,6 +2036,7 @@ var _default = {
     },
     // 前往支付页面
     goToPay: function goToPay(booking, e) {
+      var _this8 = this;
       // 阻止事件冒泡，避免触发viewDetail
       if (e) e.stopPropagation();
       if (!booking || !booking._id) {
@@ -2050,7 +2051,7 @@ var _default = {
       // 设置操作状态为缴费
       this.isRefunding = false;
 
-      // 根据课程的grade字段确定二维码URL
+      // 根据课程的grade字段确定年级
       var grade = booking.grade || '';
       // 从课程标题中尝试提取年级信息（如果grade字段为空）
       if (!grade && booking.courseTitle) {
@@ -2064,23 +2065,54 @@ var _default = {
         }
       }
 
-      // 设置二维码URL
-      if (grade === '初一') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      } else if (grade === '初二') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初二.png';
-      } else if (grade === '初三') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初三.png';
-      } else {
-        // 如果未找到匹配的年级，使用初一年级的二维码作为默认
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      }
+      // 显示加载提示
+      uni.showLoading({
+        title: '获取支付码中...'
+      });
 
-      // 保存当前正在支付的预约ID，用于可能的后续操作
-      this.currentPayingBookingId = booking._id;
+      // 从云数据库查询二维码
+      var db = uniCloud.database();
+      db.collection('payment_codes').where({
+        grade: grade || '初一',
+        // 如果没有年级信息，使用初一作为默认
+        paymentStatus: 'unpaid'
+      }).get().then(function (res) {
+        uni.hideLoading();
+        if (res.result.data && res.result.data.length > 0) {
+          // 获取二维码地址
+          _this8.qrcodeUrl = res.result.data[0].qrcode;
+          console.log('获取到支付二维码:', _this8.qrcodeUrl);
 
-      // 显示二维码弹窗
-      this.$refs.qrcodePopup.open();
+          // 保存当前正在支付的预约ID，用于可能的后续操作
+          _this8.currentPayingBookingId = booking._id;
+
+          // 显示二维码弹窗
+          _this8.$refs.qrcodePopup.open();
+        } else {
+          console.error('未找到匹配的支付二维码');
+          uni.showToast({
+            title: '获取支付码失败',
+            icon: 'none'
+          });
+
+          // 使用默认二维码
+          _this8.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+          _this8.currentPayingBookingId = booking._id;
+          _this8.$refs.qrcodePopup.open();
+        }
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('获取支付二维码失败:', err);
+        uni.showToast({
+          title: '获取支付码失败',
+          icon: 'none'
+        });
+
+        // 使用默认二维码
+        _this8.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+        _this8.currentPayingBookingId = booking._id;
+        _this8.$refs.qrcodePopup.open();
+      });
     },
     // 关闭二维码弹窗
     closeQrcodePopup: function closeQrcodePopup() {
@@ -2090,6 +2122,7 @@ var _default = {
     },
     // 处理申请退费
     handleRefund: function handleRefund(booking, e) {
+      var _this9 = this;
       // 阻止事件冒泡，避免触发viewDetail
       if (e) e.stopPropagation();
       if (!booking || !booking._id) {
@@ -2104,7 +2137,7 @@ var _default = {
       // 设置操作状态为退费
       this.isRefunding = true;
 
-      // 根据课程的grade字段确定二维码URL
+      // 根据课程的grade字段确定年级
       var grade = booking.grade || '';
       // 从课程标题中尝试提取年级信息（如果grade字段为空）
       if (!grade && booking.courseTitle) {
@@ -2118,23 +2151,54 @@ var _default = {
         }
       }
 
-      // 设置二维码URL
-      if (grade === '初一') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      } else if (grade === '初二') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初二.png';
-      } else if (grade === '初三') {
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初三.png';
-      } else {
-        // 如果未找到匹配的年级，使用初一年级的二维码作为默认
-        this.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
-      }
+      // 显示加载提示
+      uni.showLoading({
+        title: '获取退费码中...'
+      });
 
-      // 保存当前正在退费的预约ID，用于可能的后续操作
-      this.currentPayingBookingId = booking._id;
+      // 从云数据库查询二维码
+      var db = uniCloud.database();
+      db.collection('payment_codes').where({
+        grade: grade || '初一',
+        // 如果没有年级信息，使用初一作为默认
+        paymentStatus: 'paid'
+      }).get().then(function (res) {
+        uni.hideLoading();
+        if (res.result.data && res.result.data.length > 0) {
+          // 获取二维码地址
+          _this9.qrcodeUrl = res.result.data[0].qrcode;
+          console.log('获取到退费二维码:', _this9.qrcodeUrl);
 
-      // 显示二维码弹窗
-      this.$refs.qrcodePopup.open();
+          // 保存当前正在退费的预约ID，用于可能的后续操作
+          _this9.currentPayingBookingId = booking._id;
+
+          // 显示二维码弹窗
+          _this9.$refs.qrcodePopup.open();
+        } else {
+          console.error('未找到匹配的退费二维码');
+          uni.showToast({
+            title: '获取退费码失败',
+            icon: 'none'
+          });
+
+          // 使用默认二维码
+          _this9.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+          _this9.currentPayingBookingId = booking._id;
+          _this9.$refs.qrcodePopup.open();
+        }
+      }).catch(function (err) {
+        uni.hideLoading();
+        console.error('获取退费二维码失败:', err);
+        uni.showToast({
+          title: '获取退费码失败',
+          icon: 'none'
+        });
+
+        // 使用默认二维码
+        _this9.qrcodeUrl = 'https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/qrcode/初一.png';
+        _this9.currentPayingBookingId = booking._id;
+        _this9.$refs.qrcodePopup.open();
+      });
     },
     // 判断是否应该显示倒计时
     shouldShowCountdown: function shouldShowCountdown(booking) {
@@ -2157,7 +2221,7 @@ var _default = {
     },
     // 初始化所有倒计时
     initAllCountdowns: function initAllCountdowns() {
-      var _this8 = this;
+      var _this10 = this;
       // 清除之前的所有定时器
       this.clearAllCountdowns();
       console.log('开始初始化所有倒计时, 预约数量:', this.bookingList.length);
@@ -2168,7 +2232,7 @@ var _default = {
         this.bookingList.forEach(function (booking) {
           if (booking && (booking.status === 'pending' || booking.status === 'confirmed_unpaid')) {
             console.log('初始化预约倒计时:', booking.bookingId || booking._id);
-            _this8.initCountdown(booking);
+            _this10.initCountdown(booking);
             initCount++;
           }
         });
@@ -2181,7 +2245,7 @@ var _default = {
     // 初始化单个预约的倒计时
     initCountdown: function initCountdown(booking) {
       var _arguments = arguments,
-        _this9 = this;
+        _this11 = this;
       if (!booking || !booking._id || booking.status !== 'pending' && booking.status !== 'confirmed_unpaid') {
         return;
       }
@@ -2220,41 +2284,41 @@ var _default = {
         // 创建定时器 - 使用单一定时器处理UI更新和云端检查
         this.countdownTimers[booking._id] = setInterval(function () {
           // 更新倒计时
-          if (_this9.countdownValues[booking._id] > 0) {
-            _this9.countdownValues[booking._id] -= updateInterval;
+          if (_this11.countdownValues[booking._id] > 0) {
+            _this11.countdownValues[booking._id] -= updateInterval;
 
             // 检查是否需要调整更新频率
-            var newInterval = _this9.getUpdateInterval(_this9.countdownValues[booking._id]);
+            var newInterval = _this11.getUpdateInterval(_this11.countdownValues[booking._id]);
             if (newInterval !== updateInterval) {
               console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u8C03\u6574\u66F4\u65B0\u9891\u7387: ").concat(updateInterval, "\u79D2 -> ").concat(newInterval, "\u79D2"));
-              clearInterval(_this9.countdownTimers[booking._id]);
+              clearInterval(_this11.countdownTimers[booking._id]);
               updateInterval = newInterval;
-              _this9.countdownTimers[booking._id] = setInterval(_arguments.callee, updateInterval * 1000);
+              _this11.countdownTimers[booking._id] = setInterval(_arguments.callee, updateInterval * 1000);
             }
 
             // 记录日志 - 在更新频率变化点或每小时记录一次
-            if (_this9.countdownValues[booking._id] % 3600 === 0 || _this9.countdownValues[booking._id] === 7200 ||
+            if (_this11.countdownValues[booking._id] % 3600 === 0 || _this11.countdownValues[booking._id] === 7200 ||
             // 剩余2小时
-            _this9.countdownValues[booking._id] === 3600 ||
+            _this11.countdownValues[booking._id] === 3600 ||
             // 剩余1小时
-            _this9.countdownValues[booking._id] === 120) {
+            _this11.countdownValues[booking._id] === 120) {
               // 剩余2分钟
-              console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u5269\u4F59\u652F\u4ED8\u65F6\u95F4: ").concat(_this9.formatCountdown(_this9.countdownValues[booking._id])));
+              console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u5269\u4F59\u652F\u4ED8\u65F6\u95F4: ").concat(_this11.formatCountdown(_this11.countdownValues[booking._id])));
             }
 
             // 检查是否需要进行云端检查（每小时）
             var now = Date.now();
             if (now - lastCloudCheck >= cloudCheckInterval) {
               console.log("\u9884\u7EA6 ".concat(booking.bookingId, " \u6267\u884C\u6BCF\u5C0F\u65F6\u4E91\u7AEF\u68C0\u67E5"));
-              _this9.checkBookingStatusFromCloud(booking._id);
+              _this11.checkBookingStatusFromCloud(booking._id);
               lastCloudCheck = now;
             }
 
             // 强制更新视图
-            _this9.$forceUpdate();
+            _this11.$forceUpdate();
           } else {
             // 倒计时结束，处理超时
-            _this9.handleExpiredBooking(booking);
+            _this11.handleExpiredBooking(booking);
           }
         }, updateInterval * 1000); // 转换为毫秒
       } catch (e) {
@@ -2324,7 +2388,7 @@ var _default = {
     },
     // 从云端检查预约状态
     checkBookingStatusFromCloud: function checkBookingStatusFromCloud(bookingId) {
-      var _this10 = this;
+      var _this12 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
         var result, serverBooking, localBooking;
         return _regenerator.default.wrap(function _callee5$(_context5) {
@@ -2350,20 +2414,20 @@ var _default = {
 
                   // 如果云端状态已更改，更新本地状态
                   if (serverBooking && serverBooking.status) {
-                    localBooking = _this10.bookingList.find(function (b) {
+                    localBooking = _this12.bookingList.find(function (b) {
                       return b._id === bookingId;
                     });
                     if (localBooking && localBooking.status !== serverBooking.status) {
                       console.log("\u66F4\u65B0\u672C\u5730\u9884\u7EA6\u72B6\u6001: ".concat(localBooking.status, " -> ").concat(serverBooking.status));
-                      _this10.updateBookingStatus(bookingId, serverBooking.status);
+                      _this12.updateBookingStatus(bookingId, serverBooking.status);
 
                       // 如果状态为已取消，停止倒计时
                       if (serverBooking.status === 'cancelled') {
-                        _this10.clearCountdown(bookingId);
+                        _this12.clearCountdown(bookingId);
                       }
 
                       // 刷新UI
-                      _this10.$forceUpdate();
+                      _this12.$forceUpdate();
                     }
                   }
                 }
@@ -2522,9 +2586,9 @@ var _default = {
     },
     // 清除所有倒计时
     clearAllCountdowns: function clearAllCountdowns() {
-      var _this11 = this;
+      var _this13 = this;
       Object.keys(this.countdownTimers).forEach(function (bookingId) {
-        _this11.clearCountdown(bookingId);
+        _this13.clearCountdown(bookingId);
       });
       this.countdownTimers = {};
     },
