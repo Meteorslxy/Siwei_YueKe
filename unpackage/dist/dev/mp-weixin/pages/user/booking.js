@@ -366,15 +366,15 @@ var _default = {
         return validBookings;
       }
       if (this.currentStatus === 'booked') {
-        // 已预约包含所有非取消和非完成的状态
+        // 已预约包含所有非取消和非完成的状态，且排除已删除课程
         return validBookings.filter(function (booking) {
-          return booking.status === 'pending' || booking.status === 'confirmed_unpaid' || booking.status === 'confirmed';
+          return (booking.status === 'pending' || booking.status === 'confirmed_unpaid' || booking.status === 'confirmed') && !booking.isCourseDeleted;
         });
       }
       if (this.currentStatus === 'cancelled') {
-        // 已取消状态的过滤条件
+        // 已取消状态的过滤条件，包括课程已删除的情况
         return validBookings.filter(function (booking) {
-          return booking.status === 'cancelled' || booking.paymentStatus === 'cancelled' || booking.status === 'cancel';
+          return booking.status === 'cancelled' || booking.paymentStatus === 'cancelled' || booking.status === 'cancel' || booking.isCourseDeleted === true;
         });
       }
       if (this.currentStatus === 'refunded') {
@@ -384,9 +384,9 @@ var _default = {
         });
       }
 
-      // 其他状态直接按状态筛选
+      // 其他状态直接按状态筛选，同时排除已删除课程
       return validBookings.filter(function (booking) {
-        return booking.status === _this.currentStatus;
+        return booking.status === _this.currentStatus && !booking.isCourseDeleted;
       });
     }
   },
@@ -683,15 +683,15 @@ var _default = {
                   // 更新总计数
                   _this4.statusCounts.all = allBookings.length;
 
-                  // 计算各状态数量
+                  // 计算各状态数量，课程已删除的记录计入已取消数量
                   _this4.statusCounts.booked = allBookings.filter(function (item) {
-                    return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed');
+                    return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed') && !item.isCourseDeleted;
                   }).length;
                   _this4.statusCounts.finished = allBookings.filter(function (item) {
-                    return item && item.status === 'finished';
+                    return item && item.status === 'finished' && !item.isCourseDeleted;
                   }).length;
                   cancelledInList = allBookings.filter(function (item) {
-                    return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel');
+                    return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel' || item.isCourseDeleted === true);
                   }).length; // 如果已经从本地加载了取消记录，使用更大的值
                   if (!_this4.localCancelledLoaded || cancelledInList > _this4.statusCounts.cancelled) {
                     _this4.statusCounts.cancelled = cancelledInList;
@@ -699,7 +699,7 @@ var _default = {
 
                   // 统计已退费的预约数量
                   refundedCount = allBookings.filter(function (item) {
-                    return item && item.paymentStatus === 'refunded';
+                    return item && item.paymentStatus === 'refunded' && !item.isCourseDeleted;
                   }).length;
                   _this4.statusCounts.refunded = refundedCount;
 
@@ -756,16 +756,16 @@ var _default = {
                   if (useClientFiltering) {
                     if (_this4.currentStatus === 'booked') {
                       allBookings = allBookings.filter(function (item) {
-                        return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed');
+                        return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed') && !item.isCourseDeleted;
                       });
                     } else if (_this4.currentStatus === 'finished') {
                       allBookings = allBookings.filter(function (item) {
-                        return item && item.status === 'finished';
+                        return item && item.status === 'finished' && !item.isCourseDeleted;
                       });
                     } else if (_this4.currentStatus === 'cancelled') {
-                      // 重点：筛选出已取消的预约（包含本地存储的）
+                      // 重点：筛选出已取消的预约（包含本地存储的和课程已删除的）
                       cancelledBookings = allBookings.filter(function (item) {
-                        return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel');
+                        return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel' || item.isCourseDeleted === true);
                       }); // 获取本地已取消的预约
                       _localCancelledBookings = _this4.getLocalCancelledBookings(userId).filter(function (item) {
                         return item && item._id;
@@ -787,9 +787,9 @@ var _default = {
                       // 打印筛选后的已取消记录
                       console.log('前端筛选后的已取消预约记录:', allBookings);
                     } else if (_this4.currentStatus === 'refunded') {
-                      // 筛选出已退费的预约
+                      // 筛选出已退费的预约，排除已删除课程
                       allBookings = allBookings.filter(function (item) {
-                        return item && item.paymentStatus === 'refunded';
+                        return item && item.paymentStatus === 'refunded' && !item.isCourseDeleted;
                       });
                       console.log('前端筛选后的已退费预约记录:', allBookings);
                     }
@@ -1076,6 +1076,15 @@ var _default = {
     // 获取状态文本
     getStatusText: function getStatusText(booking) {
       if (!booking || !booking.status) return '未知状态';
+
+      // 如果课程已删除，显示特殊状态
+      if (booking.isCourseDeleted) {
+        // 优先判断支付状态，保留已缴费标识
+        if (booking.paymentStatus === 'paid' || booking.isPaid === true) {
+          return '已缴费(课程已删除)';
+        }
+        return '课程已删除';
+      }
 
       // 优先判断支付状态，如果已支付，直接显示已缴费
       if (booking.paymentStatus === 'paid' || booking.isPaid === true) {
@@ -2013,6 +2022,10 @@ var _default = {
     },
     // 在methods部分添加检查是否显示操作按钮的方法
     showActions: function showActions(item) {
+      // 如果课程已删除，不显示任何操作按钮
+      if (item && item.isCourseDeleted) {
+        return false;
+      }
       return item && (item.status !== 'cancelled' && item.status !== 'finished' || item.status === 'confirmed' || item.status === 'confirmed_unpaid' || item.status !== 'cancelled');
     },
     // 判断是否应该显示联系老师按钮
@@ -2203,6 +2216,11 @@ var _default = {
     // 判断是否应该显示倒计时
     shouldShowCountdown: function shouldShowCountdown(booking) {
       if (!booking || !booking._id) return false;
+
+      // 如果课程已删除，不显示倒计时
+      if (booking.isCourseDeleted) {
+        return false;
+      }
 
       // 如果已支付或已退费，不显示倒计时
       if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'refunded') {

@@ -17,7 +17,7 @@ export default {
     this.checkLoginStatus()
     
     // 测试云函数连接
-    this.testCloudConnection()
+    // this.testCloudConnection()
 
     // 初始化全局页面引用
     uni.$on('page-ready', (pageVm) => {
@@ -609,6 +609,7 @@ export default {
         
         // 直接使用uniCloud调用云函数
         console.log('正在测试云函数连接...');
+        /* 云函数不存在，注释掉调用
         const result = await uniCloud.callFunction({
           name: 'yuekeCloudTest',
           data: {
@@ -624,6 +625,9 @@ export default {
           console.warn('云函数测试返回异常结果');
           return false;
         }
+        */
+        console.warn('云函数测试已禁用');
+        return false;
       } catch (error) {
         console.error('云函数连接测试失败:', error);
         return false;

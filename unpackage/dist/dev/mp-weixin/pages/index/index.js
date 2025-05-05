@@ -204,7 +204,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
+/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -229,13 +229,15 @@ var _default = {
       statusBarHeight: 0
     };
   },
-  onLoad: function onLoad() {
-    // 初始化应用
-    this.initApp();
-    this.getNews();
-    this.getRecommendCourses();
-    // 获取状态栏高度
+  onLoad: function onLoad(options) {
     this.getStatusBarHeight();
+    this.getNews();
+
+    // 初始化应用
+    // this.initApp()
+
+    // 获取路由参数
+    this.getRecommendCourses();
   },
   onShow: function onShow() {
     // 每次显示页面时刷新数据，确保显示最新数据
@@ -252,40 +254,6 @@ var _default = {
     this.getRecommendCourses();
   },
   methods: {
-    // 初始化应用
-    initApp: function initApp() {
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var res;
-        return _regenerator.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.prev = 0;
-                _context.next = 3;
-                return uniCloud.callFunction({
-                  name: 'initUserTable'
-                });
-              case 3:
-                res = _context.sent;
-                if (res.result && res.result.code === 0) {
-                  console.log('用户表初始化完成:', res.result);
-                } else {
-                  console.warn('用户表初始化警告:', res.result);
-                }
-                _context.next = 10;
-                break;
-              case 7:
-                _context.prev = 7;
-                _context.t0 = _context["catch"](0);
-                console.error('应用初始化失败:', _context.t0);
-              case 10:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, null, [[0, 7]]);
-      }))();
-    },
     // 获取状态栏高度
     getStatusBarHeight: function getStatusBarHeight() {
       try {
@@ -299,23 +267,23 @@ var _default = {
     // 获取资讯列表
     getNews: function getNews() {
       var _this = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
         var result;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
+        return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context.prev = _context.next) {
               case 0:
-                _context2.prev = 0;
+                _context.prev = 0;
                 console.log('首页获取资讯列表');
 
                 // 调用API获取资讯
-                _context2.next = 4;
+                _context.next = 4;
                 return _this.$api.course.getNewsList({
                   page: 1,
                   pageSize: 5
                 });
               case 4:
-                result = _context2.sent;
+                result = _context.sent;
                 console.log('获取资讯结果:', result);
                 if (result && result.data && result.data.length > 0) {
                   _this.newsList = result.data;
@@ -323,12 +291,12 @@ var _default = {
                   console.warn('未获取到资讯数据');
                   _this.newsList = [];
                 }
-                _context2.next = 14;
+                _context.next = 14;
                 break;
               case 9:
-                _context2.prev = 9;
-                _context2.t0 = _context2["catch"](0);
-                console.error('获取资讯失败:', _context2.t0);
+                _context.prev = 9;
+                _context.t0 = _context["catch"](0);
+                console.error('获取资讯失败:', _context.t0);
                 _this.newsList = [];
                 uni.showToast({
                   title: '获取通知列表失败',
@@ -336,31 +304,31 @@ var _default = {
                 });
               case 14:
               case "end":
-                return _context2.stop();
+                return _context.stop();
             }
           }
-        }, _callee2, null, [[0, 9]]);
+        }, _callee, null, [[0, 9]]);
       }))();
     },
     // 获取推荐课程
     getRecommendCourses: function getRecommendCourses() {
       var _this2 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
         var result;
-        return _regenerator.default.wrap(function _callee3$(_context3) {
+        return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
-                _context3.prev = 0;
+                _context2.prev = 0;
                 console.log('获取推荐课程');
 
                 // 调用API获取推荐课程
-                _context3.next = 4;
+                _context2.next = 4;
                 return _this2.$api.course.getRecommendCourses({
                   limit: 4
                 });
               case 4:
-                result = _context3.sent;
+                result = _context2.sent;
                 console.log('获取推荐课程结果:', result);
                 if (result && result.data) {
                   // 处理每个课程项，确保有正确的数据格式
@@ -430,12 +398,12 @@ var _default = {
                     icon: 'none'
                   });
                 }
-                _context3.next = 14;
+                _context2.next = 14;
                 break;
               case 9:
-                _context3.prev = 9;
-                _context3.t0 = _context3["catch"](0);
-                console.error('获取推荐课程失败:', _context3.t0);
+                _context2.prev = 9;
+                _context2.t0 = _context2["catch"](0);
+                console.error('获取推荐课程失败:', _context2.t0);
                 _this2.recommendCourses = [];
                 uni.showToast({
                   title: '获取推荐课程失败',
@@ -443,10 +411,10 @@ var _default = {
                 });
               case 14:
               case "end":
-                return _context3.stop();
+                return _context2.stop();
             }
           }
-        }, _callee3, null, [[0, 9]]);
+        }, _callee2, null, [[0, 9]]);
       }))();
     },
     // 获取图片URL - 处理本地和云端图片
@@ -723,11 +691,43 @@ var _default = {
 
       // 最后返回默认头像
       return '/static/images/default-avatar.png';
+    },
+    // 初始化应用
+    initApp: function initApp() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                try {
+                  // 检查数据库状态
+                  /* 云函数不存在，注释掉调用
+                  const res = await uniCloud.callFunction({
+                    name: 'initUserTable'
+                  });
+                  
+                  if (res.result && res.result.code === 0) {
+                    console.log('用户表初始化完成:', res.result);
+                  } else {
+                    console.warn('用户表初始化警告:', res.result);
+                  }
+                  */
+                  console.warn('应用初始化已禁用，云函数不存在');
+                } catch (err) {
+                  console.error('应用初始化失败:', err);
+                }
+              case 1:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ })
 

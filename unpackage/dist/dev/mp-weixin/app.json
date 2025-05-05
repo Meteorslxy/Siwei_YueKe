@@ -28,6 +28,7 @@
     "pages/common/input-page",
     "pages/common/markdown",
     "pages/user/calendar",
+    "pages/user/course-notifications",
     "pages/course/manage",
     "pages/schedule/schedule",
     "pages/course/edit"

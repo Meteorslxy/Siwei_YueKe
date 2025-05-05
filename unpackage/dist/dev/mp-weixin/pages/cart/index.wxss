@@ -100,6 +100,14 @@
   display: flex;
   align-items: center;
 }
+.favorite-list .favorite-item.inactive {
+  opacity: 0.6;
+  background-color: #f8f8f8;
+}
+.favorite-list .favorite-item.inactive .item-content .item-image {
+  -webkit-filter: grayscale(100%);
+          filter: grayscale(100%);
+}
 .favorite-list .favorite-item .checkbox-wrapper {
   padding: 0 10rpx;
   width: 60rpx;
@@ -107,6 +115,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.favorite-list .favorite-item .checkbox-wrapper .inactive-icon {
+  font-size: 20rpx;
+  color: #999;
+  background-color: #eee;
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx;
 }
 .favorite-list .favorite-item .item-content {
   flex: 1;

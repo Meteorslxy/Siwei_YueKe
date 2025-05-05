@@ -95,6 +95,7 @@ console.log('云服务初始化结果:', cloudInitResult);
 if (cloudInitResult) {
   setTimeout(() => {
     console.log('测试云函数连接...');
+    /* 云函数已删除，注释掉调用
     const cloudObj = typeof uniCloud !== 'undefined' ? uniCloud : uni.cloud;
     cloudObj.callFunction({
       name: 'yuekeCloudTest',
@@ -104,6 +105,8 @@ if (cloudInitResult) {
     }).catch(err => {
       console.error('云服务连接测试失败:', err);
     });
+    */
+    console.log('云函数测试已禁用');
   }, 2000);
 }
 // #endif

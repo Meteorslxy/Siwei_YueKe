@@ -5,11 +5,11 @@
 
 /**
  * 测试云函数连接
- * @param {String} functionName 云函数名称，默认为yuekeCloudTest
+ * @param {String} functionName 云函数名称，默认为getUserInfoByToken（替换已删除的yuekeCloudTest）
  * @param {Object} data 测试数据
  * @returns {Promise} 测试结果Promise
  */
-export function testCloudConnection(functionName = 'yuekeCloudTest', data = { message: '连接测试' }) {
+export function testCloudConnection(functionName = 'getUserInfoByToken', data = { token: '' }) {
   // 获取可用的云函数对象
   const cloudObj = typeof uniCloud !== 'undefined' ? uniCloud : 
                    (typeof uni !== 'undefined' && uni.cloud) ? uni.cloud : null;
@@ -78,6 +78,8 @@ export function showCloudConnectionStatus() {
     mask: true
   });
   
+  // 注释掉直接测试调用，防止报错
+  /* 
   testCloudConnection()
     .then(res => {
       uni.hideLoading();
@@ -95,4 +97,13 @@ export function showCloudConnectionStatus() {
         showCancel: false
       });
     });
+  */
+  
+  // 直接显示提示，不调用云函数
+  uni.hideLoading();
+  uni.showToast({
+    title: '云服务检测已禁用',
+    icon: 'none',
+    duration: 2000
+  });
 } 

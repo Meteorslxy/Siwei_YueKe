@@ -190,7 +190,9 @@ var _default = {
       // 添加防抖控制参数
       userInfoDebounceTime: 5000,
       // 5秒内不重复请求
-      forceUpdateUserInfo: false // 是否强制刷新用户信息
+      forceUpdateUserInfo: false,
+      // 是否强制刷新用户信息
+      hasCourseNotifications: false // 是否有课程通知
     };
   },
   onLoad: function onLoad(options) {
@@ -263,6 +265,9 @@ var _default = {
     } else {
       console.log("\u8DDD\u79BB\u4E0A\u6B21\u52A0\u8F7D\u4EC5".concat(Math.floor(timeSinceLastUpdate / 1000), "\u79D2\uFF0C\u8DF3\u8FC7\u52A0\u8F7D"));
     }
+
+    // 获取用户预约课程，检查是否有课程通知
+    this.checkCourseNotifications();
 
     // 确保获取uni-id-token，可能uni-id-pages组件登录后没有保存userInfo但保存了token
     var token = uni.getStorageSync('uni_id_token');
@@ -1926,6 +1931,64 @@ var _default = {
       }
       console.log('格式化后的用户信息:', JSON.stringify(formattedInfo));
       return formattedInfo;
+    },
+    // 跳转到课程通知页面
+    navigateToCourseNotifications: function navigateToCourseNotifications() {
+      if (!this.hasUserInfo) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        return;
+      }
+      uni.navigateTo({
+        url: '/pages/user/course-notifications'
+      });
+    },
+    // 检查是否有课程通知
+    checkCourseNotifications: function checkCourseNotifications() {
+      var _this16 = this;
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee9() {
+        var userId, db, bookingResult;
+        return _regenerator.default.wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                _context9.prev = 0;
+                if (!(!_this16.hasUserInfo || !_this16.userInfo || !_this16.userInfo._id)) {
+                  _context9.next = 3;
+                  break;
+                }
+                return _context9.abrupt("return");
+              case 3:
+                userId = _this16.userInfo.userId || _this16.userInfo._id; // 查询用户的预约课程
+                db = uniCloud.database();
+                _context9.next = 7;
+                return db.collection('bookings').where({
+                  userId: userId,
+                  status: db.command.in(['pending', 'confirmed', 'confirmed_unpaid'])
+                }).count();
+              case 7:
+                bookingResult = _context9.sent;
+                // 设置课程通知标志
+                if (bookingResult && bookingResult.result && bookingResult.result.total > 0) {
+                  _this16.hasCourseNotifications = true;
+                } else {
+                  _this16.hasCourseNotifications = false;
+                }
+                _context9.next = 14;
+                break;
+              case 11:
+                _context9.prev = 11;
+                _context9.t0 = _context9["catch"](0);
+                console.error('检查课程通知失败:', _context9.t0);
+              case 14:
+              case "end":
+                return _context9.stop();
+            }
+          }
+        }, _callee9, null, [[0, 11]]);
+      }))();
     }
   }
 };

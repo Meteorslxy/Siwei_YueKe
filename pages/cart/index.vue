@@ -9,9 +9,12 @@
     <!-- 购物车列表 -->
     <view class="favorite-list">
       <block v-if="favoriteList.length > 0">
-        <view class="favorite-item" v-for="(item, index) in favoriteList" :key="index">
-          <view class="checkbox-wrapper" @click.stop.prevent="toggleSelect(index)">
+        <view class="favorite-item" v-for="(item, index) in favoriteList" :key="index" :class="{'inactive': item.inactive}">
+          <view class="checkbox-wrapper" @click.stop.prevent="toggleSelect(index)" v-if="!item.inactive">
             <checkbox :checked="item.selected" color="#FF6B00" />
+          </view>
+          <view class="checkbox-wrapper" v-else>
+            <view class="inactive-icon">失效</view>
           </view>
             
           <view class="item-content" @click="handleClick(index)">
@@ -24,13 +27,14 @@
             <view class="item-info">
               <view class="item-title">{{item.itemTitle || '未命名'}}</view>
               <view class="item-type">{{getItemTypeName(item.itemType)}}</view>
-              <view class="item-price">¥{{item.price || 0}}.00</view>
+              <view class="item-price" v-if="!item.inactive">¥{{item.price || 0}}.00</view>
+              <view class="item-notice" v-if="item.inactive">{{item.noticeText || '该课程已下架或不存在'}}</view>
               <view class="item-time">{{formatDate(item.createTime)}}</view>
             </view>
           </view>
             
           <view class="item-action">
-            <button class="action-btn book-btn" @click.stop="bookCourse(item)" v-if="!isManageMode">立即预约</button>
+            <button class="action-btn book-btn" @click.stop="bookCourse(item)" v-if="!isManageMode && !item.inactive">立即预约</button>
             <view class="action-btn delete-btn" @click="handleDelete(index)" v-else>
               <text class="iconfont icon-delete"></text>
               <text class="delete-text">删除</text>
@@ -91,13 +95,13 @@ export default {
     // 选中的数量
     selectedCount() {
       console.log('计算已选中数量，当前列表项数:', this.favoriteList.length);
-      return this.favoriteList.filter(item => item.selected).length;
+      return this.favoriteList.filter(item => item.selected && !item.inactive).length;
     },
     // 计算总价
     totalPrice() {
       console.log('计算总价，当前列表项数:', this.favoriteList.length);
       return this.favoriteList
-        .filter(item => item.selected)
+        .filter(item => item.selected && !item.inactive)
         .reduce((sum, item) => {
           // 确保价格是有效的数字
           const price = parseFloat(item.price) || 0;
@@ -295,10 +299,36 @@ export default {
         console.log(`直接获取课程价格结果:`, res.result);
         
         if (res.result && res.result.success && res.result.data) {
+          // 检查数据是否为空数组或null
+          if (Array.isArray(res.result.data) && res.result.data.length === 0) {
+            console.log(`课程${item.itemId}不存在或已被删除`);
+            // 标记为失效课程
+            item.inactive = true;
+            item.noticeText = '该课程已下架或不存在';
+            // 取消选择状态
+            item.selected = false;
+            // 强制更新视图
+            this.$forceUpdate();
+            return;
+          }
+          
           let course = res.result.data;
           // 处理可能返回的数组格式
           if (Array.isArray(course)) {
             course = course[0];
+          }
+          
+          // 如果没有获取到课程数据
+          if (!course || !course._id) {
+            console.log(`未获取到有效的课程数据:`, course);
+            // 标记为失效课程
+            item.inactive = true;
+            item.noticeText = '该课程已下架或不存在';
+            // 取消选择状态
+            item.selected = false;
+            // 强制更新视图
+            this.$forceUpdate();
+            return;
           }
           
           // 输出课程的完整属性，帮助调试
@@ -355,6 +385,8 @@ export default {
           
           // 设置最终价格，确保为数字
           item.price = finalPrice;
+          // 确保课程不是失效状态
+          item.inactive = false;
           console.log(`更新课程 ${item.itemTitle} 价格为: ${item.price}`);
           
           // 如果价格为0，并且重试次数小于3，则延迟2秒后重试
@@ -370,8 +402,19 @@ export default {
         } else {
           console.error('获取课程价格失败, 返回结果:', res.result);
           
+          // 检查是否因为课程不存在
+          if (res.result && (res.result.message === "课程不存在" || res.result.data === null || 
+             (Array.isArray(res.result.data) && res.result.data.length === 0))) {
+            // 标记为失效课程
+            item.inactive = true;
+            item.noticeText = '该课程已下架或不存在';
+            // 取消选择状态
+            item.selected = false;
+            // 强制更新视图
+            this.$forceUpdate();
+          }
           // 如果获取失败且重试次数小于3，则延迟2秒后重试
-          if (retryCount < 3) {
+          else if (retryCount < 3) {
             console.log(`获取失败，将在2秒后重试, 当前重试次数: ${retryCount}`);
             setTimeout(() => {
               this.fetchCoursePrice(item, retryCount + 1);
@@ -380,6 +423,23 @@ export default {
         }
       } catch (error) {
         console.error('获取课程价格失败:', error);
+        
+        // 判断是否因为课程不存在导致的错误
+        if (error && error.message && (
+            error.message.includes("Cannot read property '_id' of undefined") ||
+            error.message.includes("课程不存在") ||
+            error.message.includes("无效的课程ID")
+        )) {
+          // 标记为失效课程
+          item.inactive = true;
+          item.noticeText = '该课程已下架或不存在';
+          // 取消选择状态
+          item.selected = false;
+          // 强制更新视图
+          this.$forceUpdate();
+          console.log(`课程${item.itemId}已标记为失效`);
+          return;
+        }
         
         // 如果发生异常且重试次数小于3，则延迟2秒后重试
         if (retryCount < 3) {
@@ -399,6 +459,14 @@ export default {
     // 切换选择状态
     toggleSelect(index) {
       console.log('切换选择状态:', index, '当前列表长度:', this.favoriteList.length);
+      // 检查是否为失效课程
+      if (this.favoriteList[index].inactive) {
+        uni.showToast({
+          title: '该课程已下架或不存在',
+          icon: 'none'
+        });
+        return;
+      }
       this.favoriteList[index].selected = !this.favoriteList[index].selected;
       // 检查是否全选
       this.checkAllSelected();
@@ -408,15 +476,20 @@ export default {
     toggleSelectAll() {
       this.isAllSelected = !this.isAllSelected;
       this.favoriteList.forEach(item => {
-        item.selected = this.isAllSelected;
+        // 只有非失效的课程才能被选中
+        if (!item.inactive) {
+          item.selected = this.isAllSelected;
+        }
       });
     },
     
     // 检查是否全选
     checkAllSelected() {
-      const allSelected = this.favoriteList.length > 0 && 
-                          this.favoriteList.every(item => item.selected);
-      console.log('检查是否全选:', allSelected, '列表长度:', this.favoriteList.length);
+      // 过滤掉失效课程
+      const validItems = this.favoriteList.filter(item => !item.inactive);
+      const allSelected = validItems.length > 0 && 
+                        validItems.every(item => item.selected);
+      console.log('检查是否全选:', allSelected, '列表长度:', validItems.length);
       this.isAllSelected = allSelected;
     },
     
@@ -1284,6 +1357,15 @@ export default {
         return;
       }
       
+      // 如果课程已失效，显示提示
+      if (item.inactive) {
+        uni.showToast({
+          title: item.noticeText || '该课程已下架或不存在',
+          icon: 'none'
+        });
+        return;
+      }
+      
       console.log('点击收藏项, 索引:', index);
       this.openDetail(index);
     },
@@ -1546,6 +1628,18 @@ export default {
     display: flex;
     align-items: center;
     
+    // 添加失效状态样式
+    &.inactive {
+      opacity: 0.6;
+      background-color: #f8f8f8;
+      
+      .item-content {
+        .item-image {
+          filter: grayscale(100%);
+        }
+      }
+    }
+    
     .checkbox-wrapper {
       padding: 0 10rpx;
       width: 60rpx;
@@ -1553,6 +1647,14 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
+      
+      .inactive-icon {
+        font-size: 20rpx;
+        color: #999;
+        background-color: #eee;
+        padding: 4rpx 8rpx;
+        border-radius: 4rpx;
+      }
     }
     
     .item-content {

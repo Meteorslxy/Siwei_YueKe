@@ -20816,6 +20816,15 @@ var _default = {
       "navigationBarTextStyle": "white"
     }
   }, {
+    "path": "pages/user/course-notifications",
+    "style": {
+      "navigationBarTitleText": "课程通知",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white",
+      "navigationStyle": "custom",
+      "enablePullDownRefresh": false
+    }
+  }, {
     "path": "pages/course/manage",
     "style": {
       "navigationBarTitleText": "课程管理",

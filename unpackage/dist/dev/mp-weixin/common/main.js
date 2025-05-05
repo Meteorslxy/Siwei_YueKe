@@ -7,7 +7,7 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(wx, uni, uniCloud, createApp) {
+/* WEBPACK VAR INJECTION */(function(wx, uni, createApp) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
@@ -103,17 +103,18 @@ console.log('云服务初始化结果:', cloudInitResult);
 if (cloudInitResult) {
   setTimeout(function () {
     console.log('测试云函数连接...');
-    var cloudObj = typeof uniCloud !== 'undefined' ? uniCloud : uni.cloud;
+    /* 云函数已删除，注释掉调用
+    const cloudObj = typeof uniCloud !== 'undefined' ? uniCloud : uni.cloud;
     cloudObj.callFunction({
       name: 'yuekeCloudTest',
-      data: {
-        message: '连接测试'
-      }
-    }).then(function (res) {
+      data: { message: '连接测试' }
+    }).then(res => {
       console.log('云服务连接测试成功:', res.result);
-    }).catch(function (err) {
+    }).catch(err => {
       console.error('云服务连接测试失败:', err);
     });
+    */
+    console.log('云函数测试已禁用');
   }, 2000);
 }
 
@@ -125,7 +126,7 @@ uni.addInterceptor('navigateTo', {
 });
 var app = new _vue.default(_objectSpread({}, _App.default));
 createApp(app).$mount();
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["createApp"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["createApp"]))
 
 /***/ }),
 /* 1 */,
@@ -263,7 +264,7 @@ var _default = {
     this.checkLoginStatus();
 
     // 测试云函数连接
-    this.testCloudConnection();
+    // this.testCloudConnection()
 
     // 初始化全局页面引用
     uni.$on('page-ready', function (pageVm) {
@@ -881,7 +882,6 @@ var _default = {
     // 测试云函数连接
     testCloudConnection: function testCloudConnection() {
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
-        var result;
         return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -906,39 +906,36 @@ var _default = {
               case 6:
                 // 直接使用uniCloud调用云函数
                 console.log('正在测试云函数连接...');
-                _context4.next = 9;
-                return uniCloud.callFunction({
+                /* 云函数不存在，注释掉调用
+                const result = await uniCloud.callFunction({
                   name: 'yuekeCloudTest',
                   data: {
                     message: '测试云函数连接 - ' + new Date().toLocaleString()
                   }
                 });
-              case 9:
-                result = _context4.sent;
+                
                 console.log('云函数测试结果:', result);
-                if (!(result && result.result && result.result.code === 0)) {
-                  _context4.next = 16;
-                  break;
+                if (result && result.result && result.result.code === 0) {
+                  console.log('云函数连接成功');
+                  return true;
+                } else {
+                  console.warn('云函数测试返回异常结果');
+                  return false;
                 }
-                console.log('云函数连接成功');
-                return _context4.abrupt("return", true);
-              case 16:
-                console.warn('云函数测试返回异常结果');
+                */
+                console.warn('云函数测试已禁用');
                 return _context4.abrupt("return", false);
-              case 18:
-                _context4.next = 24;
-                break;
-              case 20:
-                _context4.prev = 20;
+              case 11:
+                _context4.prev = 11;
                 _context4.t0 = _context4["catch"](0);
                 console.error('云函数连接测试失败:', _context4.t0);
                 return _context4.abrupt("return", false);
-              case 24:
+              case 15:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, null, [[0, 20]]);
+        }, _callee4, null, [[0, 11]]);
       }))();
     },
     // 检查学生姓名设置状态

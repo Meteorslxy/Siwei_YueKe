@@ -3,10 +3,10 @@
     <!-- 用户信息区域 -->
     <view class="user-info-section">
       <view class="user-bg">
-        <!-- 返回按钮 -->
-        <view class="back-button" @click="goBack">
+        <!-- 返回按钮 - 隐藏 -->
+        <!-- <view class="back-button" @click="goBack">
           <text>←</text>
-        </view>
+        </view> -->
         <!-- 添加刷新按钮 -->
         <view class="refresh-button" @click="reload">
           <text>⟳</text>
@@ -71,21 +71,22 @@
       <view class="menu-group">
         <view class="menu-title">学习服务</view>
         <view class="menu-content grid-layout">
+          <view class="menu-item" @click="navigateTo('/pages/cart/index')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/Shopping-Bag-2.png" mode="aspectFit"></image>
+            <text class="item-text">购物车</text>
+          </view>
           <view class="menu-item" @click="navigateTo('/pages/user/calendar')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/日历-c.png" mode="aspectFit"></image>
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/课程日历.PNG" mode="aspectFit"></image>
             <text class="item-text">课程日历</text>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/course/course')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/课程-c.png" mode="aspectFit"></image>
+          <view class="menu-item" @click="navigateTo('/pages/user/booking?status=usable')">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/全部课程.PNG" mode="aspectFit"></image>
             <text class="item-text">全部课程</text>
           </view>
-          <view class="menu-item" @click="navigateTo('/pages/news/index')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/通知-c.png" mode="aspectFit"></image>
+          <view class="menu-item" @click="navigateToCourseNotifications">
+            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/课程通知.PNG" mode="aspectFit"></image>
             <text class="item-text">课程通知</text>
-          </view>
-          <view class="menu-item" @click="navigateTo('/pages/course/manage')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/资料-c.png" mode="aspectFit"></image>
-            <text class="item-text">课程管理</text>
+            <view v-if="hasCourseNotifications" class="badge-dot"></view>
           </view>
         </view>
       </view>
@@ -93,11 +94,7 @@
       <!-- 我的服务 -->
       <view class="menu-group">
         <view class="menu-title">我的服务</view>
-        <view class="menu-content grid-layout">
-          <view class="menu-item" @click="navigateTo('/pages/cart/index')">
-            <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/我的收藏-c.png" mode="aspectFit"></image>
-            <text class="item-text">购物车</text>
-          </view>
+        <view class="menu-content left-aligned-layout">
           <view class="menu-item" @click="openFeedback">
             <image class="item-icon-img" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/意见反馈-c.png" mode="aspectFit"></image>
             <text class="item-text">意见反馈</text>
@@ -178,7 +175,8 @@ export default {
       lastUserUpdateTime: 0,
       // 添加防抖控制参数
       userInfoDebounceTime: 5000, // 5秒内不重复请求
-      forceUpdateUserInfo: false  // 是否强制刷新用户信息
+      forceUpdateUserInfo: false,  // 是否强制刷新用户信息
+      hasCourseNotifications: false // 是否有课程通知
     }
   },
   onLoad(options) {
@@ -249,6 +247,9 @@ export default {
     } else {
       console.log(`距离上次加载仅${Math.floor(timeSinceLastUpdate/1000)}秒，跳过加载`);
     }
+    
+    // 获取用户预约课程，检查是否有课程通知
+    this.checkCourseNotifications();
     
     // 确保获取uni-id-token，可能uni-id-pages组件登录后没有保存userInfo但保存了token
     const token = uni.getStorageSync('uni_id_token')
@@ -1810,7 +1811,52 @@ export default {
       
       console.log('格式化后的用户信息:', JSON.stringify(formattedInfo));
       return formattedInfo;
-    }
+    },
+    
+    // 跳转到课程通知页面
+    navigateToCourseNotifications() {
+      if (!this.hasUserInfo) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      uni.navigateTo({
+        url: '/pages/user/course-notifications'
+      });
+    },
+    
+    // 检查是否有课程通知
+    async checkCourseNotifications() {
+      try {
+        // 确保用户已登录
+        if (!this.hasUserInfo || !this.userInfo || !this.userInfo._id) {
+          return;
+        }
+        
+        const userId = this.userInfo.userId || this.userInfo._id;
+        
+        // 查询用户的预约课程
+        const db = uniCloud.database();
+        const bookingResult = await db.collection('bookings')
+          .where({
+            userId: userId,
+            status: db.command.in(['pending', 'confirmed', 'confirmed_unpaid'])
+          })
+          .count();
+        
+        // 设置课程通知标志
+        if (bookingResult && bookingResult.result && bookingResult.result.total > 0) {
+          this.hasCourseNotifications = true;
+        } else {
+          this.hasCourseNotifications = false;
+        }
+      } catch (error) {
+        console.error('检查课程通知失败:', error);
+      }
+    },
   }
 }
 </script>
@@ -1980,11 +2026,13 @@ export default {
       padding: 20rpx 0;
       
       .menu-item {
+        position: relative;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         width: 25%;
-        position: relative;
+        margin-bottom: 30rpx;
         
         .item-badge {
           position: absolute;
@@ -2146,8 +2194,8 @@ export default {
 }
 
 .tab-icon {
-  width: 56rpx;
-  height: 56rpx;
+  width: 75rpx;
+  height: 75rpx;
   margin-bottom: 10rpx;
 }
 
@@ -2203,5 +2251,133 @@ export default {
   font-size: 24rpx;
   color: #333;
   text-align: center;
+}
+
+/* 左对齐布局样式 */
+.left-aligned-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: 20rpx 10rpx;
+}
+
+.left-aligned-layout .menu-item {
+  width: 30%;
+  height: auto;
+  margin-bottom: 20rpx;
+  margin-right: 10rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx 0;
+  box-sizing: border-box;
+}
+
+.left-aligned-layout .item-icon-img {
+  width: 64rpx;
+  height: 64rpx;
+  margin-bottom: 10rpx;
+}
+
+.left-aligned-layout .item-text {
+  font-size: 24rpx;
+  color: #333;
+  text-align: center;
+}
+
+/* 课程通知弹窗样式 */
+.notification-popup {
+  width: 650rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-header {
+  padding: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.notification-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: $text-color;
+}
+
+.notification-close {
+  font-size: 40rpx;
+  color: #999;
+  height: 40rpx;
+  width: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+}
+
+.notification-content {
+  padding: 0 30rpx;
+  max-height: 60vh;
+}
+
+.notification-empty {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.notification-list {
+  padding: 20rpx 0;
+}
+
+.notification-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.notification-item-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: $text-color;
+}
+
+.notification-item-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.notification-item-content {
+  font-size: 26rpx;
+  color: $text-color;
+  line-height: 1.5;
+}
+
+.badge-dot {
+  position: absolute;
+  top: 0;
+  right: 20%;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background-color: #ff4d4f;
 }
 </style> 

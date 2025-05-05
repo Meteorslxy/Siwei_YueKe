@@ -271,6 +271,10 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 //
 //
 //
+//
+//
+//
+//
 var _default = {
   data: function data() {
     return {
@@ -309,14 +313,14 @@ var _default = {
     selectedCount: function selectedCount() {
       console.log('计算已选中数量，当前列表项数:', this.favoriteList.length);
       return this.favoriteList.filter(function (item) {
-        return item.selected;
+        return item.selected && !item.inactive;
       }).length;
     },
     // 计算总价
     totalPrice: function totalPrice() {
       console.log('计算总价，当前列表项数:', this.favoriteList.length);
       return this.favoriteList.filter(function (item) {
-        return item.selected;
+        return item.selected && !item.inactive;
       }).reduce(function (sum, item) {
         // 确保价格是有效的数字
         var price = parseFloat(item.price) || 0;
@@ -544,91 +548,152 @@ var _default = {
               case 5:
                 res = _context2.sent;
                 console.log("\u76F4\u63A5\u83B7\u53D6\u8BFE\u7A0B\u4EF7\u683C\u7ED3\u679C:", res.result);
-                if (res.result && res.result.success && res.result.data) {
-                  course = res.result.data; // 处理可能返回的数组格式
-                  if (Array.isArray(course)) {
-                    course = course[0];
-                  }
+                if (!(res.result && res.result.success && res.result.data)) {
+                  _context2.next = 41;
+                  break;
+                }
+                if (!(Array.isArray(res.result.data) && res.result.data.length === 0)) {
+                  _context2.next = 15;
+                  break;
+                }
+                console.log("\u8BFE\u7A0B".concat(item.itemId, "\u4E0D\u5B58\u5728\u6216\u5DF2\u88AB\u5220\u9664"));
+                // 标记为失效课程
+                item.inactive = true;
+                item.noticeText = '该课程已下架或不存在';
+                // 取消选择状态
+                item.selected = false;
+                // 强制更新视图
+                _this2.$forceUpdate();
+                return _context2.abrupt("return");
+              case 15:
+                course = res.result.data; // 处理可能返回的数组格式
+                if (Array.isArray(course)) {
+                  course = course[0];
+                }
 
-                  // 输出课程的完整属性，帮助调试
-                  console.log("\u8BFE\u7A0B\u5B8C\u6574\u4FE1\u606F:", JSON.stringify({
-                    id: course._id,
-                    title: course.title,
-                    classFee: course.classFee,
-                    materialFee: course.materialFee,
-                    price: course.price,
-                    totalFee: course.totalFee,
-                    fee: course.fee,
-                    courseFee: course.courseFee,
-                    discountPrice: course.discountPrice,
-                    originalPrice: course.originalPrice
-                  }));
+                // 如果没有获取到课程数据
+                if (!(!course || !course._id)) {
+                  _context2.next = 24;
+                  break;
+                }
+                console.log("\u672A\u83B7\u53D6\u5230\u6709\u6548\u7684\u8BFE\u7A0B\u6570\u636E:", course);
+                // 标记为失效课程
+                item.inactive = true;
+                item.noticeText = '该课程已下架或不存在';
+                // 取消选择状态
+                item.selected = false;
+                // 强制更新视图
+                _this2.$forceUpdate();
+                return _context2.abrupt("return");
+              case 24:
+                // 输出课程的完整属性，帮助调试
+                console.log("\u8BFE\u7A0B\u5B8C\u6574\u4FE1\u606F:", JSON.stringify({
+                  id: course._id,
+                  title: course.title,
+                  classFee: course.classFee,
+                  materialFee: course.materialFee,
+                  price: course.price,
+                  totalFee: course.totalFee,
+                  fee: course.fee,
+                  courseFee: course.courseFee,
+                  discountPrice: course.discountPrice,
+                  originalPrice: course.originalPrice
+                }));
 
-                  // 获取价格信息，优先使用课时费和材料费
-                  classFee = parseFloat(course.classFee || 0);
-                  materialFee = parseFloat(course.materialFee || 0); // 计算总价：课时费和材料费的总和
-                  finalPrice = classFee + materialFee;
-                  console.log("\u8BFE\u65F6\u8D39: ".concat(classFee, ", \u6750\u6599\u8D39: ").concat(materialFee, ", \u603B\u4EF7: ").concat(finalPrice));
+                // 获取价格信息，优先使用课时费和材料费
+                classFee = parseFloat(course.classFee || 0);
+                materialFee = parseFloat(course.materialFee || 0); // 计算总价：课时费和材料费的总和
+                finalPrice = classFee + materialFee;
+                console.log("\u8BFE\u65F6\u8D39: ".concat(classFee, ", \u6750\u6599\u8D39: ").concat(materialFee, ", \u603B\u4EF7: ").concat(finalPrice));
 
-                  // 如果课时费和材料费都为0，尝试使用其他价格字段
-                  if (finalPrice === 0) {
-                    finalPrice = parseFloat(course.price || 0);
-                    console.log("\u4F7F\u7528\u8BFE\u7A0B\u539F\u4EF7: ".concat(finalPrice));
-                  }
+                // 如果课时费和材料费都为0，尝试使用其他价格字段
+                if (finalPrice === 0) {
+                  finalPrice = parseFloat(course.price || 0);
+                  console.log("\u4F7F\u7528\u8BFE\u7A0B\u539F\u4EF7: ".concat(finalPrice));
+                }
 
-                  // 如果还是0，尝试其他可能的价格字段
-                  if (finalPrice === 0 && course.totalFee) {
-                    finalPrice = parseFloat(course.totalFee || 0);
-                    console.log("\u4F7F\u7528\u603B\u8D39\u7528: ".concat(finalPrice));
-                  }
-                  if (finalPrice === 0 && course.fee) {
-                    finalPrice = parseFloat(course.fee || 0);
-                    console.log("\u4F7F\u7528\u8D39\u7528: ".concat(finalPrice));
-                  }
-                  if (finalPrice === 0 && course.courseFee) {
-                    finalPrice = parseFloat(course.courseFee || 0);
-                    console.log("\u4F7F\u7528\u8BFE\u7A0B\u8D39\u7528: ".concat(finalPrice));
-                  }
-                  if (finalPrice === 0 && course.discountPrice) {
-                    finalPrice = parseFloat(course.discountPrice || 0);
-                    console.log("\u4F7F\u7528\u6298\u6263\u4EF7: ".concat(finalPrice));
-                  } else if (finalPrice === 0 && course.originalPrice) {
-                    finalPrice = parseFloat(course.originalPrice || 0);
-                    console.log("\u4F7F\u7528\u539F\u4EF7: ".concat(finalPrice));
-                  }
+                // 如果还是0，尝试其他可能的价格字段
+                if (finalPrice === 0 && course.totalFee) {
+                  finalPrice = parseFloat(course.totalFee || 0);
+                  console.log("\u4F7F\u7528\u603B\u8D39\u7528: ".concat(finalPrice));
+                }
+                if (finalPrice === 0 && course.fee) {
+                  finalPrice = parseFloat(course.fee || 0);
+                  console.log("\u4F7F\u7528\u8D39\u7528: ".concat(finalPrice));
+                }
+                if (finalPrice === 0 && course.courseFee) {
+                  finalPrice = parseFloat(course.courseFee || 0);
+                  console.log("\u4F7F\u7528\u8BFE\u7A0B\u8D39\u7528: ".concat(finalPrice));
+                }
+                if (finalPrice === 0 && course.discountPrice) {
+                  finalPrice = parseFloat(course.discountPrice || 0);
+                  console.log("\u4F7F\u7528\u6298\u6263\u4EF7: ".concat(finalPrice));
+                } else if (finalPrice === 0 && course.originalPrice) {
+                  finalPrice = parseFloat(course.originalPrice || 0);
+                  console.log("\u4F7F\u7528\u539F\u4EF7: ".concat(finalPrice));
+                }
 
-                  // 设置最终价格，确保为数字
-                  item.price = finalPrice;
-                  console.log("\u66F4\u65B0\u8BFE\u7A0B ".concat(item.itemTitle, " \u4EF7\u683C\u4E3A: ").concat(item.price));
+                // 设置最终价格，确保为数字
+                item.price = finalPrice;
+                // 确保课程不是失效状态
+                item.inactive = false;
+                console.log("\u66F4\u65B0\u8BFE\u7A0B ".concat(item.itemTitle, " \u4EF7\u683C\u4E3A: ").concat(item.price));
 
-                  // 如果价格为0，并且重试次数小于3，则延迟2秒后重试
-                  if (item.price === 0 && retryCount < 3) {
-                    console.log("\u8BFE\u7A0B\u4EF7\u683C\u4E3A0\uFF0C\u5C06\u57282\u79D2\u540E\u91CD\u8BD5, \u5F53\u524D\u91CD\u8BD5\u6B21\u6570: ".concat(retryCount));
-                    setTimeout(function () {
-                      _this2.fetchCoursePrice(item, retryCount + 1);
-                    }, 2000);
-                  }
+                // 如果价格为0，并且重试次数小于3，则延迟2秒后重试
+                if (item.price === 0 && retryCount < 3) {
+                  console.log("\u8BFE\u7A0B\u4EF7\u683C\u4E3A0\uFF0C\u5C06\u57282\u79D2\u540E\u91CD\u8BD5, \u5F53\u524D\u91CD\u8BD5\u6B21\u6570: ".concat(retryCount));
+                  setTimeout(function () {
+                    _this2.fetchCoursePrice(item, retryCount + 1);
+                  }, 2000);
+                }
 
+                // 强制更新视图
+                _this2.$forceUpdate();
+                _context2.next = 43;
+                break;
+              case 41:
+                console.error('获取课程价格失败, 返回结果:', res.result);
+
+                // 检查是否因为课程不存在
+                if (res.result && (res.result.message === "课程不存在" || res.result.data === null || Array.isArray(res.result.data) && res.result.data.length === 0)) {
+                  // 标记为失效课程
+                  item.inactive = true;
+                  item.noticeText = '该课程已下架或不存在';
+                  // 取消选择状态
+                  item.selected = false;
                   // 强制更新视图
                   _this2.$forceUpdate();
-                } else {
-                  console.error('获取课程价格失败, 返回结果:', res.result);
-
-                  // 如果获取失败且重试次数小于3，则延迟2秒后重试
-                  if (retryCount < 3) {
-                    console.log("\u83B7\u53D6\u5931\u8D25\uFF0C\u5C06\u57282\u79D2\u540E\u91CD\u8BD5, \u5F53\u524D\u91CD\u8BD5\u6B21\u6570: ".concat(retryCount));
-                    setTimeout(function () {
-                      _this2.fetchCoursePrice(item, retryCount + 1);
-                    }, 2000);
-                  }
                 }
-                _context2.next = 14;
+                // 如果获取失败且重试次数小于3，则延迟2秒后重试
+                else if (retryCount < 3) {
+                  console.log("\u83B7\u53D6\u5931\u8D25\uFF0C\u5C06\u57282\u79D2\u540E\u91CD\u8BD5, \u5F53\u524D\u91CD\u8BD5\u6B21\u6570: ".concat(retryCount));
+                  setTimeout(function () {
+                    _this2.fetchCoursePrice(item, retryCount + 1);
+                  }, 2000);
+                }
+              case 43:
+                _context2.next = 56;
                 break;
-              case 10:
-                _context2.prev = 10;
+              case 45:
+                _context2.prev = 45;
                 _context2.t0 = _context2["catch"](1);
                 console.error('获取课程价格失败:', _context2.t0);
 
+                // 判断是否因为课程不存在导致的错误
+                if (!(_context2.t0 && _context2.t0.message && (_context2.t0.message.includes("Cannot read property '_id' of undefined") || _context2.t0.message.includes("课程不存在") || _context2.t0.message.includes("无效的课程ID")))) {
+                  _context2.next = 55;
+                  break;
+                }
+                // 标记为失效课程
+                item.inactive = true;
+                item.noticeText = '该课程已下架或不存在';
+                // 取消选择状态
+                item.selected = false;
+                // 强制更新视图
+                _this2.$forceUpdate();
+                console.log("\u8BFE\u7A0B".concat(item.itemId, "\u5DF2\u6807\u8BB0\u4E3A\u5931\u6548"));
+                return _context2.abrupt("return");
+              case 55:
                 // 如果发生异常且重试次数小于3，则延迟2秒后重试
                 if (retryCount < 3) {
                   console.log("\u53D1\u751F\u5F02\u5E38\uFF0C\u5C06\u57282\u79D2\u540E\u91CD\u8BD5, \u5F53\u524D\u91CD\u8BD5\u6B21\u6570: ".concat(retryCount));
@@ -636,12 +701,12 @@ var _default = {
                     _this2.fetchCoursePrice(item, retryCount + 1);
                   }, 2000);
                 }
-              case 14:
+              case 56:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[1, 10]]);
+        }, _callee2, null, [[1, 45]]);
       }))();
     },
     // 切换管理模式
@@ -651,6 +716,14 @@ var _default = {
     // 切换选择状态
     toggleSelect: function toggleSelect(index) {
       console.log('切换选择状态:', index, '当前列表长度:', this.favoriteList.length);
+      // 检查是否为失效课程
+      if (this.favoriteList[index].inactive) {
+        uni.showToast({
+          title: '该课程已下架或不存在',
+          icon: 'none'
+        });
+        return;
+      }
       this.favoriteList[index].selected = !this.favoriteList[index].selected;
       // 检查是否全选
       this.checkAllSelected();
@@ -660,15 +733,22 @@ var _default = {
       var _this3 = this;
       this.isAllSelected = !this.isAllSelected;
       this.favoriteList.forEach(function (item) {
-        item.selected = _this3.isAllSelected;
+        // 只有非失效的课程才能被选中
+        if (!item.inactive) {
+          item.selected = _this3.isAllSelected;
+        }
       });
     },
     // 检查是否全选
     checkAllSelected: function checkAllSelected() {
-      var allSelected = this.favoriteList.length > 0 && this.favoriteList.every(function (item) {
+      // 过滤掉失效课程
+      var validItems = this.favoriteList.filter(function (item) {
+        return !item.inactive;
+      });
+      var allSelected = validItems.length > 0 && validItems.every(function (item) {
         return item.selected;
       });
-      console.log('检查是否全选:', allSelected, '列表长度:', this.favoriteList.length);
+      console.log('检查是否全选:', allSelected, '列表长度:', validItems.length);
       this.isAllSelected = allSelected;
     },
     // 获取用户信息
@@ -1756,6 +1836,15 @@ var _default = {
       var item = this.favoriteList[index];
       if (!item) {
         console.error('索引对应的收藏项为空:', index);
+        return;
+      }
+
+      // 如果课程已失效，显示提示
+      if (item.inactive) {
+        uni.showToast({
+          title: item.noticeText || '该课程已下架或不存在',
+          icon: 'none'
+        });
         return;
       }
       console.log('点击收藏项, 索引:', index);

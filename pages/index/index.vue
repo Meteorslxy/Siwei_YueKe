@@ -89,14 +89,15 @@ export default {
       statusBarHeight: 0
     }
   },
-  onLoad() {
-    // 初始化应用
-    this.initApp();
-    
-    this.getNews()
-    this.getRecommendCourses()
-    // 获取状态栏高度
+  onLoad(options) {
     this.getStatusBarHeight()
+    this.getNews()
+    
+    // 初始化应用
+    // this.initApp()
+    
+    // 获取路由参数
+    this.getRecommendCourses()
   },
   onShow() {
     // 每次显示页面时刷新数据，确保显示最新数据
@@ -116,23 +117,6 @@ export default {
     this.getRecommendCourses()
   },
   methods: {
-    // 初始化应用
-    async initApp() {
-      try {
-        // 检查数据库状态
-        const res = await uniCloud.callFunction({
-          name: 'initUserTable'
-        });
-        
-        if (res.result && res.result.code === 0) {
-          console.log('用户表初始化完成:', res.result);
-        } else {
-          console.warn('用户表初始化警告:', res.result);
-        }
-      } catch (err) {
-        console.error('应用初始化失败:', err);
-      }
-    },
     // 获取状态栏高度
     getStatusBarHeight() {
       try {
@@ -560,6 +544,27 @@ export default {
       
       // 最后返回默认头像
       return '/static/images/default-avatar.png';
+    },
+
+    // 初始化应用
+    async initApp() {
+      try {
+        // 检查数据库状态
+        /* 云函数不存在，注释掉调用
+        const res = await uniCloud.callFunction({
+          name: 'initUserTable'
+        });
+        
+        if (res.result && res.result.code === 0) {
+          console.log('用户表初始化完成:', res.result);
+        } else {
+          console.warn('用户表初始化警告:', res.result);
+        }
+        */
+        console.warn('应用初始化已禁用，云函数不存在');
+      } catch (err) {
+        console.error('应用初始化失败:', err);
+      }
     }
   }
 }
