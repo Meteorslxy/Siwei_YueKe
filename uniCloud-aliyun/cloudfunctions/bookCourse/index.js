@@ -747,6 +747,35 @@ exports.main = async (event, context) => {
       teacherPhone: teacherPhone
     };
     
+    // 添加classTime字段（上课日期，如周一、周二等）
+    if (event.classTime) {
+      // 如果请求中提供了classTime字段，直接使用
+      bookingData.classTime = Array.isArray(event.classTime) ? event.classTime : [event.classTime];
+      console.log('从请求参数中获取classTime:', bookingData.classTime);
+    } else if (course.classTime) {
+      // 尝试从课程对象中获取classTime
+      bookingData.classTime = Array.isArray(course.classTime) ? course.classTime : [course.classTime];
+      console.log('从课程对象中获取classTime:', bookingData.classTime);
+    } else if (course.timeSlots && course.timeSlots.length > 0) {
+      // 如果都没有但有timeSlots，尝试从时间槽提取上课日
+      try {
+        const weekdayMap = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const weekdays = course.timeSlots.map(slot => {
+          const date = new Date(slot.start);
+          if (!isNaN(date.getTime())) {
+            return weekdayMap[date.getDay()];
+          }
+          return null;
+        }).filter(day => day !== null);
+        
+        // 去重
+        bookingData.classTime = [...new Set(weekdays)];
+        console.log('从timeSlots提取classTime:', bookingData.classTime);
+      } catch (err) {
+        console.error('从timeSlots提取classTime失败:', err);
+      }
+    }
+    
     console.log('准备创建预约记录:', bookingData);
     
     // 插入预约记录

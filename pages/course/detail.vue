@@ -40,7 +40,7 @@
       </view>
       
       <view class="info-item" v-if="courseInfo.classFee || courseInfo.materialFee">
-        <image class="item-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/价格明细.png" mode="aspectFit"></image>
+        <image class="item-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/课时费.png" mode="aspectFit"></image>
         <text class="item-label">价格明细：</text>
         <view class="item-value price-details">
           <text>课时费：¥{{courseInfo.classFee || 0}}.00</text>
@@ -1617,6 +1617,18 @@ export default {
         remark: ''
       };
       
+      // 添加classTime字段到预约数据中
+      if (this.courseInfo && this.courseInfo.classTime) {
+        // 确保classTime是数组格式
+        if (Array.isArray(this.courseInfo.classTime)) {
+          bookingData.classTime = this.courseInfo.classTime;
+        } else {
+          // 如果是字符串，转换为数组
+          bookingData.classTime = [this.courseInfo.classTime];
+        }
+        console.log('将课程classTime添加到预约数据中:', bookingData.classTime);
+      }
+      
       // 添加课程时间槽数据，用于服务端冲突检测
       if (this.courseInfo && this.courseInfo.timeSlots && this.courseInfo.timeSlots.length > 0) {
         bookingData.courseTimeSlots = this.courseInfo.timeSlots;
@@ -1906,6 +1918,45 @@ export default {
           result += ` ${startTimeFormatted}-${endTimeFormatted}`;
         } else {
           result = `${startTimeFormatted}-${endTimeFormatted}`;
+        }
+      }
+      
+      // 添加classTime字段内容（每周几）
+      if (this.courseInfo.classTime) {
+        // 处理classTime字段，可能是字符串或数组
+        let classTimeStr = '';
+        if (Array.isArray(this.courseInfo.classTime)) {
+          // 检查是否包含所有周一到周日（即每天）
+          const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+          const classTimeSet = new Set(this.courseInfo.classTime);
+          
+          // 检查是否为"每天"
+          const isEveryday = weekdays.every(day => classTimeSet.has(day));
+          if (isEveryday) {
+            classTimeStr = '天';
+          } else {
+            // 不是每天，按照周一到周日的顺序排序
+            const sortedDays = [];
+            weekdays.forEach(day => {
+              if (classTimeSet.has(day)) {
+                sortedDays.push(day);
+              }
+            });
+            classTimeStr = sortedDays.join('、');
+          }
+        } else {
+          // 如果是字符串，检查是否为"每天"或包含"每天"字样
+          if (this.courseInfo.classTime === '每天' || this.courseInfo.classTime === '天天' || 
+              this.courseInfo.classTime === '每日' || this.courseInfo.classTime.includes('每天')) {
+            classTimeStr = '天';
+          } else {
+            classTimeStr = this.courseInfo.classTime;
+          }
+        }
+        
+        // 如果classTime有内容，添加到结果中
+        if (classTimeStr) {
+          result += ` （每${classTimeStr}）`;
         }
       }
       

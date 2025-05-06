@@ -17,7 +17,11 @@ exports.main = async (event, context) => {
   const gender = event.gender !== undefined ? event.gender : 
                 (event.data && event.data.gender !== undefined ? event.data.gender : undefined);
   
-  console.log('提取的参数:', {nickname, avatar, gender});
+  // 获取wx_nickname，用于保存微信原始昵称
+  const wx_nickname = event.wx_nickname || (event.data && event.data.wx_nickname) || 
+                     (event.updateData && event.updateData.wx_nickname) || '';
+  
+  console.log('提取的参数:', {nickname, avatar, gender, wx_nickname});
   
   try {
     // 获取当前用户ID
@@ -141,6 +145,42 @@ exports.main = async (event, context) => {
         
         // 同时将real_name字段更新为真实姓名
         updateData.real_name = nickname;
+      }
+    }
+    
+    // 处理微信原始昵称
+    if (wx_nickname) {
+      // 获取用户当前信息，检查wx_nickname是否已设置
+      try {
+        const userInfo = await db.collection('uni-id-users')
+          .doc(userId)
+          .field({ wx_nickname: true })
+          .get();
+          
+        if (userInfo.data && userInfo.data.length > 0) {
+          const currentWxNickname = userInfo.data[0].wx_nickname;
+          
+          // 只有在以下情况才更新wx_nickname:
+          // 1. 用户没有设置过wx_nickname
+          // 2. 用户的wx_nickname为默认值"微信用户"
+          // 3. 明确在updateData中请求更新wx_nickname (特殊处理，由缓存清理时触发)
+          if (!currentWxNickname || 
+              currentWxNickname === '微信用户' || 
+              event.updateData && event.updateData.wx_nickname) {
+            console.log('更新wx_nickname:', wx_nickname);
+            updateData.wx_nickname = wx_nickname;
+          } else {
+            console.log('保留用户现有wx_nickname:', currentWxNickname);
+          }
+        } else {
+          // 如果没有查到用户信息，就直接设置
+          console.log('未查询到现有wx_nickname，直接设置:', wx_nickname);
+          updateData.wx_nickname = wx_nickname;
+        }
+      } catch (e) {
+        console.error('查询用户wx_nickname失败:', e);
+        // 出错时仍然尝试更新
+        updateData.wx_nickname = wx_nickname;
       }
     }
     

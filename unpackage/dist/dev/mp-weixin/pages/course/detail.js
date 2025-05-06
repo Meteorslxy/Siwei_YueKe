@@ -11,8 +11,8 @@
 /* WEBPACK VAR INJECTION */(function(wx, createPage) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-__webpack_require__(/*! uni-pages */ 38);
-__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
+__webpack_require__(/*! uni-pages */ 26);
+__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _detail = _interopRequireDefault(__webpack_require__(/*! ./pages/course/detail.vue */ 138));
 // @ts-ignore
@@ -186,11 +186,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 var _courseCalendar = _interopRequireDefault(__webpack_require__(/*! @/utils/courseCalendar.js */ 126));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -1828,6 +1828,18 @@ var _default = {
         remark: ''
       };
 
+      // 添加classTime字段到预约数据中
+      if (this.courseInfo && this.courseInfo.classTime) {
+        // 确保classTime是数组格式
+        if (Array.isArray(this.courseInfo.classTime)) {
+          bookingData.classTime = this.courseInfo.classTime;
+        } else {
+          // 如果是字符串，转换为数组
+          bookingData.classTime = [this.courseInfo.classTime];
+        }
+        console.log('将课程classTime添加到预约数据中:', bookingData.classTime);
+      }
+
       // 添加课程时间槽数据，用于服务端冲突检测
       if (this.courseInfo && this.courseInfo.timeSlots && this.courseInfo.timeSlots.length > 0) {
         bookingData.courseTimeSlots = this.courseInfo.timeSlots;
@@ -2105,6 +2117,46 @@ var _default = {
           result += " ".concat(startTimeFormatted, "-").concat(endTimeFormatted);
         } else {
           result = "".concat(startTimeFormatted, "-").concat(endTimeFormatted);
+        }
+      }
+
+      // 添加classTime字段内容（每周几）
+      if (this.courseInfo.classTime) {
+        // 处理classTime字段，可能是字符串或数组
+        var classTimeStr = '';
+        if (Array.isArray(this.courseInfo.classTime)) {
+          // 检查是否包含所有周一到周日（即每天）
+          var weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+          var classTimeSet = new Set(this.courseInfo.classTime);
+
+          // 检查是否为"每天"
+          var isEveryday = weekdays.every(function (day) {
+            return classTimeSet.has(day);
+          });
+          if (isEveryday) {
+            classTimeStr = '天';
+          } else {
+            // 不是每天，按照周一到周日的顺序排序
+            var sortedDays = [];
+            weekdays.forEach(function (day) {
+              if (classTimeSet.has(day)) {
+                sortedDays.push(day);
+              }
+            });
+            classTimeStr = sortedDays.join('、');
+          }
+        } else {
+          // 如果是字符串，检查是否为"每天"或包含"每天"字样
+          if (this.courseInfo.classTime === '每天' || this.courseInfo.classTime === '天天' || this.courseInfo.classTime === '每日' || this.courseInfo.classTime.includes('每天')) {
+            classTimeStr = '天';
+          } else {
+            classTimeStr = this.courseInfo.classTime;
+          }
+        }
+
+        // 如果classTime有内容，添加到结果中
+        if (classTimeStr) {
+          result += " \uFF08\u6BCF".concat(classTimeStr, "\uFF09");
         }
       }
       return result || '时间待定';
@@ -2752,7 +2804,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"]))
 
 /***/ }),
 

@@ -61,6 +61,7 @@ exports.main = async (event, context) => {
 			
 			// 尝试使用另一种表名
 			try {
+				// 只更新token相关字段，不更新nickname和wx_nickname
 				await db.collection('uni-id-users').doc(userData._id).update({
 					token: [newToken],
 					token_expired: tokenExpireTime,
@@ -76,10 +77,15 @@ exports.main = async (event, context) => {
 			}
 		}
 		
-		// 保留用户原有nickname，防止被重置
+		// 保留用户原有nickname和wx_nickname，防止被重置
 		if (userData.nickname && userData.nickname !== '微信用户') {
 			console.log('保留用户原有昵称:', userData.nickname);
 			// 确保返回的用户信息中包含原有nickname
+		}
+		
+		if (userData.wx_nickname && userData.wx_nickname !== '微信用户') {
+			console.log('保留用户原有微信昵称:', userData.wx_nickname);
+			// 确保原始微信昵称不被覆盖
 		}
 		
 		// 返回成功结果

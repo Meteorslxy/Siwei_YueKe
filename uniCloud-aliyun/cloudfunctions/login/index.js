@@ -574,13 +574,26 @@ exports.main = async (event, context) => {
           
           // 如果有微信昵称和头像，同时更新用户信息
           if (userInfo && userInfo.nickName) {
-            updateData.nickname = userInfo.nickName;
-            updateData.wx_nickname = userInfo.nickName; // 使用wx_nickname字段存储微信原始昵称
-            updateData.username = userInfo.nickName; // 同时更新username
+            // 只在用户没有wx_nickname或wx_nickname为默认值时更新
+            if (!user.wx_nickname || user.wx_nickname === '微信用户') {
+              updateData.wx_nickname = userInfo.nickName;
+              console.log('更新用户微信昵称:', userInfo.nickName);
+            } else {
+              console.log('保留用户现有微信昵称:', user.wx_nickname);
+            }
+            
+            // 仅当用户没有设置过昵称时才设置默认昵称
+            if (!user.nickname || user.nickname === '') {
+              updateData.nickname = '微信用户';
+              updateData.username = userInfo.nickName; // 同时更新username
+            }
           }
           
           if (userInfo && userInfo.avatarUrl) {
-            updateData.avatar = userInfo.avatarUrl;
+            // 只在用户没有头像时更新头像
+            if (!user.avatar || user.avatar === '') {
+              updateData.avatar = userInfo.avatarUrl;
+            }
           }
           
           // 如果提供了real_name，保存到real_name字段
@@ -1336,13 +1349,26 @@ async function loginWithOpenid(openid, userInfo, platform, appid) {
       
       // 如果有微信昵称和头像，同时更新用户信息
       if (userInfo && userInfo.nickName) {
-        updateData.nickname = userInfo.nickName;
-        updateData.wx_nickname = userInfo.nickName; // 使用wx_nickname字段存储微信原始昵称
-        updateData.username = userInfo.nickName; // 同时更新username
+        // 只在用户没有wx_nickname或wx_nickname为默认值时更新
+        if (!user.wx_nickname || user.wx_nickname === '微信用户') {
+          updateData.wx_nickname = userInfo.nickName;
+          console.log('更新用户微信昵称:', userInfo.nickName);
+        } else {
+          console.log('保留用户现有微信昵称:', user.wx_nickname);
+        }
+        
+        // 仅当用户没有设置过昵称时才设置默认昵称
+        if (!user.nickname || user.nickname === '') {
+          updateData.nickname = '微信用户';
+          updateData.username = userInfo.nickName; // 同时更新username
+        }
       }
       
       if (userInfo && userInfo.avatarUrl) {
-        updateData.avatar = userInfo.avatarUrl;
+        // 只在用户没有头像时更新头像
+        if (!user.avatar || user.avatar === '') {
+          updateData.avatar = userInfo.avatarUrl;
+        }
       }
       
       // 如果提供了real_name，保存到real_name字段
@@ -1562,12 +1588,35 @@ async function handleWechatLogin(code, openid, userInfo, platform, clientIp, {de
         wx_confirmed: 1
       };
       
-      // 如果提供了用户信息，更新用户资料
-      if (hasUserInfo) {
-        console.log('更新用户微信信息:', userInfo);
-        updateData.nickname = userInfo.nickName || existUser.nickname;
-        updateData.avatar = userInfo.avatarUrl || existUser.avatar;
-        updateData.gender = userInfo.gender !== undefined ? userInfo.gender : existUser.gender;
+      // 提取用户头像昵称信息
+      const wx_nickname = userInfo && userInfo.nickName || '微信用户';
+      const avatarUrl = userInfo && userInfo.avatarUrl || '';
+      
+      console.log('用户信息:', { wx_nickname, avatarUrl });
+      
+      // 如果有微信信息，只更新wx_nickname，不更新nickname
+      if (userInfo) {
+        // 保存到wx_nickname，但只在用户提供了有效昵称的情况下，且用户之前未设置有效昵称时
+        if (wx_nickname && wx_nickname !== '微信用户') {
+          // 仅当用户没有设置过wx_nickname或wx_nickname为默认值时才更新
+          if (!existUser.wx_nickname || existUser.wx_nickname === '微信用户' || existUser.wx_nickname === '') {
+            updateData.wx_nickname = wx_nickname;
+            console.log('更新用户wx_nickname为:', wx_nickname);
+          } else {
+            console.log('保留用户已设置的wx_nickname:', existUser.wx_nickname);
+          }
+        }
+        
+        // 仅当用户头像为空时更新
+        if (avatarUrl && !existUser.avatar) {
+          updateData.avatar = avatarUrl;
+        }
+      }
+      
+      // 如果提供了真实姓名，也保存
+      if (real_name && !existUser.realname) {
+        updateData.realname_verified = 1;
+        updateData.realname = real_name;
       }
       
       // 更新用户信息
@@ -1595,7 +1644,13 @@ async function handleWechatLogin(code, openid, userInfo, platform, clientIp, {de
         status: 0
       };
       
-      // 创建用户
+      // 如果提供了real_name，保存到real_name字段
+      if (real_name) {
+        newUserData.real_name = real_name;
+        console.log('新用户保存真实姓名:', real_name);
+      }
+      
+      // 插入新用户
       const result = await db.collection('uni-id-users')
         .add(newUserData);
       
@@ -1706,8 +1761,6 @@ async function handlePhoneLogin(phone, wxCode, userInfo, platform, appid, client
         mobile: phoneNumber,
         mobile_confirmed: 1,
         nickname: '微信用户', // 使用默认值，不使用微信昵称
-        wx_nickname: wx_nickname,  // 特别保存到wx_nickname字段
-        avatar: avatarUrl,      // 保存头像到avatar字段
         register_date: serverDate,
         register_ip: clientIp || '127.0.0.1',
         last_login_date: serverDate,
@@ -1716,6 +1769,16 @@ async function handlePhoneLogin(phone, wxCode, userInfo, platform, appid, client
         status: 0, // 正常状态
         register_source: platform
       };
+      
+      // 只在提供了有效微信昵称的情况下保存
+      if (wx_nickname && wx_nickname !== '微信用户') {
+        insertData.wx_nickname = wx_nickname;
+      }
+      
+      // 只在提供了有效头像的情况下保存
+      if (avatarUrl) {
+        insertData.avatar = avatarUrl;
+      }
       
       // 如果提供了真实姓名，也保存
       if (real_name) {
@@ -1743,9 +1806,15 @@ async function handlePhoneLogin(phone, wxCode, userInfo, platform, appid, client
       
       // 如果有微信信息，只更新wx_nickname，不更新nickname
       if (userInfo) {
-        // 保存到wx_nickname，无论是否存在
-        if (wx_nickname) {
-          updateData.wx_nickname = wx_nickname;
+        // 保存到wx_nickname，但只在用户提供了有效昵称的情况下，且用户之前未设置有效昵称时
+        if (wx_nickname && wx_nickname !== '微信用户') {
+          // 仅当用户没有设置过wx_nickname或wx_nickname为默认值时才更新
+          if (!existUser.wx_nickname || existUser.wx_nickname === '微信用户' || existUser.wx_nickname === '') {
+            updateData.wx_nickname = wx_nickname;
+            console.log('更新用户wx_nickname为:', wx_nickname);
+          } else {
+            console.log('保留用户已设置的wx_nickname:', existUser.wx_nickname);
+          }
         }
         
         // 仅当用户头像为空时更新

@@ -233,11 +233,123 @@ export default {
     },
     formattedCourseTime() {
       // 从课程开始和结束时间格式化课程时间
+      let result = '';
       if (this.bookingDetail.courseStartTime && this.bookingDetail.courseEndTime) {
-        return `${this.bookingDetail.courseStartTime} - ${this.bookingDetail.courseEndTime}`;
+        result = `${this.bookingDetail.courseStartTime}-${this.bookingDetail.courseEndTime}`;
       } else {
-        return this.bookingDetail.courseTime || '暂无';
+        result = this.bookingDetail.courseTime || '暂无';
       }
+      
+      // 添加classTime字段内容（每周几）
+      if (this.bookingDetail.classTime) {
+        // 处理classTime字段，可能是字符串或数组
+        let classTimeStr = '';
+        if (Array.isArray(this.bookingDetail.classTime)) {
+          // 处理数组中可能包含的字符串，如 ["周一，周三"]
+          const extractWeekdays = (str) => {
+            if (!str) return [];
+            // 处理包含逗号、顿号或空格分隔的字符串
+            return str.split(/[,，、\s]+/).filter(Boolean);
+          };
+          
+          // 提取和扁平化所有周几数据
+          let weekdaysArray = [];
+          this.bookingDetail.classTime.forEach(entry => {
+            if (typeof entry === 'string') {
+              if (entry.includes('周') || entry.includes('每')) {
+                weekdaysArray = weekdaysArray.concat(extractWeekdays(entry));
+              } else {
+                weekdaysArray.push(entry);
+              }
+            } else {
+              weekdaysArray.push(entry);
+            }
+          });
+          
+          // 标准化处理，确保所有数据格式一致
+          const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+          const classTimeSet = new Set();
+          
+          weekdaysArray.forEach(day => {
+            const trimmedDay = String(day).trim();
+            // 处理标准格式
+            if (weekdays.includes(trimmedDay)) {
+              classTimeSet.add(trimmedDay);
+            } 
+            // 处理数字格式，如 "1" 表示周一
+            else if (/^[1-7]$/.test(trimmedDay)) {
+              const index = parseInt(trimmedDay, 10) - 1;
+              if (index >= 0 && index < 7) {
+                classTimeSet.add(weekdays[index]);
+              }
+            }
+            // 处理带有"周"前缀但不完整的格式，如"周一"可能缩写为"一"
+            else if (/^[一二三四五六日天]$/.test(trimmedDay)) {
+              const dayMap = {一: '周一', 二: '周二', 三: '周三', 四: '周四', 五: '周五', 六: '周六', 日: '周日', 天: '周日'};
+              if (dayMap[trimmedDay]) {
+                classTimeSet.add(dayMap[trimmedDay]);
+              }
+            }
+          });
+          
+          // 检查是否为"每天"
+          const isEveryday = weekdays.every(day => classTimeSet.has(day));
+          if (isEveryday) {
+            classTimeStr = '天';
+          } else {
+            // 不是每天，按照周一到周日的顺序排序
+            const sortedDays = [];
+            weekdays.forEach(day => {
+              if (classTimeSet.has(day)) {
+                sortedDays.push(day);
+              }
+            });
+            classTimeStr = sortedDays.join('、');
+          }
+        } else if (typeof this.bookingDetail.classTime === 'string') {
+          // 如果是字符串，检查是否为"每天"或包含"每天"字样
+          const classTimeString = this.bookingDetail.classTime.trim();
+          
+          if (classTimeString === '每天' || classTimeString === '天天' || 
+              classTimeString === '每日' || classTimeString.includes('每天')) {
+            classTimeStr = '天';
+          } else {
+            // 处理可能包含逗号分隔的字符串，如 "周一，周三"
+            const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            const parts = classTimeString.split(/[,，、\s]+/).filter(Boolean);
+            
+            if (parts.length > 1) {
+              // 包含多个周几数据，标准化并排序
+              const daySet = new Set();
+              parts.forEach(part => {
+                const trimmed = part.trim();
+                if (weekdays.includes(trimmed)) {
+                  daySet.add(trimmed);
+                }
+              });
+              
+              const sortedDays = [];
+              weekdays.forEach(day => {
+                if (daySet.has(day)) {
+                  sortedDays.push(day);
+                }
+              });
+              
+              classTimeStr = sortedDays.join('、');
+            } else {
+              // 单个值，直接使用
+              classTimeStr = classTimeString;
+            }
+          }
+        }
+        
+        // 如果classTime有内容，添加到结果中
+        if (classTimeStr) {
+          result += ` (每${classTimeStr})`;
+        }
+      }
+      
+      return result;
     },
     // 判断是否需要显示联系老师按钮
     isNeedContactTeacher() {
@@ -299,6 +411,11 @@ export default {
             this.bookingDetail.paymentStatus = 'unpaid';
           }
           
+          // 如果有课程ID，尝试获取课程的classTime信息
+          if (this.bookingDetail.courseId) {
+            this.fetchCourseClassTime(this.bookingDetail.courseId);
+          }
+          
           // 对于所有待确认状态的预约，无论支付状态如何，都检查倒计时
           if (this.bookingDetail.status === 'pending') {
             console.log('发现待确认预约，立即检查倒计时');
@@ -319,6 +436,91 @@ export default {
         })
       } finally {
         uni.hideLoading()
+      }
+    },
+    
+    // 获取课程的classTime信息
+    async fetchCourseClassTime(courseId) {
+      if (!courseId) return;
+      
+      try {
+        console.log('获取课程classTime信息，课程ID:', courseId);
+        // 首先尝试使用getCourseDetail云函数
+        let classTimeData = null;
+        
+        try {
+          const res = await uniCloud.callFunction({
+            name: 'getCourseDetail',
+            data: { courseId }
+          });
+          
+          if (res.result && res.result.success && res.result.data) {
+            console.log('获取课程详情成功:', res.result.data);
+            
+            // 更新课程信息中的classTime字段
+            if (res.result.data.classTime) {
+              classTimeData = res.result.data.classTime;
+            }
+          }
+        } catch (err) {
+          console.error('获取课程详情信息失败:', err);
+        }
+        
+        // 如果通过云函数获取失败，尝试直接从数据库获取
+        if (!classTimeData) {
+          try {
+            console.log('尝试直接从数据库获取课程classTime信息');
+            const db = uniCloud.database();
+            const result = await db.collection('courses')
+              .doc(courseId)
+              .field({ classTime: true })
+              .get();
+              
+            if (result.data && result.data.classTime) {
+              classTimeData = result.data.classTime;
+            }
+          } catch (e) {
+            console.error('从数据库获取课程classTime失败:', e);
+          }
+        }
+        
+        // 如果获取到了classTime数据，更新预约详情
+        if (classTimeData) {
+          console.log('成功获取到课程classTime数据:', classTimeData);
+          this.bookingDetail.classTime = classTimeData;
+          
+          // 确保classTime是数组格式
+          if (!Array.isArray(this.bookingDetail.classTime)) {
+            let formattedClassTime;
+            
+            // 处理可能的字符串格式
+            if (typeof this.bookingDetail.classTime === 'string') {
+              const classTimeStr = this.bookingDetail.classTime.trim();
+              
+              // 处理逗号或顿号分隔的字符串
+              if (classTimeStr.includes(',') || 
+                  classTimeStr.includes('，') || 
+                  classTimeStr.includes('、')) {
+                formattedClassTime = classTimeStr
+                  .split(/[,，、\s]+/)
+                  .filter(Boolean)
+                  .map(day => day.trim());
+              } else {
+                formattedClassTime = [classTimeStr];
+              }
+            } else {
+              formattedClassTime = [String(this.bookingDetail.classTime)];
+            }
+            
+            this.bookingDetail.classTime = formattedClassTime;
+          }
+          
+          console.log('处理后的classTime数据:', this.bookingDetail.classTime);
+        } else {
+          console.warn('无法获取课程classTime信息');
+        }
+      } catch (err) {
+        console.error('获取并处理课程classTime信息失败:', err);
       }
     },
     

@@ -11,8 +11,8 @@
 /* WEBPACK VAR INJECTION */(function(wx, createPage) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-__webpack_require__(/*! uni-pages */ 38);
-__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
+__webpack_require__(/*! uni-pages */ 26);
+__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _index2 = _interopRequireDefault(__webpack_require__(/*! ./pages/cart/index.vue */ 121));
 // @ts-ignore
@@ -196,11 +196,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
@@ -975,7 +975,7 @@ var _default = {
       var _arguments2 = arguments,
         _this6 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5() {
-        var showLoading, _res$result, userId, userName, phoneNumber, course, _courseRes$result, courseRes, conflictRes, finalCourseId, bookingParams, res, _res$result2, errorMessage;
+        var showLoading, _res$result, userId, userName, phoneNumber, course, courseClassTime, _courseRes$result, courseRes, db, courseResult, _db, _courseResult, conflictRes, finalCourseId, bookingParams, res, _res$result2, errorMessage;
         return _regenerator.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -1025,26 +1025,27 @@ var _default = {
 
                 // 获取当前课程详情
                 course = null;
-                _context5.prev = 20;
-                _context5.next = 23;
+                courseClassTime = null;
+                _context5.prev = 21;
+                _context5.next = 24;
                 return uniCloud.callFunction({
                   name: 'getCourseDetail',
                   data: {
                     courseId: courseId
                   }
                 });
-              case 23:
+              case 24:
                 courseRes = _context5.sent;
                 console.log('课程详情API返回:', JSON.stringify(courseRes === null || courseRes === void 0 ? void 0 : courseRes.result));
 
                 // 使用安全的辅助函数获取课程数据
                 if (!(courseRes !== null && courseRes !== void 0 && (_courseRes$result = courseRes.result) !== null && _courseRes$result !== void 0 && _courseRes$result.data)) {
-                  _context5.next = 34;
+                  _context5.next = 37;
                   break;
                 }
                 course = _this6.safeGetArrayItem(courseRes.result.data);
                 if (course) {
-                  _context5.next = 31;
+                  _context5.next = 32;
                   break;
                 }
                 if (showLoading) uni.hideLoading();
@@ -1053,50 +1054,96 @@ var _default = {
                   icon: 'none'
                 });
                 return _context5.abrupt("return", null);
-              case 31:
+              case 32:
+                // 获取classTime数据
+                courseClassTime = course.classTime;
+                console.log('获取到课程信息:', course.title, '上课时间:', courseClassTime);
                 console.log('处理后的课程数据:', course);
-                _context5.next = 35;
-                break;
-              case 34:
-                console.warn('未获取到课程详情或格式不正确:', courseRes);
-              case 35:
-                _context5.next = 40;
+                _context5.next = 49;
                 break;
               case 37:
-                _context5.prev = 37;
-                _context5.t0 = _context5["catch"](20);
-                console.error('获取课程详情失败:', _context5.t0);
-                // 获取课程详情失败，继续预约流程
-              case 40:
-                _context5.prev = 40;
+                console.warn('未获取到课程详情或格式不正确:', courseRes);
+
+                // 如果无法通过云函数获取，尝试直接从数据库获取classTime
+                _context5.prev = 38;
+                db = uniCloud.database();
+                _context5.next = 42;
+                return db.collection('courses').doc(courseId).field({
+                  _id: true,
+                  title: true,
+                  classTime: true
+                }).get();
+              case 42:
+                courseResult = _context5.sent;
+                if (courseResult.data) {
+                  courseClassTime = courseResult.data.classTime;
+                  console.log('通过数据库获取课程上课时间:', courseClassTime);
+                }
+                _context5.next = 49;
+                break;
+              case 46:
+                _context5.prev = 46;
+                _context5.t0 = _context5["catch"](38);
+                console.error('从数据库获取课程信息失败:', _context5.t0);
+              case 49:
+                _context5.next = 65;
+                break;
+              case 51:
+                _context5.prev = 51;
+                _context5.t1 = _context5["catch"](21);
+                console.error('获取课程详情失败:', _context5.t1);
+
+                // 获取课程详情失败，尝试直接从数据库获取classTime
+                _context5.prev = 54;
+                _db = uniCloud.database();
+                _context5.next = 58;
+                return _db.collection('courses').doc(courseId).field({
+                  _id: true,
+                  title: true,
+                  classTime: true
+                }).get();
+              case 58:
+                _courseResult = _context5.sent;
+                if (_courseResult.data) {
+                  courseClassTime = _courseResult.data.classTime;
+                  console.log('通过数据库获取课程上课时间:', courseClassTime);
+                }
+                _context5.next = 65;
+                break;
+              case 62:
+                _context5.prev = 62;
+                _context5.t2 = _context5["catch"](54);
+                console.error('从数据库获取课程信息失败:', _context5.t2);
+              case 65:
+                _context5.prev = 65;
                 if (!course) {
-                  _context5.next = 48;
+                  _context5.next = 73;
                   break;
                 }
-                _context5.next = 44;
+                _context5.next = 69;
                 return _this6.checkCourseConflict(course, userId);
-              case 44:
+              case 69:
                 conflictRes = _context5.sent;
                 if (!(conflictRes && conflictRes.hasConflict)) {
-                  _context5.next = 48;
+                  _context5.next = 73;
                   break;
                 }
                 // 有冲突，显示冲突对话框
                 if (showLoading) uni.hideLoading();
                 return _context5.abrupt("return", _this6.showConflictDialog(conflictRes, course, userId));
-              case 48:
-                _context5.next = 53;
+              case 73:
+                _context5.next = 78;
                 break;
-              case 50:
-                _context5.prev = 50;
-                _context5.t1 = _context5["catch"](40);
-                console.error('检查课程冲突失败:', _context5.t1);
+              case 75:
+                _context5.prev = 75;
+                _context5.t3 = _context5["catch"](65);
+                console.error('检查课程冲突失败:', _context5.t3);
                 // 冲突检查失败，继续预约流程
-              case 53:
-                // 直接使用字符串格式的courseId，避免对象访问问题
+              case 78:
+                // 确保courseId是字符串格式
                 finalCourseId = (0, _typeof2.default)(courseId) === 'object' ? courseId._id || courseId.id || '' : String(courseId || '');
                 if (finalCourseId) {
-                  _context5.next = 58;
+                  _context5.next = 83;
                   break;
                 }
                 if (showLoading) uni.hideLoading();
@@ -1105,7 +1152,7 @@ var _default = {
                   icon: 'none'
                 });
                 return _context5.abrupt("return", null);
-              case 58:
+              case 83:
                 // 构建预约请求参数，确保所有字段格式正确
                 bookingParams = {
                   userId: String(userId),
@@ -1113,21 +1160,31 @@ var _default = {
                   userName: String(userName || ''),
                   phoneNumber: String(phoneNumber || ''),
                   remark: ''
-                };
+                }; // 添加classTime字段
+                if (courseClassTime) {
+                  // 确保classTime是数组格式
+                  if (Array.isArray(courseClassTime)) {
+                    bookingParams.classTime = courseClassTime;
+                  } else {
+                    // 如果是字符串，转换为数组
+                    bookingParams.classTime = [courseClassTime];
+                  }
+                  console.log('将课程classTime添加到预约数据中:', bookingParams.classTime);
+                }
                 console.log('调用bookCourse云函数，参数:', JSON.stringify(bookingParams));
 
                 // 调用云函数预约课程
-                _context5.next = 62;
+                _context5.next = 88;
                 return uniCloud.callFunction({
                   name: 'bookCourse',
                   data: bookingParams
                 });
-              case 62:
+              case 88:
                 res = _context5.sent;
                 console.log('预约结果详情:', JSON.stringify(res === null || res === void 0 ? void 0 : res.result));
                 if (showLoading) uni.hideLoading();
                 if (!(res !== null && res !== void 0 && (_res$result = res.result) !== null && _res$result !== void 0 && _res$result.success)) {
-                  _context5.next = 74;
+                  _context5.next = 100;
                   break;
                 }
                 console.log('预约成功:', res.result);
@@ -1173,7 +1230,7 @@ var _default = {
                   }, 1500);
                 }
                 return _context5.abrupt("return", res.result);
-              case 74:
+              case 100:
                 console.error('预约失败:', res === null || res === void 0 ? void 0 : res.result);
                 if (showLoading) {
                   errorMessage = (res === null || res === void 0 ? void 0 : (_res$result2 = res.result) === null || _res$result2 === void 0 ? void 0 : _res$result2.message) || '预约失败，请稍后重试';
@@ -1185,14 +1242,14 @@ var _default = {
                 return _context5.abrupt("return", (res === null || res === void 0 ? void 0 : res.result) || {
                   success: false
                 });
-              case 77:
-                _context5.next = 85;
+              case 103:
+                _context5.next = 111;
                 break;
-              case 79:
-                _context5.prev = 79;
-                _context5.t2 = _context5["catch"](2);
+              case 105:
+                _context5.prev = 105;
+                _context5.t4 = _context5["catch"](2);
                 if (showLoading) uni.hideLoading();
-                console.error('预约课程过程中发生异常:', _context5.t2);
+                console.error('预约课程过程中发生异常:', _context5.t4);
                 if (showLoading) {
                   uni.showToast({
                     title: '预约失败，请稍后重试',
@@ -1201,14 +1258,14 @@ var _default = {
                 }
                 return _context5.abrupt("return", {
                   success: false,
-                  message: _context5.t2.message || '预约过程发生异常'
+                  message: _context5.t4.message || '预约过程发生异常'
                 });
-              case 85:
+              case 111:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, null, [[2, 79], [20, 37], [40, 50]]);
+        }, _callee5, null, [[2, 105], [21, 51], [38, 46], [54, 62], [65, 75]]);
       }))();
     },
     // 检查课程冲突
@@ -1549,7 +1606,7 @@ var _default = {
     proceedWithBooking: function proceedWithBooking(courseId, userId) {
       var _this8 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee8() {
-        var _res$result3, userName, phoneNumber, finalCourseId, bookingParams, res, _res$result4, errorMessage;
+        var _res$result3, userName, phoneNumber, finalCourseId, courseClassTime, db, courseResult, bookingParams, res, _res$result4, errorMessage;
         return _regenerator.default.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
@@ -1578,6 +1635,27 @@ var _default = {
                   message: '无效的课程ID'
                 });
               case 9:
+                // 尝试获取课程的classTime信息
+                courseClassTime = null;
+                _context8.prev = 10;
+                db = uniCloud.database();
+                _context8.next = 14;
+                return db.collection('courses').doc(finalCourseId).field({
+                  classTime: true
+                }).get();
+              case 14:
+                courseResult = _context8.sent;
+                if (courseResult.data && courseResult.data.classTime) {
+                  courseClassTime = courseResult.data.classTime;
+                  console.log('获取到课程上课时间:', courseClassTime);
+                }
+                _context8.next = 21;
+                break;
+              case 18:
+                _context8.prev = 18;
+                _context8.t0 = _context8["catch"](10);
+                console.error('获取课程classTime失败:', _context8.t0);
+              case 21:
                 // 构建预约请求参数
                 bookingParams = {
                   userId: String(userId),
@@ -1585,20 +1663,30 @@ var _default = {
                   userName: String(userName || ''),
                   phoneNumber: String(phoneNumber || ''),
                   remark: ''
-                };
+                }; // 添加classTime字段
+                if (courseClassTime) {
+                  // 确保classTime是数组格式
+                  if (Array.isArray(courseClassTime)) {
+                    bookingParams.classTime = courseClassTime;
+                  } else {
+                    // 如果是字符串，转换为数组
+                    bookingParams.classTime = [courseClassTime];
+                  }
+                  console.log('将课程classTime添加到预约数据中:', bookingParams.classTime);
+                }
                 console.log('继续预约流程 - 确认预约参数:', JSON.stringify(bookingParams));
 
                 // 调用云函数预约课程
-                _context8.next = 13;
+                _context8.next = 26;
                 return uniCloud.callFunction({
                   name: 'bookCourse',
                   data: bookingParams
                 });
-              case 13:
+              case 26:
                 res = _context8.sent;
                 uni.hideLoading();
                 if (!(res !== null && res !== void 0 && (_res$result3 = res.result) !== null && _res$result3 !== void 0 && _res$result3.success)) {
-                  _context8.next = 22;
+                  _context8.next = 35;
                   break;
                 }
                 uni.showToast({
@@ -1617,7 +1705,7 @@ var _default = {
                   _this8.removeFromCartAfterBooking(_this8.currentBookingCourseId);
                 }
                 return _context8.abrupt("return", res.result);
-              case 22:
+              case 35:
                 errorMessage = (res === null || res === void 0 ? void 0 : (_res$result4 = res.result) === null || _res$result4 === void 0 ? void 0 : _res$result4.message) || '预约失败，请稍后重试';
                 uni.showToast({
                   title: errorMessage,
@@ -1627,28 +1715,28 @@ var _default = {
                   success: false,
                   message: errorMessage
                 });
-              case 25:
-                _context8.next = 33;
+              case 38:
+                _context8.next = 46;
                 break;
-              case 27:
-                _context8.prev = 27;
-                _context8.t0 = _context8["catch"](0);
+              case 40:
+                _context8.prev = 40;
+                _context8.t1 = _context8["catch"](0);
                 uni.hideLoading();
-                console.error('预约课程过程中发生异常:', _context8.t0);
+                console.error('预约课程过程中发生异常:', _context8.t1);
                 uni.showToast({
                   title: '预约失败，请稍后重试',
                   icon: 'none'
                 });
                 return _context8.abrupt("return", {
                   success: false,
-                  message: _context8.t0.message || '预约过程发生异常'
+                  message: _context8.t1.message || '预约过程发生异常'
                 });
-              case 33:
+              case 46:
               case "end":
                 return _context8.stop();
             }
           }
-        }, _callee8, null, [[0, 27]]);
+        }, _callee8, null, [[0, 40], [10, 18]]);
       }))();
     },
     // 批量删除
@@ -2118,7 +2206,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"]))
 
 /***/ }),
 

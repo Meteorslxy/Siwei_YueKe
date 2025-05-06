@@ -503,6 +503,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  -webkit-animation: fadeIn 0.3s ease;
+          animation: fadeIn 0.3s ease;
 }
 .user-profile-modal .modal-mask {
   position: absolute;
@@ -514,80 +516,164 @@
 }
 .user-profile-modal .modal-content {
   background-color: #fff;
-  padding: 30rpx;
-  border-radius: 12rpx;
-  width: 80%;
+  padding: 40rpx 30rpx;
+  border-radius: 24rpx;
+  width: 85%;
+  max-width: 650rpx;
   position: relative;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.15);
+  -webkit-transform: translateY(0);
+          transform: translateY(0);
+  -webkit-animation: slideUp 0.3s ease;
+          animation: slideUp 0.3s ease;
 }
-.user-profile-modal .modal-content .modal-title {
-  font-size: 32rpx;
+.user-profile-modal .modal-content .modal-header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+.user-profile-modal .modal-content .modal-header .modal-title {
+  display: block;
+  font-size: 36rpx;
   font-weight: bold;
-  margin-bottom: 20rpx;
+  color: #333;
+  margin-bottom: 16rpx;
 }
-.user-profile-modal .modal-content .modal-subtitle {
+.user-profile-modal .modal-content .modal-header .modal-subtitle {
+  display: block;
   font-size: 28rpx;
   color: #666;
-  margin-bottom: 30rpx;
 }
 .user-profile-modal .modal-content .user-info-form {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.user-profile-modal .modal-content .user-info-form .avatar-wrapper {
-  margin-bottom: 30rpx;
+.user-profile-modal .modal-content .user-info-form .avatar-container {
+  position: relative;
+  margin-bottom: 40rpx;
 }
-.user-profile-modal .modal-content .user-info-form .avatar-wrapper .avatar-preview {
-  width: 120rpx;
-  height: 120rpx;
+.user-profile-modal .modal-content .user-info-form .avatar-container .avatar-preview {
+  width: 160rpx;
+  height: 160rpx;
   border-radius: 50%;
   object-fit: cover;
+  border: 4rpx solid #f0f0f0;
+  background-color: #f8f8f8;
 }
-.user-profile-modal .modal-content .user-info-form .avatar-wrapper .avatar-btn {
-  background-color: #07C160;
-  color: #fff;
-  border: none;
-  border-radius: 40rpx;
-  padding: 10rpx 20rpx;
-  font-size: 28rpx;
-  margin-top: 10rpx;
+.user-profile-modal .modal-content .user-info-form .avatar-container .avatar-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
-.user-profile-modal .modal-content .user-info-form .nickname-wrapper {
+.user-profile-modal .modal-content .user-info-form .avatar-container .avatar-overlay .avatar-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  margin-bottom: 30rpx;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  background-color: #07C160;
+  border: 4rpx solid #fff;
 }
-.user-profile-modal .modal-content .user-info-form .nickname-wrapper .input-label {
+.user-profile-modal .modal-content .user-info-form .avatar-container .avatar-overlay .avatar-btn .avatar-icon {
+  color: #fff;
+  font-size: 40rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+.user-profile-modal .modal-content .user-info-form .avatar-container .avatar-overlay .avatar-btn::after {
+  border: none;
+}
+.user-profile-modal .modal-content .user-info-form .nickname-container {
+  width: 100%;
+  margin-bottom: 100rpx;
+}
+.user-profile-modal .modal-content .user-info-form .nickname-container .input-label {
+  display: block;
   font-size: 28rpx;
   color: #333;
-  margin-right: 10rpx;
+  margin-bottom: 16rpx;
+  font-weight: 500;
 }
-.user-profile-modal .modal-content .user-info-form .nickname-wrapper input[type=nickname] {
-  width: 200rpx;
-  height: 80rpx;
-  border: 1px solid #ddd;
-  border-radius: 40rpx;
-  padding: 0 20rpx;
-  font-size: 28rpx;
+.user-profile-modal .modal-content .user-info-form .nickname-container input {
+  width: 100%;
+  height: 90rpx;
+  border: none;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+}
+.user-profile-modal .modal-content .user-info-form .nickname-container .input-placeholder {
+  color: #bbb;
 }
 .user-profile-modal .modal-content .modal-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 30rpx;
+  gap: 24rpx;
 }
 .user-profile-modal .modal-content .modal-actions .cancel-btn, .user-profile-modal .modal-content .modal-actions .confirm-btn {
   flex: 1;
-  height: 80rpx;
-  line-height: 80rpx;
-  border-radius: 40rpx;
-  font-size: 30rpx;
-  margin: 0 10rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  border-radius: 45rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  margin: 0;
+  border: none;
+}
+.user-profile-modal .modal-content .modal-actions .cancel-btn::after, .user-profile-modal .modal-content .modal-actions .confirm-btn::after {
+  border: none;
 }
 .user-profile-modal .modal-content .modal-actions .cancel-btn {
   background-color: #f5f5f5;
   color: #666;
 }
 .user-profile-modal .modal-content .modal-actions .confirm-btn {
-  background-color: #47c76d;
+  background-color: #07C160;
   color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+}
+@-webkit-keyframes fadeIn {
+from {
+    opacity: 0;
+}
+to {
+    opacity: 1;
+}
+}
+@keyframes fadeIn {
+from {
+    opacity: 0;
+}
+to {
+    opacity: 1;
+}
+}
+@-webkit-keyframes slideUp {
+from {
+    -webkit-transform: translateY(50rpx);
+            transform: translateY(50rpx);
+    opacity: 0.8;
+}
+to {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+    opacity: 1;
+}
+}
+@keyframes slideUp {
+from {
+    -webkit-transform: translateY(50rpx);
+            transform: translateY(50rpx);
+    opacity: 0.8;
+}
+to {
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+    opacity: 1;
+}
 }

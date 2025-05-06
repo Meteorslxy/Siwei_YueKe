@@ -169,13 +169,12 @@ module.exports = async function (params = {}) {
   
   // 保存用户信息到extraData
   if (nickname) {
-    // 只存储到wx_nickname字段，不更新nickname
-    extraData.wx_nickname = nickname;
-    
-    // 如果是注册新用户，则使用临时昵称
+    // 只有在注册新用户时，才存储wx_nickname字段
     if (type === 'register') {
+      extraData.wx_nickname = nickname;
       extraData.nickname = '微信用户';
     }
+    // 在登录时不设置extraData中的wx_nickname，防止覆盖
   }
   
   if (avatar) {
@@ -219,13 +218,13 @@ module.exports = async function (params = {}) {
     
     const updateData = {}
     
-    // 如果用户没有昵称，使用临时昵称，等用户设置真实姓名
+    // 只有在用户没有昵称的情况下才设置默认昵称
     if (!userRecord.nickname || userRecord.nickname === '') {
       updateData.nickname = '微信用户';
     }
     
-    // 无论如何都更新wx_nickname字段，保存最新的微信昵称
-    if (nickname) {
+    // 只有当传入了微信昵称且之前没有保存过wx_nickname或为默认值"微信用户"时才更新
+    if (nickname && (!userRecord.wx_nickname || userRecord.wx_nickname === '微信用户')) {
       updateData.wx_nickname = nickname;
     }
     

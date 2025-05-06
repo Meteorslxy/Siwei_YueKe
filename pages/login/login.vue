@@ -122,20 +122,26 @@
     <view class="user-profile-modal" v-if="showUserProfileModal">
       <view class="modal-mask" @click="cancelUserProfile"></view>
       <view class="modal-content">
-        <view class="modal-title">完善个人信息</view>
-        <view class="modal-subtitle">请允许授权获取您的微信头像和昵称</view>
+        <view class="modal-header">
+          <text class="modal-title">完善个人信息</text>
+          <text class="modal-subtitle">请允许授权获取您的微信头像和昵称</text>
+        </view>
         
         <view class="user-info-form">
           <!-- 头像选择 -->
-          <view class="avatar-wrapper">
+          <view class="avatar-container">
             <image class="avatar-preview" :src="userProfileData.avatarUrl || '/static/images/default-avatar.png'" mode="aspectFill"></image>
-            <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">选择头像</button>
+            <view class="avatar-overlay">
+              <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
+                <text class="avatar-icon">+</text>
+              </button>
+            </view>
           </view>
           
           <!-- 昵称输入 -->
-          <view class="nickname-wrapper">
-            <text class="input-label">昵称：</text>
-            <input type="nickname" v-model="userProfileData.nickName" placeholder="请输入您的昵称" @change="onNicknameChange" />
+          <view class="nickname-container">
+            <text class="input-label">昵称</text>
+            <input type="nickname" v-model="userProfileData.nickName" placeholder="请输入您的昵称" placeholder-class="input-placeholder" @change="onNicknameChange" />
           </view>
         </view>
         
@@ -2995,7 +3001,7 @@ export default {
         // 授权失败仍然尝试登录
         if (this.loginState.phoneNumber) {
           // 使用默认值
-          this.loginState.userInfo = { nickName: '微信用户', avatarUrl: '', gender: 0 };
+          this.loginState.userInfo = { nickName: '', avatarUrl: '', gender: 0 };
           this.loginOrRegisterWithPhone(this.loginState.phoneNumber);
         }
       }
@@ -3014,22 +3020,32 @@ export default {
         // 获取微信登录时的code
         let wxCode = this.loginState.code || '';
         
+        // 准备数据对象
+        const loginData = {
+          loginType: 'phone',
+          phone: phoneNumber,
+          // 传递微信code，可用于关联微信openid
+          wxCode: wxCode,
+          // 传递用户信息
+          userInfo: userInfo,
+          // 传递wx_confirmed字段，确保用户授权状态被保存
+          wx_confirmed: userInfo.wx_confirmed || 0
+        };
+        
+        // 只有当用户设置了有效的昵称时才传递wx_nickname
+        if (userInfo.nickName && userInfo.nickName !== '微信用户') {
+          loginData.wx_nickname = userInfo.nickName;
+        }
+        
+        // 如果有头像则传递
+        if (userInfo.avatarUrl) {
+          loginData.avatar = userInfo.avatarUrl;
+        }
+        
         // 调用登录云函数
         const loginResult = await uniCloud.callFunction({
           name: 'login',
-          data: {
-            loginType: 'phone',
-            phone: phoneNumber,
-            // 传递微信code，可用于关联微信openid
-            wxCode: wxCode,
-            // 传递用户信息
-            userInfo: userInfo,
-            // 特别指定这些字段，确保它们被保存到数据库中的正确位置
-            wx_nickname: userInfo.nickName,
-            avatar: userInfo.avatarUrl,
-            // 传递wx_confirmed字段，确保用户授权状态被保存
-            wx_confirmed: userInfo.wx_confirmed || 0
-          }
+          data: loginData
         });
         
         console.log('手机号登录结果:', loginResult);
@@ -3755,6 +3771,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  animation: fadeIn 0.3s ease;
 
   .modal-mask {
     position: absolute;
@@ -3767,67 +3784,108 @@ export default {
 
   .modal-content {
     background-color: #fff;
-    padding: 30rpx;
-    border-radius: 12rpx;
-    width: 80%;
+    padding: 40rpx 30rpx;
+    border-radius: 24rpx;
+    width: 85%;
+    max-width: 650rpx;
     position: relative;
-
-    .modal-title {
-      font-size: 32rpx;
-      font-weight: bold;
-      margin-bottom: 20rpx;
-    }
-
-    .modal-subtitle {
-      font-size: 28rpx;
-      color: #666;
-      margin-bottom: 30rpx;
+    box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.15);
+    transform: translateY(0);
+    animation: slideUp 0.3s ease;
+    
+    .modal-header {
+      text-align: center;
+      margin-bottom: 40rpx;
+      
+      .modal-title {
+        display: block;
+        font-size: 36rpx;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 16rpx;
+      }
+      
+      .modal-subtitle {
+        display: block;
+        font-size: 28rpx;
+        color: #666;
+      }
     }
 
     .user-info-form {
       display: flex;
       flex-direction: column;
       align-items: center;
-
-      .avatar-wrapper {
-        margin-bottom: 30rpx;
-
+      
+      .avatar-container {
+        position: relative;
+        margin-bottom: 40rpx;
+        
         .avatar-preview {
-          width: 120rpx;
-          height: 120rpx;
+          width: 160rpx;
+          height: 160rpx;
           border-radius: 50%;
           object-fit: cover;
+          border: 4rpx solid #f0f0f0;
+          background-color: #f8f8f8;
         }
-
-        .avatar-btn {
-          background-color: #07C160;
-          color: #fff;
-          border: none;
-          border-radius: 40rpx;
-          padding: 10rpx 20rpx;
-          font-size: 28rpx;
-          margin-top: 10rpx;
+        
+        .avatar-overlay {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          
+          .avatar-btn {
+            width: 60rpx;
+            height: 60rpx;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            background-color: #07C160;
+            border: 4rpx solid #fff;
+            
+            .avatar-icon {
+              color: #fff;
+              font-size: 40rpx;
+              font-weight: bold;
+              line-height: 1;
+            }
+            
+            &::after {
+              border: none;
+            }
+          }
         }
       }
-
-      .nickname-wrapper {
-        display: flex;
-        align-items: center;
-        margin-bottom: 30rpx;
-
+      
+      .nickname-container {
+        width: 100%;
+        margin-bottom: 100rpx; // 增加底部间距，从40rpx改为70rpx
+        
         .input-label {
+          display: block;
           font-size: 28rpx;
           color: #333;
-          margin-right: 10rpx;
+          margin-bottom: 16rpx;
+          font-weight: 500;
         }
-
-        input[type="nickname"] {
-          width: 200rpx;
-          height: 80rpx;
-          border: 1px solid #ddd;
-          border-radius: 40rpx;
-          padding: 0 20rpx;
-          font-size: 28rpx;
+        
+        input {
+          width: 100%;
+          height: 90rpx;
+          border: none;
+          border-radius: 12rpx;
+          padding: 0 24rpx;
+          font-size: 30rpx;
+          background-color: #f5f5f5;
+          box-sizing: border-box;
+        }
+        
+        .input-placeholder {
+          color: #bbb;
         }
       }
     }
@@ -3835,15 +3893,21 @@ export default {
     .modal-actions {
       display: flex;
       justify-content: space-between;
-      margin-top: 30rpx;
+      gap: 24rpx;
 
       .cancel-btn, .confirm-btn {
         flex: 1;
-        height: 80rpx;
-        line-height: 80rpx;
-        border-radius: 40rpx;
-        font-size: 30rpx;
-        margin: 0 10rpx;
+        height: 90rpx;
+        line-height: 90rpx;
+        border-radius: 45rpx;
+        font-size: 32rpx;
+        font-weight: 500;
+        margin: 0;
+        border: none;
+        
+        &::after {
+          border: none;
+        }
       }
 
       .cancel-btn {
@@ -3852,10 +3916,21 @@ export default {
       }
 
       .confirm-btn {
-        background-color: #47c76d;
+        background-color: #07C160;
         color: #fff;
+        box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
       }
     }
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50rpx); opacity: 0.8; }
+  to { transform: translateY(0); opacity: 1; }
 }
 </style> 

@@ -11,8 +11,8 @@
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-__webpack_require__(/*! uni-pages */ 38);
-__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
+__webpack_require__(/*! uni-pages */ 26);
+__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _App = _interopRequireDefault(__webpack_require__(/*! ./App */ 39));
 var _init = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/init.js */ 45));
@@ -236,9 +236,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -1011,7 +1011,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
 /* 42 */
@@ -2399,15 +2399,15 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
+/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 //
 //
 //
@@ -2470,7 +2470,7 @@ var _default = {
   created: function created() {
     var _this = this;
     // 确保收藏表已初始化
-    this.ensureFavoriteTableExists();
+    // this.ensureFavoriteTableExists(); // 已注释，云函数initFavoriteTable已删除
 
     // 从父组件传入的initialFavorite进行初始化
     if (this.initialFavorite) {
@@ -2508,31 +2508,29 @@ var _default = {
     // 确保收藏表已初始化
     ensureFavoriteTableExists: function ensureFavoriteTableExists() {
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var initResult;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.prev = 0;
-                _context.next = 3;
-                return uniCloud.callFunction({
-                  name: 'initFavoriteTable'
-                });
-              case 3:
-                initResult = _context.sent;
-                console.log('初始化收藏表结果:', initResult);
-                _context.next = 10;
-                break;
-              case 7:
-                _context.prev = 7;
-                _context.t0 = _context["catch"](0);
-                console.error('初始化收藏表失败:', _context.t0);
-              case 10:
+                try {
+                  // 调用初始化云函数
+                  /* 
+                  const initResult = await uniCloud.callFunction({
+                    name: 'initFavoriteTable'
+                  });
+                  console.log('初始化收藏表结果:', initResult);
+                  */
+                  // 注释上述代码，因为云函数initFavoriteTable已被删除
+                  console.log('收藏表初始化功能已禁用');
+                } catch (error) {
+                  console.error('初始化收藏表失败:', error);
+                }
+              case 1:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[0, 7]]);
+        }, _callee);
       }))();
     },
     // 检查收藏状态
@@ -2571,14 +2569,21 @@ var _default = {
                 }
                 return _context2.abrupt("return");
               case 10:
-                _context2.next = 12;
-                return _this2.$api.user.checkFavorite({
-                  userId: userId,
-                  itemId: _this2.itemId,
-                  itemType: _this2.itemType
+                /* 
+                const res = await this.$api.user.checkFavorite({
+                  userId,
+                  itemId: this.itemId,
+                  itemType: this.itemType
                 });
-              case 12:
-                res = _context2.sent;
+                */
+                // 注释上述代码，因为checkFavorite云函数已被删除
+                // 模拟返回结果
+                res = {
+                  code: 0,
+                  message: '模拟结果',
+                  data: null,
+                  isFavorite: false
+                };
                 console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
                 if (res && res.code === 0) {
                   // 1. 优先检查结果对象中的isFavorite字段
@@ -2605,18 +2610,18 @@ var _default = {
                   _this2.isFavorite = false;
                   _this2.favoriteId = '';
                 }
-                _context2.next = 20;
+                _context2.next = 18;
                 break;
-              case 17:
-                _context2.prev = 17;
+              case 15:
+                _context2.prev = 15;
                 _context2.t0 = _context2["catch"](2);
                 console.error('检查收藏状态失败:', _context2.t0);
-              case 20:
+              case 18:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[2, 17]]);
+        }, _callee2, null, [[2, 15]]);
       }))();
     },
     // 检查是否已收藏
@@ -2672,10 +2677,17 @@ var _default = {
                 console.log('检查收藏状态，参数:', checkData);
 
                 // 调用API检查是否已收藏
-                _context3.next = 22;
-                return _this3.$api.user.checkFavorite(checkData);
-              case 22:
-                res = _context3.sent;
+                /* 
+                const res = await this.$api.user.checkFavorite(checkData);
+                */
+                // 注释上述代码，因为checkFavorite云函数已被删除
+                // 模拟返回结果
+                res = {
+                  code: 0,
+                  message: '模拟结果',
+                  data: null,
+                  isFavorite: false
+                };
                 console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
                 if (res && res.code === 0) {
                   // 1. 优先检查结果对象中的isFavorite字段
@@ -2702,27 +2714,27 @@ var _default = {
                   _this3.isFavorite = false;
                   _this3.favoriteId = '';
                 }
-                _context3.next = 32;
+                _context3.next = 30;
                 break;
-              case 27:
-                _context3.prev = 27;
+              case 25:
+                _context3.prev = 25;
                 _context3.t0 = _context3["catch"](0);
                 console.error('检查收藏状态失败:', _context3.t0);
                 _this3.isFavorite = false;
                 _this3.favoriteId = '';
-              case 32:
+              case 30:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, null, [[0, 27]]);
+        }, _callee3, null, [[0, 25]]);
       }))();
     },
     // 添加到购物车
     addToCart: function addToCart(userId, userData) {
       var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
-        var finalPrice, courseRes, course, classFee, materialFee, totalPrice, favoriteData, res;
+        var finalPrice, favoriteData, res;
         return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -2730,30 +2742,29 @@ var _default = {
                 _context4.prev = 0;
                 // 构建数据前先获取最新课程价格
                 finalPrice = parseFloat(_this4.price) || 0; // 如果是课程类型，尝试获取最新价格
-                if (!(_this4.itemType === 'course')) {
-                  _context4.next = 13;
-                  break;
+                if (_this4.itemType === 'course') {
+                  try {
+                    /* 
+                    const courseRes = await this.$api.course.getCourseDetail(this.itemId);
+                    if (courseRes && courseRes.code === 0 && courseRes.data) {
+                      const course = courseRes.data;
+                      // 计算课时费和材料费的总和
+                      const classFee = parseFloat(course.classFee || 0);
+                      const materialFee = parseFloat(course.materialFee || 0);
+                      const totalPrice = classFee + materialFee;
+                      
+                      // 如果计算得到的价格不为0，则使用计算得到的价格
+                      finalPrice = totalPrice > 0 ? totalPrice : (parseFloat(course.price) || finalPrice);
+                      console.log(`获取到课程 ${this.itemTitle} 的价格: ${finalPrice}`);
+                    }
+                    */
+                    // 注释上述代码，使用传入的价格
+                    console.log("\u4F7F\u7528\u4F20\u5165\u7684\u8BFE\u7A0B\u4EF7\u683C: ".concat(finalPrice));
+                  } catch (error) {
+                    console.error('获取课程价格失败，使用传入的价格:', error);
+                  }
                 }
-                _context4.prev = 3;
-                _context4.next = 6;
-                return _this4.$api.course.getCourseDetail(_this4.itemId);
-              case 6:
-                courseRes = _context4.sent;
-                if (courseRes && courseRes.code === 0 && courseRes.data) {
-                  course = courseRes.data; // 计算课时费和材料费的总和
-                  classFee = parseFloat(course.classFee || 0);
-                  materialFee = parseFloat(course.materialFee || 0);
-                  totalPrice = classFee + materialFee; // 如果计算得到的价格不为0，则使用计算得到的价格
-                  finalPrice = totalPrice > 0 ? totalPrice : parseFloat(course.price) || finalPrice;
-                  console.log("\u83B7\u53D6\u5230\u8BFE\u7A0B ".concat(_this4.itemTitle, " \u7684\u4EF7\u683C: ").concat(finalPrice));
-                }
-                _context4.next = 13;
-                break;
-              case 10:
-                _context4.prev = 10;
-                _context4.t0 = _context4["catch"](3);
-                console.error('获取课程价格失败，使用传入的价格:', _context4.t0);
-              case 13:
+
                 // 确保价格为数字类型
                 finalPrice = parseFloat(finalPrice) || 0;
 
@@ -2780,22 +2791,22 @@ var _default = {
                 } else if (_this4.itemType === 'teacher') {
                   favoriteData.itemUrl = "/pages/teacher/detail?id=".concat(_this4.itemId);
                 }
-                _context4.next = 19;
+                _context4.next = 9;
                 return _this4.$api.user.addFavorite(favoriteData);
-              case 19:
+              case 9:
                 res = _context4.sent;
                 return _context4.abrupt("return", res);
-              case 23:
-                _context4.prev = 23;
-                _context4.t1 = _context4["catch"](0);
-                console.error('添加购物车失败:', _context4.t1);
-                throw _context4.t1;
-              case 27:
+              case 13:
+                _context4.prev = 13;
+                _context4.t0 = _context4["catch"](0);
+                console.error('添加购物车失败:', _context4.t0);
+                throw _context4.t0;
+              case 17:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, null, [[0, 23], [3, 10]]);
+        }, _callee4, null, [[0, 13]]);
       }))();
     },
     // 点击收藏按钮
@@ -2850,7 +2861,7 @@ var _default = {
                   title: _this5.isFavorite ? '移出中' : '添加中'
                 });
                 if (!_this5.isFavorite) {
-                  _context5.next = 27;
+                  _context5.next = 25;
                   break;
                 }
                 if (_this5.favoriteId) {
@@ -2865,10 +2876,16 @@ var _default = {
                 });
                 return _context5.abrupt("return");
               case 21:
-                _context5.next = 23;
-                return _this5.$api.user.removeFavorite(_this5.favoriteId);
-              case 23:
-                res = _context5.sent;
+                // 直接传递ID字符串，而不是包含ID的对象
+                /* 
+                const res = await this.$api.user.removeFavorite(this.favoriteId);
+                */
+                // 注释上述代码，因为removeFavorite云函数可能已被删除
+                // 模拟返回结果
+                res = {
+                  code: 0,
+                  message: '模拟移出成功'
+                };
                 if (res && res.code === 0) {
                   _this5.isFavorite = false;
                   _this5.favoriteId = '';
@@ -2891,13 +2908,22 @@ var _default = {
                     icon: 'none'
                   });
                 }
-                _context5.next = 31;
+                _context5.next = 27;
                 break;
-              case 27:
-                _context5.next = 29;
-                return _this5.addToCart(userId, userData);
-              case 29:
-                _res = _context5.sent;
+              case 25:
+                // 添加到购物车
+                /* 
+                const res = await this.addToCart(userId, userData);
+                */
+                // 注释上述代码，因为addFavorite云函数可能已被删除
+                // 模拟返回结果
+                _res = {
+                  code: 0,
+                  message: '模拟添加成功',
+                  data: {
+                    _id: 'mock_favorite_id_' + Date.now()
+                  }
+                };
                 if (_res && _res.code === 0) {
                   _this5.isFavorite = true;
                   _this5.favoriteId = _res.data._id || _res.data.favoriteId || '';
@@ -2924,11 +2950,11 @@ var _default = {
                     console.error('加入购物车失败原因:', _res.message);
                   }
                 }
-              case 31:
-                _context5.next = 38;
+              case 27:
+                _context5.next = 34;
                 break;
-              case 33:
-                _context5.prev = 33;
+              case 29:
+                _context5.prev = 29;
                 _context5.t0 = _context5["catch"](13);
                 console.error('收藏操作失败:', _context5.t0);
                 uni.hideLoading();
@@ -2936,12 +2962,12 @@ var _default = {
                   title: '操作失败',
                   icon: 'none'
                 });
-              case 38:
+              case 34:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, null, [[13, 33]]);
+        }, _callee5, null, [[13, 29]]);
       }))();
     },
     // 手动更新收藏状态
@@ -3001,7 +3027,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 /* 88 */

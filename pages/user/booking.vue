@@ -83,10 +83,12 @@
         
         <!-- 底部：操作按钮 -->
         <view class="booking-actions" v-if="showActions(item)">
-          <!-- 取消预约按钮 -->
+          <!-- 取消预约按钮 - 对已付费的显示"转班申请"，未付费的显示"取消预约" -->
           <view class="action-btn cancel-btn" 
                 v-if="item && item.status !== 'cancelled' && item.status !== 'finished'"
-                @click.stop="$event => cancelBooking(item, $event)">取消预约</view>
+                @click.stop="$event => (item.paymentStatus === 'paid' || item.isPaid === true) ? showTransferClassDialog(item, $event) : cancelBooking(item, $event)">
+                {{(item.paymentStatus === 'paid' || item.isPaid === true) ? '转班申请' : '取消预约'}}
+          </view>
           
           <!-- 去缴费按钮 -->
           <view class="action-btn pay-btn" 
@@ -516,6 +518,96 @@ export default {
           const totalCount = res.result.total || 0;
           
           console.log(`API获取到${allBookings.length}条预约记录，总数: ${totalCount}`);
+          
+          // 获取所有课程ID
+          const courseIds = [...new Set(allBookings.filter(item => item.courseId).map(item => item.courseId))];
+          
+          if (courseIds.length > 0) {
+            console.log(`从预约记录中提取到${courseIds.length}个课程ID，准备获取课程信息`);
+            
+            try {
+              // 查询课程表获取课程信息
+              const db = uniCloud.database();
+              const courseResult = await db.collection('courses')
+                .where({
+                  _id: db.command.in(courseIds)
+                })
+                .field({
+                  _id: true,
+                  classTime: true,
+                  title: true
+                })
+                .get();
+              
+              if (courseResult.data && courseResult.data.length > 0) {
+                console.log(`获取到${courseResult.data.length}个课程信息`);
+                
+                // 创建课程ID到课程信息的映射
+                const courseMap = {};
+                courseResult.data.forEach(course => {
+                  courseMap[course._id] = course;
+                });
+                
+                // 为每个预约记录添加课程信息
+                allBookings = allBookings.map(booking => {
+                  if (booking.courseId && courseMap[booking.courseId]) {
+                    // 注入课程信息到预约记录
+                    return {
+                      ...booking,
+                      classTime: courseMap[booking.courseId].classTime || booking.classTime,
+                      courseTitle: booking.courseTitle || courseMap[booking.courseId].title
+                    };
+                  }
+                  return booking;
+                });
+                
+                console.log('已为预约记录注入课程信息，包括classTime字段');
+              } else {
+                console.log('未找到相关课程信息，尝试查询courses表');
+                
+                // 尝试使用courses表名再次查询
+                const coursesResult = await db.collection('courses')
+                  .where({
+                    _id: db.command.in(courseIds)
+                  })
+                  .field({
+                    _id: true,
+                    classTime: true,
+                    title: true
+                  })
+                  .get();
+                
+                if (coursesResult.data && coursesResult.data.length > 0) {
+                  console.log(`从courses表获取到${coursesResult.data.length}个课程信息`);
+                  
+                  // 创建课程ID到课程信息的映射
+                  const courseMap = {};
+                  coursesResult.data.forEach(course => {
+                    courseMap[course._id] = course;
+                  });
+                  
+                  // 为每个预约记录添加课程信息
+                  allBookings = allBookings.map(booking => {
+                    if (booking.courseId && courseMap[booking.courseId]) {
+                      // 注入课程信息到预约记录
+                      return {
+                        ...booking,
+                        classTime: courseMap[booking.courseId].classTime || booking.classTime,
+                        courseTitle: booking.courseTitle || courseMap[booking.courseId].title
+                      };
+                    }
+                    return booking;
+                  });
+                  
+                  console.log('已为预约记录注入courses表中的课程信息，包括classTime字段');
+                } else {
+                  console.log('在course和courses表中都未找到相关课程信息');
+                }
+              }
+            } catch (courseErr) {
+              console.error('获取课程信息失败:', courseErr);
+            }
+          }
           
           // 更新总计数
           this.statusCounts.all = allBookings.length;
@@ -1002,16 +1094,126 @@ export default {
       const dateRange = formatDateRange();
       const timeRange = formatTimeRange();
       
+      let result = '';
       if (dateRange && timeRange) {
-        return `${dateRange} ${timeRange}`;
+        result = `${dateRange} ${timeRange}`;
       } else if (dateRange) {
-        return dateRange;
+        result = dateRange;
       } else if (timeRange) {
-        return timeRange;
+        result = timeRange;
+      }
+      
+      // 添加classTime字段内容（每周几）
+      if (item.classTime) {
+        // 处理classTime字段，可能是字符串或数组
+        let classTimeStr = '';
+        if (Array.isArray(item.classTime)) {
+          // 处理数组中可能包含的字符串，如 ["周一，周三"]
+          const extractWeekdays = (str) => {
+            if (!str) return [];
+            // 处理包含逗号、顿号或空格分隔的字符串
+            return str.split(/[,，、\s]+/).filter(Boolean);
+          };
+          
+          // 提取和扁平化所有周几数据
+          let weekdaysArray = [];
+          item.classTime.forEach(entry => {
+            if (typeof entry === 'string') {
+              if (entry.includes('周') || entry.includes('每')) {
+                weekdaysArray = weekdaysArray.concat(extractWeekdays(entry));
+              } else {
+                weekdaysArray.push(entry);
+              }
+            } else {
+              weekdaysArray.push(entry);
+            }
+          });
+          
+          // 标准化处理，确保所有数据格式一致
+          const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+          const classTimeSet = new Set();
+          
+          weekdaysArray.forEach(day => {
+            const trimmedDay = String(day).trim();
+            // 处理标准格式
+            if (weekdays.includes(trimmedDay)) {
+              classTimeSet.add(trimmedDay);
+            } 
+            // 处理数字格式，如 "1" 表示周一
+            else if (/^[1-7]$/.test(trimmedDay)) {
+              const index = parseInt(trimmedDay, 10) - 1;
+              if (index >= 0 && index < 7) {
+                classTimeSet.add(weekdays[index]);
+              }
+            }
+            // 处理带有"周"前缀但不完整的格式，如"周一"可能缩写为"一"
+            else if (/^[一二三四五六日天]$/.test(trimmedDay)) {
+              const dayMap = {一: '周一', 二: '周二', 三: '周三', 四: '周四', 五: '周五', 六: '周六', 日: '周日', 天: '周日'};
+              if (dayMap[trimmedDay]) {
+                classTimeSet.add(dayMap[trimmedDay]);
+              }
+            }
+          });
+          
+          // 检查是否为"每天"
+          const isEveryday = weekdays.every(day => classTimeSet.has(day));
+          if (isEveryday) {
+            classTimeStr = '天';
+          } else {
+            // 不是每天，按照周一到周日的顺序排序
+            const sortedDays = [];
+            weekdays.forEach(day => {
+              if (classTimeSet.has(day)) {
+                sortedDays.push(day);
+              }
+            });
+            classTimeStr = sortedDays.join('、');
+          }
+        } else if (typeof item.classTime === 'string') {
+          // 如果是字符串，检查是否为"每天"或包含"每天"字样
+          const classTimeString = item.classTime.trim();
+          
+          if (classTimeString === '每天' || classTimeString === '天天' || 
+              classTimeString === '每日' || classTimeString.includes('每天')) {
+            classTimeStr = '天';
+          } else {
+            // 处理可能包含逗号分隔的字符串，如 "周一，周三"
+            const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            const parts = classTimeString.split(/[,，、\s]+/).filter(Boolean);
+            
+            if (parts.length > 1) {
+              // 包含多个周几数据，标准化并排序
+              const daySet = new Set();
+              parts.forEach(part => {
+                const trimmed = part.trim();
+                if (weekdays.includes(trimmed)) {
+                  daySet.add(trimmed);
+                }
+              });
+              
+              const sortedDays = [];
+              weekdays.forEach(day => {
+                if (daySet.has(day)) {
+                  sortedDays.push(day);
+                }
+              });
+              
+              classTimeStr = sortedDays.join('、');
+            } else {
+              // 单个值，直接使用
+              classTimeStr = classTimeString;
+            }
+          }
+        }
+        
+        // 如果classTime有内容，添加到结果中
+        if (classTimeStr) {
+          result += ` （每${classTimeStr}）`;
+        }
       }
       
       // 处理原始的startTime和endTime（如果存在）
-      if (item.startTime || item.endTime) {
+      if (!result && (item.startTime || item.endTime)) {
         try {
           const formatFullDateTime = (dateTimeStr) => {
             if (!dateTimeStr) return '';
@@ -1039,7 +1241,7 @@ export default {
         }
       }
       
-      return '暂无';
+      return result || '暂无';
     },
     
     // 格式化预约时间
@@ -2494,6 +2696,33 @@ export default {
       }
       
       return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    },
+    
+    // 显示转班对话框
+    showTransferClassDialog(booking, e) {
+      // 阻止事件冒泡
+      if (e) e.stopPropagation();
+      
+      // 确保booking参数存在且有效
+      if (!booking || typeof booking !== 'object') {
+        console.error('无效的预约数据:', booking);
+        uni.showToast({
+          title: '无效的预约数据',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 获取教师姓名
+      const teacherName = booking.teacherName || '代课老师';
+      
+      // 显示提示框
+      uni.showModal({
+        title: '转班申请',
+        content: `请联系${teacherName}老师进行转班`,
+        showCancel: false,
+        confirmText: '知道了'
+      });
     },
   }
 }

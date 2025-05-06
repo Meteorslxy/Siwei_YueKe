@@ -11,8 +11,8 @@
 /* WEBPACK VAR INJECTION */(function(wx, createPage) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-__webpack_require__(/*! uni-pages */ 38);
-__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
+__webpack_require__(/*! uni-pages */ 26);
+__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _booking = _interopRequireDefault(__webpack_require__(/*! ./pages/user/booking.vue */ 234));
 // @ts-ignore
@@ -105,10 +105,10 @@ try {
       return __webpack_require__.e(/*! import() | components/empty-tip/empty-tip */ "components/empty-tip/empty-tip").then(__webpack_require__.bind(null, /*! @/components/empty-tip/empty-tip.vue */ 48))
     },
     uniLoadMore: function () {
-      return Promise.all(/*! import() | uni_modules/uni-load-more/components/uni-load-more/uni-load-more */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-load-more/components/uni-load-more/uni-load-more")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue */ 434))
+      return Promise.all(/*! import() | uni_modules/uni-load-more/components/uni-load-more/uni-load-more */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-load-more/components/uni-load-more/uni-load-more")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue */ 442))
     },
     uniPopup: function () {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-popup/components/uni-popup/uni-popup */ "uni_modules/uni-popup/components/uni-popup/uni-popup").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-popup/components/uni-popup/uni-popup.vue */ 445))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-popup/components/uni-popup/uni-popup */ "uni_modules/uni-popup/components/uni-popup/uni-popup").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-popup/components/uni-popup/uni-popup.vue */ 453))
     },
   }
 } catch (e) {
@@ -183,7 +183,9 @@ var render = function () {
       var _temp, _temp2
       $event.stopPropagation()
       return (function ($event) {
-        return _vm.cancelBooking(item, $event)
+        return item.paymentStatus === "paid" || item.isPaid === true
+          ? _vm.showTransferClassDialog(item, $event)
+          : _vm.cancelBooking(item, $event)
       })($event)
     }
     _vm.e1 = function ($event, item) {
@@ -268,16 +270,16 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ 18));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var bookingItem = function bookingItem() {
   __webpack_require__.e(/*! require.ensure | components/booking-item/booking-item */ "components/booking-item/booking-item").then((function () {
     return resolve(__webpack_require__(/*! @/components/booking-item/booking-item.vue */ 69));
@@ -290,7 +292,7 @@ var emptyTip = function emptyTip() {
 };
 var uniLoadMore = function uniLoadMore() {
   Promise.all(/*! require.ensure | uni_modules/uni-load-more/components/uni-load-more/uni-load-more */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-load-more/components/uni-load-more/uni-load-more")]).then((function () {
-    return resolve(__webpack_require__(/*! @/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue */ 434));
+    return resolve(__webpack_require__(/*! @/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue */ 442));
   }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
 };
 var _default = {
@@ -570,7 +572,7 @@ var _default = {
     loadBookingList: function loadBookingList() {
       var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-        var userInfoStr, userData, userId, localCancelledBookings, status, useClientFiltering, statusForLog, res, allBookings, totalCount, cancelledInList, refundedCount, pendingCount, cancelledBookings, _localCancelledBookings, existingIds, newLocalCancelled, _userId, _localCancelledBookings2;
+        var userInfoStr, userData, userId, localCancelledBookings, status, useClientFiltering, statusForLog, res, allBookings, totalCount, courseIds, db, courseResult, courseMap, coursesResult, _courseMap, cancelledInList, refundedCount, pendingCount, cancelledBookings, _localCancelledBookings, existingIds, newLocalCancelled, _userId, _localCancelledBookings2;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -672,177 +674,278 @@ var _default = {
               case 32:
                 res = _context.sent;
                 console.log('getBookings原始返回结果:', res.result);
-                if (res.result && res.result.success) {
-                  // 过滤掉undefined和null值
-                  allBookings = (res.result.data || []).filter(function (item) {
-                    return item && item._id;
-                  });
-                  totalCount = res.result.total || 0;
-                  console.log("API\u83B7\u53D6\u5230".concat(allBookings.length, "\u6761\u9884\u7EA6\u8BB0\u5F55\uFF0C\u603B\u6570: ").concat(totalCount));
+                if (!(res.result && res.result.success)) {
+                  _context.next = 83;
+                  break;
+                }
+                // 过滤掉undefined和null值
+                allBookings = (res.result.data || []).filter(function (item) {
+                  return item && item._id;
+                });
+                totalCount = res.result.total || 0;
+                console.log("API\u83B7\u53D6\u5230".concat(allBookings.length, "\u6761\u9884\u7EA6\u8BB0\u5F55\uFF0C\u603B\u6570: ").concat(totalCount));
 
-                  // 更新总计数
-                  _this4.statusCounts.all = allBookings.length;
+                // 获取所有课程ID
+                courseIds = (0, _toConsumableArray2.default)(new Set(allBookings.filter(function (item) {
+                  return item.courseId;
+                }).map(function (item) {
+                  return item.courseId;
+                })));
+                if (!(courseIds.length > 0)) {
+                  _context.next = 64;
+                  break;
+                }
+                console.log("\u4ECE\u9884\u7EA6\u8BB0\u5F55\u4E2D\u63D0\u53D6\u5230".concat(courseIds.length, "\u4E2A\u8BFE\u7A0BID\uFF0C\u51C6\u5907\u83B7\u53D6\u8BFE\u7A0B\u4FE1\u606F"));
+                _context.prev = 41;
+                // 查询课程表获取课程信息
+                db = uniCloud.database();
+                _context.next = 45;
+                return db.collection('courses').where({
+                  _id: db.command.in(courseIds)
+                }).field({
+                  _id: true,
+                  classTime: true,
+                  title: true
+                }).get();
+              case 45:
+                courseResult = _context.sent;
+                if (!(courseResult.data && courseResult.data.length > 0)) {
+                  _context.next = 54;
+                  break;
+                }
+                console.log("\u83B7\u53D6\u5230".concat(courseResult.data.length, "\u4E2A\u8BFE\u7A0B\u4FE1\u606F"));
 
-                  // 计算各状态数量，课程已删除的记录计入已取消数量
-                  _this4.statusCounts.booked = allBookings.filter(function (item) {
-                    return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed') && !item.isCourseDeleted;
-                  }).length;
-                  _this4.statusCounts.finished = allBookings.filter(function (item) {
-                    return item && item.status === 'finished' && !item.isCourseDeleted;
-                  }).length;
-                  cancelledInList = allBookings.filter(function (item) {
-                    return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel' || item.isCourseDeleted === true);
-                  }).length; // 如果已经从本地加载了取消记录，使用更大的值
-                  if (!_this4.localCancelledLoaded || cancelledInList > _this4.statusCounts.cancelled) {
-                    _this4.statusCounts.cancelled = cancelledInList;
+                // 创建课程ID到课程信息的映射
+                courseMap = {};
+                courseResult.data.forEach(function (course) {
+                  courseMap[course._id] = course;
+                });
+
+                // 为每个预约记录添加课程信息
+                allBookings = allBookings.map(function (booking) {
+                  if (booking.courseId && courseMap[booking.courseId]) {
+                    // 注入课程信息到预约记录
+                    return _objectSpread(_objectSpread({}, booking), {}, {
+                      classTime: courseMap[booking.courseId].classTime || booking.classTime,
+                      courseTitle: booking.courseTitle || courseMap[booking.courseId].title
+                    });
                   }
+                  return booking;
+                });
+                console.log('已为预约记录注入课程信息，包括classTime字段');
+                _context.next = 59;
+                break;
+              case 54:
+                console.log('未找到相关课程信息，尝试查询courses表');
 
-                  // 统计已退费的预约数量
-                  refundedCount = allBookings.filter(function (item) {
-                    return item && item.paymentStatus === 'refunded' && !item.isCourseDeleted;
-                  }).length;
-                  _this4.statusCounts.refunded = refundedCount;
+                // 尝试使用courses表名再次查询
+                _context.next = 57;
+                return db.collection('courses').where({
+                  _id: db.command.in(courseIds)
+                }).field({
+                  _id: true,
+                  classTime: true,
+                  title: true
+                }).get();
+              case 57:
+                coursesResult = _context.sent;
+                if (coursesResult.data && coursesResult.data.length > 0) {
+                  console.log("\u4ECEcourses\u8868\u83B7\u53D6\u5230".concat(coursesResult.data.length, "\u4E2A\u8BFE\u7A0B\u4FE1\u606F"));
 
-                  // 确保每个预约都有_id字段
-                  allBookings = allBookings.filter(function (item) {
-                    return item && item._id;
+                  // 创建课程ID到课程信息的映射
+                  _courseMap = {};
+                  coursesResult.data.forEach(function (course) {
+                    _courseMap[course._id] = course;
                   });
 
-                  // 规范化数据，确保支付状态和显示状态一致
-                  allBookings.forEach(function (booking) {
-                    // 检查是否有支付状态不一致的情况
-                    if ((booking.paymentStatus === 'paid' || booking.isPaid === true) && (booking.status === 'pending' || booking.status === 'confirmed_unpaid')) {
-                      // 如果已支付但状态仍为待支付，则更新状态
-                      console.log("\u53D1\u73B0\u72B6\u6001\u4E0D\u4E00\u81F4\uFF1A".concat(booking._id, " \u5DF2\u652F\u4ED8\u4F46\u72B6\u6001\u4E3A ").concat(booking.status, "\uFF0C\u4FEE\u6B63\u4E3Aconfirmed"));
-                      booking.status = 'confirmed';
+                  // 为每个预约记录添加课程信息
+                  allBookings = allBookings.map(function (booking) {
+                    if (booking.courseId && _courseMap[booking.courseId]) {
+                      // 注入课程信息到预约记录
+                      return _objectSpread(_objectSpread({}, booking), {}, {
+                        classTime: _courseMap[booking.courseId].classTime || booking.classTime,
+                        courseTitle: booking.courseTitle || _courseMap[booking.courseId].title
+                      });
                     }
-
-                    // 标准化支付状态字段
-                    if (booking.isPaid === true && booking.paymentStatus !== 'paid') {
-                      booking.paymentStatus = 'paid';
-                    } else if (booking.paymentStatus === 'paid' && booking.isPaid !== true) {
-                      booking.isPaid = true;
-                    }
+                    return booking;
                   });
-
-                  // 更新自动取消标记信息
-                  allBookings.forEach(function (booking) {
-                    if (booking.status === 'cancelled') {
-                      // 检查本地存储中是否为自动取消
-                      var isAutoCancel = _this4.isAutoCancelBookingFromStorage(booking._id);
-                      if (isAutoCancel) {
-                        console.log("\u66F4\u65B0\u9884\u7EA6 ".concat(booking.bookingId || booking._id, " \u7684\u81EA\u52A8\u53D6\u6D88\u6807\u8BB0"));
-                        booking.autoCancel = true;
-                        booking.cancelReason = '超时未支付，系统自动取消';
-                      }
-                    }
-                  });
-
-                  // 更新列表
-                  _this4.bookingList = allBookings;
-                  _this4.total = allBookings.length;
-                  console.log("\u524D\u7AEF\u7B5B\u9009\u540E\u7684\u9884\u7EA6\u8BB0\u5F55\u6570: ".concat(_this4.bookingList.length));
-
-                  // 更新加载状态
-                  _this4.loadMoreStatus = 'noMore'; // 已获取全部数据
-
-                  // 日志显示有多少pending状态的预约
-                  pendingCount = allBookings.filter(function (item) {
-                    return item && item.status === 'pending';
-                  }).length;
-                  console.log("\u83B7\u53D6\u5230".concat(pendingCount, "\u6761\u5F85\u652F\u4ED8\u9884\u7EA6\u8BB0\u5F55"));
-
-                  // 在前端根据状态筛选
-                  if (useClientFiltering) {
-                    if (_this4.currentStatus === 'booked') {
-                      allBookings = allBookings.filter(function (item) {
-                        return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed') && !item.isCourseDeleted;
-                      });
-                    } else if (_this4.currentStatus === 'finished') {
-                      allBookings = allBookings.filter(function (item) {
-                        return item && item.status === 'finished' && !item.isCourseDeleted;
-                      });
-                    } else if (_this4.currentStatus === 'cancelled') {
-                      // 重点：筛选出已取消的预约（包含本地存储的和课程已删除的）
-                      cancelledBookings = allBookings.filter(function (item) {
-                        return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel' || item.isCourseDeleted === true);
-                      }); // 获取本地已取消的预约
-                      _localCancelledBookings = _this4.getLocalCancelledBookings(userId).filter(function (item) {
-                        return item && item._id;
-                      }); // 合并本地和远程的已取消预约，避免重复
-                      if (_localCancelledBookings.length > 0) {
-                        existingIds = cancelledBookings.map(function (item) {
-                          return item._id;
-                        });
-                        newLocalCancelled = _localCancelledBookings.filter(function (item) {
-                          return !existingIds.includes(item._id);
-                        });
-                        if (newLocalCancelled.length > 0) {
-                          console.log("\u6DFB\u52A0".concat(newLocalCancelled.length, "\u6761\u672C\u5730\u5DF2\u53D6\u6D88\u9884\u7EA6\u5230\u5217\u8868"));
-                          cancelledBookings = [].concat((0, _toConsumableArray2.default)(cancelledBookings), (0, _toConsumableArray2.default)(newLocalCancelled));
-                        }
-                      }
-                      allBookings = cancelledBookings;
-
-                      // 打印筛选后的已取消记录
-                      console.log('前端筛选后的已取消预约记录:', allBookings);
-                    } else if (_this4.currentStatus === 'refunded') {
-                      // 筛选出已退费的预约，排除已删除课程
-                      allBookings = allBookings.filter(function (item) {
-                        return item && item.paymentStatus === 'refunded' && !item.isCourseDeleted;
-                      });
-                      console.log('前端筛选后的已退费预约记录:', allBookings);
-                    }
-                  }
+                  console.log('已为预约记录注入courses表中的课程信息，包括classTime字段');
                 } else {
-                  console.error('获取预约记录API返回失败:', res.result);
-                  // 显示错误提示
-                  uni.showToast({
-                    title: '获取预约记录失败',
-                    icon: 'none'
-                  });
+                  console.log('在course和courses表中都未找到相关课程信息');
+                }
+              case 59:
+                _context.next = 64;
+                break;
+              case 61:
+                _context.prev = 61;
+                _context.t1 = _context["catch"](41);
+                console.error('获取课程信息失败:', _context.t1);
+              case 64:
+                // 更新总计数
+                _this4.statusCounts.all = allBookings.length;
 
-                  // 错误情况下，尝试从本地加载已取消预约
-                  if (_this4.currentStatus === 'cancelled') {
-                    try {
-                      _userId = _this4.getUserId();
-                      if (_userId) {
-                        _localCancelledBookings2 = _this4.getLocalCancelledBookings(_userId);
-                        if (_localCancelledBookings2.length > 0) {
-                          _this4.bookingList = _localCancelledBookings2;
-                          _this4.statusCounts.cancelled = _localCancelledBookings2.length;
-                          _this4.total = _localCancelledBookings2.length;
-                          _this4.localCancelledLoaded = true;
-                          console.log("\u52A0\u8F7D\u4E86".concat(_localCancelledBookings2.length, "\u6761\u672C\u5730\u5DF2\u53D6\u6D88\u8BB0\u5F55"));
-                          _this4.$forceUpdate();
-                        }
-                      }
-                    } catch (localErr) {
-                      console.error('加载本地已取消记录失败:', localErr);
+                // 计算各状态数量，课程已删除的记录计入已取消数量
+                _this4.statusCounts.booked = allBookings.filter(function (item) {
+                  return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed') && !item.isCourseDeleted;
+                }).length;
+                _this4.statusCounts.finished = allBookings.filter(function (item) {
+                  return item && item.status === 'finished' && !item.isCourseDeleted;
+                }).length;
+                cancelledInList = allBookings.filter(function (item) {
+                  return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel' || item.isCourseDeleted === true);
+                }).length; // 如果已经从本地加载了取消记录，使用更大的值
+                if (!_this4.localCancelledLoaded || cancelledInList > _this4.statusCounts.cancelled) {
+                  _this4.statusCounts.cancelled = cancelledInList;
+                }
+
+                // 统计已退费的预约数量
+                refundedCount = allBookings.filter(function (item) {
+                  return item && item.paymentStatus === 'refunded' && !item.isCourseDeleted;
+                }).length;
+                _this4.statusCounts.refunded = refundedCount;
+
+                // 确保每个预约都有_id字段
+                allBookings = allBookings.filter(function (item) {
+                  return item && item._id;
+                });
+
+                // 规范化数据，确保支付状态和显示状态一致
+                allBookings.forEach(function (booking) {
+                  // 检查是否有支付状态不一致的情况
+                  if ((booking.paymentStatus === 'paid' || booking.isPaid === true) && (booking.status === 'pending' || booking.status === 'confirmed_unpaid')) {
+                    // 如果已支付但状态仍为待支付，则更新状态
+                    console.log("\u53D1\u73B0\u72B6\u6001\u4E0D\u4E00\u81F4\uFF1A".concat(booking._id, " \u5DF2\u652F\u4ED8\u4F46\u72B6\u6001\u4E3A ").concat(booking.status, "\uFF0C\u4FEE\u6B63\u4E3Aconfirmed"));
+                    booking.status = 'confirmed';
+                  }
+
+                  // 标准化支付状态字段
+                  if (booking.isPaid === true && booking.paymentStatus !== 'paid') {
+                    booking.paymentStatus = 'paid';
+                  } else if (booking.paymentStatus === 'paid' && booking.isPaid !== true) {
+                    booking.isPaid = true;
+                  }
+                });
+
+                // 更新自动取消标记信息
+                allBookings.forEach(function (booking) {
+                  if (booking.status === 'cancelled') {
+                    // 检查本地存储中是否为自动取消
+                    var isAutoCancel = _this4.isAutoCancelBookingFromStorage(booking._id);
+                    if (isAutoCancel) {
+                      console.log("\u66F4\u65B0\u9884\u7EA6 ".concat(booking.bookingId || booking._id, " \u7684\u81EA\u52A8\u53D6\u6D88\u6807\u8BB0"));
+                      booking.autoCancel = true;
+                      booking.cancelReason = '超时未支付，系统自动取消';
                     }
+                  }
+                });
+
+                // 更新列表
+                _this4.bookingList = allBookings;
+                _this4.total = allBookings.length;
+                console.log("\u524D\u7AEF\u7B5B\u9009\u540E\u7684\u9884\u7EA6\u8BB0\u5F55\u6570: ".concat(_this4.bookingList.length));
+
+                // 更新加载状态
+                _this4.loadMoreStatus = 'noMore'; // 已获取全部数据
+
+                // 日志显示有多少pending状态的预约
+                pendingCount = allBookings.filter(function (item) {
+                  return item && item.status === 'pending';
+                }).length;
+                console.log("\u83B7\u53D6\u5230".concat(pendingCount, "\u6761\u5F85\u652F\u4ED8\u9884\u7EA6\u8BB0\u5F55"));
+
+                // 在前端根据状态筛选
+                if (useClientFiltering) {
+                  if (_this4.currentStatus === 'booked') {
+                    allBookings = allBookings.filter(function (item) {
+                      return item && (item.status === 'pending' || item.status === 'confirmed_unpaid' || item.status === 'confirmed') && !item.isCourseDeleted;
+                    });
+                  } else if (_this4.currentStatus === 'finished') {
+                    allBookings = allBookings.filter(function (item) {
+                      return item && item.status === 'finished' && !item.isCourseDeleted;
+                    });
+                  } else if (_this4.currentStatus === 'cancelled') {
+                    // 重点：筛选出已取消的预约（包含本地存储的和课程已删除的）
+                    cancelledBookings = allBookings.filter(function (item) {
+                      return item && (item.status === 'cancelled' || item.paymentStatus === 'cancelled' || item.status === 'cancel' || item.isCourseDeleted === true);
+                    }); // 获取本地已取消的预约
+                    _localCancelledBookings = _this4.getLocalCancelledBookings(userId).filter(function (item) {
+                      return item && item._id;
+                    }); // 合并本地和远程的已取消预约，避免重复
+                    if (_localCancelledBookings.length > 0) {
+                      existingIds = cancelledBookings.map(function (item) {
+                        return item._id;
+                      });
+                      newLocalCancelled = _localCancelledBookings.filter(function (item) {
+                        return !existingIds.includes(item._id);
+                      });
+                      if (newLocalCancelled.length > 0) {
+                        console.log("\u6DFB\u52A0".concat(newLocalCancelled.length, "\u6761\u672C\u5730\u5DF2\u53D6\u6D88\u9884\u7EA6\u5230\u5217\u8868"));
+                        cancelledBookings = [].concat((0, _toConsumableArray2.default)(cancelledBookings), (0, _toConsumableArray2.default)(newLocalCancelled));
+                      }
+                    }
+                    allBookings = cancelledBookings;
+
+                    // 打印筛选后的已取消记录
+                    console.log('前端筛选后的已取消预约记录:', allBookings);
+                  } else if (_this4.currentStatus === 'refunded') {
+                    // 筛选出已退费的预约，排除已删除课程
+                    allBookings = allBookings.filter(function (item) {
+                      return item && item.paymentStatus === 'refunded' && !item.isCourseDeleted;
+                    });
+                    console.log('前端筛选后的已退费预约记录:', allBookings);
                   }
                 }
-                _context.next = 41;
+                _context.next = 86;
                 break;
-              case 37:
-                _context.prev = 37;
-                _context.t1 = _context["catch"](1);
-                console.error('获取预约记录失败:', _context.t1);
+              case 83:
+                console.error('获取预约记录API返回失败:', res.result);
                 // 显示错误提示
                 uni.showToast({
                   title: '获取预约记录失败',
                   icon: 'none'
                 });
-              case 41:
+
+                // 错误情况下，尝试从本地加载已取消预约
+                if (_this4.currentStatus === 'cancelled') {
+                  try {
+                    _userId = _this4.getUserId();
+                    if (_userId) {
+                      _localCancelledBookings2 = _this4.getLocalCancelledBookings(_userId);
+                      if (_localCancelledBookings2.length > 0) {
+                        _this4.bookingList = _localCancelledBookings2;
+                        _this4.statusCounts.cancelled = _localCancelledBookings2.length;
+                        _this4.total = _localCancelledBookings2.length;
+                        _this4.localCancelledLoaded = true;
+                        console.log("\u52A0\u8F7D\u4E86".concat(_localCancelledBookings2.length, "\u6761\u672C\u5730\u5DF2\u53D6\u6D88\u8BB0\u5F55"));
+                        _this4.$forceUpdate();
+                      }
+                    }
+                  } catch (localErr) {
+                    console.error('加载本地已取消记录失败:', localErr);
+                  }
+                }
+              case 86:
+                _context.next = 92;
+                break;
+              case 88:
+                _context.prev = 88;
+                _context.t2 = _context["catch"](1);
+                console.error('获取预约记录失败:', _context.t2);
+                // 显示错误提示
+                uni.showToast({
+                  title: '获取预约记录失败',
+                  icon: 'none'
+                });
+              case 92:
                 // 更新UI显示
                 _this4.$forceUpdate();
                 return _context.abrupt("return", Promise.resolve());
-              case 43:
+              case 94:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[1, 37], [9, 14]]);
+        }, _callee, null, [[1, 88], [9, 14], [41, 61]]);
       }))();
     },
     // 从本地存储获取已取消的预约记录
@@ -1189,16 +1292,131 @@ var _default = {
       // 组合日期和时间
       var dateRange = formatDateRange();
       var timeRange = formatTimeRange();
+      var result = '';
       if (dateRange && timeRange) {
-        return "".concat(dateRange, " ").concat(timeRange);
+        result = "".concat(dateRange, " ").concat(timeRange);
       } else if (dateRange) {
-        return dateRange;
+        result = dateRange;
       } else if (timeRange) {
-        return timeRange;
+        result = timeRange;
+      }
+
+      // 添加classTime字段内容（每周几）
+      if (item.classTime) {
+        // 处理classTime字段，可能是字符串或数组
+        var classTimeStr = '';
+        if (Array.isArray(item.classTime)) {
+          // 处理数组中可能包含的字符串，如 ["周一，周三"]
+          var extractWeekdays = function extractWeekdays(str) {
+            if (!str) return [];
+            // 处理包含逗号、顿号或空格分隔的字符串
+            return str.split(/[,，、\s]+/).filter(Boolean);
+          };
+
+          // 提取和扁平化所有周几数据
+          var weekdaysArray = [];
+          item.classTime.forEach(function (entry) {
+            if (typeof entry === 'string') {
+              if (entry.includes('周') || entry.includes('每')) {
+                weekdaysArray = weekdaysArray.concat(extractWeekdays(entry));
+              } else {
+                weekdaysArray.push(entry);
+              }
+            } else {
+              weekdaysArray.push(entry);
+            }
+          });
+
+          // 标准化处理，确保所有数据格式一致
+          var weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+          var classTimeSet = new Set();
+          weekdaysArray.forEach(function (day) {
+            var trimmedDay = String(day).trim();
+            // 处理标准格式
+            if (weekdays.includes(trimmedDay)) {
+              classTimeSet.add(trimmedDay);
+            }
+            // 处理数字格式，如 "1" 表示周一
+            else if (/^[1-7]$/.test(trimmedDay)) {
+              var index = parseInt(trimmedDay, 10) - 1;
+              if (index >= 0 && index < 7) {
+                classTimeSet.add(weekdays[index]);
+              }
+            }
+            // 处理带有"周"前缀但不完整的格式，如"周一"可能缩写为"一"
+            else if (/^[一二三四五六日天]$/.test(trimmedDay)) {
+              var dayMap = {
+                一: '周一',
+                二: '周二',
+                三: '周三',
+                四: '周四',
+                五: '周五',
+                六: '周六',
+                日: '周日',
+                天: '周日'
+              };
+              if (dayMap[trimmedDay]) {
+                classTimeSet.add(dayMap[trimmedDay]);
+              }
+            }
+          });
+
+          // 检查是否为"每天"
+          var isEveryday = weekdays.every(function (day) {
+            return classTimeSet.has(day);
+          });
+          if (isEveryday) {
+            classTimeStr = '天';
+          } else {
+            // 不是每天，按照周一到周日的顺序排序
+            var sortedDays = [];
+            weekdays.forEach(function (day) {
+              if (classTimeSet.has(day)) {
+                sortedDays.push(day);
+              }
+            });
+            classTimeStr = sortedDays.join('、');
+          }
+        } else if (typeof item.classTime === 'string') {
+          // 如果是字符串，检查是否为"每天"或包含"每天"字样
+          var classTimeString = item.classTime.trim();
+          if (classTimeString === '每天' || classTimeString === '天天' || classTimeString === '每日' || classTimeString.includes('每天')) {
+            classTimeStr = '天';
+          } else {
+            // 处理可能包含逗号分隔的字符串，如 "周一，周三"
+            var _weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            var parts = classTimeString.split(/[,，、\s]+/).filter(Boolean);
+            if (parts.length > 1) {
+              // 包含多个周几数据，标准化并排序
+              var daySet = new Set();
+              parts.forEach(function (part) {
+                var trimmed = part.trim();
+                if (_weekdays.includes(trimmed)) {
+                  daySet.add(trimmed);
+                }
+              });
+              var _sortedDays = [];
+              _weekdays.forEach(function (day) {
+                if (daySet.has(day)) {
+                  _sortedDays.push(day);
+                }
+              });
+              classTimeStr = _sortedDays.join('、');
+            } else {
+              // 单个值，直接使用
+              classTimeStr = classTimeString;
+            }
+          }
+        }
+
+        // 如果classTime有内容，添加到结果中
+        if (classTimeStr) {
+          result += " \uFF08\u6BCF".concat(classTimeStr, "\uFF09");
+        }
       }
 
       // 处理原始的startTime和endTime（如果存在）
-      if (item.startTime || item.endTime) {
+      if (!result && (item.startTime || item.endTime)) {
         try {
           var formatFullDateTime = function formatFullDateTime(dateTimeStr) {
             if (!dateTimeStr) return '';
@@ -1221,7 +1439,7 @@ var _default = {
           console.error('格式化完整日期时间出错:', e);
         }
       }
-      return '暂无';
+      return result || '暂无';
     },
     // 格式化预约时间
     formatBookingTime: function formatBookingTime(timeStr) {
@@ -2725,11 +2943,37 @@ var _default = {
         return '未知';
       }
       return "".concat(date.getFullYear(), "-").concat((date.getMonth() + 1).toString().padStart(2, '0'), "-").concat(date.getDate().toString().padStart(2, '0'), " ").concat(date.getHours().toString().padStart(2, '0'), ":").concat(date.getMinutes().toString().padStart(2, '0'));
+    },
+    // 显示转班对话框
+    showTransferClassDialog: function showTransferClassDialog(booking, e) {
+      // 阻止事件冒泡
+      if (e) e.stopPropagation();
+
+      // 确保booking参数存在且有效
+      if (!booking || (0, _typeof2.default)(booking) !== 'object') {
+        console.error('无效的预约数据:', booking);
+        uni.showToast({
+          title: '无效的预约数据',
+          icon: 'none'
+        });
+        return;
+      }
+
+      // 获取教师姓名
+      var teacherName = booking.teacherName || '代课老师';
+
+      // 显示提示框
+      uni.showModal({
+        title: '转班申请',
+        content: "\u8BF7\u8054\u7CFB".concat(teacherName, "\u8001\u5E08\u8FDB\u884C\u8F6C\u73ED"),
+        showCancel: false,
+        confirmText: '知道了'
+      });
     }
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"]))
 
 /***/ }),
 

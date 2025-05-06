@@ -182,14 +182,99 @@ export default {
               title: '清除中'
             });
             
-            setTimeout(() => {
-              uni.hideLoading();
-              this.cacheSize = '0.00MB';
-              uni.showToast({
-                title: '缓存已清除',
-                icon: 'success'
-              });
-            }, 1000);
+            // 先保存重要的用户信息
+            let savedUserInfo = null;
+            let savedWxNickname = null;
+            
+            try {
+              // 保存用户信息中的wx_nickname和其他重要字段
+              const userInfoStr = uni.getStorageSync('userInfo');
+              if (userInfoStr) {
+                const userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+                if (userInfo && userInfo.wx_nickname && userInfo.wx_nickname !== '微信用户') {
+                  console.log('保存用户的wx_nickname:', userInfo.wx_nickname);
+                  savedWxNickname = userInfo.wx_nickname;
+                  
+                  // 保存用户关键信息
+                  savedUserInfo = {
+                    _id: userInfo._id || userInfo.uid,
+                    nickname: userInfo.nickname,
+                    wx_nickname: userInfo.wx_nickname,
+                    avatar: userInfo.avatar,
+                    mobile: userInfo.mobile,
+                    userId: userInfo._id || userInfo.uid
+                  };
+                }
+              }
+            } catch (e) {
+              console.error('保存用户信息失败:', e);
+            }
+            
+            // 获取所有缓存key
+            uni.getStorageInfo({
+              success: (res) => {
+                console.log('当前缓存keys:', res.keys);
+                
+                // 排除不清除的关键信息，比如token
+                const keysToKeep = ['uni_id_token', 'uni_id_token_expired'];
+                const keysToRemove = res.keys.filter(key => !keysToKeep.includes(key));
+                
+                // 清除除了keysToKeep以外的所有缓存
+                keysToRemove.forEach(key => {
+                  uni.removeStorageSync(key);
+                });
+                
+                // 恢复保存的信息
+                if (savedUserInfo) {
+                  console.log('恢复用户重要信息');
+                  uni.setStorageSync('userInfo', savedUserInfo);
+                  uni.setStorageSync('uni-id-pages-userInfo', savedUserInfo);
+                  
+                  // 确保云数据库中的wx_nickname不会被覆盖
+                  setTimeout(async () => {
+                    try {
+                      if (savedWxNickname && savedUserInfo._id) {
+                        console.log('确保数据库中保留wx_nickname:', savedWxNickname);
+                        
+                        // 调用云函数更新用户信息，确保wx_nickname不被重置
+                        await uniCloud.callFunction({
+                          name: 'updateUserInfo',
+                          data: {
+                            userId: savedUserInfo._id,
+                            updateData: {
+                              wx_nickname: savedWxNickname
+                            }
+                          }
+                        });
+                      }
+                    } catch (e) {
+                      console.error('保护wx_nickname失败:', e);
+                    }
+                  }, 500);
+                }
+                
+                // 显示清除完成提示
+                setTimeout(() => {
+                  uni.hideLoading();
+                  this.cacheSize = '0.00MB';
+                  uni.showToast({
+                    title: '缓存已清除',
+                    icon: 'success'
+                  });
+                  
+                  // 刷新页面
+                  this.calculateCacheSize();
+                }, 1000);
+              },
+              fail: (err) => {
+                console.error('获取缓存信息失败:', err);
+                uni.hideLoading();
+                uni.showToast({
+                  title: '缓存清除失败',
+                  icon: 'none'
+                });
+              }
+            });
           }
         }
       });

@@ -11,8 +11,8 @@
 /* WEBPACK VAR INJECTION */(function(wx, createPage) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-__webpack_require__(/*! uni-pages */ 38);
-__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
+__webpack_require__(/*! uni-pages */ 26);
+__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _login = _interopRequireDefault(__webpack_require__(/*! ./pages/login/login.vue */ 154));
 // @ts-ignore
@@ -152,17 +152,23 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ 5));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 var _methods;
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3263,7 +3269,7 @@ var _default = {
               if (_this33.loginState.phoneNumber) {
                 // 使用默认值
                 _this33.loginState.userInfo = {
-                  nickName: '微信用户',
+                  nickName: '',
                   avatarUrl: '',
                   gender: 0
                 };
@@ -3280,7 +3286,7 @@ var _default = {
     var _arguments2 = arguments,
       _this34 = this;
     return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee11() {
-      var userInfo, wxCode, loginResult;
+      var userInfo, wxCode, loginData, loginResult;
       return _regenerator.default.wrap(function _callee11$(_context11) {
         while (1) {
           switch (_context11.prev = _context11.next) {
@@ -3293,25 +3299,33 @@ var _default = {
               });
               _context11.prev = 3;
               // 获取微信登录时的code
-              wxCode = _this34.loginState.code || ''; // 调用登录云函数
-              _context11.next = 7;
+              wxCode = _this34.loginState.code || ''; // 准备数据对象
+              loginData = {
+                loginType: 'phone',
+                phone: phoneNumber,
+                // 传递微信code，可用于关联微信openid
+                wxCode: wxCode,
+                // 传递用户信息
+                userInfo: userInfo,
+                // 传递wx_confirmed字段，确保用户授权状态被保存
+                wx_confirmed: userInfo.wx_confirmed || 0
+              }; // 只有当用户设置了有效的昵称时才传递wx_nickname
+              if (userInfo.nickName && userInfo.nickName !== '微信用户') {
+                loginData.wx_nickname = userInfo.nickName;
+              }
+
+              // 如果有头像则传递
+              if (userInfo.avatarUrl) {
+                loginData.avatar = userInfo.avatarUrl;
+              }
+
+              // 调用登录云函数
+              _context11.next = 10;
               return uniCloud.callFunction({
                 name: 'login',
-                data: {
-                  loginType: 'phone',
-                  phone: phoneNumber,
-                  // 传递微信code，可用于关联微信openid
-                  wxCode: wxCode,
-                  // 传递用户信息
-                  userInfo: userInfo,
-                  // 特别指定这些字段，确保它们被保存到数据库中的正确位置
-                  wx_nickname: userInfo.nickName,
-                  avatar: userInfo.avatarUrl,
-                  // 传递wx_confirmed字段，确保用户授权状态被保存
-                  wx_confirmed: userInfo.wx_confirmed || 0
-                }
+                data: loginData
               });
-            case 7:
+            case 10:
               loginResult = _context11.sent;
               console.log('手机号登录结果:', loginResult);
               if (loginResult.result && loginResult.result.code === 0) {
@@ -3325,26 +3339,26 @@ var _default = {
                   icon: 'none'
                 });
               }
-              _context11.next = 16;
+              _context11.next = 19;
               break;
-            case 12:
-              _context11.prev = 12;
+            case 15:
+              _context11.prev = 15;
               _context11.t0 = _context11["catch"](3);
               console.error('手机号登录过程中出错:', _context11.t0);
               uni.showToast({
                 title: '登录失败，请重试',
                 icon: 'none'
               });
-            case 16:
-              _context11.prev = 16;
-              uni.hideLoading();
-              return _context11.finish(16);
             case 19:
+              _context11.prev = 19;
+              uni.hideLoading();
+              return _context11.finish(19);
+            case 22:
             case "end":
               return _context11.stop();
           }
         }
-      }, _callee11, null, [[3, 12, 16, 19]]);
+      }, _callee11, null, [[3, 15, 19, 22]]);
     }))();
   }), (0, _defineProperty2.default)(_methods, "completePhoneLoginWithRealName", function completePhoneLoginWithRealName() {
     var _this35 = this;
@@ -3554,7 +3568,7 @@ var _default = {
   }), _methods)
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"]))
 
 /***/ }),
 

@@ -702,6 +702,8 @@ export default {
         
         // 获取当前课程详情
         let course = null;
+        let courseClassTime = null;
+        
         try {
           // 先获取课程详情
           const courseRes = await uniCloud.callFunction({
@@ -724,12 +726,57 @@ export default {
               return null;
             }
             
+            // 获取classTime数据
+            courseClassTime = course.classTime;
+            console.log('获取到课程信息:', course.title, '上课时间:', courseClassTime);
+            
             console.log('处理后的课程数据:', course);
           } else {
             console.warn('未获取到课程详情或格式不正确:', courseRes);
+            
+            // 如果无法通过云函数获取，尝试直接从数据库获取classTime
+            try {
+              const db = uniCloud.database();
+              const courseResult = await db.collection('courses')
+                .doc(courseId)
+                .field({
+                  _id: true,
+                  title: true,
+                  classTime: true
+                })
+                .get();
+                
+              if (courseResult.data) {
+                courseClassTime = courseResult.data.classTime;
+                console.log('通过数据库获取课程上课时间:', courseClassTime);
+              }
+            } catch (dbError) {
+              console.error('从数据库获取课程信息失败:', dbError);
+            }
           }
         } catch (error) {
           console.error('获取课程详情失败:', error);
+          
+          // 获取课程详情失败，尝试直接从数据库获取classTime
+          try {
+            const db = uniCloud.database();
+            const courseResult = await db.collection('courses')
+              .doc(courseId)
+              .field({
+                _id: true,
+                title: true,
+                classTime: true
+              })
+              .get();
+              
+            if (courseResult.data) {
+              courseClassTime = courseResult.data.classTime;
+              console.log('通过数据库获取课程上课时间:', courseClassTime);
+            }
+          } catch (dbError) {
+            console.error('从数据库获取课程信息失败:', dbError);
+          }
+          
           // 获取课程详情失败，继续预约流程
         }
         
@@ -750,11 +797,11 @@ export default {
           // 冲突检查失败，继续预约流程
         }
         
-        // 直接使用字符串格式的courseId，避免对象访问问题
+        // 确保courseId是字符串格式
         const finalCourseId = typeof courseId === 'object' ? 
           (courseId._id || courseId.id || '') : 
           String(courseId || '');
-          
+        
         if (!finalCourseId) {
           if (showLoading) uni.hideLoading();
           uni.showToast({
@@ -772,6 +819,18 @@ export default {
           phoneNumber: String(phoneNumber || ''),
           remark: ''
         };
+        
+        // 添加classTime字段
+        if (courseClassTime) {
+          // 确保classTime是数组格式
+          if (Array.isArray(courseClassTime)) {
+            bookingParams.classTime = courseClassTime;
+          } else {
+            // 如果是字符串，转换为数组
+            bookingParams.classTime = [courseClassTime];
+          }
+          console.log('将课程classTime添加到预约数据中:', bookingParams.classTime);
+        }
         
         console.log('调用bookCourse云函数，参数:', JSON.stringify(bookingParams));
         
@@ -1172,6 +1231,25 @@ export default {
           return { success: false, message: '无效的课程ID' };
         }
         
+        // 尝试获取课程的classTime信息
+        let courseClassTime = null;
+        try {
+          const db = uniCloud.database();
+          const courseResult = await db.collection('courses')
+            .doc(finalCourseId)
+            .field({
+              classTime: true
+            })
+            .get();
+            
+          if (courseResult.data && courseResult.data.classTime) {
+            courseClassTime = courseResult.data.classTime;
+            console.log('获取到课程上课时间:', courseClassTime);
+          }
+        } catch (error) {
+          console.error('获取课程classTime失败:', error);
+        }
+        
         // 构建预约请求参数
         const bookingParams = {
           userId: String(userId),
@@ -1180,6 +1258,18 @@ export default {
           phoneNumber: String(phoneNumber || ''),
           remark: ''
         };
+        
+        // 添加classTime字段
+        if (courseClassTime) {
+          // 确保classTime是数组格式
+          if (Array.isArray(courseClassTime)) {
+            bookingParams.classTime = courseClassTime;
+          } else {
+            // 如果是字符串，转换为数组
+            bookingParams.classTime = [courseClassTime];
+          }
+          console.log('将课程classTime添加到预约数据中:', bookingParams.classTime);
+        }
         
         console.log('继续预约流程 - 确认预约参数:', JSON.stringify(bookingParams));
         

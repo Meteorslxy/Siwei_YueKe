@@ -1649,11 +1649,20 @@ export default {
       }
       
       const nickname = this.userInfo.nickname || this.userInfo.nickName || '';
+      const wxNickname = this.userInfo.wx_nickname || '';
       const isDefaultNickname = nickname === '微信用户' || 
                                nickname.startsWith('用户') || 
                                nickname.includes('默认');
       
-      console.log(`当前昵称: ${nickname}, 是否为默认昵称: ${isDefaultNickname}`);
+      console.log(`当前昵称: ${nickname}, 微信原始昵称: ${wxNickname}, 是否为默认昵称: ${isDefaultNickname}`);
+      
+      // 如果昵称是"微信用户"但wx_nickname不是"微信用户"且不为空，说明是后端自动设置的
+      if (nickname === '微信用户' && wxNickname && wxNickname !== '微信用户') {
+        console.log('检测到昵称为"微信用户"，但存在不同的wx_nickname，不显示弹窗');
+        // 自动设置标记，避免重复弹窗
+        uni.setStorageSync('hasSetStudentName', true);
+        return false;
+      }
       
       if (isDefaultNickname) {
         console.log('检测到默认昵称，需要显示姓名设置弹窗');

@@ -11,8 +11,8 @@
 /* WEBPACK VAR INJECTION */(function(wx, createPage) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-__webpack_require__(/*! uni-pages */ 38);
-__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
+__webpack_require__(/*! uni-pages */ 26);
+__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _user = _interopRequireDefault(__webpack_require__(/*! ./pages/user/user.vue */ 112));
 // @ts-ignore
@@ -152,16 +152,16 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 117);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var StudentNameModal = function StudentNameModal() {
   __webpack_require__.e(/*! require.ensure | components/common/student-name-modal */ "components/common/student-name-modal").then((function () {
-    return resolve(__webpack_require__(/*! @/components/common/student-name-modal.vue */ 429));
+    return resolve(__webpack_require__(/*! @/components/common/student-name-modal.vue */ 437));
   }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
 };
 var _default = {
@@ -1782,8 +1782,17 @@ var _default = {
         return false;
       }
       var nickname = this.userInfo.nickname || this.userInfo.nickName || '';
+      var wxNickname = this.userInfo.wx_nickname || '';
       var isDefaultNickname = nickname === '微信用户' || nickname.startsWith('用户') || nickname.includes('默认');
-      console.log("\u5F53\u524D\u6635\u79F0: ".concat(nickname, ", \u662F\u5426\u4E3A\u9ED8\u8BA4\u6635\u79F0: ").concat(isDefaultNickname));
+      console.log("\u5F53\u524D\u6635\u79F0: ".concat(nickname, ", \u5FAE\u4FE1\u539F\u59CB\u6635\u79F0: ").concat(wxNickname, ", \u662F\u5426\u4E3A\u9ED8\u8BA4\u6635\u79F0: ").concat(isDefaultNickname));
+
+      // 如果昵称是"微信用户"但wx_nickname不是"微信用户"且不为空，说明是后端自动设置的
+      if (nickname === '微信用户' && wxNickname && wxNickname !== '微信用户') {
+        console.log('检测到昵称为"微信用户"，但存在不同的wx_nickname，不显示弹窗');
+        // 自动设置标记，避免重复弹窗
+        uni.setStorageSync('hasSetStudentName', true);
+        return false;
+      }
       if (isDefaultNickname) {
         console.log('检测到默认昵称，需要显示姓名设置弹窗');
         // 清除已设置标记，确保弹窗能够显示
@@ -1993,7 +2002,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/wx.js */ 1)["default"]))
 
 /***/ }),
 

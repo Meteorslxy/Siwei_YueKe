@@ -11,8 +11,8 @@
 /* WEBPACK VAR INJECTION */(function(wx, createPage) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-__webpack_require__(/*! uni-pages */ 38);
-__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26);
+__webpack_require__(/*! uni-pages */ 26);
+__webpack_require__(/*! @dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27);
 var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
 var _index2 = _interopRequireDefault(__webpack_require__(/*! ./pages/user/setting/index.vue */ 258));
 // @ts-ignore
@@ -143,9 +143,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 27));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 30));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
 var _user = __webpack_require__(/*! @/api/modules/user.js */ 263);
 //
 //
@@ -327,14 +327,118 @@ var _default = {
             uni.showLoading({
               title: '清除中'
             });
-            setTimeout(function () {
-              uni.hideLoading();
-              _this.cacheSize = '0.00MB';
-              uni.showToast({
-                title: '缓存已清除',
-                icon: 'success'
-              });
-            }, 1000);
+
+            // 先保存重要的用户信息
+            var savedUserInfo = null;
+            var savedWxNickname = null;
+            try {
+              // 保存用户信息中的wx_nickname和其他重要字段
+              var userInfoStr = uni.getStorageSync('userInfo');
+              if (userInfoStr) {
+                var userInfo = typeof userInfoStr === 'string' ? JSON.parse(userInfoStr) : userInfoStr;
+                if (userInfo && userInfo.wx_nickname && userInfo.wx_nickname !== '微信用户') {
+                  console.log('保存用户的wx_nickname:', userInfo.wx_nickname);
+                  savedWxNickname = userInfo.wx_nickname;
+
+                  // 保存用户关键信息
+                  savedUserInfo = {
+                    _id: userInfo._id || userInfo.uid,
+                    nickname: userInfo.nickname,
+                    wx_nickname: userInfo.wx_nickname,
+                    avatar: userInfo.avatar,
+                    mobile: userInfo.mobile,
+                    userId: userInfo._id || userInfo.uid
+                  };
+                }
+              }
+            } catch (e) {
+              console.error('保存用户信息失败:', e);
+            }
+
+            // 获取所有缓存key
+            uni.getStorageInfo({
+              success: function success(res) {
+                console.log('当前缓存keys:', res.keys);
+
+                // 排除不清除的关键信息，比如token
+                var keysToKeep = ['uni_id_token', 'uni_id_token_expired'];
+                var keysToRemove = res.keys.filter(function (key) {
+                  return !keysToKeep.includes(key);
+                });
+
+                // 清除除了keysToKeep以外的所有缓存
+                keysToRemove.forEach(function (key) {
+                  uni.removeStorageSync(key);
+                });
+
+                // 恢复保存的信息
+                if (savedUserInfo) {
+                  console.log('恢复用户重要信息');
+                  uni.setStorageSync('userInfo', savedUserInfo);
+                  uni.setStorageSync('uni-id-pages-userInfo', savedUserInfo);
+
+                  // 确保云数据库中的wx_nickname不会被覆盖
+                  setTimeout( /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+                    return _regenerator.default.wrap(function _callee$(_context) {
+                      while (1) {
+                        switch (_context.prev = _context.next) {
+                          case 0:
+                            _context.prev = 0;
+                            if (!(savedWxNickname && savedUserInfo._id)) {
+                              _context.next = 5;
+                              break;
+                            }
+                            console.log('确保数据库中保留wx_nickname:', savedWxNickname);
+
+                            // 调用云函数更新用户信息，确保wx_nickname不被重置
+                            _context.next = 5;
+                            return uniCloud.callFunction({
+                              name: 'updateUserInfo',
+                              data: {
+                                userId: savedUserInfo._id,
+                                updateData: {
+                                  wx_nickname: savedWxNickname
+                                }
+                              }
+                            });
+                          case 5:
+                            _context.next = 10;
+                            break;
+                          case 7:
+                            _context.prev = 7;
+                            _context.t0 = _context["catch"](0);
+                            console.error('保护wx_nickname失败:', _context.t0);
+                          case 10:
+                          case "end":
+                            return _context.stop();
+                        }
+                      }
+                    }, _callee, null, [[0, 7]]);
+                  })), 500);
+                }
+
+                // 显示清除完成提示
+                setTimeout(function () {
+                  uni.hideLoading();
+                  _this.cacheSize = '0.00MB';
+                  uni.showToast({
+                    title: '缓存已清除',
+                    icon: 'success'
+                  });
+
+                  // 刷新页面
+                  _this.calculateCacheSize();
+                }, 1000);
+              },
+              fail: function fail(err) {
+                console.error('获取缓存信息失败:', err);
+                uni.hideLoading();
+                uni.showToast({
+                  title: '缓存清除失败',
+                  icon: 'none'
+                });
+              }
+            });
           }
         }
       });
@@ -402,19 +506,19 @@ var _default = {
     // 从数据库获取最新用户信息
     fetchUserFromDatabase: function fetchUserFromDatabase() {
       var _this2 = this;
-      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+      return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
         var userInfoStr, userInfo, userId, token, result, dbUserInfo;
-        return _regenerator.default.wrap(function _callee$(_context) {
+        return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
-                _context.prev = 0;
+                _context2.prev = 0;
                 userInfoStr = uni.getStorageSync('userInfo');
                 if (userInfoStr) {
-                  _context.next = 4;
+                  _context2.next = 4;
                   break;
                 }
-                return _context.abrupt("return");
+                return _context2.abrupt("return");
               case 4:
                 if (typeof userInfoStr === 'string') {
                   userInfo = JSON.parse(userInfoStr);
@@ -425,23 +529,23 @@ var _default = {
                 // 获取用户ID
                 userId = userInfo._id || userInfo.uid;
                 if (userId) {
-                  _context.next = 8;
+                  _context2.next = 8;
                   break;
                 }
-                return _context.abrupt("return");
+                return _context2.abrupt("return");
               case 8:
                 // 获取token
                 token = uni.getStorageSync('uni_id_token');
                 if (token) {
-                  _context.next = 11;
+                  _context2.next = 11;
                   break;
                 }
-                return _context.abrupt("return");
+                return _context2.abrupt("return");
               case 11:
                 console.log('正在从数据库获取最新用户信息...');
 
                 // 调用云函数获取完整用户信息
-                _context.next = 14;
+                _context2.next = 14;
                 return uniCloud.callFunction({
                   name: 'getUserInfoById',
                   data: {
@@ -450,7 +554,7 @@ var _default = {
                   }
                 });
               case 14:
-                result = _context.sent;
+                result = _context2.sent;
                 if (result.result && result.result.code === 0 && result.result.userInfo) {
                   dbUserInfo = result.result.userInfo;
                   console.log('从数据库获取的最新用户信息:', dbUserInfo);
@@ -476,18 +580,18 @@ var _default = {
                   // 强制更新视图
                   _this2.$forceUpdate();
                 }
-                _context.next = 21;
+                _context2.next = 21;
                 break;
               case 18:
-                _context.prev = 18;
-                _context.t0 = _context["catch"](0);
-                console.error('获取数据库用户信息失败:', _context.t0);
+                _context2.prev = 18;
+                _context2.t0 = _context2["catch"](0);
+                console.error('获取数据库用户信息失败:', _context2.t0);
               case 21:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, null, [[0, 18]]);
+        }, _callee2, null, [[0, 18]]);
       }))();
     },
     // 检查微信绑定状态
@@ -667,7 +771,7 @@ var _default = {
   }
 };
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 26)["uniCloud"]))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"]))
 
 /***/ }),
 
