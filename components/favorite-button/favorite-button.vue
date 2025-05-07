@@ -58,7 +58,7 @@ export default {
   },
   created() {
     // 确保收藏表已初始化
-    // this.ensureFavoriteTableExists(); // 已注释，云函数initFavoriteTable已删除
+    this.ensureFavoriteTableExists();
     
     // 从父组件传入的initialFavorite进行初始化
     if (this.initialFavorite) {
@@ -97,14 +97,7 @@ export default {
     // 确保收藏表已初始化
     async ensureFavoriteTableExists() {
       try {
-        // 调用初始化云函数
-        /* 
-        const initResult = await uniCloud.callFunction({
-          name: 'initFavoriteTable'
-        });
-        console.log('初始化收藏表结果:', initResult);
-        */
-        // 注释上述代码，因为云函数initFavoriteTable已被删除
+        // 云函数initFavoriteTable已不存在，不再调用
         console.log('收藏表初始化功能已禁用');
       } catch (error) {
         console.error('初始化收藏表失败:', error);
@@ -133,21 +126,11 @@ export default {
                      (userData.userInfo && userData.userInfo.uid) || '';
         if (!userId) return;
         
-        /* 
         const res = await this.$api.user.checkFavorite({
           userId,
           itemId: this.itemId,
           itemType: this.itemType
         });
-        */
-        // 注释上述代码，因为checkFavorite云函数已被删除
-        // 模拟返回结果
-        const res = {
-          code: 0, 
-          message: '模拟结果', 
-          data: null,
-          isFavorite: false
-        };
         
         console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
         
@@ -229,17 +212,7 @@ export default {
         console.log('检查收藏状态，参数:', checkData);
         
         // 调用API检查是否已收藏
-        /* 
         const res = await this.$api.user.checkFavorite(checkData);
-        */
-        // 注释上述代码，因为checkFavorite云函数已被删除
-        // 模拟返回结果
-        const res = {
-          code: 0, 
-          message: '模拟结果', 
-          data: null,
-          isFavorite: false
-        };
         
         console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
         
@@ -285,7 +258,6 @@ export default {
         // 如果是课程类型，尝试获取最新价格
         if (this.itemType === 'course') {
           try {
-            /* 
             const courseRes = await this.$api.course.getCourseDetail(this.itemId);
             if (courseRes && courseRes.code === 0 && courseRes.data) {
               const course = courseRes.data;
@@ -298,9 +270,6 @@ export default {
               finalPrice = totalPrice > 0 ? totalPrice : (parseFloat(course.price) || finalPrice);
               console.log(`获取到课程 ${this.itemTitle} 的价格: ${finalPrice}`);
             }
-            */
-            // 注释上述代码，使用传入的价格
-            console.log(`使用传入的课程价格: ${finalPrice}`);
           } catch (error) {
             console.error('获取课程价格失败，使用传入的价格:', error);
           }
@@ -403,15 +372,7 @@ export default {
           }
           
           // 直接传递ID字符串，而不是包含ID的对象
-          /* 
           const res = await this.$api.user.removeFavorite(this.favoriteId);
-          */
-          // 注释上述代码，因为removeFavorite云函数可能已被删除
-          // 模拟返回结果
-          const res = {
-            code: 0,
-            message: '模拟移出成功'
-          };
           
           if (res && res.code === 0) {
             this.isFavorite = false;
@@ -438,18 +399,7 @@ export default {
           }
         } else {
           // 添加到购物车
-          /* 
           const res = await this.addToCart(userId, userData);
-          */
-          // 注释上述代码，因为addFavorite云函数可能已被删除
-          // 模拟返回结果
-          const res = {
-            code: 0,
-            message: '模拟添加成功',
-            data: {
-              _id: 'mock_favorite_id_' + Date.now()
-            }
-          };
           
           if (res && res.code === 0) {
             this.isFavorite = true;

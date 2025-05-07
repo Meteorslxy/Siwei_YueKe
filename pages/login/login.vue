@@ -155,6 +155,8 @@
 </template>
 
 <script>
+import { saveToken, getToken, clearToken, resetPreventAutoLogin, isPreventAutoLogin } from '@/utils/token.js'
+
 export default {
   components: {
     // 注册组件
@@ -680,12 +682,12 @@ export default {
           // 保存用户信息 (根据uni-id-co的返回格式)
           const userInfo = {
             uid: result.uid,
-            token: result.token,
+            token: result.token || getToken(),
             tokenExpired: result.tokenExpired,
             userInfo: result.userInfo || {}
           };
           
-          uni.setStorageSync('userInfo', userInfo);
+          saveToken(result.token, result.tokenExpired);
           
           // 检查是否是首次登录
           const hasSetStudentName = uni.getStorageSync('hasSetStudentName');
@@ -757,7 +759,7 @@ export default {
         console.log('跳转到指定页面:', redirectUrl);
         
         // 判断是否是tabbar页面
-        const tabbarPages = ['/pages/index/index', '/pages/course/index', '/pages/user/user'];
+        const tabbarPages = ['/pages/index/index', '/pkgs/course/course', '/pkgs/user/user'];
         const isTabbarPage = tabbarPages.some(page => redirectUrl.startsWith(page));
         
         if (isTabbarPage) {
@@ -827,6 +829,13 @@ export default {
       console.log('尝试静默登录');
       
       try {
+        // 首先检查是否设置了防止自动登录的标记
+        const preventAutoLogin = uni.getStorageSync('prevent_auto_login');
+        if (preventAutoLogin) {
+          console.log('检测到防止自动登录标记，不执行静默登录');
+          return false;
+        }
+        
         // 获取存储的openid
         const savedOpenid = uni.getStorageSync('wx_openid');
         
@@ -911,12 +920,11 @@ export default {
         
         // 保存用户数据
         const userData = result.userInfo;
-        const token = result.token || uni.getStorageSync('uni_id_token');
+        const token = result.token || getToken();
         const tokenExpired = result.tokenExpired || uni.getStorageSync('uni_id_token_expired');
         
         // 保存token和用户信息
-        uni.setStorageSync('uni_id_token', token);
-        uni.setStorageSync('uni_id_token_expired', tokenExpired);
+        saveToken(token, tokenExpired);
         uni.setStorageSync('uni-id-pages-userInfo', userData);
         uni.setStorageSync('userInfo', userData);
         
@@ -994,16 +1002,15 @@ export default {
       
       // 确保result有正确的格式
       const data = result.data || result.userInfo || {};
-      const token = result.token;
+      const token = result.token || getToken();
       const tokenExpired = result.tokenExpired;
       
       // 保存token和用户信息
-      if (token) {
-        uni.setStorageSync('uni_id_token', token);
-      }
-      if (tokenExpired) {
-        uni.setStorageSync('uni_id_token_expired', tokenExpired);
-      }
+      saveToken(token, tokenExpired);
+      
+      // 清除防止自动登录的标记 - 因为现在是用户主动登录
+      uni.removeStorageSync('prevent_auto_login');
+      uni.removeStorageSync('logout_time');
       
       // 保存用户信息
       uni.setStorageSync('uni-id-pages-userInfo', data);
@@ -1656,7 +1663,7 @@ export default {
     handleLoginSuccess(result) {
       // 登录成功，提取用户信息与token
       const userData = result.data;
-      const token = result.token;
+      const token = result.token || getToken();
       const tokenExpired = result.tokenExpired;
       
       // 开启精简日志模式，减少重复输出
@@ -1667,8 +1674,7 @@ export default {
       }
       
       // 保存token和用户信息
-      uni.setStorageSync('uni_id_token', token);
-      uni.setStorageSync('uni_id_token_expired', tokenExpired);
+      saveToken(token, tokenExpired);
       uni.setStorageSync('uni-id-pages-userInfo', userData);
       uni.setStorageSync('userInfo', userData);
       
@@ -1728,14 +1734,13 @@ export default {
         if (result.result && result.result.code === 0) {
           // 登录成功，提取用户信息与token
           const userData = result.result.data;
-          const token = result.result.token;
+          const token = result.result.token || getToken();
           const tokenExpired = result.result.tokenExpired;
           
           console.log('登录/注册成功，保存token和用户信息');
           
           // 保存token和用户信息
-          uni.setStorageSync('uni_id_token', token);
-          uni.setStorageSync('uni_id_token_expired', tokenExpired);
+          saveToken(token, tokenExpired);
           uni.setStorageSync('uni-id-pages-userInfo', userData);
           uni.setStorageSync('userInfo', userData);
           
@@ -2546,7 +2551,7 @@ export default {
         console.log('跳转到指定页面:', redirect);
         
         // 判断是否是tabbar页面
-        const tabbarPages = ['/pages/index/index', '/pages/course/course', '/pages/user/user'];
+        const tabbarPages = ['/pages/index/index', '/pkgs/course/course', '/pkgs/user/user'];
         const isTabbarPage = tabbarPages.some(page => redirect.startsWith(page));
         
         if (isTabbarPage) {

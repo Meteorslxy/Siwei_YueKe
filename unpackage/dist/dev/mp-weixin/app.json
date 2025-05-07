@@ -2,36 +2,19 @@
   "pages": [
     "pages/index/index",
     "pages/course/course",
-    "pages/user/user",
-    "pages/cart/index",
-    "pages/user/favorite/index",
     "pages/course/detail",
+    "pages/cart/index",
     "pages/teacher/detail",
     "pages/login/login",
     "pages/booking/list",
-    "pages/course/featured",
-    "pages/course/lectures",
     "pages/teacher/list",
     "pages/school/detail",
-    "pages/course/lecture-detail",
-    "pages/user/upload-image",
     "pages/news/list",
     "pages/news/detail",
-    "pages/user/booking",
-    "pages/user/booking-detail",
-    "pages/user/about/index",
-    "pages/user/setting/index",
-    "pages/user/edit-field",
-    "pages/user/profile/index",
-    "pages/user/phone/index",
-    "pages/user/wechat/index",
     "pages/common/input-page",
     "pages/common/markdown",
-    "pages/user/calendar",
-    "pages/user/course-notifications",
-    "pages/course/manage",
     "pages/schedule/schedule",
-    "pages/course/edit"
+    "pages/user/user"
   ],
   "subPackages": [
     {
@@ -47,6 +30,34 @@
         "userinfo/bind-mobile/bind-mobile",
         "userinfo/cropImage/cropImage",
         "userinfo/set-pwd/set-pwd"
+      ]
+    },
+    {
+      "root": "pkgs/course",
+      "pages": [
+        "detail",
+        "featured",
+        "lectures",
+        "lecture-detail",
+        "manage",
+        "edit"
+      ]
+    },
+    {
+      "root": "pkgs/user",
+      "pages": [
+        "favorite/index",
+        "upload-image",
+        "booking",
+        "booking-detail",
+        "about/index",
+        "setting/index",
+        "edit-field",
+        "profile/index",
+        "phone/index",
+        "wechat/index",
+        "calendar",
+        "course-notifications"
       ]
     }
   ],

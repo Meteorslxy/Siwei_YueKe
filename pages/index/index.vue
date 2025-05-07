@@ -8,11 +8,11 @@
     <!-- 功能导航菜单 -->
     <view class="nav-card">
       <view class="nav-menu">
-        <view class="nav-item" @click="switchTab('/pages/course/course')">
+        <view class="nav-item" @click="switchTab('/pkgs/course/course')">
           <image class="nav-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/featured.png" mode="aspectFit"></image>
           <text class="nav-text">精选好课</text>
         </view>
-        <view class="nav-item" @click="navigateTo('/pages/course/lectures')">
+        <view class="nav-item" @click="navigateTo('/pkgs/course/lectures')">
           <image class="nav-icon" src="https://mp-a876f469-bab5-46b7-8863-2e7147900fdd.cdn.bspapp.com/icons/lecture.png" mode="aspectFit"></image>
           <text class="nav-text">热点讲座</text>
         </view>
@@ -57,7 +57,7 @@
       <view class="section-header">
         <view class="section-tag"></view>
         <text class="section-title">推荐课程</text>
-        <view class="section-more" @click="switchTab('/pages/course/course')">
+        <view class="section-more" @click="switchTab('/pkgs/course/course')">
           <text>更多</text>
           <view class="more-arrow"></view>
         </view>
@@ -68,7 +68,7 @@
           v-for="(item, index) in recommendCourses" 
           :key="index"
           :course="item"
-          @click="navigateTo(`/pages/course/detail?id=${item._id}`)"
+          @click="navigateTo(`/pkgs/course/detail?id=${item._id}`)"
         ></course-card>
       </view>
     </view>

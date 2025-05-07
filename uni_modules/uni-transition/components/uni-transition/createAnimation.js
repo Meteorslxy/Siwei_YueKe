@@ -125,7 +125,9 @@ animateTypes1.concat(animateTypes2, animateTypes3).forEach(type => {
 })
 
 export function createAnimation(option, _this) {
-	if(!_this) return
-	clearTimeout(_this.timer)
+	if(!_this) return null
+	if(typeof _this.timer !== 'undefined') {
+		clearTimeout(_this.timer)
+	}
 	return new MPAnimation(option, _this)
 }

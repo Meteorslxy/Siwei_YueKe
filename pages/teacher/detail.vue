@@ -579,7 +579,7 @@ export default {
     // 点击课程
     onCourseClick(course) {
       uni.navigateTo({
-        url: `/pages/course/detail?id=${course._id}`
+        url: `/pkgs/course/detail?id=${course._id}`
       });
     },
     
@@ -589,7 +589,7 @@ export default {
       
       // 跳转到课程详情页面进行预约
       uni.navigateTo({
-        url: `/pages/course/detail?id=${course._id}`
+        url: `/pkgs/course/detail?id=${course._id}`
       });
     },
     

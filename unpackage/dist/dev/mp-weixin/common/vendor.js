@@ -454,798 +454,6 @@ module.exports = _defineProperty, module.exports.__esModule = true, module.expor
 /***/ }),
 
 /***/ 117:
-/*!********************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/store.js ***!
-  \********************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.store = exports.mutations = exports.fixTokenFormat = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
-var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
-var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 37));
-var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
-var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-var uniIdCo = uniCloud.importObject("uni-id-co", {
-  errorOptions: {
-    type: 'toast'
-  }
-});
-var db = uniCloud.database();
-var usersTable = db.collection('uni-id-users');
-var hostUserInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
-var data = {
-  userInfo: hostUserInfo,
-  hasLogin: Object.keys(hostUserInfo).length != 0
-};
-
-// 创建响应式store对象
-var store;
-
-// 通过Vue.observable创建一个可响应的对象
-exports.store = store;
-exports.store = store = _vue.default.observable(data);
-
-// 定义 mutations, 修改属性
-var mutations = {
-  // data不为空，表示传递要更新的值(注意不是覆盖是合并),什么也不传时，直接查库获取更新
-  updateUserInfo: function updateUserInfo() {
-    var _arguments = arguments,
-      _this = this;
-    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
-      var data, storedUserInfo, hasStoredUserInfo, token, tokenExpired, userInfoFromToken, _id, res, realNameRes, newUserInfo;
-      return _regenerator.default.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              data = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : false;
-              if (!data) {
-                _context.next = 5;
-                break;
-              }
-              usersTable.where('_id==$env.uid').update(data).then(function (e) {
-                // console.log(e);
-                if (e.result.updated) {
-                  uni.showToast({
-                    title: "更新成功",
-                    icon: 'none',
-                    duration: 3000
-                  });
-                  _this.setUserInfo(data);
-                } else {
-                  uni.showToast({
-                    title: "没有改变",
-                    icon: 'none',
-                    duration: 3000
-                  });
-                }
-              });
-              _context.next = 48;
-              break;
-            case 5:
-              _context.prev = 5;
-              // 先检查本地存储的用户信息是否存在
-              storedUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
-              hasStoredUserInfo = storedUserInfo && storedUserInfo._id; // 再检查token是否存在和有效
-              token = uni.getStorageSync('uni_id_token');
-              tokenExpired = uni.getStorageSync('uni_id_token_expired');
-              console.log('更新用户信息检查:', {
-                hasToken: !!token,
-                hasExpired: !!tokenExpired,
-                tokenValid: tokenExpired > Date.now(),
-                hasStoredInfo: !!hasStoredUserInfo
-              });
-
-              // 优先使用本地存储的用户信息，确保至少有基本数据
-              if (hasStoredUserInfo) {
-                console.log('先加载本地缓存的用户信息');
-                // 确保store中有用户信息，但不完全覆盖，保留可能存在的其他信息
-                if (!store.userInfo || !store.userInfo._id) {
-                  _this.setUserInfo(storedUserInfo, {
-                    cover: true
-                  });
-                }
-              }
-
-              // 如果token有效，尝试从服务器获取最新信息
-              if (!(token && typeof token === 'string' && tokenExpired && tokenExpired > Date.now())) {
-                _context.next = 42;
-                break;
-              }
-              // 不等待联网查询，立即更新用户_id确保store.userInfo中的_id是最新的
-              userInfoFromToken = uniCloud.getCurrentUserInfo();
-              if (!(userInfoFromToken && userInfoFromToken.uid)) {
-                _context.next = 40;
-                break;
-              }
-              _id = userInfoFromToken.uid; // 如果store中的_id和token中的不一致，更新它
-              if (!store.userInfo || store.userInfo._id !== _id) {
-                _this.setUserInfo({
-                  _id: _id
-                }, {
-                  cover: false
-                }); // 不覆盖，只更新_id
-              }
-
-              // 查库获取用户信息，更新store.userInfo
-              _context.prev = 17;
-              _context.next = 20;
-              return usersTable.where("'_id' == $cloudEnv_uid").field('mobile,nickname,username,email,avatar_file').get();
-            case 20:
-              res = _context.sent;
-              if (!(res.result && res.result.data && res.result.data.length > 0)) {
-                _context.next = 35;
-                break;
-              }
-              _context.prev = 22;
-              _context.next = 25;
-              return uniIdCo.getRealNameInfo();
-            case 25:
-              realNameRes = _context.sent;
-              _context.next = 32;
-              break;
-            case 28:
-              _context.prev = 28;
-              _context.t0 = _context["catch"](22);
-              console.error('获取实名信息失败:', _context.t0);
-              realNameRes = null;
-            case 32:
-              // 更新用户信息，但不覆盖已有信息
-              newUserInfo = _objectSpread(_objectSpread({}, res.result.data[0]), {}, {
-                realNameAuth: realNameRes || {}
-              });
-              console.log('从服务器获取到新的用户信息', newUserInfo);
-              _this.setUserInfo(newUserInfo, {
-                cover: false
-              });
-            case 35:
-              _context.next = 40;
-              break;
-            case 37:
-              _context.prev = 37;
-              _context.t1 = _context["catch"](17);
-              console.error('获取用户信息失败:', _context.t1);
-              // 这里不再清除token和用户信息，保持现有状态
-            case 40:
-              _context.next = 43;
-              break;
-            case 42:
-              if (token && !hasStoredUserInfo) {
-                // token无效且没有缓存用户信息，才清理token
-                console.log('token无效，清除token但不清除用户状态');
-                uni.removeStorageSync('uni_id_token');
-                uni.removeStorageSync('uni_id_token_expired');
-              }
-            case 43:
-              _context.next = 48;
-              break;
-            case 45:
-              _context.prev = 45;
-              _context.t2 = _context["catch"](5);
-              console.error('updateUserInfo外层错误:', _context.t2);
-              // 即使出错也不清除用户信息，保持最后一个可用状态
-            case 48:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee, null, [[5, 45], [17, 37], [22, 28]]);
-    }))();
-  },
-  // 静默更新token的方法（小程序环境）
-  silentUpdateToken: function silentUpdateToken() {
-    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
-      var loginRes, loginResult;
-      return _regenerator.default.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              _context2.prev = 0;
-              _context2.next = 3;
-              return new Promise(function (resolve, reject) {
-                uni.login({
-                  provider: 'weixin',
-                  success: resolve,
-                  fail: reject
-                });
-              });
-            case 3:
-              loginRes = _context2.sent;
-              if (!loginRes.code) {
-                _context2.next = 14;
-                break;
-              }
-              console.log('获取到小程序登录凭证，尝试刷新token');
-              // 调用云函数刷新token
-
-              // 静默登录，更新token
-              _context2.next = 8;
-              return uniIdCo.loginByWeixin({
-                code: loginRes.code,
-                autoUpdate: true // 该参数表示静默更新，不创建新用户
-              }).catch(function (err) {
-                console.error('静默登录失败:', err);
-                return null;
-              });
-            case 8:
-              loginResult = _context2.sent;
-              if (!(loginResult && loginResult.token)) {
-                _context2.next = 14;
-                break;
-              }
-              console.log('成功刷新token');
-              uni.setStorageSync('uni_id_token', loginResult.token);
-              uni.setStorageSync('uni_id_token_expired', loginResult.tokenExpired);
-              return _context2.abrupt("return", true);
-            case 14:
-              _context2.next = 19;
-              break;
-            case 16:
-              _context2.prev = 16;
-              _context2.t0 = _context2["catch"](0);
-              console.error('静默更新token失败:', _context2.t0);
-            case 19:
-              return _context2.abrupt("return", false);
-            case 20:
-            case "end":
-              return _context2.stop();
-          }
-        }
-      }, _callee2, null, [[0, 16]]);
-    }))();
-  },
-  setUserInfo: function setUserInfo(data) {
-    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
-        cover: false
-      },
-      cover = _ref.cover;
-    // console.log('set-userInfo', data);
-    var userInfo = cover ? data : Object.assign(store.userInfo, data);
-    store.userInfo = Object.assign({}, userInfo);
-    store.hasLogin = Object.keys(store.userInfo).length != 0;
-    // console.log('store.userInfo', store.userInfo);
-    uni.setStorageSync('uni-id-pages-userInfo', store.userInfo);
-    return data;
-  },
-  logout: function logout() {
-    var _this2 = this;
-    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
-      var currentUserInfo, token, tokenExpired, isTokenValid, uniIdCoCustom, cacheKeys, userRelatedKeys, app, tabbarPages, firstTabPage;
-      return _regenerator.default.wrap(function _callee3$(_context3) {
-        while (1) {
-          switch (_context3.prev = _context3.next) {
-            case 0:
-              // 先保存当前用户信息，以便后续恢复
-              currentUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
-              console.log('注销前保存用户信息:', currentUserInfo);
-
-              // 1. 已经过期就不需要调用服务端的注销接口	2.即使调用注销接口失败，不能阻塞客户端
-              _context3.prev = 2;
-              // 获取token并检查类型和有效性
-              token = uni.getStorageSync('uni_id_token');
-              tokenExpired = uni.getStorageSync('uni_id_token_expired'); // 增强token有效性检查：确保token格式正确、非空且未过期
-              isTokenValid = token && typeof token === 'string' && token.length > 10 &&
-              // 确保token不是空字符串或过短
-              tokenExpired && tokenExpired > Date.now(); // 确保token未过期
-              if (!isTokenValid) {
-                _context3.next = 20;
-                break;
-              }
-              _context3.prev = 7;
-              console.log('token有效，调用logout云函数');
-              // 使用customUI参数创建uniIdCo对象，禁止自动显示错误提示
-              uniIdCoCustom = uniCloud.importObject("uni-id-co", {
-                customUI: true,
-                // 完全禁用错误提示
-                errorOptions: {
-                  type: 'none'
-                }
-              });
-              _context3.next = 12;
-              return uniIdCoCustom.logout();
-            case 12:
-              console.log('logout云函数调用成功');
-              _context3.next = 18;
-              break;
-            case 15:
-              _context3.prev = 15;
-              _context3.t0 = _context3["catch"](7);
-              // 完全静默处理错误，仅记录日志
-              console.log('注销时发生错误，已捕获并忽略:', _context3.t0.message || _context3.t0);
-            case 18:
-              _context3.next = 21;
-              break;
-            case 20:
-              console.log('token无效或已过期，跳过调用logout云函数');
-            case 21:
-              _context3.next = 26;
-              break;
-            case 23:
-              _context3.prev = 23;
-              _context3.t1 = _context3["catch"](2);
-              console.log('注销过程处理错误:', _context3.t1.message || _context3.t1);
-            case 26:
-              // 清理所有相关的本地缓存
-              console.log('清理本地存储的token和用户信息');
-              uni.removeStorageSync('uni_id_token');
-              uni.removeStorageSync('uni_id_token_expired');
-              uni.removeStorageSync('uni-id-pages-userInfo');
-              uni.removeStorageSync('userInfo');
-
-              // 清除其他可能存在的与用户相关的缓存
-              try {
-                cacheKeys = [];
-                cacheKeys = uni.getStorageInfoSync().keys;
-
-                // 清除包含"token"或"user"的存储项
-                userRelatedKeys = cacheKeys.filter(function (key) {
-                  return key.toLowerCase().includes('token') || key.toLowerCase().includes('user') || key.toLowerCase().includes('login');
-                });
-                userRelatedKeys.forEach(function (key) {
-                  console.log('清除用户相关缓存:', key);
-                  uni.removeStorageSync(key);
-                });
-              } catch (e) {
-                console.error('清除用户缓存时出错:', e);
-              }
-
-              // 清空store中的用户信息
-              _this2.setUserInfo({}, {
-                cover: true
-              });
-
-              // 在全局应用对象中设置防止自动重新登录的标志
-              try {
-                app = getApp();
-                if (app && app.globalData) {
-                  console.log('设置全局防止自动登录标志');
-                  app.globalData.preventAutoLogin = true;
-                  app.globalData.logoutTime = Date.now();
-                  app.globalData.userInfo = null;
-                }
-              } catch (e) {
-                console.log('设置全局防止自动登录标志失败:', e);
-              }
-
-              // 通知其他组件登录状态改变
-              uni.$emit('uni-id-pages-logout');
-
-              // 跳转到首页而不是登录页，避免找不到页面的问题
-              try {
-                // 尝试返回到上一页
-                uni.navigateBack({
-                  fail: function fail() {
-                    // 如果返回失败，跳转到首页
-                    var homePage = _pages.default.pages[0].path;
-                    console.log('跳转到首页:', homePage);
-                    uni.reLaunch({
-                      url: "/".concat(homePage)
-                    });
-                  }
-                });
-              } catch (e) {
-                console.error('跳转失败:', e);
-                // 最后防线：尝试跳转到tabBar页面
-                tabbarPages = _pages.default.tabBar ? _pages.default.tabBar.list : [];
-                if (tabbarPages && tabbarPages.length > 0) {
-                  firstTabPage = tabbarPages[0].pagePath;
-                  console.log('尝试跳转到tabBar页面:', firstTabPage);
-                  uni.switchTab({
-                    url: "/".concat(firstTabPage)
-                  });
-                }
-              }
-            case 36:
-            case "end":
-              return _context3.stop();
-          }
-        }
-      }, _callee3, null, [[2, 23], [7, 15]]);
-    }))();
-  },
-  loginBack: function loginBack() {
-    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var _e$uniIdRedirectUrl = e.uniIdRedirectUrl,
-      uniIdRedirectUrl = _e$uniIdRedirectUrl === void 0 ? '' : _e$uniIdRedirectUrl;
-    var delta = 0; //判断需要返回几层
-    var pages = getCurrentPages();
-    // console.log(pages);
-    pages.forEach(function (page, index) {
-      if (pages[pages.length - index - 1].route.split('/')[3] == 'login') {
-        delta++;
-      }
-    });
-    // console.log('判断需要返回几层:', delta);
-    if (uniIdRedirectUrl) {
-      return uni.redirectTo({
-        url: uniIdRedirectUrl,
-        fail: function fail(err1) {
-          uni.switchTab({
-            url: uniIdRedirectUrl,
-            fail: function fail(err2) {
-              console.log(err1, err2);
-            }
-          });
-        }
-      });
-    }
-    if (delta) {
-      var page = _pages.default.pages[0];
-      return uni.reLaunch({
-        url: "/".concat(page.path)
-      });
-    }
-    uni.navigateBack({
-      delta: delta
-    });
-  },
-  loginSuccess: function loginSuccess() {
-    var _this3 = this;
-    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    // 设置 token
-    var _e$showToast = e.showToast,
-      showToast = _e$showToast === void 0 ? true : _e$showToast,
-      _e$toastText = e.toastText,
-      toastText = _e$toastText === void 0 ? '登录成功' : _e$toastText,
-      _e$autoBack = e.autoBack,
-      autoBack = _e$autoBack === void 0 ? true : _e$autoBack,
-      _e$uniIdRedirectUrl2 = e.uniIdRedirectUrl,
-      uniIdRedirectUrl = _e$uniIdRedirectUrl2 === void 0 ? '' : _e$uniIdRedirectUrl2,
-      _e$passwordConfirmed = e.passwordConfirmed,
-      passwordConfirmed = _e$passwordConfirmed === void 0 ? e.password_confirm && e.password_confirm === 'true' : _e$passwordConfirmed,
-      paramConfig = e.config;
-
-    // 确保引用的是正确的config
-    var localConfig = paramConfig || _config.default || {}; // 优先使用传入的config，然后是导入的config
-
-    // 确保setPasswordAfterLogin存在并检查类型
-    var needSetPassword = (0, _typeof2.default)(localConfig.setPasswordAfterLogin) === 'object' ? !!localConfig.setPasswordAfterLogin : !!localConfig.setPasswordAfterLogin;
-    if (e.errMsg && e.errMsg.indexOf('token不存在') > -1) {
-      uni.showToast({
-        title: e.errMsg || '登录失败',
-        icon: 'none'
-      });
-      return;
-    }
-
-    //习惯问题，有的云端会返回 token 有的返回 accessToken 
-    if (e.token || e.accessToken) {
-      var _token = e.token || e.accessToken;
-
-      // 增强的类型检查和错误处理
-      // 1. 如果token是数组，取第一个有效的字符串token
-      if (Array.isArray(_token)) {
-        console.log('收到token数组，尝试提取有效token');
-        var validTokens = _token.filter(function (t) {
-          return typeof t === 'string' && t.length > 0;
-        });
-        if (validTokens.length > 0) {
-          _token = validTokens[0];
-          console.log('从数组中提取到有效token');
-        } else {
-          console.error('token数组中没有有效的token');
-          _token = null;
-        }
-      }
-      // 2. 如果token是对象但不是数组，尝试转为字符串
-      else if ((0, _typeof2.default)(_token) === 'object' && _token !== null) {
-        console.error('收到对象类型token，尝试转换为字符串', (0, _typeof2.default)(_token));
-        try {
-          if (_token.toString && typeof _token.toString === 'function' && _token.toString() !== '[object Object]') {
-            _token = _token.toString();
-            console.log('将对象token转换为字符串');
-          } else {
-            console.error('无法将对象token转换为有效字符串');
-            _token = null;
-          }
-        } catch (err) {
-          console.error('转换token对象为字符串时出错:', err);
-          _token = null;
-        }
-      }
-
-      // 3. 最后检查token是否为有效字符串
-      if (typeof _token === 'string' && _token.length > 0) {
-        uni.setStorageSync('uni_id_token', _token);
-        uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
-        console.log('已保存token信息到storage');
-      } else {
-        console.error('token格式无效，无法保存:', (0, _typeof2.default)(_token));
-        // 创建临时token以便用户后续刷新
-        if (e.uid || e.userInfo && e.userInfo._id) {
-          var userId = e.uid || e.userInfo._id;
-          var tmpToken = "".concat(userId, "_").concat(Date.now(), "_").concat(Math.random().toString(36).substring(2, 10));
-          var tmpExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天过期
-          console.log('创建临时token:', tmpToken.substring(0, 10) + '...');
-          uni.setStorageSync('uni_id_token', tmpToken);
-          uni.setStorageSync('uni_id_token_expired', tmpExpired);
-        }
-      }
-    }
-
-    // 异步调用（更新用户信息）防止获取头像等操作阻塞页面返回
-    this.updateUserInfo();
-
-    // 触发uni-id-pages的登录成功事件
-    uni.$emit('uni-id-pages-login-success');
-
-    // 同时触发应用自定义的登录成功事件，确保兼容性
-    uni.$emit('user:login', e.userInfo || {});
-    uni.$emit('login:success', e.userInfo || {});
-
-    // 显示登录成功的提示
-    if (showToast) {
-      uni.showToast({
-        title: toastText,
-        icon: 'none',
-        duration: 3000
-      });
-    }
-
-    // 检查是否是首次登录
-    var hasSetStudentName = uni.getStorageSync('hasSetStudentName');
-    var isFirstLogin = !hasSetStudentName;
-
-    // 检查用户信息是否有效
-    var token = uni.getStorageSync('uni_id_token');
-    var userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
-    var hasValidUserInfo = token && userInfo && userInfo._id;
-
-    // 如果是首次登录且用户信息有效，在跳转后触发学生姓名设置弹窗
-    if (isFirstLogin && hasValidUserInfo) {
-      console.log('检测到首次登录，即将展示学生姓名设置弹窗');
-      // 确保清除可能错误设置的标记
-      uni.removeStorageSync('hasSetStudentName');
-      setTimeout(function () {
-        // 再次检查登录状态，确保用户仍然登录
-        var currentToken = uni.getStorageSync('uni_id_token');
-        if (currentToken) {
-          console.log('触发App全局方法检查学生姓名设置状态');
-          try {
-            // 获取App实例
-            var app = getApp();
-            if (app && app.checkStudentNameStatus) {
-              // 使用App中的方法进行更完整的检查
-              app.checkStudentNameStatus(userInfo, true);
-            } else {
-              // 如果获取不到App实例或方法不存在，则直接触发弹窗
-              console.log('无法获取App实例或方法不存在，直接触发学生姓名设置弹窗');
-              uni.$emit('show:student-name-modal');
-            }
-          } catch (e) {
-            console.error('触发学生姓名设置检查失败:', e);
-            // 出错时直接触发弹窗
-            uni.$emit('show:student-name-modal');
-          }
-        } else {
-          console.log('用户已退出登录，不显示姓名设置弹窗');
-        }
-      }, 1500); // 页面跳转完成后显示弹窗
-    } else if (hasValidUserInfo) {
-      console.log('非首次登录或已设置过学生姓名，但仍检查一次云端数据');
-      // 即使不是首次登录，也调用一次检查方法，以确保与云端数据一致
-      try {
-        // 获取App实例
-        var app = getApp();
-        if (app && app.checkStudentNameStatus) {
-          // 延迟执行，确保页面跳转完成
-          setTimeout(function () {
-            app.checkStudentNameStatus(userInfo, false);
-          }, 1800);
-        }
-      } catch (e) {
-        console.error('非首次登录检查学生姓名设置状态失败:', e);
-      }
-    }
-
-    // 检查是否需要设置密码
-    if (needSetPassword && !passwordConfirmed) {
-      // 账号密码登录方式不需要跳转到设置密码页面
-      if (e.loginType === 'username' || e.type === 'password' || e.type === 'account') {
-        console.log('账号密码登录方式，跳过设置密码步骤');
-        // 不执行跳转到设置密码页面的逻辑，继续后续操作
-      } else {
-        try {
-          // 确保loginType有值，避免undefined在URL中
-          var loginTypeParam = e.loginType ? "&loginType=".concat(e.loginType) : '';
-          var uniIdRedirectUrlParam = uniIdRedirectUrl ? "?uniIdRedirectUrl=".concat(encodeURIComponent(uniIdRedirectUrl)).concat(loginTypeParam) : e.loginType ? "?loginType=".concat(e.loginType) : '';
-
-          // 确保路径格式正确
-          var setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
-          var url = setPasswordPath + uniIdRedirectUrlParam;
-          console.log('准备跳转到设置密码页面:', url);
-          uni.redirectTo({
-            url: url,
-            fail: function fail(err) {
-              console.error('跳转到设置密码页面失败:', err);
-              // 如果路径不存在，尝试备用路径
-              if (err.errMsg && err.errMsg.includes('not found')) {
-                var fallbackUrl = '/pages/index/index';
-                console.log('尝试跳转到首页:', fallbackUrl);
-                uni.reLaunch({
-                  url: fallbackUrl,
-                  fail: function fail(fallbackErr) {
-                    console.error('跳转到首页也失败:', fallbackErr);
-                    uni.showToast({
-                      title: '页面跳转失败',
-                      icon: 'none'
-                    });
-                  }
-                });
-                return;
-              }
-
-              // 跳转失败时回到首页
-              uni.showToast({
-                title: '页面跳转失败',
-                icon: 'none'
-              });
-              setTimeout(function () {
-                uni.reLaunch({
-                  url: localConfig.customHomePagePath || '/pages/index/index'
-                });
-              }, 1500);
-            }
-          });
-          return; // 阻止继续执行后续代码
-        } catch (err) {
-          console.error('设置密码页面跳转出错:', err);
-        }
-      }
-    }
-
-    // 修改：优先跳转到用户个人中心页面
-    if (autoBack) {
-      // 跳转到个人中心页面
-      console.log('登录成功，跳转到个人中心页面');
-      setTimeout(function () {
-        uni.switchTab({
-          url: '/pages/user/user',
-          success: function success() {
-            console.log('跳转到个人中心成功');
-          },
-          fail: function fail(err) {
-            console.error('跳转到个人中心失败:', err);
-            // 失败时使用原有的跳转逻辑
-            _this3.loginBack({
-              uniIdRedirectUrl: uniIdRedirectUrl
-            });
-          }
-        });
-      }, 1000);
-    } else if (!needSetPassword) {
-      // 没有自动返回且不需要设置密码时，跳转到首页
-      console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);
-      setTimeout(function () {
-        uni.reLaunch({
-          url: localConfig.customHomePagePath || '/pages/index/index',
-          fail: function fail(err) {
-            console.error('跳转首页失败:', err);
-            // 尝试使用switchTab
-            uni.switchTab({
-              url: '/pages/index/index'
-            });
-          }
-        });
-      }, 1500);
-    }
-  }
-};
-
-// 创建token修复函数 - 将字符串token转换为数组格式
-exports.mutations = mutations;
-var fixTokenFormat = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(userId) {
-    var _db, userResult, user, token;
-    return _regenerator.default.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            if (userId) {
-              _context4.next = 2;
-              break;
-            }
-            return _context4.abrupt("return", console.error('修复token需要用户ID'));
-          case 2:
-            _context4.prev = 2;
-            console.log('尝试修复用户token格式:', userId);
-            _db = uniCloud.database(); // 查询用户信息
-            _context4.next = 7;
-            return _db.collection('uni-id-users').doc(userId).get();
-          case 7:
-            userResult = _context4.sent;
-            if (!(!userResult.data || userResult.data.length === 0)) {
-              _context4.next = 10;
-              break;
-            }
-            return _context4.abrupt("return", console.error('找不到要修复token的用户'));
-          case 10:
-            user = userResult.data[0];
-            token = user.token; // 检查token格式
-            if (!(typeof token === 'string')) {
-              _context4.next = 20;
-              break;
-            }
-            console.log('发现字符串格式token，修复为数组格式');
-
-            // 更新为数组格式
-            _context4.next = 16;
-            return _db.collection('uni-id-users').doc(userId).update({
-              token: [token]
-            });
-          case 16:
-            console.log('token格式修复完成');
-            return _context4.abrupt("return", true);
-          case 20:
-            if (!Array.isArray(token)) {
-              _context4.next = 25;
-              break;
-            }
-            console.log('token已经是数组格式，无需修复');
-            return _context4.abrupt("return", false);
-          case 25:
-            if (token) {
-              _context4.next = 30;
-              break;
-            }
-            console.log('用户没有token，无需修复');
-            return _context4.abrupt("return", false);
-          case 30:
-            console.error('未知token格式:', (0, _typeof2.default)(token));
-            return _context4.abrupt("return", false);
-          case 32:
-            _context4.next = 38;
-            break;
-          case 34:
-            _context4.prev = 34;
-            _context4.t0 = _context4["catch"](2);
-            console.error('修复token格式失败:', _context4.t0);
-            return _context4.abrupt("return", false);
-          case 38:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4, null, [[2, 34]]);
-  }));
-  return function fixTokenFormat(_x) {
-    return _ref2.apply(this, arguments);
-  };
-}();
-exports.fixTokenFormat = fixTokenFormat;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
-/***/ 12:
-/*!**************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/toPropertyKey.js ***!
-  \**************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-var toPrimitive = __webpack_require__(/*! ./toPrimitive.js */ 14);
-function toPropertyKey(t) {
-  var i = toPrimitive(t, "string");
-  return "symbol" == _typeof(i) ? i : i + "";
-}
-module.exports = toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 126:
 /*!***************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/utils/courseCalendar.js ***!
   \***************************************************************************************************/
@@ -1945,6 +1153,23 @@ module.exports = {
 
 /***/ }),
 
+/***/ 12:
+/*!**************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/toPropertyKey.js ***!
+  \**************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
+var toPrimitive = __webpack_require__(/*! ./toPrimitive.js */ 14);
+function toPropertyKey(t) {
+  var i = toPrimitive(t, "string");
+  return "symbol" == _typeof(i) ? i : i + "";
+}
+module.exports = toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
 /***/ 13:
 /*!*******************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/typeof.js ***!
@@ -1984,6 +1209,141 @@ function toPrimitive(t, r) {
   return ("string" === r ? String : Number)(t);
 }
 module.exports = toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 142:
+/*!******************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/utils/token.js ***!
+  \******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni, uniCloud) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.addTokenToRequest = addTokenToRequest;
+exports.clearToken = clearToken;
+exports.getToken = getToken;
+exports.getUserId = getUserId;
+exports.isPreventAutoLogin = isPreventAutoLogin;
+exports.isTokenValid = isTokenValid;
+exports.resetPreventAutoLogin = resetPreventAutoLogin;
+exports.saveToken = saveToken;
+/**
+ * token相关的通用工具函数
+ */
+
+// 获取token
+function getToken() {
+  // 检查是否设置了防止自动登录的标记
+  if (uni.getStorageSync('prevent_auto_login')) {
+    console.log('检测到防止自动登录标记，返回空token');
+    return '';
+  }
+  return uni.getStorageSync('uni_id_token') || '';
+}
+
+// 保存token
+function saveToken(token, tokenExpired) {
+  if (token) {
+    uni.setStorageSync('uni_id_token', token);
+  }
+  if (tokenExpired) {
+    uni.setStorageSync('uni_id_token_expired', tokenExpired);
+  }
+
+  // 保存token时清除防止自动登录的标记
+  uni.removeStorageSync('prevent_auto_login');
+}
+
+// 检查token是否有效
+function isTokenValid() {
+  // 检查是否设置了防止自动登录的标记
+  if (uni.getStorageSync('prevent_auto_login')) {
+    console.log('检测到防止自动登录标记，token视为无效');
+    return false;
+  }
+  var token = uni.getStorageSync('uni_id_token');
+  var tokenExpired = uni.getStorageSync('uni_id_token_expired');
+  return token && typeof token === 'string' && token.length > 10 && tokenExpired && tokenExpired > Date.now();
+}
+
+// 清除token
+function clearToken(key) {
+  if (key) {
+    uni.removeStorageSync(key);
+    return;
+  }
+
+  // 清除基本token
+  uni.removeStorageSync('uni_id_token');
+  uni.removeStorageSync('uni_id_token_expired');
+
+  // 设置防止自动登录的标记，并记录登出时间
+  uni.setStorageSync('prevent_auto_login', true);
+  uni.setStorageSync('logout_time', Date.now());
+
+  // 清除微信登录相关信息
+  uni.removeStorageSync('wx_openid');
+
+  // 清除可能存在的用户信息缓存
+  uni.removeStorageSync('uni-id-pages-userInfo');
+  uni.removeStorageSync('userInfo');
+}
+
+// 检查是否防止自动登录
+function isPreventAutoLogin() {
+  return !!uni.getStorageSync('prevent_auto_login');
+}
+
+// 重置防止自动登录标记（仅在用户主动登录时调用）
+function resetPreventAutoLogin() {
+  uni.removeStorageSync('prevent_auto_login');
+  uni.removeStorageSync('logout_time');
+}
+
+// 获取用户ID (从token中)
+function getUserId() {
+  // 检查是否设置了防止自动登录的标记
+  if (uni.getStorageSync('prevent_auto_login')) {
+    return '';
+  }
+
+  // 优先从uni-id-pages-userInfo中获取
+  var userInfo = uni.getStorageSync('uni-id-pages-userInfo');
+  if (userInfo && userInfo._id) {
+    return userInfo._id;
+  }
+
+  // 尝试从token获取
+  try {
+    var userInfoFromToken = uniCloud.getCurrentUserInfo();
+    if (userInfoFromToken && userInfoFromToken.uid) {
+      return userInfoFromToken.uid;
+    }
+  } catch (e) {
+    console.error('从token获取用户ID失败', e);
+  }
+  return '';
+}
+
+// 为请求添加token
+function addTokenToRequest() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  if (!options.header) {
+    options.header = {};
+  }
+  var token = getToken();
+  if (token) {
+    options.header['x-token'] = token;
+  }
+  return options;
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"], __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"]))
 
 /***/ }),
 
@@ -4552,6 +3912,781 @@ module.exports = _nonIterableSpread, module.exports.__esModule = true, module.ex
 
 /***/ }),
 
+/***/ 215:
+/*!********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/store.js ***!
+  \********************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uniCloud, uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.store = exports.mutations = exports.fixTokenFormat = void 0;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 28));
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 31));
+var _pages = _interopRequireDefault(__webpack_require__(/*! @/pages.json */ 37));
+var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
+var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var uniIdCo = uniCloud.importObject("uni-id-co", {
+  errorOptions: {
+    type: 'toast'
+  }
+});
+var db = uniCloud.database();
+var usersTable = db.collection('uni-id-users');
+var hostUserInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+var data = {
+  userInfo: hostUserInfo,
+  hasLogin: Object.keys(hostUserInfo).length != 0
+};
+
+// 创建响应式store对象
+var store;
+
+// 通过Vue.observable创建一个可响应的对象
+exports.store = store;
+exports.store = store = _vue.default.observable(data);
+
+// 定义 mutations, 修改属性
+var mutations = {
+  // data不为空，表示传递要更新的值(注意不是覆盖是合并),什么也不传时，直接查库获取更新
+  updateUserInfo: function updateUserInfo() {
+    var _arguments = arguments,
+      _this = this;
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+      var data, storedUserInfo, hasStoredUserInfo, token, tokenExpired, userInfoFromToken, _id, res, realNameRes, newUserInfo;
+      return _regenerator.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              data = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : false;
+              if (!data) {
+                _context.next = 5;
+                break;
+              }
+              usersTable.where('_id==$env.uid').update(data).then(function (e) {
+                // console.log(e);
+                if (e.result.updated) {
+                  uni.showToast({
+                    title: "更新成功",
+                    icon: 'none',
+                    duration: 3000
+                  });
+                  _this.setUserInfo(data);
+                } else {
+                  uni.showToast({
+                    title: "没有改变",
+                    icon: 'none',
+                    duration: 3000
+                  });
+                }
+              });
+              _context.next = 48;
+              break;
+            case 5:
+              _context.prev = 5;
+              // 先检查本地存储的用户信息是否存在
+              storedUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+              hasStoredUserInfo = storedUserInfo && storedUserInfo._id; // 再检查token是否存在和有效
+              token = uni.getStorageSync('uni_id_token');
+              tokenExpired = uni.getStorageSync('uni_id_token_expired');
+              console.log('更新用户信息检查:', {
+                hasToken: !!token,
+                hasExpired: !!tokenExpired,
+                tokenValid: tokenExpired > Date.now(),
+                hasStoredInfo: !!hasStoredUserInfo
+              });
+
+              // 优先使用本地存储的用户信息，确保至少有基本数据
+              if (hasStoredUserInfo) {
+                console.log('先加载本地缓存的用户信息');
+                // 确保store中有用户信息，但不完全覆盖，保留可能存在的其他信息
+                if (!store.userInfo || !store.userInfo._id) {
+                  _this.setUserInfo(storedUserInfo, {
+                    cover: true
+                  });
+                }
+              }
+
+              // 如果token有效，尝试从服务器获取最新信息
+              if (!(token && typeof token === 'string' && tokenExpired && tokenExpired > Date.now())) {
+                _context.next = 42;
+                break;
+              }
+              // 不等待联网查询，立即更新用户_id确保store.userInfo中的_id是最新的
+              userInfoFromToken = uniCloud.getCurrentUserInfo();
+              if (!(userInfoFromToken && userInfoFromToken.uid)) {
+                _context.next = 40;
+                break;
+              }
+              _id = userInfoFromToken.uid; // 如果store中的_id和token中的不一致，更新它
+              if (!store.userInfo || store.userInfo._id !== _id) {
+                _this.setUserInfo({
+                  _id: _id
+                }, {
+                  cover: false
+                }); // 不覆盖，只更新_id
+              }
+
+              // 查库获取用户信息，更新store.userInfo
+              _context.prev = 17;
+              _context.next = 20;
+              return usersTable.where("'_id' == $cloudEnv_uid").field('mobile,nickname,username,email,avatar_file').get();
+            case 20:
+              res = _context.sent;
+              if (!(res.result && res.result.data && res.result.data.length > 0)) {
+                _context.next = 35;
+                break;
+              }
+              _context.prev = 22;
+              _context.next = 25;
+              return uniIdCo.getRealNameInfo();
+            case 25:
+              realNameRes = _context.sent;
+              _context.next = 32;
+              break;
+            case 28:
+              _context.prev = 28;
+              _context.t0 = _context["catch"](22);
+              console.error('获取实名信息失败:', _context.t0);
+              realNameRes = null;
+            case 32:
+              // 更新用户信息，但不覆盖已有信息
+              newUserInfo = _objectSpread(_objectSpread({}, res.result.data[0]), {}, {
+                realNameAuth: realNameRes || {}
+              });
+              console.log('从服务器获取到新的用户信息', newUserInfo);
+              _this.setUserInfo(newUserInfo, {
+                cover: false
+              });
+            case 35:
+              _context.next = 40;
+              break;
+            case 37:
+              _context.prev = 37;
+              _context.t1 = _context["catch"](17);
+              console.error('获取用户信息失败:', _context.t1);
+              // 这里不再清除token和用户信息，保持现有状态
+            case 40:
+              _context.next = 43;
+              break;
+            case 42:
+              if (token && !hasStoredUserInfo) {
+                // token无效且没有缓存用户信息，才清理token
+                console.log('token无效，清除token但不清除用户状态');
+                uni.removeStorageSync('uni_id_token');
+                uni.removeStorageSync('uni_id_token_expired');
+              }
+            case 43:
+              _context.next = 48;
+              break;
+            case 45:
+              _context.prev = 45;
+              _context.t2 = _context["catch"](5);
+              console.error('updateUserInfo外层错误:', _context.t2);
+              // 即使出错也不清除用户信息，保持最后一个可用状态
+            case 48:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[5, 45], [17, 37], [22, 28]]);
+    }))();
+  },
+  // 静默更新token的方法（小程序环境）
+  silentUpdateToken: function silentUpdateToken() {
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+      var loginRes, loginResult;
+      return _regenerator.default.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.prev = 0;
+              _context2.next = 3;
+              return new Promise(function (resolve, reject) {
+                uni.login({
+                  provider: 'weixin',
+                  success: resolve,
+                  fail: reject
+                });
+              });
+            case 3:
+              loginRes = _context2.sent;
+              if (!loginRes.code) {
+                _context2.next = 14;
+                break;
+              }
+              console.log('获取到小程序登录凭证，尝试刷新token');
+              // 调用云函数刷新token
+
+              // 静默登录，更新token
+              _context2.next = 8;
+              return uniIdCo.loginByWeixin({
+                code: loginRes.code,
+                autoUpdate: true // 该参数表示静默更新，不创建新用户
+              }).catch(function (err) {
+                console.error('静默登录失败:', err);
+                return null;
+              });
+            case 8:
+              loginResult = _context2.sent;
+              if (!(loginResult && loginResult.token)) {
+                _context2.next = 14;
+                break;
+              }
+              console.log('成功刷新token');
+              uni.setStorageSync('uni_id_token', loginResult.token);
+              uni.setStorageSync('uni_id_token_expired', loginResult.tokenExpired);
+              return _context2.abrupt("return", true);
+            case 14:
+              _context2.next = 19;
+              break;
+            case 16:
+              _context2.prev = 16;
+              _context2.t0 = _context2["catch"](0);
+              console.error('静默更新token失败:', _context2.t0);
+            case 19:
+              return _context2.abrupt("return", false);
+            case 20:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, null, [[0, 16]]);
+    }))();
+  },
+  setUserInfo: function setUserInfo(data) {
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+        cover: false
+      },
+      cover = _ref.cover;
+    // console.log('set-userInfo', data);
+    var userInfo = cover ? data : Object.assign(store.userInfo, data);
+    store.userInfo = Object.assign({}, userInfo);
+    store.hasLogin = Object.keys(store.userInfo).length != 0;
+    // console.log('store.userInfo', store.userInfo);
+    uni.setStorageSync('uni-id-pages-userInfo', store.userInfo);
+    return data;
+  },
+  logout: function logout() {
+    var _this2 = this;
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3() {
+      var currentUserInfo, token, tokenExpired, isTokenValid, uniIdCoCustom, cacheKeys, userRelatedKeys, app, tabbarPages, firstTabPage;
+      return _regenerator.default.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              // 先保存当前用户信息，以便后续恢复
+              currentUserInfo = uni.getStorageSync('uni-id-pages-userInfo');
+              console.log('注销前保存用户信息:', currentUserInfo);
+
+              // 1. 已经过期就不需要调用服务端的注销接口	2.即使调用注销接口失败，不能阻塞客户端
+              _context3.prev = 2;
+              // 获取token并检查类型和有效性
+              token = uni.getStorageSync('uni_id_token');
+              tokenExpired = uni.getStorageSync('uni_id_token_expired'); // 增强token有效性检查：确保token格式正确、非空且未过期
+              isTokenValid = token && typeof token === 'string' && token.length > 10 &&
+              // 确保token不是空字符串或过短
+              tokenExpired && tokenExpired > Date.now(); // 确保token未过期
+              if (!isTokenValid) {
+                _context3.next = 20;
+                break;
+              }
+              _context3.prev = 7;
+              console.log('token有效，调用logout云函数');
+              // 使用customUI参数创建uniIdCo对象，禁止自动显示错误提示
+              uniIdCoCustom = uniCloud.importObject("uni-id-co", {
+                customUI: true,
+                // 完全禁用错误提示
+                errorOptions: {
+                  type: 'none'
+                }
+              });
+              _context3.next = 12;
+              return uniIdCoCustom.logout();
+            case 12:
+              console.log('logout云函数调用成功');
+              _context3.next = 18;
+              break;
+            case 15:
+              _context3.prev = 15;
+              _context3.t0 = _context3["catch"](7);
+              // 完全静默处理错误，仅记录日志
+              console.log('注销时发生错误，已捕获并忽略:', _context3.t0.message || _context3.t0);
+            case 18:
+              _context3.next = 21;
+              break;
+            case 20:
+              console.log('token无效或已过期，跳过调用logout云函数');
+            case 21:
+              _context3.next = 26;
+              break;
+            case 23:
+              _context3.prev = 23;
+              _context3.t1 = _context3["catch"](2);
+              console.log('注销过程处理错误:', _context3.t1.message || _context3.t1);
+            case 26:
+              // 清理所有相关的本地缓存
+              console.log('清理本地存储的token和用户信息');
+              uni.removeStorageSync('uni_id_token');
+              uni.removeStorageSync('uni_id_token_expired');
+              uni.removeStorageSync('uni-id-pages-userInfo');
+              uni.removeStorageSync('userInfo');
+
+              // 清除其他可能存在的与用户相关的缓存
+              try {
+                cacheKeys = [];
+                cacheKeys = uni.getStorageInfoSync().keys;
+
+                // 清除包含"token"或"user"的存储项
+                userRelatedKeys = cacheKeys.filter(function (key) {
+                  return key.toLowerCase().includes('token') || key.toLowerCase().includes('user') || key.toLowerCase().includes('login');
+                });
+                userRelatedKeys.forEach(function (key) {
+                  console.log('清除用户相关缓存:', key);
+                  uni.removeStorageSync(key);
+                });
+              } catch (e) {
+                console.error('清除用户缓存时出错:', e);
+              }
+
+              // 清空store中的用户信息
+              _this2.setUserInfo({}, {
+                cover: true
+              });
+
+              // 在全局应用对象中设置防止自动重新登录的标志
+              try {
+                app = getApp();
+                if (app && app.globalData) {
+                  console.log('设置全局防止自动登录标志');
+                  app.globalData.preventAutoLogin = true;
+                  app.globalData.logoutTime = Date.now();
+                  app.globalData.userInfo = null;
+                }
+              } catch (e) {
+                console.log('设置全局防止自动登录标志失败:', e);
+              }
+
+              // 通知其他组件登录状态改变
+              uni.$emit('uni-id-pages-logout');
+
+              // 跳转到首页而不是登录页，避免找不到页面的问题
+              try {
+                // 尝试返回到上一页
+                uni.navigateBack({
+                  fail: function fail() {
+                    // 如果返回失败，跳转到首页
+                    var homePage = _pages.default.pages[0].path;
+                    console.log('跳转到首页:', homePage);
+                    uni.reLaunch({
+                      url: "/".concat(homePage)
+                    });
+                  }
+                });
+              } catch (e) {
+                console.error('跳转失败:', e);
+                // 最后防线：尝试跳转到tabBar页面
+                tabbarPages = _pages.default.tabBar ? _pages.default.tabBar.list : [];
+                if (tabbarPages && tabbarPages.length > 0) {
+                  firstTabPage = tabbarPages[0].pagePath;
+                  console.log('尝试跳转到tabBar页面:', firstTabPage);
+                  uni.switchTab({
+                    url: "/".concat(firstTabPage)
+                  });
+                }
+              }
+            case 36:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3, null, [[2, 23], [7, 15]]);
+    }))();
+  },
+  loginBack: function loginBack() {
+    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var _e$uniIdRedirectUrl = e.uniIdRedirectUrl,
+      uniIdRedirectUrl = _e$uniIdRedirectUrl === void 0 ? '' : _e$uniIdRedirectUrl;
+    var delta = 0; //判断需要返回几层
+    var pages = getCurrentPages();
+    // console.log(pages);
+    pages.forEach(function (page, index) {
+      if (pages[pages.length - index - 1].route.split('/')[3] == 'login') {
+        delta++;
+      }
+    });
+    // console.log('判断需要返回几层:', delta);
+    if (uniIdRedirectUrl) {
+      return uni.redirectTo({
+        url: uniIdRedirectUrl,
+        fail: function fail(err1) {
+          uni.switchTab({
+            url: uniIdRedirectUrl,
+            fail: function fail(err2) {
+              console.log(err1, err2);
+            }
+          });
+        }
+      });
+    }
+    if (delta) {
+      var page = _pages.default.pages[0];
+      return uni.reLaunch({
+        url: "/".concat(page.path)
+      });
+    }
+    uni.navigateBack({
+      delta: delta
+    });
+  },
+  loginSuccess: function loginSuccess() {
+    var _this3 = this;
+    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    // 设置 token
+    var _e$showToast = e.showToast,
+      showToast = _e$showToast === void 0 ? true : _e$showToast,
+      _e$toastText = e.toastText,
+      toastText = _e$toastText === void 0 ? '登录成功' : _e$toastText,
+      _e$autoBack = e.autoBack,
+      autoBack = _e$autoBack === void 0 ? true : _e$autoBack,
+      _e$uniIdRedirectUrl2 = e.uniIdRedirectUrl,
+      uniIdRedirectUrl = _e$uniIdRedirectUrl2 === void 0 ? '' : _e$uniIdRedirectUrl2,
+      _e$passwordConfirmed = e.passwordConfirmed,
+      passwordConfirmed = _e$passwordConfirmed === void 0 ? e.password_confirm && e.password_confirm === 'true' : _e$passwordConfirmed,
+      paramConfig = e.config;
+
+    // 确保引用的是正确的config
+    var localConfig = paramConfig || _config.default || {}; // 优先使用传入的config，然后是导入的config
+
+    // 确保setPasswordAfterLogin存在并检查类型
+    var needSetPassword = (0, _typeof2.default)(localConfig.setPasswordAfterLogin) === 'object' ? !!localConfig.setPasswordAfterLogin : !!localConfig.setPasswordAfterLogin;
+    if (e.errMsg && e.errMsg.indexOf('token不存在') > -1) {
+      uni.showToast({
+        title: e.errMsg || '登录失败',
+        icon: 'none'
+      });
+      return;
+    }
+
+    //习惯问题，有的云端会返回 token 有的返回 accessToken 
+    if (e.token || e.accessToken) {
+      var _token = e.token || e.accessToken;
+
+      // 增强的类型检查和错误处理
+      // 1. 如果token是数组，取第一个有效的字符串token
+      if (Array.isArray(_token)) {
+        console.log('收到token数组，尝试提取有效token');
+        var validTokens = _token.filter(function (t) {
+          return typeof t === 'string' && t.length > 0;
+        });
+        if (validTokens.length > 0) {
+          _token = validTokens[0];
+          console.log('从数组中提取到有效token');
+        } else {
+          console.error('token数组中没有有效的token');
+          _token = null;
+        }
+      }
+      // 2. 如果token是对象但不是数组，尝试转为字符串
+      else if ((0, _typeof2.default)(_token) === 'object' && _token !== null) {
+        console.error('收到对象类型token，尝试转换为字符串', (0, _typeof2.default)(_token));
+        try {
+          if (_token.toString && typeof _token.toString === 'function' && _token.toString() !== '[object Object]') {
+            _token = _token.toString();
+            console.log('将对象token转换为字符串');
+          } else {
+            console.error('无法将对象token转换为有效字符串');
+            _token = null;
+          }
+        } catch (err) {
+          console.error('转换token对象为字符串时出错:', err);
+          _token = null;
+        }
+      }
+
+      // 3. 最后检查token是否为有效字符串
+      if (typeof _token === 'string' && _token.length > 0) {
+        uni.setStorageSync('uni_id_token', _token);
+        uni.setStorageSync('uni_id_token_expired', e.tokenExpired);
+        console.log('已保存token信息到storage');
+      } else {
+        console.error('token格式无效，无法保存:', (0, _typeof2.default)(_token));
+        // 创建临时token以便用户后续刷新
+        if (e.uid || e.userInfo && e.userInfo._id) {
+          var userId = e.uid || e.userInfo._id;
+          var tmpToken = "".concat(userId, "_").concat(Date.now(), "_").concat(Math.random().toString(36).substring(2, 10));
+          var tmpExpired = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7天过期
+          console.log('创建临时token:', tmpToken.substring(0, 10) + '...');
+          uni.setStorageSync('uni_id_token', tmpToken);
+          uni.setStorageSync('uni_id_token_expired', tmpExpired);
+        }
+      }
+    }
+
+    // 异步调用（更新用户信息）防止获取头像等操作阻塞页面返回
+    this.updateUserInfo();
+
+    // 触发uni-id-pages的登录成功事件
+    uni.$emit('uni-id-pages-login-success');
+
+    // 同时触发应用自定义的登录成功事件，确保兼容性
+    uni.$emit('user:login', e.userInfo || {});
+    uni.$emit('login:success', e.userInfo || {});
+
+    // 显示登录成功的提示
+    if (showToast) {
+      uni.showToast({
+        title: toastText,
+        icon: 'none',
+        duration: 3000
+      });
+    }
+
+    // 检查是否是首次登录
+    var hasSetStudentName = uni.getStorageSync('hasSetStudentName');
+    var isFirstLogin = !hasSetStudentName;
+
+    // 检查用户信息是否有效
+    var token = uni.getStorageSync('uni_id_token');
+    var userInfo = uni.getStorageSync('uni-id-pages-userInfo') || {};
+    var hasValidUserInfo = token && userInfo && userInfo._id;
+
+    // 如果是首次登录且用户信息有效，在跳转后触发学生姓名设置弹窗
+    if (isFirstLogin && hasValidUserInfo) {
+      console.log('检测到首次登录，即将展示学生姓名设置弹窗');
+      // 确保清除可能错误设置的标记
+      uni.removeStorageSync('hasSetStudentName');
+      setTimeout(function () {
+        // 再次检查登录状态，确保用户仍然登录
+        var currentToken = uni.getStorageSync('uni_id_token');
+        if (currentToken) {
+          console.log('触发App全局方法检查学生姓名设置状态');
+          try {
+            // 获取App实例
+            var app = getApp();
+            if (app && app.checkStudentNameStatus) {
+              // 使用App中的方法进行更完整的检查
+              app.checkStudentNameStatus(userInfo, true);
+            } else {
+              // 如果获取不到App实例或方法不存在，则直接触发弹窗
+              console.log('无法获取App实例或方法不存在，直接触发学生姓名设置弹窗');
+              uni.$emit('show:student-name-modal');
+            }
+          } catch (e) {
+            console.error('触发学生姓名设置检查失败:', e);
+            // 出错时直接触发弹窗
+            uni.$emit('show:student-name-modal');
+          }
+        } else {
+          console.log('用户已退出登录，不显示姓名设置弹窗');
+        }
+      }, 1500); // 页面跳转完成后显示弹窗
+    } else if (hasValidUserInfo) {
+      console.log('非首次登录或已设置过学生姓名，但仍检查一次云端数据');
+      // 即使不是首次登录，也调用一次检查方法，以确保与云端数据一致
+      try {
+        // 获取App实例
+        var app = getApp();
+        if (app && app.checkStudentNameStatus) {
+          // 延迟执行，确保页面跳转完成
+          setTimeout(function () {
+            app.checkStudentNameStatus(userInfo, false);
+          }, 1800);
+        }
+      } catch (e) {
+        console.error('非首次登录检查学生姓名设置状态失败:', e);
+      }
+    }
+
+    // 检查是否需要设置密码
+    if (needSetPassword && !passwordConfirmed) {
+      // 账号密码登录方式不需要跳转到设置密码页面
+      if (e.loginType === 'username' || e.type === 'password' || e.type === 'account') {
+        console.log('账号密码登录方式，跳过设置密码步骤');
+        // 不执行跳转到设置密码页面的逻辑，继续后续操作
+      } else {
+        try {
+          // 确保loginType有值，避免undefined在URL中
+          var loginTypeParam = e.loginType ? "&loginType=".concat(e.loginType) : '';
+          var uniIdRedirectUrlParam = uniIdRedirectUrl ? "?uniIdRedirectUrl=".concat(encodeURIComponent(uniIdRedirectUrl)).concat(loginTypeParam) : e.loginType ? "?loginType=".concat(e.loginType) : '';
+
+          // 确保路径格式正确
+          var setPasswordPath = '/uni_modules/uni-id-pages/pages/userinfo/set-pwd/set-pwd';
+          var url = setPasswordPath + uniIdRedirectUrlParam;
+          console.log('准备跳转到设置密码页面:', url);
+          uni.redirectTo({
+            url: url,
+            fail: function fail(err) {
+              console.error('跳转到设置密码页面失败:', err);
+              // 如果路径不存在，尝试备用路径
+              if (err.errMsg && err.errMsg.includes('not found')) {
+                var fallbackUrl = '/pages/index/index';
+                console.log('尝试跳转到首页:', fallbackUrl);
+                uni.reLaunch({
+                  url: fallbackUrl,
+                  fail: function fail(fallbackErr) {
+                    console.error('跳转到首页也失败:', fallbackErr);
+                    uni.showToast({
+                      title: '页面跳转失败',
+                      icon: 'none'
+                    });
+                  }
+                });
+                return;
+              }
+
+              // 跳转失败时回到首页
+              uni.showToast({
+                title: '页面跳转失败',
+                icon: 'none'
+              });
+              setTimeout(function () {
+                uni.reLaunch({
+                  url: localConfig.customHomePagePath || '/pages/index/index'
+                });
+              }, 1500);
+            }
+          });
+          return; // 阻止继续执行后续代码
+        } catch (err) {
+          console.error('设置密码页面跳转出错:', err);
+        }
+      }
+    }
+
+    // 修改：优先跳转到用户个人中心页面
+    if (autoBack) {
+      // 跳转到个人中心页面
+      console.log('登录成功，跳转到个人中心页面');
+      setTimeout(function () {
+        uni.switchTab({
+          url: '/pkgs/user/user',
+          success: function success() {
+            console.log('跳转到个人中心成功');
+          },
+          fail: function fail(err) {
+            console.error('跳转到个人中心失败:', err);
+            // 失败时使用原有的跳转逻辑
+            _this3.loginBack({
+              uniIdRedirectUrl: uniIdRedirectUrl
+            });
+          }
+        });
+      }, 1000);
+    } else if (!needSetPassword) {
+      // 没有自动返回且不需要设置密码时，跳转到首页
+      console.log('登录成功，跳转到首页:', localConfig.customHomePagePath);
+      setTimeout(function () {
+        uni.reLaunch({
+          url: localConfig.customHomePagePath || '/pages/index/index',
+          fail: function fail(err) {
+            console.error('跳转首页失败:', err);
+            // 尝试使用switchTab
+            uni.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        });
+      }, 1500);
+    }
+  }
+};
+
+// 创建token修复函数 - 将字符串token转换为数组格式
+exports.mutations = mutations;
+var fixTokenFormat = /*#__PURE__*/function () {
+  var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(userId) {
+    var _db, userResult, user, token;
+    return _regenerator.default.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            if (userId) {
+              _context4.next = 2;
+              break;
+            }
+            return _context4.abrupt("return", console.error('修复token需要用户ID'));
+          case 2:
+            _context4.prev = 2;
+            console.log('尝试修复用户token格式:', userId);
+            _db = uniCloud.database(); // 查询用户信息
+            _context4.next = 7;
+            return _db.collection('uni-id-users').doc(userId).get();
+          case 7:
+            userResult = _context4.sent;
+            if (!(!userResult.data || userResult.data.length === 0)) {
+              _context4.next = 10;
+              break;
+            }
+            return _context4.abrupt("return", console.error('找不到要修复token的用户'));
+          case 10:
+            user = userResult.data[0];
+            token = user.token; // 检查token格式
+            if (!(typeof token === 'string')) {
+              _context4.next = 20;
+              break;
+            }
+            console.log('发现字符串格式token，修复为数组格式');
+
+            // 更新为数组格式
+            _context4.next = 16;
+            return _db.collection('uni-id-users').doc(userId).update({
+              token: [token]
+            });
+          case 16:
+            console.log('token格式修复完成');
+            return _context4.abrupt("return", true);
+          case 20:
+            if (!Array.isArray(token)) {
+              _context4.next = 25;
+              break;
+            }
+            console.log('token已经是数组格式，无需修复');
+            return _context4.abrupt("return", false);
+          case 25:
+            if (token) {
+              _context4.next = 30;
+              break;
+            }
+            console.log('用户没有token，无需修复');
+            return _context4.abrupt("return", false);
+          case 30:
+            console.error('未知token格式:', (0, _typeof2.default)(token));
+            return _context4.abrupt("return", false);
+          case 32:
+            _context4.next = 38;
+            break;
+          case 34:
+            _context4.prev = 34;
+            _context4.t0 = _context4["catch"](2);
+            console.error('修复token格式失败:', _context4.t0);
+            return _context4.abrupt("return", false);
+          case 38:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4, null, [[2, 34]]);
+  }));
+  return function fixTokenFormat(_x) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+exports.fixTokenFormat = fixTokenFormat;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/uni-cloud/dist/index.js */ 27)["uniCloud"], __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
 /***/ 22:
 /*!*************************************************************!*\
   !*** ./node_modules/@dcloudio/uni-i18n/dist/uni-i18n.es.js ***!
@@ -5089,6 +5224,120 @@ function resolveLocaleChain(locale) {
 
 /***/ }),
 
+/***/ 224:
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
+  \*******************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 215);
+var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var mixin = {
+  data: function data() {
+    return {
+      config: _config.default,
+      uniIdRedirectUrl: '',
+      isMounted: false
+    };
+  },
+  onUnload: function onUnload() {},
+  mounted: function mounted() {
+    this.isMounted = true;
+  },
+  onLoad: function onLoad(e) {
+    var _this = this;
+    if (e.is_weixin_redirect) {
+      uni.showLoading({
+        mask: true
+      });
+      if (window.location.href.includes('#')) {
+        // 将url通过 ? 分割获取后面的参数字符串 再通过 & 将每一个参数单独分割出来
+        var paramsArr = window.location.href.split('?')[1].split('&');
+        paramsArr.forEach(function (item) {
+          var arr = item.split('=');
+          if (arr[0] == 'code') {
+            e.code = arr[1];
+          }
+        });
+      }
+      this.$nextTick(function (n) {
+        // console.log(this.$refs.uniFabLogin);
+        _this.$refs.uniFabLogin.login({
+          code: e.code
+        }, 'weixin');
+      });
+    }
+    if (e.uniIdRedirectUrl) {
+      this.uniIdRedirectUrl = decodeURIComponent(e.uniIdRedirectUrl);
+    }
+    if (getCurrentPages().length === 1) {
+      uni.hideHomeButton();
+      console.log('已隐藏：返回首页按钮');
+    }
+  },
+  computed: {
+    needAgreements: function needAgreements() {
+      if (this.isMounted) {
+        if (this.$refs.agreements) {
+          return this.$refs.agreements.needAgreements;
+        } else {
+          return false;
+        }
+      }
+    },
+    agree: {
+      get: function get() {
+        if (this.isMounted) {
+          if (this.$refs.agreements) {
+            return this.$refs.agreements.isAgree;
+          } else {
+            return true;
+          }
+        }
+      },
+      set: function set(agree) {
+        if (this.$refs.agreements) {
+          this.$refs.agreements.isAgree = agree;
+        } else {
+          console.log('不存在 隐私政策协议组件');
+        }
+      }
+    }
+  },
+  methods: {
+    loginSuccess: function loginSuccess() {
+      var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      // 设置showToast和toastText参数
+      var loginParams = _objectSpread(_objectSpread({}, e), {}, {
+        showToast: true,
+        toastText: '登录成功',
+        uniIdRedirectUrl: this.uniIdRedirectUrl,
+        config: this.config
+      });
+
+      // 调用store中的loginSuccess方法
+      _store.mutations.loginSuccess(loginParams);
+    }
+  }
+};
+var _default = mixin;
+exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
 /***/ 23:
 /*!***************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/classCallCheck.js ***!
@@ -5102,6 +5351,1263 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 module.exports = _classCallCheck, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 233:
+/*!**************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vuex3/dist/vuex.common.js ***!
+  \**************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/*!
+ * vuex v3.6.2
+ * (c) 2021 Evan You
+ * @license MIT
+ */
+
+
+function applyMixin (Vue) {
+  var version = Number(Vue.version.split('.')[0]);
+
+  if (version >= 2) {
+    Vue.mixin({ beforeCreate: vuexInit });
+  } else {
+    // override init and inject vuex init procedure
+    // for 1.x backwards compatibility.
+    var _init = Vue.prototype._init;
+    Vue.prototype._init = function (options) {
+      if ( options === void 0 ) options = {};
+
+      options.init = options.init
+        ? [vuexInit].concat(options.init)
+        : vuexInit;
+      _init.call(this, options);
+    };
+  }
+
+  /**
+   * Vuex init hook, injected into each instances init hooks list.
+   */
+
+  function vuexInit () {
+    var options = this.$options;
+    // store injection
+    if (options.store) {
+      this.$store = typeof options.store === 'function'
+        ? options.store()
+        : options.store;
+    } else if (options.parent && options.parent.$store) {
+      this.$store = options.parent.$store;
+    }
+  }
+}
+
+var target = typeof window !== 'undefined'
+  ? window
+  : typeof global !== 'undefined'
+    ? global
+    : {};
+var devtoolHook = target.__VUE_DEVTOOLS_GLOBAL_HOOK__;
+
+function devtoolPlugin (store) {
+  if (!devtoolHook) { return }
+
+  store._devtoolHook = devtoolHook;
+
+  devtoolHook.emit('vuex:init', store);
+
+  devtoolHook.on('vuex:travel-to-state', function (targetState) {
+    store.replaceState(targetState);
+  });
+
+  store.subscribe(function (mutation, state) {
+    devtoolHook.emit('vuex:mutation', mutation, state);
+  }, { prepend: true });
+
+  store.subscribeAction(function (action, state) {
+    devtoolHook.emit('vuex:action', action, state);
+  }, { prepend: true });
+}
+
+/**
+ * Get the first item that pass the test
+ * by second argument function
+ *
+ * @param {Array} list
+ * @param {Function} f
+ * @return {*}
+ */
+function find (list, f) {
+  return list.filter(f)[0]
+}
+
+/**
+ * Deep copy the given object considering circular structure.
+ * This function caches all nested objects and its copies.
+ * If it detects circular structure, use cached copy to avoid infinite loop.
+ *
+ * @param {*} obj
+ * @param {Array<Object>} cache
+ * @return {*}
+ */
+function deepCopy (obj, cache) {
+  if ( cache === void 0 ) cache = [];
+
+  // just return if obj is immutable value
+  if (obj === null || typeof obj !== 'object') {
+    return obj
+  }
+
+  // if obj is hit, it is in circular structure
+  var hit = find(cache, function (c) { return c.original === obj; });
+  if (hit) {
+    return hit.copy
+  }
+
+  var copy = Array.isArray(obj) ? [] : {};
+  // put the copy into cache at first
+  // because we want to refer it in recursive deepCopy
+  cache.push({
+    original: obj,
+    copy: copy
+  });
+
+  Object.keys(obj).forEach(function (key) {
+    copy[key] = deepCopy(obj[key], cache);
+  });
+
+  return copy
+}
+
+/**
+ * forEach for object
+ */
+function forEachValue (obj, fn) {
+  Object.keys(obj).forEach(function (key) { return fn(obj[key], key); });
+}
+
+function isObject (obj) {
+  return obj !== null && typeof obj === 'object'
+}
+
+function isPromise (val) {
+  return val && typeof val.then === 'function'
+}
+
+function assert (condition, msg) {
+  if (!condition) { throw new Error(("[vuex] " + msg)) }
+}
+
+function partial (fn, arg) {
+  return function () {
+    return fn(arg)
+  }
+}
+
+// Base data struct for store's module, package with some attribute and method
+var Module = function Module (rawModule, runtime) {
+  this.runtime = runtime;
+  // Store some children item
+  this._children = Object.create(null);
+  // Store the origin module object which passed by programmer
+  this._rawModule = rawModule;
+  var rawState = rawModule.state;
+
+  // Store the origin module's state
+  this.state = (typeof rawState === 'function' ? rawState() : rawState) || {};
+};
+
+var prototypeAccessors = { namespaced: { configurable: true } };
+
+prototypeAccessors.namespaced.get = function () {
+  return !!this._rawModule.namespaced
+};
+
+Module.prototype.addChild = function addChild (key, module) {
+  this._children[key] = module;
+};
+
+Module.prototype.removeChild = function removeChild (key) {
+  delete this._children[key];
+};
+
+Module.prototype.getChild = function getChild (key) {
+  return this._children[key]
+};
+
+Module.prototype.hasChild = function hasChild (key) {
+  return key in this._children
+};
+
+Module.prototype.update = function update (rawModule) {
+  this._rawModule.namespaced = rawModule.namespaced;
+  if (rawModule.actions) {
+    this._rawModule.actions = rawModule.actions;
+  }
+  if (rawModule.mutations) {
+    this._rawModule.mutations = rawModule.mutations;
+  }
+  if (rawModule.getters) {
+    this._rawModule.getters = rawModule.getters;
+  }
+};
+
+Module.prototype.forEachChild = function forEachChild (fn) {
+  forEachValue(this._children, fn);
+};
+
+Module.prototype.forEachGetter = function forEachGetter (fn) {
+  if (this._rawModule.getters) {
+    forEachValue(this._rawModule.getters, fn);
+  }
+};
+
+Module.prototype.forEachAction = function forEachAction (fn) {
+  if (this._rawModule.actions) {
+    forEachValue(this._rawModule.actions, fn);
+  }
+};
+
+Module.prototype.forEachMutation = function forEachMutation (fn) {
+  if (this._rawModule.mutations) {
+    forEachValue(this._rawModule.mutations, fn);
+  }
+};
+
+Object.defineProperties( Module.prototype, prototypeAccessors );
+
+var ModuleCollection = function ModuleCollection (rawRootModule) {
+  // register root module (Vuex.Store options)
+  this.register([], rawRootModule, false);
+};
+
+ModuleCollection.prototype.get = function get (path) {
+  return path.reduce(function (module, key) {
+    return module.getChild(key)
+  }, this.root)
+};
+
+ModuleCollection.prototype.getNamespace = function getNamespace (path) {
+  var module = this.root;
+  return path.reduce(function (namespace, key) {
+    module = module.getChild(key);
+    return namespace + (module.namespaced ? key + '/' : '')
+  }, '')
+};
+
+ModuleCollection.prototype.update = function update$1 (rawRootModule) {
+  update([], this.root, rawRootModule);
+};
+
+ModuleCollection.prototype.register = function register (path, rawModule, runtime) {
+    var this$1 = this;
+    if ( runtime === void 0 ) runtime = true;
+
+  if ((true)) {
+    assertRawModule(path, rawModule);
+  }
+
+  var newModule = new Module(rawModule, runtime);
+  if (path.length === 0) {
+    this.root = newModule;
+  } else {
+    var parent = this.get(path.slice(0, -1));
+    parent.addChild(path[path.length - 1], newModule);
+  }
+
+  // register nested modules
+  if (rawModule.modules) {
+    forEachValue(rawModule.modules, function (rawChildModule, key) {
+      this$1.register(path.concat(key), rawChildModule, runtime);
+    });
+  }
+};
+
+ModuleCollection.prototype.unregister = function unregister (path) {
+  var parent = this.get(path.slice(0, -1));
+  var key = path[path.length - 1];
+  var child = parent.getChild(key);
+
+  if (!child) {
+    if ((true)) {
+      console.warn(
+        "[vuex] trying to unregister module '" + key + "', which is " +
+        "not registered"
+      );
+    }
+    return
+  }
+
+  if (!child.runtime) {
+    return
+  }
+
+  parent.removeChild(key);
+};
+
+ModuleCollection.prototype.isRegistered = function isRegistered (path) {
+  var parent = this.get(path.slice(0, -1));
+  var key = path[path.length - 1];
+
+  if (parent) {
+    return parent.hasChild(key)
+  }
+
+  return false
+};
+
+function update (path, targetModule, newModule) {
+  if ((true)) {
+    assertRawModule(path, newModule);
+  }
+
+  // update target module
+  targetModule.update(newModule);
+
+  // update nested modules
+  if (newModule.modules) {
+    for (var key in newModule.modules) {
+      if (!targetModule.getChild(key)) {
+        if ((true)) {
+          console.warn(
+            "[vuex] trying to add a new module '" + key + "' on hot reloading, " +
+            'manual reload is needed'
+          );
+        }
+        return
+      }
+      update(
+        path.concat(key),
+        targetModule.getChild(key),
+        newModule.modules[key]
+      );
+    }
+  }
+}
+
+var functionAssert = {
+  assert: function (value) { return typeof value === 'function'; },
+  expected: 'function'
+};
+
+var objectAssert = {
+  assert: function (value) { return typeof value === 'function' ||
+    (typeof value === 'object' && typeof value.handler === 'function'); },
+  expected: 'function or object with "handler" function'
+};
+
+var assertTypes = {
+  getters: functionAssert,
+  mutations: functionAssert,
+  actions: objectAssert
+};
+
+function assertRawModule (path, rawModule) {
+  Object.keys(assertTypes).forEach(function (key) {
+    if (!rawModule[key]) { return }
+
+    var assertOptions = assertTypes[key];
+
+    forEachValue(rawModule[key], function (value, type) {
+      assert(
+        assertOptions.assert(value),
+        makeAssertionMessage(path, key, type, value, assertOptions.expected)
+      );
+    });
+  });
+}
+
+function makeAssertionMessage (path, key, type, value, expected) {
+  var buf = key + " should be " + expected + " but \"" + key + "." + type + "\"";
+  if (path.length > 0) {
+    buf += " in module \"" + (path.join('.')) + "\"";
+  }
+  buf += " is " + (JSON.stringify(value)) + ".";
+  return buf
+}
+
+var Vue; // bind on install
+
+var Store = function Store (options) {
+  var this$1 = this;
+  if ( options === void 0 ) options = {};
+
+  // Auto install if it is not done yet and `window` has `Vue`.
+  // To allow users to avoid auto-installation in some cases,
+  // this code should be placed here. See #731
+  if (!Vue && typeof window !== 'undefined' && window.Vue) {
+    install(window.Vue);
+  }
+
+  if ((true)) {
+    assert(Vue, "must call Vue.use(Vuex) before creating a store instance.");
+    assert(typeof Promise !== 'undefined', "vuex requires a Promise polyfill in this browser.");
+    assert(this instanceof Store, "store must be called with the new operator.");
+  }
+
+  var plugins = options.plugins; if ( plugins === void 0 ) plugins = [];
+  var strict = options.strict; if ( strict === void 0 ) strict = false;
+
+  // store internal state
+  this._committing = false;
+  this._actions = Object.create(null);
+  this._actionSubscribers = [];
+  this._mutations = Object.create(null);
+  this._wrappedGetters = Object.create(null);
+  this._modules = new ModuleCollection(options);
+  this._modulesNamespaceMap = Object.create(null);
+  this._subscribers = [];
+  this._watcherVM = new Vue();
+  this._makeLocalGettersCache = Object.create(null);
+
+  // bind commit and dispatch to self
+  var store = this;
+  var ref = this;
+  var dispatch = ref.dispatch;
+  var commit = ref.commit;
+  this.dispatch = function boundDispatch (type, payload) {
+    return dispatch.call(store, type, payload)
+  };
+  this.commit = function boundCommit (type, payload, options) {
+    return commit.call(store, type, payload, options)
+  };
+
+  // strict mode
+  this.strict = strict;
+
+  var state = this._modules.root.state;
+
+  // init root module.
+  // this also recursively registers all sub-modules
+  // and collects all module getters inside this._wrappedGetters
+  installModule(this, state, [], this._modules.root);
+
+  // initialize the store vm, which is responsible for the reactivity
+  // (also registers _wrappedGetters as computed properties)
+  resetStoreVM(this, state);
+
+  // apply plugins
+  plugins.forEach(function (plugin) { return plugin(this$1); });
+
+  var useDevtools = options.devtools !== undefined ? options.devtools : Vue.config.devtools;
+  if (useDevtools) {
+    devtoolPlugin(this);
+  }
+};
+
+var prototypeAccessors$1 = { state: { configurable: true } };
+
+prototypeAccessors$1.state.get = function () {
+  return this._vm._data.$$state
+};
+
+prototypeAccessors$1.state.set = function (v) {
+  if ((true)) {
+    assert(false, "use store.replaceState() to explicit replace store state.");
+  }
+};
+
+Store.prototype.commit = function commit (_type, _payload, _options) {
+    var this$1 = this;
+
+  // check object-style commit
+  var ref = unifyObjectStyle(_type, _payload, _options);
+    var type = ref.type;
+    var payload = ref.payload;
+    var options = ref.options;
+
+  var mutation = { type: type, payload: payload };
+  var entry = this._mutations[type];
+  if (!entry) {
+    if ((true)) {
+      console.error(("[vuex] unknown mutation type: " + type));
+    }
+    return
+  }
+  this._withCommit(function () {
+    entry.forEach(function commitIterator (handler) {
+      handler(payload);
+    });
+  });
+
+  this._subscribers
+    .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
+    .forEach(function (sub) { return sub(mutation, this$1.state); });
+
+  if (
+    ( true) &&
+    options && options.silent
+  ) {
+    console.warn(
+      "[vuex] mutation type: " + type + ". Silent option has been removed. " +
+      'Use the filter functionality in the vue-devtools'
+    );
+  }
+};
+
+Store.prototype.dispatch = function dispatch (_type, _payload) {
+    var this$1 = this;
+
+  // check object-style dispatch
+  var ref = unifyObjectStyle(_type, _payload);
+    var type = ref.type;
+    var payload = ref.payload;
+
+  var action = { type: type, payload: payload };
+  var entry = this._actions[type];
+  if (!entry) {
+    if ((true)) {
+      console.error(("[vuex] unknown action type: " + type));
+    }
+    return
+  }
+
+  try {
+    this._actionSubscribers
+      .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
+      .filter(function (sub) { return sub.before; })
+      .forEach(function (sub) { return sub.before(action, this$1.state); });
+  } catch (e) {
+    if ((true)) {
+      console.warn("[vuex] error in before action subscribers: ");
+      console.error(e);
+    }
+  }
+
+  var result = entry.length > 1
+    ? Promise.all(entry.map(function (handler) { return handler(payload); }))
+    : entry[0](payload);
+
+  return new Promise(function (resolve, reject) {
+    result.then(function (res) {
+      try {
+        this$1._actionSubscribers
+          .filter(function (sub) { return sub.after; })
+          .forEach(function (sub) { return sub.after(action, this$1.state); });
+      } catch (e) {
+        if ((true)) {
+          console.warn("[vuex] error in after action subscribers: ");
+          console.error(e);
+        }
+      }
+      resolve(res);
+    }, function (error) {
+      try {
+        this$1._actionSubscribers
+          .filter(function (sub) { return sub.error; })
+          .forEach(function (sub) { return sub.error(action, this$1.state, error); });
+      } catch (e) {
+        if ((true)) {
+          console.warn("[vuex] error in error action subscribers: ");
+          console.error(e);
+        }
+      }
+      reject(error);
+    });
+  })
+};
+
+Store.prototype.subscribe = function subscribe (fn, options) {
+  return genericSubscribe(fn, this._subscribers, options)
+};
+
+Store.prototype.subscribeAction = function subscribeAction (fn, options) {
+  var subs = typeof fn === 'function' ? { before: fn } : fn;
+  return genericSubscribe(subs, this._actionSubscribers, options)
+};
+
+Store.prototype.watch = function watch (getter, cb, options) {
+    var this$1 = this;
+
+  if ((true)) {
+    assert(typeof getter === 'function', "store.watch only accepts a function.");
+  }
+  return this._watcherVM.$watch(function () { return getter(this$1.state, this$1.getters); }, cb, options)
+};
+
+Store.prototype.replaceState = function replaceState (state) {
+    var this$1 = this;
+
+  this._withCommit(function () {
+    this$1._vm._data.$$state = state;
+  });
+};
+
+Store.prototype.registerModule = function registerModule (path, rawModule, options) {
+    if ( options === void 0 ) options = {};
+
+  if (typeof path === 'string') { path = [path]; }
+
+  if ((true)) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+    assert(path.length > 0, 'cannot register the root module by using registerModule.');
+  }
+
+  this._modules.register(path, rawModule);
+  installModule(this, this.state, path, this._modules.get(path), options.preserveState);
+  // reset store to update getters...
+  resetStoreVM(this, this.state);
+};
+
+Store.prototype.unregisterModule = function unregisterModule (path) {
+    var this$1 = this;
+
+  if (typeof path === 'string') { path = [path]; }
+
+  if ((true)) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+  }
+
+  this._modules.unregister(path);
+  this._withCommit(function () {
+    var parentState = getNestedState(this$1.state, path.slice(0, -1));
+    Vue.delete(parentState, path[path.length - 1]);
+  });
+  resetStore(this);
+};
+
+Store.prototype.hasModule = function hasModule (path) {
+  if (typeof path === 'string') { path = [path]; }
+
+  if ((true)) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+  }
+
+  return this._modules.isRegistered(path)
+};
+
+Store.prototype[[104,111,116,85,112,100,97,116,101].map(function (item) {return String.fromCharCode(item)}).join('')] = function (newOptions) {
+  this._modules.update(newOptions);
+  resetStore(this, true);
+};
+
+Store.prototype._withCommit = function _withCommit (fn) {
+  var committing = this._committing;
+  this._committing = true;
+  fn();
+  this._committing = committing;
+};
+
+Object.defineProperties( Store.prototype, prototypeAccessors$1 );
+
+function genericSubscribe (fn, subs, options) {
+  if (subs.indexOf(fn) < 0) {
+    options && options.prepend
+      ? subs.unshift(fn)
+      : subs.push(fn);
+  }
+  return function () {
+    var i = subs.indexOf(fn);
+    if (i > -1) {
+      subs.splice(i, 1);
+    }
+  }
+}
+
+function resetStore (store, hot) {
+  store._actions = Object.create(null);
+  store._mutations = Object.create(null);
+  store._wrappedGetters = Object.create(null);
+  store._modulesNamespaceMap = Object.create(null);
+  var state = store.state;
+  // init all modules
+  installModule(store, state, [], store._modules.root, true);
+  // reset vm
+  resetStoreVM(store, state, hot);
+}
+
+function resetStoreVM (store, state, hot) {
+  var oldVm = store._vm;
+
+  // bind store public getters
+  store.getters = {};
+  // reset local getters cache
+  store._makeLocalGettersCache = Object.create(null);
+  var wrappedGetters = store._wrappedGetters;
+  var computed = {};
+  forEachValue(wrappedGetters, function (fn, key) {
+    // use computed to leverage its lazy-caching mechanism
+    // direct inline function use will lead to closure preserving oldVm.
+    // using partial to return function with only arguments preserved in closure environment.
+    computed[key] = partial(fn, store);
+    Object.defineProperty(store.getters, key, {
+      get: function () { return store._vm[key]; },
+      enumerable: true // for local getters
+    });
+  });
+
+  // use a Vue instance to store the state tree
+  // suppress warnings just in case the user has added
+  // some funky global mixins
+  var silent = Vue.config.silent;
+  Vue.config.silent = true;
+  store._vm = new Vue({
+    data: {
+      $$state: state
+    },
+    computed: computed
+  });
+  Vue.config.silent = silent;
+
+  // enable strict mode for new vm
+  if (store.strict) {
+    enableStrictMode(store);
+  }
+
+  if (oldVm) {
+    if (hot) {
+      // dispatch changes in all subscribed watchers
+      // to force getter re-evaluation for hot reloading.
+      store._withCommit(function () {
+        oldVm._data.$$state = null;
+      });
+    }
+    Vue.nextTick(function () { return oldVm.$destroy(); });
+  }
+}
+
+function installModule (store, rootState, path, module, hot) {
+  var isRoot = !path.length;
+  var namespace = store._modules.getNamespace(path);
+
+  // register in namespace map
+  if (module.namespaced) {
+    if (store._modulesNamespaceMap[namespace] && ("development" !== 'production')) {
+      console.error(("[vuex] duplicate namespace " + namespace + " for the namespaced module " + (path.join('/'))));
+    }
+    store._modulesNamespaceMap[namespace] = module;
+  }
+
+  // set state
+  if (!isRoot && !hot) {
+    var parentState = getNestedState(rootState, path.slice(0, -1));
+    var moduleName = path[path.length - 1];
+    store._withCommit(function () {
+      if ((true)) {
+        if (moduleName in parentState) {
+          console.warn(
+            ("[vuex] state field \"" + moduleName + "\" was overridden by a module with the same name at \"" + (path.join('.')) + "\"")
+          );
+        }
+      }
+      Vue.set(parentState, moduleName, module.state);
+    });
+  }
+
+  var local = module.context = makeLocalContext(store, namespace, path);
+
+  module.forEachMutation(function (mutation, key) {
+    var namespacedType = namespace + key;
+    registerMutation(store, namespacedType, mutation, local);
+  });
+
+  module.forEachAction(function (action, key) {
+    var type = action.root ? key : namespace + key;
+    var handler = action.handler || action;
+    registerAction(store, type, handler, local);
+  });
+
+  module.forEachGetter(function (getter, key) {
+    var namespacedType = namespace + key;
+    registerGetter(store, namespacedType, getter, local);
+  });
+
+  module.forEachChild(function (child, key) {
+    installModule(store, rootState, path.concat(key), child, hot);
+  });
+}
+
+/**
+ * make localized dispatch, commit, getters and state
+ * if there is no namespace, just use root ones
+ */
+function makeLocalContext (store, namespace, path) {
+  var noNamespace = namespace === '';
+
+  var local = {
+    dispatch: noNamespace ? store.dispatch : function (_type, _payload, _options) {
+      var args = unifyObjectStyle(_type, _payload, _options);
+      var payload = args.payload;
+      var options = args.options;
+      var type = args.type;
+
+      if (!options || !options.root) {
+        type = namespace + type;
+        if (( true) && !store._actions[type]) {
+          console.error(("[vuex] unknown local action type: " + (args.type) + ", global type: " + type));
+          return
+        }
+      }
+
+      return store.dispatch(type, payload)
+    },
+
+    commit: noNamespace ? store.commit : function (_type, _payload, _options) {
+      var args = unifyObjectStyle(_type, _payload, _options);
+      var payload = args.payload;
+      var options = args.options;
+      var type = args.type;
+
+      if (!options || !options.root) {
+        type = namespace + type;
+        if (( true) && !store._mutations[type]) {
+          console.error(("[vuex] unknown local mutation type: " + (args.type) + ", global type: " + type));
+          return
+        }
+      }
+
+      store.commit(type, payload, options);
+    }
+  };
+
+  // getters and state object must be gotten lazily
+  // because they will be changed by vm update
+  Object.defineProperties(local, {
+    getters: {
+      get: noNamespace
+        ? function () { return store.getters; }
+        : function () { return makeLocalGetters(store, namespace); }
+    },
+    state: {
+      get: function () { return getNestedState(store.state, path); }
+    }
+  });
+
+  return local
+}
+
+function makeLocalGetters (store, namespace) {
+  if (!store._makeLocalGettersCache[namespace]) {
+    var gettersProxy = {};
+    var splitPos = namespace.length;
+    Object.keys(store.getters).forEach(function (type) {
+      // skip if the target getter is not match this namespace
+      if (type.slice(0, splitPos) !== namespace) { return }
+
+      // extract local getter type
+      var localType = type.slice(splitPos);
+
+      // Add a port to the getters proxy.
+      // Define as getter property because
+      // we do not want to evaluate the getters in this time.
+      Object.defineProperty(gettersProxy, localType, {
+        get: function () { return store.getters[type]; },
+        enumerable: true
+      });
+    });
+    store._makeLocalGettersCache[namespace] = gettersProxy;
+  }
+
+  return store._makeLocalGettersCache[namespace]
+}
+
+function registerMutation (store, type, handler, local) {
+  var entry = store._mutations[type] || (store._mutations[type] = []);
+  entry.push(function wrappedMutationHandler (payload) {
+    handler.call(store, local.state, payload);
+  });
+}
+
+function registerAction (store, type, handler, local) {
+  var entry = store._actions[type] || (store._actions[type] = []);
+  entry.push(function wrappedActionHandler (payload) {
+    var res = handler.call(store, {
+      dispatch: local.dispatch,
+      commit: local.commit,
+      getters: local.getters,
+      state: local.state,
+      rootGetters: store.getters,
+      rootState: store.state
+    }, payload);
+    if (!isPromise(res)) {
+      res = Promise.resolve(res);
+    }
+    if (store._devtoolHook) {
+      return res.catch(function (err) {
+        store._devtoolHook.emit('vuex:error', err);
+        throw err
+      })
+    } else {
+      return res
+    }
+  });
+}
+
+function registerGetter (store, type, rawGetter, local) {
+  if (store._wrappedGetters[type]) {
+    if ((true)) {
+      console.error(("[vuex] duplicate getter key: " + type));
+    }
+    return
+  }
+  store._wrappedGetters[type] = function wrappedGetter (store) {
+    return rawGetter(
+      local.state, // local state
+      local.getters, // local getters
+      store.state, // root state
+      store.getters // root getters
+    )
+  };
+}
+
+function enableStrictMode (store) {
+  store._vm.$watch(function () { return this._data.$$state }, function () {
+    if ((true)) {
+      assert(store._committing, "do not mutate vuex store state outside mutation handlers.");
+    }
+  }, { deep: true, sync: true });
+}
+
+function getNestedState (state, path) {
+  return path.reduce(function (state, key) { return state[key]; }, state)
+}
+
+function unifyObjectStyle (type, payload, options) {
+  if (isObject(type) && type.type) {
+    options = payload;
+    payload = type;
+    type = type.type;
+  }
+
+  if ((true)) {
+    assert(typeof type === 'string', ("expects string as the type, but found " + (typeof type) + "."));
+  }
+
+  return { type: type, payload: payload, options: options }
+}
+
+function install (_Vue) {
+  if (Vue && _Vue === Vue) {
+    if ((true)) {
+      console.error(
+        '[vuex] already installed. Vue.use(Vuex) should be called only once.'
+      );
+    }
+    return
+  }
+  Vue = _Vue;
+  applyMixin(Vue);
+}
+
+/**
+ * Reduce the code which written in Vue.js for getting the state.
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} states # Object's item can be a function which accept state and getters for param, you can do something for state and getters in it.
+ * @param {Object}
+ */
+var mapState = normalizeNamespace(function (namespace, states) {
+  var res = {};
+  if (( true) && !isValidMap(states)) {
+    console.error('[vuex] mapState: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(states).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedState () {
+      var state = this.$store.state;
+      var getters = this.$store.getters;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapState', namespace);
+        if (!module) {
+          return
+        }
+        state = module.context.state;
+        getters = module.context.getters;
+      }
+      return typeof val === 'function'
+        ? val.call(this, state, getters)
+        : state[val]
+    };
+    // mark vuex getter for devtools
+    res[key].vuex = true;
+  });
+  return res
+});
+
+/**
+ * Reduce the code which written in Vue.js for committing the mutation
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} mutations # Object's item can be a function which accept `commit` function as the first param, it can accept another params. You can commit mutation and do any other things in this function. specially, You need to pass anthor params from the mapped function.
+ * @return {Object}
+ */
+var mapMutations = normalizeNamespace(function (namespace, mutations) {
+  var res = {};
+  if (( true) && !isValidMap(mutations)) {
+    console.error('[vuex] mapMutations: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(mutations).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedMutation () {
+      var args = [], len = arguments.length;
+      while ( len-- ) args[ len ] = arguments[ len ];
+
+      // Get the commit method from store
+      var commit = this.$store.commit;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapMutations', namespace);
+        if (!module) {
+          return
+        }
+        commit = module.context.commit;
+      }
+      return typeof val === 'function'
+        ? val.apply(this, [commit].concat(args))
+        : commit.apply(this.$store, [val].concat(args))
+    };
+  });
+  return res
+});
+
+/**
+ * Reduce the code which written in Vue.js for getting the getters
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} getters
+ * @return {Object}
+ */
+var mapGetters = normalizeNamespace(function (namespace, getters) {
+  var res = {};
+  if (( true) && !isValidMap(getters)) {
+    console.error('[vuex] mapGetters: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(getters).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    // The namespace has been mutated by normalizeNamespace
+    val = namespace + val;
+    res[key] = function mappedGetter () {
+      if (namespace && !getModuleByNamespace(this.$store, 'mapGetters', namespace)) {
+        return
+      }
+      if (( true) && !(val in this.$store.getters)) {
+        console.error(("[vuex] unknown getter: " + val));
+        return
+      }
+      return this.$store.getters[val]
+    };
+    // mark vuex getter for devtools
+    res[key].vuex = true;
+  });
+  return res
+});
+
+/**
+ * Reduce the code which written in Vue.js for dispatch the action
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} actions # Object's item can be a function which accept `dispatch` function as the first param, it can accept anthor params. You can dispatch action and do any other things in this function. specially, You need to pass anthor params from the mapped function.
+ * @return {Object}
+ */
+var mapActions = normalizeNamespace(function (namespace, actions) {
+  var res = {};
+  if (( true) && !isValidMap(actions)) {
+    console.error('[vuex] mapActions: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(actions).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedAction () {
+      var args = [], len = arguments.length;
+      while ( len-- ) args[ len ] = arguments[ len ];
+
+      // get dispatch function from store
+      var dispatch = this.$store.dispatch;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapActions', namespace);
+        if (!module) {
+          return
+        }
+        dispatch = module.context.dispatch;
+      }
+      return typeof val === 'function'
+        ? val.apply(this, [dispatch].concat(args))
+        : dispatch.apply(this.$store, [val].concat(args))
+    };
+  });
+  return res
+});
+
+/**
+ * Rebinding namespace param for mapXXX function in special scoped, and return them by simple object
+ * @param {String} namespace
+ * @return {Object}
+ */
+var createNamespacedHelpers = function (namespace) { return ({
+  mapState: mapState.bind(null, namespace),
+  mapGetters: mapGetters.bind(null, namespace),
+  mapMutations: mapMutations.bind(null, namespace),
+  mapActions: mapActions.bind(null, namespace)
+}); };
+
+/**
+ * Normalize the map
+ * normalizeMap([1, 2, 3]) => [ { key: 1, val: 1 }, { key: 2, val: 2 }, { key: 3, val: 3 } ]
+ * normalizeMap({a: 1, b: 2, c: 3}) => [ { key: 'a', val: 1 }, { key: 'b', val: 2 }, { key: 'c', val: 3 } ]
+ * @param {Array|Object} map
+ * @return {Object}
+ */
+function normalizeMap (map) {
+  if (!isValidMap(map)) {
+    return []
+  }
+  return Array.isArray(map)
+    ? map.map(function (key) { return ({ key: key, val: key }); })
+    : Object.keys(map).map(function (key) { return ({ key: key, val: map[key] }); })
+}
+
+/**
+ * Validate whether given map is valid or not
+ * @param {*} map
+ * @return {Boolean}
+ */
+function isValidMap (map) {
+  return Array.isArray(map) || isObject(map)
+}
+
+/**
+ * Return a function expect two param contains namespace and map. it will normalize the namespace and then the param's function will handle the new namespace and the map.
+ * @param {Function} fn
+ * @return {Function}
+ */
+function normalizeNamespace (fn) {
+  return function (namespace, map) {
+    if (typeof namespace !== 'string') {
+      map = namespace;
+      namespace = '';
+    } else if (namespace.charAt(namespace.length - 1) !== '/') {
+      namespace += '/';
+    }
+    return fn(namespace, map)
+  }
+}
+
+/**
+ * Search a special module from store by namespace. if module not exist, print error message.
+ * @param {Object} store
+ * @param {String} helper
+ * @param {String} namespace
+ * @return {Object}
+ */
+function getModuleByNamespace (store, helper, namespace) {
+  var module = store._modulesNamespaceMap[namespace];
+  if (( true) && !module) {
+    console.error(("[vuex] module namespace not found in " + helper + "(): " + namespace));
+  }
+  return module
+}
+
+// Credits: borrowed code from fcomb/redux-logger
+
+function createLogger (ref) {
+  if ( ref === void 0 ) ref = {};
+  var collapsed = ref.collapsed; if ( collapsed === void 0 ) collapsed = true;
+  var filter = ref.filter; if ( filter === void 0 ) filter = function (mutation, stateBefore, stateAfter) { return true; };
+  var transformer = ref.transformer; if ( transformer === void 0 ) transformer = function (state) { return state; };
+  var mutationTransformer = ref.mutationTransformer; if ( mutationTransformer === void 0 ) mutationTransformer = function (mut) { return mut; };
+  var actionFilter = ref.actionFilter; if ( actionFilter === void 0 ) actionFilter = function (action, state) { return true; };
+  var actionTransformer = ref.actionTransformer; if ( actionTransformer === void 0 ) actionTransformer = function (act) { return act; };
+  var logMutations = ref.logMutations; if ( logMutations === void 0 ) logMutations = true;
+  var logActions = ref.logActions; if ( logActions === void 0 ) logActions = true;
+  var logger = ref.logger; if ( logger === void 0 ) logger = console;
+
+  return function (store) {
+    var prevState = deepCopy(store.state);
+
+    if (typeof logger === 'undefined') {
+      return
+    }
+
+    if (logMutations) {
+      store.subscribe(function (mutation, state) {
+        var nextState = deepCopy(state);
+
+        if (filter(mutation, prevState, nextState)) {
+          var formattedTime = getFormattedTime();
+          var formattedMutation = mutationTransformer(mutation);
+          var message = "mutation " + (mutation.type) + formattedTime;
+
+          startMessage(logger, message, collapsed);
+          logger.log('%c prev state', 'color: #9E9E9E; font-weight: bold', transformer(prevState));
+          logger.log('%c mutation', 'color: #03A9F4; font-weight: bold', formattedMutation);
+          logger.log('%c next state', 'color: #4CAF50; font-weight: bold', transformer(nextState));
+          endMessage(logger);
+        }
+
+        prevState = nextState;
+      });
+    }
+
+    if (logActions) {
+      store.subscribeAction(function (action, state) {
+        if (actionFilter(action, state)) {
+          var formattedTime = getFormattedTime();
+          var formattedAction = actionTransformer(action);
+          var message = "action " + (action.type) + formattedTime;
+
+          startMessage(logger, message, collapsed);
+          logger.log('%c action', 'color: #03A9F4; font-weight: bold', formattedAction);
+          endMessage(logger);
+        }
+      });
+    }
+  }
+}
+
+function startMessage (logger, message, collapsed) {
+  var startMessage = collapsed
+    ? logger.groupCollapsed
+    : logger.group;
+
+  // render
+  try {
+    startMessage.call(logger, message);
+  } catch (e) {
+    logger.log(message);
+  }
+}
+
+function endMessage (logger) {
+  try {
+    logger.groupEnd();
+  } catch (e) {
+    logger.log('—— log end ——');
+  }
+}
+
+function getFormattedTime () {
+  var time = new Date();
+  return (" @ " + (pad(time.getHours(), 2)) + ":" + (pad(time.getMinutes(), 2)) + ":" + (pad(time.getSeconds(), 2)) + "." + (pad(time.getMilliseconds(), 3)))
+}
+
+function repeat (str, times) {
+  return (new Array(times + 1)).join(str)
+}
+
+function pad (num, maxLength) {
+  return repeat('0', maxLength - num.toString().length) + num
+}
+
+var index_cjs = {
+  Store: Store,
+  install: install,
+  version: '3.6.2',
+  mapState: mapState,
+  mapMutations: mapMutations,
+  mapGetters: mapGetters,
+  mapActions: mapActions,
+  createNamespacedHelpers: createNamespacedHelpers,
+  createLogger: createLogger
+};
+
+module.exports = index_cjs;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3)))
 
 /***/ }),
 
@@ -11216,6 +12722,179 @@ internalMixin(Vue);
 
 /***/ }),
 
+/***/ 250:
+/*!********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/register/validator.js ***!
+  \********************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 251));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var _default = _objectSpread({
+  "username": {
+    "rules": [{
+      required: true,
+      errorMessage: '请输入用户名'
+    }, {
+      minLength: 3,
+      maxLength: 32,
+      errorMessage: '用户名长度在 {minLength} 到 {maxLength} 个字符'
+    }, {
+      validateFunction: function validateFunction(rule, value, data, callback) {
+        // console.log(value);
+        if (/^1\d{10}$/.test(value) || /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(value)) {
+          callback('用户名不能是：手机号或邮箱');
+        }
+        ;
+        if (/^\d+$/.test(value)) {
+          callback('用户名不能为纯数字');
+        }
+        ;
+        if (/[\u4E00-\u9FA5\uF900-\uFA2D]{1,}/.test(value)) {
+          callback('用户名不能包含中文');
+        }
+        return true;
+      }
+    }],
+    "label": "用户名"
+  },
+  "nickname": {
+    "rules": [{
+      minLength: 3,
+      maxLength: 32,
+      errorMessage: '昵称长度在 {minLength} 到 {maxLength} 个字符'
+    }, {
+      validateFunction: function validateFunction(rule, value, data, callback) {
+        // console.log(value);
+        if (/^1\d{10}$/.test(value) || /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(value)) {
+          callback('昵称不能是：手机号或邮箱');
+        }
+        ;
+        if (/^\d+$/.test(value)) {
+          callback('昵称不能为纯数字');
+        }
+        ;
+        if (/[\u4E00-\u9FA5\uF900-\uFA2D]{1,}/.test(value)) {
+          callback('昵称不能包含中文');
+        }
+        return true;
+      }
+    }],
+    "label": "昵称"
+  }
+}, _password.default.getPwdRules());
+exports.default = _default;
+
+/***/ }),
+
+/***/ 251:
+/*!***********************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/password.js ***!
+  \***********************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
+// 导入配置
+
+var passwordStrength = _config.default.passwordStrength;
+
+// 密码强度表达式
+var passwordRules = {
+  // 密码必须包含大小写字母、数字和特殊符号
+  super: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/])[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{8,16}$/,
+  // 密码必须包含字母、数字和特殊符号
+  strong: /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/])[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{8,16}$/,
+  // 密码必须为字母、数字和特殊符号任意两种的组合
+  medium: /^(?![0-9]+$)(?![a-zA-Z]+$)(?![~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]+$)[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{8,16}$/,
+  // 密码必须包含字母和数字
+  weak: /^(?=.*[0-9])(?=.*[a-zA-Z])[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{6,16}$/
+};
+var ERROR = {
+  normal: {
+    noPwd: '请输入密码',
+    noRePwd: '再次输入密码',
+    rePwdErr: '两次输入密码不一致'
+  },
+  passwordStrengthError: {
+    super: '密码必须包含大小写字母、数字和特殊符号，密码长度必须在8-16位之间',
+    strong: '密码必须包含字母、数字和特殊符号，密码长度必须在8-16位之间',
+    medium: '密码必须为字母、数字和特殊符号任意两种的组合，密码长度必须在8-16位之间',
+    weak: '密码必须包含字母，密码长度必须在6-16位之间'
+  }
+};
+function validPwd(password) {
+  //强度校验
+  if (passwordStrength && passwordRules[passwordStrength]) {
+    if (!new RegExp(passwordRules[passwordStrength]).test(password)) {
+      return ERROR.passwordStrengthError[passwordStrength];
+    }
+  }
+  return true;
+}
+function getPwdRules() {
+  var pwdName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'password';
+  var rePwdName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'password2';
+  var rules = {};
+  rules[pwdName] = {
+    rules: [{
+      required: true,
+      errorMessage: ERROR.normal.noPwd
+    }, {
+      validateFunction: function validateFunction(rule, value, data, callback) {
+        var checkRes = validPwd(value);
+        if (checkRes !== true) {
+          callback(checkRes);
+        }
+        return true;
+      }
+    }]
+  };
+  if (rePwdName) {
+    rules[rePwdName] = {
+      rules: [{
+        required: true,
+        errorMessage: ERROR.normal.noRePwd
+      }, {
+        validateFunction: function validateFunction(rule, value, data, callback) {
+          if (value != data[pwdName]) {
+            callback(ERROR.normal.rePwdErr);
+          }
+          return true;
+        }
+      }]
+    };
+  }
+  return rules;
+}
+var _default = {
+  ERROR: ERROR,
+  validPwd: validPwd,
+  getPwdRules: getPwdRules
+};
+exports.default = _default;
+
+/***/ }),
+
 /***/ 26:
 /*!**************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json ***!
@@ -11224,249 +12903,6 @@ internalMixin(Vue);
 /***/ (function(module, exports) {
 
 
-
-/***/ }),
-
-/***/ 263:
-/*!***********************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/user.js ***!
-  \***********************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.addFavorite = addFavorite;
-exports.checkFavorite = checkFavorite;
-exports.default = void 0;
-exports.getUserInfo = getUserInfo;
-exports.getWxOpenid = getWxOpenid;
-exports.login = login;
-exports.logout = logout;
-exports.removeFavorite = removeFavorite;
-exports.updatePhoneNumber = updatePhoneNumber;
-var _request = _interopRequireDefault(__webpack_require__(/*! ../request */ 91));
-/**
- * 用户相关API
- */
-
-/**
- * 用户登录
- * @param {Object} params - 登录参数
- * @param {String} params.code - 微信登录code
- * @param {Object} params.userInfo - 用户信息
- * @param {String} params.loginType - 登录类型 wechat/phone
- * @param {String} params.phoneNumber - 手机号(loginType为phone时必填)
- * @returns {Promise} API请求Promise
- */
-function login() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用login API，参数:', params);
-  return (0, _request.default)({
-    name: 'login',
-    data: params
-  });
-}
-
-/**
- * 获取微信OpenID
- * @param {Object} params - 请求参数
- * @param {String} params.code - 微信登录code
- * @returns {Promise} API请求Promise
- */
-function getWxOpenid() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用getWxOpenid API，参数:', params);
-  if (!params.code) {
-    return Promise.reject(new Error('缺少code参数'));
-  }
-  return (0, _request.default)({
-    name: 'getWxOpenid',
-    data: params
-  });
-}
-
-/**
- * 获取用户信息
- * @returns {Promise} API请求Promise
- */
-function getUserInfo() {
-  return (0, _request.default)({
-    name: 'getUserInfo',
-    data: {}
-  });
-}
-
-/**
- * 退出登录
- * @returns {Promise} API请求Promise
- */
-function logout() {
-  return (0, _request.default)({
-    name: 'logout',
-    data: {}
-  });
-}
-
-/**
- * 检查课程/讲座/老师是否已收藏
- * @param {Object} params - 请求参数
- * @param {String} params.userId - 用户ID
- * @param {String} params.itemId - 项目ID
- * @param {String} params.itemType - 项目类型(course/lecture/teacher)
- * @returns {Promise} API请求Promise
- */
-function checkFavorite() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用checkFavorite API，参数:', params);
-  if (!params.userId || !params.itemId || !params.itemType) {
-    console.error('检查收藏状态失败: 参数不完整', params);
-    return Promise.reject(new Error('参数不完整'));
-  }
-  return (0, _request.default)({
-    name: 'checkFavorite',
-    data: params
-  });
-}
-
-/**
- * 添加收藏
- * @param {Object} params - 请求参数
- * @param {String} params.userId - 用户ID
- * @param {String} params.itemId - 项目ID
- * @param {String} params.itemType - 项目类型(course/lecture/teacher)
- * @param {String} params.itemTitle - 项目标题
- * @param {String} params.itemCover - 项目封面图
- * @param {String} params.itemUrl - 项目URL
- * @returns {Promise} API请求Promise
- */
-function addFavorite() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用addFavorite API，参数:', params);
-  if (!params.userId || !params.itemId || !params.itemType) {
-    console.error('添加收藏失败: 参数不完整', params);
-    return Promise.reject(new Error('参数不完整'));
-  }
-  return (0, _request.default)({
-    name: 'addFavorite',
-    data: params
-  });
-}
-
-/**
- * 删除收藏
- * @param {String} favoriteId - 收藏记录ID
- * @returns {Promise} API请求Promise
- */
-function removeFavorite(favoriteId) {
-  console.log('调用removeFavorite API，参数:', favoriteId);
-  if (!favoriteId) {
-    console.error('删除收藏失败: 收藏ID不能为空');
-    return Promise.reject(new Error('收藏ID不能为空'));
-  }
-  return (0, _request.default)({
-    name: 'removeFavorite',
-    data: {
-      favoriteId: favoriteId
-    }
-  });
-}
-
-/**
- * 更新用户手机号
- * @param {Object} params - 请求参数
- * @param {String} params.phoneNumber - 新的手机号码
- * @returns {Promise} API请求Promise
- */
-function updatePhoneNumber() {
-  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  console.log('调用updatePhoneNumber API，参数:', params);
-  if (!params.phoneNumber) {
-    return Promise.reject(new Error('缺少phoneNumber参数'));
-  }
-
-  // 尝试获取所有可能的token
-  var uniIdToken = uni.getStorageSync('uni_id_token') || '';
-  var token = uni.getStorageSync('token') || '';
-  var userToken = uni.getStorageSync('userToken') || '';
-
-  // 获取优先级: uniIdToken > token > userToken
-  var effectiveToken = uniIdToken || token || userToken;
-
-  // 获取可能的用户ID
-  var userId = '';
-  try {
-    var userInfoStr = uni.getStorageSync('userInfo');
-    if (userInfoStr) {
-      // 检查是否已经是对象，避免重复解析
-      var userInfo;
-      if (typeof userInfoStr === 'string') {
-        userInfo = JSON.parse(userInfoStr);
-      } else {
-        // 已经是对象
-        userInfo = userInfoStr;
-      }
-      userId = userInfo._id || userInfo.userId || userInfo.id || '';
-    }
-  } catch (e) {
-    console.error('获取用户ID失败:', e);
-  }
-  console.log('使用token:', {
-    'uni_id_token': !!uniIdToken,
-    'token': !!token,
-    'userToken': !!userToken,
-    'effectiveToken': !!effectiveToken,
-    'userId': userId
-  });
-  return (0, _request.default)({
-    name: 'updateUserInfo',
-    data: {
-      // 明确指定update对象中的mobile字段
-      update: {
-        mobile: params.phoneNumber,
-        phoneNumber: params.phoneNumber,
-        mobile_confirmed: 1
-      },
-      // 直接在根级别也提供mobile字段，以防update对象处理有问题
-      mobile: params.phoneNumber,
-      phoneNumber: params.phoneNumber,
-      mobile_confirmed: 1,
-      // 用户ID参数，使用多种可能的参数名增加成功率
-      uid: userId,
-      // uni-id标准用户ID参数
-      userId: userId,
-      // 常见用户ID参数
-      _id: userId,
-      // MongoDB文档ID
-      id: userId,
-      // 通用ID参数名
-      user_id: userId,
-      // 下划线格式ID
-
-      // token相关参数
-      uniIdToken: effectiveToken,
-      token: effectiveToken,
-      userToken: effectiveToken
-    }
-  });
-}
-var _default = {
-  login: login,
-  getWxOpenid: getWxOpenid,
-  getUserInfo: getUserInfo,
-  logout: logout,
-  updatePhoneNumber: updatePhoneNumber,
-  checkFavorite: checkFavorite,
-  addFavorite: addFavorite,
-  removeFavorite: removeFavorite
-};
-exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 
@@ -12004,7 +13440,7 @@ var b = "development" === "development",
   k = "true" === undefined || !0 === undefined,
   P = T([]),
   C = "h5" === E ? "web" : "app-plus" === E || "app-harmony" === E ? "app" : E,
-  A = T({"address":["127.0.0.1","192.168.31.38","172.22.32.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"local","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
+  A = T({"address":["127.0.0.1","10.201.65.112","172.22.32.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","D:/HBuilderX.4.55.2025030718/HBuilderX/plugins/unicloud/**/*.js"]}),
   O = T([{"provider":"aliyun","spaceName":"siwei-chuzhong","spaceId":"mp-a876f469-bab5-46b7-8863-2e7147900fdd","clientSecret":"IhCqrULEYv+AG3PS/Z7jrw==","endpoint":"https://api.next.bspapp.com"}]) || [],
   x = true;
 var N = "";
@@ -20296,75 +21732,6 @@ module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exp
 
 /***/ }),
 
-/***/ 312:
-/*!******************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/common/utils/marked.min.js ***!
-  \******************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-/**
- * Simplified marked - a markdown parser
- * Copyright (c) 2023, Claude
- * All rights reserved.
- * License: MIT
- */
-
-// 简化版的Markdown解析器
-function marked(src) {
-  // 基本的markdown转HTML
-  var html = src
-  // 标题转换
-  .replace(/^# (.*$)/gm, '<h1>$1</h1>').replace(/^## (.*$)/gm, '<h2>$1</h2>').replace(/^### (.*$)/gm, '<h3>$1</h3>').replace(/^#### (.*$)/gm, '<h4>$1</h4>')
-
-  // 列表转换
-  .replace(/^\* (.*$)/gm, '<ul><li>$1</li></ul>').replace(/^- (.*$)/gm, '<ul><li>$1</li></ul>').replace(/^[0-9]+\. (.*$)/gm, '<ol><li>$1</li></ol>')
-
-  // 段落转换 - 连续的两个换行符表示段落
-  .replace(/\n\n/g, '</p><p>')
-
-  // 强调和加粗
-  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
-
-  // 链接
-  .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-
-  // 代码块
-  .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-
-  // 行内代码
-  .replace(/`(.*?)`/g, '<code>$1</code>')
-
-  // 水平线
-  .replace(/^\-\-\-$/gm, '<hr>')
-
-  // 引用
-  .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
-
-  // 修复列表标签问题
-  html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
-
-  // 确保整个内容被包裹在<p>标签内
-  if (!html.startsWith('<')) {
-    html = '<p>' + html;
-  }
-  if (!html.endsWith('>')) {
-    html += '</p>';
-  }
-  return html;
-}
-var _default = marked;
-exports.default = _default;
-
-/***/ }),
-
 /***/ 32:
 /*!*********************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/inherits.js ***!
@@ -20490,120 +21857,6 @@ module.exports = _isNativeFunction, module.exports.__esModule = true, module.exp
 
 /***/ }),
 
-/***/ 361:
-/*!*******************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/login-page.mixin.js ***!
-  \*******************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _store = __webpack_require__(/*! @/uni_modules/uni-id-pages/common/store.js */ 117);
-var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-var mixin = {
-  data: function data() {
-    return {
-      config: _config.default,
-      uniIdRedirectUrl: '',
-      isMounted: false
-    };
-  },
-  onUnload: function onUnload() {},
-  mounted: function mounted() {
-    this.isMounted = true;
-  },
-  onLoad: function onLoad(e) {
-    var _this = this;
-    if (e.is_weixin_redirect) {
-      uni.showLoading({
-        mask: true
-      });
-      if (window.location.href.includes('#')) {
-        // 将url通过 ? 分割获取后面的参数字符串 再通过 & 将每一个参数单独分割出来
-        var paramsArr = window.location.href.split('?')[1].split('&');
-        paramsArr.forEach(function (item) {
-          var arr = item.split('=');
-          if (arr[0] == 'code') {
-            e.code = arr[1];
-          }
-        });
-      }
-      this.$nextTick(function (n) {
-        // console.log(this.$refs.uniFabLogin);
-        _this.$refs.uniFabLogin.login({
-          code: e.code
-        }, 'weixin');
-      });
-    }
-    if (e.uniIdRedirectUrl) {
-      this.uniIdRedirectUrl = decodeURIComponent(e.uniIdRedirectUrl);
-    }
-    if (getCurrentPages().length === 1) {
-      uni.hideHomeButton();
-      console.log('已隐藏：返回首页按钮');
-    }
-  },
-  computed: {
-    needAgreements: function needAgreements() {
-      if (this.isMounted) {
-        if (this.$refs.agreements) {
-          return this.$refs.agreements.needAgreements;
-        } else {
-          return false;
-        }
-      }
-    },
-    agree: {
-      get: function get() {
-        if (this.isMounted) {
-          if (this.$refs.agreements) {
-            return this.$refs.agreements.isAgree;
-          } else {
-            return true;
-          }
-        }
-      },
-      set: function set(agree) {
-        if (this.$refs.agreements) {
-          this.$refs.agreements.isAgree = agree;
-        } else {
-          console.log('不存在 隐私政策协议组件');
-        }
-      }
-    }
-  },
-  methods: {
-    loginSuccess: function loginSuccess() {
-      var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      // 设置showToast和toastText参数
-      var loginParams = _objectSpread(_objectSpread({}, e), {}, {
-        showToast: true,
-        toastText: '登录成功',
-        uniIdRedirectUrl: this.uniIdRedirectUrl,
-        config: this.config
-      });
-
-      // 调用store中的loginSuccess方法
-      _store.mutations.loginSuccess(loginParams);
-    }
-  }
-};
-var _default = mixin;
-exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
 /***/ 37:
 /*!*******************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/pages.json?{"type":"origin-pages-json"} ***!
@@ -20636,9 +21889,9 @@ var _default = {
       "navigationStyle": "custom"
     }
   }, {
-    "path": "pages/user/user",
+    "path": "pages/course/detail",
     "style": {
-      "navigationBarTitleText": "我的",
+      "navigationBarTitleText": "课程详情",
       "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
@@ -20649,21 +21902,6 @@ var _default = {
       "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white",
       "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/user/favorite/index",
-    "style": {
-      "navigationBarTitleText": "我的收藏",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/course/detail",
-    "style": {
-      "navigationBarTitleText": "课程详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
     }
   }, {
     "path": "pages/teacher/detail",
@@ -20688,20 +21926,6 @@ var _default = {
       "navigationBarTextStyle": "white"
     }
   }, {
-    "path": "pages/course/featured",
-    "style": {
-      "navigationBarTitleText": "精选好课",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/lectures",
-    "style": {
-      "navigationBarTitleText": "热点讲座",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
     "path": "pages/teacher/list",
     "style": {
       "navigationBarTitleText": "名师介绍",
@@ -20712,20 +21936,6 @@ var _default = {
     "path": "pages/school/detail",
     "style": {
       "navigationBarTitleText": "校区详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/course/lecture-detail",
-    "style": {
-      "navigationBarTitleText": "讲座详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/upload-image",
-    "style": {
-      "navigationBarTitleText": "图片上传",
       "navigationBarBackgroundColor": "#EC7A49",
       "navigationBarTextStyle": "white"
     }
@@ -20747,64 +21957,6 @@ var _default = {
       "navigationStyle": "custom"
     }
   }, {
-    "path": "pages/user/booking",
-    "style": {
-      "navigationBarTitleText": "预约记录",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": true
-    }
-  }, {
-    "path": "pages/user/booking-detail",
-    "style": {
-      "navigationBarTitleText": "预约详情",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/about/index",
-    "style": {
-      "navigationBarTitleText": "关于我们",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/setting/index",
-    "style": {
-      "navigationBarTitleText": "设置",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/edit-field",
-    "style": {
-      "navigationBarTitleText": "编辑资料",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom"
-    }
-  }, {
-    "path": "pages/user/profile/index",
-    "style": {
-      "navigationBarTitleText": "个人资料",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/phone/index",
-    "style": {
-      "navigationBarTitleText": "手机绑定",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/wechat/index",
-    "style": {
-      "navigationBarTitleText": "微信账号",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
     "path": "pages/common/input-page",
     "style": {
       "navigationBarTitleText": "输入",
@@ -20820,30 +21972,6 @@ var _default = {
       "navigationStyle": "custom"
     }
   }, {
-    "path": "pages/user/calendar",
-    "style": {
-      "navigationBarTitleText": "我的课程日历",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white"
-    }
-  }, {
-    "path": "pages/user/course-notifications",
-    "style": {
-      "navigationBarTitleText": "课程通知",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "navigationStyle": "custom",
-      "enablePullDownRefresh": false
-    }
-  }, {
-    "path": "pages/course/manage",
-    "style": {
-      "navigationBarTitleText": "课程管理",
-      "navigationBarBackgroundColor": "#EC7A49",
-      "navigationBarTextStyle": "white",
-      "enablePullDownRefresh": false
-    }
-  }, {
     "path": "pages/schedule/schedule",
     "style": {
       "navigationBarTitleText": "排课管理",
@@ -20851,10 +21979,11 @@ var _default = {
       "navigationBarTextStyle": "white"
     }
   }, {
-    "path": "pages/course/edit",
+    "path": "pages/user/user",
     "style": {
-      "navigationBarTitleText": "编辑课程",
-      "enablePullDownRefresh": false
+      "navigationBarTitleText": "我的",
+      "navigationBarBackgroundColor": "#EC7A49",
+      "navigationBarTextStyle": "white"
     }
   }],
   "globalStyle": {
@@ -20939,1266 +22068,146 @@ var _default = {
         "navigationBarTitleText": "设置密码"
       }
     }]
+  }, {
+    "root": "pkgs/course",
+    "pages": [{
+      "path": "detail",
+      "style": {
+        "navigationBarTitleText": "课程详情",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "featured",
+      "style": {
+        "navigationBarTitleText": "精选好课",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "lectures",
+      "style": {
+        "navigationBarTitleText": "热点讲座",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "lecture-detail",
+      "style": {
+        "navigationBarTitleText": "讲座详情",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "manage",
+      "style": {
+        "navigationBarTitleText": "课程管理",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": false
+      }
+    }, {
+      "path": "edit",
+      "style": {
+        "navigationBarTitleText": "编辑课程",
+        "enablePullDownRefresh": false
+      }
+    }]
+  }, {
+    "root": "pkgs/user",
+    "pages": [{
+      "path": "favorite/index",
+      "style": {
+        "navigationBarTitleText": "我的收藏",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    }, {
+      "path": "upload-image",
+      "style": {
+        "navigationBarTitleText": "图片上传",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "booking",
+      "style": {
+        "navigationBarTitleText": "预约记录",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    }, {
+      "path": "booking-detail",
+      "style": {
+        "navigationBarTitleText": "预约详情",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "about/index",
+      "style": {
+        "navigationBarTitleText": "关于我们",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "setting/index",
+      "style": {
+        "navigationBarTitleText": "设置",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "edit-field",
+      "style": {
+        "navigationBarTitleText": "编辑资料",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
+    }, {
+      "path": "profile/index",
+      "style": {
+        "navigationBarTitleText": "个人资料",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "phone/index",
+      "style": {
+        "navigationBarTitleText": "手机绑定",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "wechat/index",
+      "style": {
+        "navigationBarTitleText": "微信账号",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "calendar",
+      "style": {
+        "navigationBarTitleText": "我的课程日历",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white"
+      }
+    }, {
+      "path": "course-notifications",
+      "style": {
+        "navigationBarTitleText": "课程通知",
+        "navigationBarBackgroundColor": "#EC7A49",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false
+      }
+    }]
   }]
 };
 exports.default = _default;
-
-/***/ }),
-
-/***/ 370:
-/*!**************************************************************************************!*\
-  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vuex3/dist/vuex.common.js ***!
-  \**************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {/*!
- * vuex v3.6.2
- * (c) 2021 Evan You
- * @license MIT
- */
-
-
-function applyMixin (Vue) {
-  var version = Number(Vue.version.split('.')[0]);
-
-  if (version >= 2) {
-    Vue.mixin({ beforeCreate: vuexInit });
-  } else {
-    // override init and inject vuex init procedure
-    // for 1.x backwards compatibility.
-    var _init = Vue.prototype._init;
-    Vue.prototype._init = function (options) {
-      if ( options === void 0 ) options = {};
-
-      options.init = options.init
-        ? [vuexInit].concat(options.init)
-        : vuexInit;
-      _init.call(this, options);
-    };
-  }
-
-  /**
-   * Vuex init hook, injected into each instances init hooks list.
-   */
-
-  function vuexInit () {
-    var options = this.$options;
-    // store injection
-    if (options.store) {
-      this.$store = typeof options.store === 'function'
-        ? options.store()
-        : options.store;
-    } else if (options.parent && options.parent.$store) {
-      this.$store = options.parent.$store;
-    }
-  }
-}
-
-var target = typeof window !== 'undefined'
-  ? window
-  : typeof global !== 'undefined'
-    ? global
-    : {};
-var devtoolHook = target.__VUE_DEVTOOLS_GLOBAL_HOOK__;
-
-function devtoolPlugin (store) {
-  if (!devtoolHook) { return }
-
-  store._devtoolHook = devtoolHook;
-
-  devtoolHook.emit('vuex:init', store);
-
-  devtoolHook.on('vuex:travel-to-state', function (targetState) {
-    store.replaceState(targetState);
-  });
-
-  store.subscribe(function (mutation, state) {
-    devtoolHook.emit('vuex:mutation', mutation, state);
-  }, { prepend: true });
-
-  store.subscribeAction(function (action, state) {
-    devtoolHook.emit('vuex:action', action, state);
-  }, { prepend: true });
-}
-
-/**
- * Get the first item that pass the test
- * by second argument function
- *
- * @param {Array} list
- * @param {Function} f
- * @return {*}
- */
-function find (list, f) {
-  return list.filter(f)[0]
-}
-
-/**
- * Deep copy the given object considering circular structure.
- * This function caches all nested objects and its copies.
- * If it detects circular structure, use cached copy to avoid infinite loop.
- *
- * @param {*} obj
- * @param {Array<Object>} cache
- * @return {*}
- */
-function deepCopy (obj, cache) {
-  if ( cache === void 0 ) cache = [];
-
-  // just return if obj is immutable value
-  if (obj === null || typeof obj !== 'object') {
-    return obj
-  }
-
-  // if obj is hit, it is in circular structure
-  var hit = find(cache, function (c) { return c.original === obj; });
-  if (hit) {
-    return hit.copy
-  }
-
-  var copy = Array.isArray(obj) ? [] : {};
-  // put the copy into cache at first
-  // because we want to refer it in recursive deepCopy
-  cache.push({
-    original: obj,
-    copy: copy
-  });
-
-  Object.keys(obj).forEach(function (key) {
-    copy[key] = deepCopy(obj[key], cache);
-  });
-
-  return copy
-}
-
-/**
- * forEach for object
- */
-function forEachValue (obj, fn) {
-  Object.keys(obj).forEach(function (key) { return fn(obj[key], key); });
-}
-
-function isObject (obj) {
-  return obj !== null && typeof obj === 'object'
-}
-
-function isPromise (val) {
-  return val && typeof val.then === 'function'
-}
-
-function assert (condition, msg) {
-  if (!condition) { throw new Error(("[vuex] " + msg)) }
-}
-
-function partial (fn, arg) {
-  return function () {
-    return fn(arg)
-  }
-}
-
-// Base data struct for store's module, package with some attribute and method
-var Module = function Module (rawModule, runtime) {
-  this.runtime = runtime;
-  // Store some children item
-  this._children = Object.create(null);
-  // Store the origin module object which passed by programmer
-  this._rawModule = rawModule;
-  var rawState = rawModule.state;
-
-  // Store the origin module's state
-  this.state = (typeof rawState === 'function' ? rawState() : rawState) || {};
-};
-
-var prototypeAccessors = { namespaced: { configurable: true } };
-
-prototypeAccessors.namespaced.get = function () {
-  return !!this._rawModule.namespaced
-};
-
-Module.prototype.addChild = function addChild (key, module) {
-  this._children[key] = module;
-};
-
-Module.prototype.removeChild = function removeChild (key) {
-  delete this._children[key];
-};
-
-Module.prototype.getChild = function getChild (key) {
-  return this._children[key]
-};
-
-Module.prototype.hasChild = function hasChild (key) {
-  return key in this._children
-};
-
-Module.prototype.update = function update (rawModule) {
-  this._rawModule.namespaced = rawModule.namespaced;
-  if (rawModule.actions) {
-    this._rawModule.actions = rawModule.actions;
-  }
-  if (rawModule.mutations) {
-    this._rawModule.mutations = rawModule.mutations;
-  }
-  if (rawModule.getters) {
-    this._rawModule.getters = rawModule.getters;
-  }
-};
-
-Module.prototype.forEachChild = function forEachChild (fn) {
-  forEachValue(this._children, fn);
-};
-
-Module.prototype.forEachGetter = function forEachGetter (fn) {
-  if (this._rawModule.getters) {
-    forEachValue(this._rawModule.getters, fn);
-  }
-};
-
-Module.prototype.forEachAction = function forEachAction (fn) {
-  if (this._rawModule.actions) {
-    forEachValue(this._rawModule.actions, fn);
-  }
-};
-
-Module.prototype.forEachMutation = function forEachMutation (fn) {
-  if (this._rawModule.mutations) {
-    forEachValue(this._rawModule.mutations, fn);
-  }
-};
-
-Object.defineProperties( Module.prototype, prototypeAccessors );
-
-var ModuleCollection = function ModuleCollection (rawRootModule) {
-  // register root module (Vuex.Store options)
-  this.register([], rawRootModule, false);
-};
-
-ModuleCollection.prototype.get = function get (path) {
-  return path.reduce(function (module, key) {
-    return module.getChild(key)
-  }, this.root)
-};
-
-ModuleCollection.prototype.getNamespace = function getNamespace (path) {
-  var module = this.root;
-  return path.reduce(function (namespace, key) {
-    module = module.getChild(key);
-    return namespace + (module.namespaced ? key + '/' : '')
-  }, '')
-};
-
-ModuleCollection.prototype.update = function update$1 (rawRootModule) {
-  update([], this.root, rawRootModule);
-};
-
-ModuleCollection.prototype.register = function register (path, rawModule, runtime) {
-    var this$1 = this;
-    if ( runtime === void 0 ) runtime = true;
-
-  if ((true)) {
-    assertRawModule(path, rawModule);
-  }
-
-  var newModule = new Module(rawModule, runtime);
-  if (path.length === 0) {
-    this.root = newModule;
-  } else {
-    var parent = this.get(path.slice(0, -1));
-    parent.addChild(path[path.length - 1], newModule);
-  }
-
-  // register nested modules
-  if (rawModule.modules) {
-    forEachValue(rawModule.modules, function (rawChildModule, key) {
-      this$1.register(path.concat(key), rawChildModule, runtime);
-    });
-  }
-};
-
-ModuleCollection.prototype.unregister = function unregister (path) {
-  var parent = this.get(path.slice(0, -1));
-  var key = path[path.length - 1];
-  var child = parent.getChild(key);
-
-  if (!child) {
-    if ((true)) {
-      console.warn(
-        "[vuex] trying to unregister module '" + key + "', which is " +
-        "not registered"
-      );
-    }
-    return
-  }
-
-  if (!child.runtime) {
-    return
-  }
-
-  parent.removeChild(key);
-};
-
-ModuleCollection.prototype.isRegistered = function isRegistered (path) {
-  var parent = this.get(path.slice(0, -1));
-  var key = path[path.length - 1];
-
-  if (parent) {
-    return parent.hasChild(key)
-  }
-
-  return false
-};
-
-function update (path, targetModule, newModule) {
-  if ((true)) {
-    assertRawModule(path, newModule);
-  }
-
-  // update target module
-  targetModule.update(newModule);
-
-  // update nested modules
-  if (newModule.modules) {
-    for (var key in newModule.modules) {
-      if (!targetModule.getChild(key)) {
-        if ((true)) {
-          console.warn(
-            "[vuex] trying to add a new module '" + key + "' on hot reloading, " +
-            'manual reload is needed'
-          );
-        }
-        return
-      }
-      update(
-        path.concat(key),
-        targetModule.getChild(key),
-        newModule.modules[key]
-      );
-    }
-  }
-}
-
-var functionAssert = {
-  assert: function (value) { return typeof value === 'function'; },
-  expected: 'function'
-};
-
-var objectAssert = {
-  assert: function (value) { return typeof value === 'function' ||
-    (typeof value === 'object' && typeof value.handler === 'function'); },
-  expected: 'function or object with "handler" function'
-};
-
-var assertTypes = {
-  getters: functionAssert,
-  mutations: functionAssert,
-  actions: objectAssert
-};
-
-function assertRawModule (path, rawModule) {
-  Object.keys(assertTypes).forEach(function (key) {
-    if (!rawModule[key]) { return }
-
-    var assertOptions = assertTypes[key];
-
-    forEachValue(rawModule[key], function (value, type) {
-      assert(
-        assertOptions.assert(value),
-        makeAssertionMessage(path, key, type, value, assertOptions.expected)
-      );
-    });
-  });
-}
-
-function makeAssertionMessage (path, key, type, value, expected) {
-  var buf = key + " should be " + expected + " but \"" + key + "." + type + "\"";
-  if (path.length > 0) {
-    buf += " in module \"" + (path.join('.')) + "\"";
-  }
-  buf += " is " + (JSON.stringify(value)) + ".";
-  return buf
-}
-
-var Vue; // bind on install
-
-var Store = function Store (options) {
-  var this$1 = this;
-  if ( options === void 0 ) options = {};
-
-  // Auto install if it is not done yet and `window` has `Vue`.
-  // To allow users to avoid auto-installation in some cases,
-  // this code should be placed here. See #731
-  if (!Vue && typeof window !== 'undefined' && window.Vue) {
-    install(window.Vue);
-  }
-
-  if ((true)) {
-    assert(Vue, "must call Vue.use(Vuex) before creating a store instance.");
-    assert(typeof Promise !== 'undefined', "vuex requires a Promise polyfill in this browser.");
-    assert(this instanceof Store, "store must be called with the new operator.");
-  }
-
-  var plugins = options.plugins; if ( plugins === void 0 ) plugins = [];
-  var strict = options.strict; if ( strict === void 0 ) strict = false;
-
-  // store internal state
-  this._committing = false;
-  this._actions = Object.create(null);
-  this._actionSubscribers = [];
-  this._mutations = Object.create(null);
-  this._wrappedGetters = Object.create(null);
-  this._modules = new ModuleCollection(options);
-  this._modulesNamespaceMap = Object.create(null);
-  this._subscribers = [];
-  this._watcherVM = new Vue();
-  this._makeLocalGettersCache = Object.create(null);
-
-  // bind commit and dispatch to self
-  var store = this;
-  var ref = this;
-  var dispatch = ref.dispatch;
-  var commit = ref.commit;
-  this.dispatch = function boundDispatch (type, payload) {
-    return dispatch.call(store, type, payload)
-  };
-  this.commit = function boundCommit (type, payload, options) {
-    return commit.call(store, type, payload, options)
-  };
-
-  // strict mode
-  this.strict = strict;
-
-  var state = this._modules.root.state;
-
-  // init root module.
-  // this also recursively registers all sub-modules
-  // and collects all module getters inside this._wrappedGetters
-  installModule(this, state, [], this._modules.root);
-
-  // initialize the store vm, which is responsible for the reactivity
-  // (also registers _wrappedGetters as computed properties)
-  resetStoreVM(this, state);
-
-  // apply plugins
-  plugins.forEach(function (plugin) { return plugin(this$1); });
-
-  var useDevtools = options.devtools !== undefined ? options.devtools : Vue.config.devtools;
-  if (useDevtools) {
-    devtoolPlugin(this);
-  }
-};
-
-var prototypeAccessors$1 = { state: { configurable: true } };
-
-prototypeAccessors$1.state.get = function () {
-  return this._vm._data.$$state
-};
-
-prototypeAccessors$1.state.set = function (v) {
-  if ((true)) {
-    assert(false, "use store.replaceState() to explicit replace store state.");
-  }
-};
-
-Store.prototype.commit = function commit (_type, _payload, _options) {
-    var this$1 = this;
-
-  // check object-style commit
-  var ref = unifyObjectStyle(_type, _payload, _options);
-    var type = ref.type;
-    var payload = ref.payload;
-    var options = ref.options;
-
-  var mutation = { type: type, payload: payload };
-  var entry = this._mutations[type];
-  if (!entry) {
-    if ((true)) {
-      console.error(("[vuex] unknown mutation type: " + type));
-    }
-    return
-  }
-  this._withCommit(function () {
-    entry.forEach(function commitIterator (handler) {
-      handler(payload);
-    });
-  });
-
-  this._subscribers
-    .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
-    .forEach(function (sub) { return sub(mutation, this$1.state); });
-
-  if (
-    ( true) &&
-    options && options.silent
-  ) {
-    console.warn(
-      "[vuex] mutation type: " + type + ". Silent option has been removed. " +
-      'Use the filter functionality in the vue-devtools'
-    );
-  }
-};
-
-Store.prototype.dispatch = function dispatch (_type, _payload) {
-    var this$1 = this;
-
-  // check object-style dispatch
-  var ref = unifyObjectStyle(_type, _payload);
-    var type = ref.type;
-    var payload = ref.payload;
-
-  var action = { type: type, payload: payload };
-  var entry = this._actions[type];
-  if (!entry) {
-    if ((true)) {
-      console.error(("[vuex] unknown action type: " + type));
-    }
-    return
-  }
-
-  try {
-    this._actionSubscribers
-      .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
-      .filter(function (sub) { return sub.before; })
-      .forEach(function (sub) { return sub.before(action, this$1.state); });
-  } catch (e) {
-    if ((true)) {
-      console.warn("[vuex] error in before action subscribers: ");
-      console.error(e);
-    }
-  }
-
-  var result = entry.length > 1
-    ? Promise.all(entry.map(function (handler) { return handler(payload); }))
-    : entry[0](payload);
-
-  return new Promise(function (resolve, reject) {
-    result.then(function (res) {
-      try {
-        this$1._actionSubscribers
-          .filter(function (sub) { return sub.after; })
-          .forEach(function (sub) { return sub.after(action, this$1.state); });
-      } catch (e) {
-        if ((true)) {
-          console.warn("[vuex] error in after action subscribers: ");
-          console.error(e);
-        }
-      }
-      resolve(res);
-    }, function (error) {
-      try {
-        this$1._actionSubscribers
-          .filter(function (sub) { return sub.error; })
-          .forEach(function (sub) { return sub.error(action, this$1.state, error); });
-      } catch (e) {
-        if ((true)) {
-          console.warn("[vuex] error in error action subscribers: ");
-          console.error(e);
-        }
-      }
-      reject(error);
-    });
-  })
-};
-
-Store.prototype.subscribe = function subscribe (fn, options) {
-  return genericSubscribe(fn, this._subscribers, options)
-};
-
-Store.prototype.subscribeAction = function subscribeAction (fn, options) {
-  var subs = typeof fn === 'function' ? { before: fn } : fn;
-  return genericSubscribe(subs, this._actionSubscribers, options)
-};
-
-Store.prototype.watch = function watch (getter, cb, options) {
-    var this$1 = this;
-
-  if ((true)) {
-    assert(typeof getter === 'function', "store.watch only accepts a function.");
-  }
-  return this._watcherVM.$watch(function () { return getter(this$1.state, this$1.getters); }, cb, options)
-};
-
-Store.prototype.replaceState = function replaceState (state) {
-    var this$1 = this;
-
-  this._withCommit(function () {
-    this$1._vm._data.$$state = state;
-  });
-};
-
-Store.prototype.registerModule = function registerModule (path, rawModule, options) {
-    if ( options === void 0 ) options = {};
-
-  if (typeof path === 'string') { path = [path]; }
-
-  if ((true)) {
-    assert(Array.isArray(path), "module path must be a string or an Array.");
-    assert(path.length > 0, 'cannot register the root module by using registerModule.');
-  }
-
-  this._modules.register(path, rawModule);
-  installModule(this, this.state, path, this._modules.get(path), options.preserveState);
-  // reset store to update getters...
-  resetStoreVM(this, this.state);
-};
-
-Store.prototype.unregisterModule = function unregisterModule (path) {
-    var this$1 = this;
-
-  if (typeof path === 'string') { path = [path]; }
-
-  if ((true)) {
-    assert(Array.isArray(path), "module path must be a string or an Array.");
-  }
-
-  this._modules.unregister(path);
-  this._withCommit(function () {
-    var parentState = getNestedState(this$1.state, path.slice(0, -1));
-    Vue.delete(parentState, path[path.length - 1]);
-  });
-  resetStore(this);
-};
-
-Store.prototype.hasModule = function hasModule (path) {
-  if (typeof path === 'string') { path = [path]; }
-
-  if ((true)) {
-    assert(Array.isArray(path), "module path must be a string or an Array.");
-  }
-
-  return this._modules.isRegistered(path)
-};
-
-Store.prototype[[104,111,116,85,112,100,97,116,101].map(function (item) {return String.fromCharCode(item)}).join('')] = function (newOptions) {
-  this._modules.update(newOptions);
-  resetStore(this, true);
-};
-
-Store.prototype._withCommit = function _withCommit (fn) {
-  var committing = this._committing;
-  this._committing = true;
-  fn();
-  this._committing = committing;
-};
-
-Object.defineProperties( Store.prototype, prototypeAccessors$1 );
-
-function genericSubscribe (fn, subs, options) {
-  if (subs.indexOf(fn) < 0) {
-    options && options.prepend
-      ? subs.unshift(fn)
-      : subs.push(fn);
-  }
-  return function () {
-    var i = subs.indexOf(fn);
-    if (i > -1) {
-      subs.splice(i, 1);
-    }
-  }
-}
-
-function resetStore (store, hot) {
-  store._actions = Object.create(null);
-  store._mutations = Object.create(null);
-  store._wrappedGetters = Object.create(null);
-  store._modulesNamespaceMap = Object.create(null);
-  var state = store.state;
-  // init all modules
-  installModule(store, state, [], store._modules.root, true);
-  // reset vm
-  resetStoreVM(store, state, hot);
-}
-
-function resetStoreVM (store, state, hot) {
-  var oldVm = store._vm;
-
-  // bind store public getters
-  store.getters = {};
-  // reset local getters cache
-  store._makeLocalGettersCache = Object.create(null);
-  var wrappedGetters = store._wrappedGetters;
-  var computed = {};
-  forEachValue(wrappedGetters, function (fn, key) {
-    // use computed to leverage its lazy-caching mechanism
-    // direct inline function use will lead to closure preserving oldVm.
-    // using partial to return function with only arguments preserved in closure environment.
-    computed[key] = partial(fn, store);
-    Object.defineProperty(store.getters, key, {
-      get: function () { return store._vm[key]; },
-      enumerable: true // for local getters
-    });
-  });
-
-  // use a Vue instance to store the state tree
-  // suppress warnings just in case the user has added
-  // some funky global mixins
-  var silent = Vue.config.silent;
-  Vue.config.silent = true;
-  store._vm = new Vue({
-    data: {
-      $$state: state
-    },
-    computed: computed
-  });
-  Vue.config.silent = silent;
-
-  // enable strict mode for new vm
-  if (store.strict) {
-    enableStrictMode(store);
-  }
-
-  if (oldVm) {
-    if (hot) {
-      // dispatch changes in all subscribed watchers
-      // to force getter re-evaluation for hot reloading.
-      store._withCommit(function () {
-        oldVm._data.$$state = null;
-      });
-    }
-    Vue.nextTick(function () { return oldVm.$destroy(); });
-  }
-}
-
-function installModule (store, rootState, path, module, hot) {
-  var isRoot = !path.length;
-  var namespace = store._modules.getNamespace(path);
-
-  // register in namespace map
-  if (module.namespaced) {
-    if (store._modulesNamespaceMap[namespace] && ("development" !== 'production')) {
-      console.error(("[vuex] duplicate namespace " + namespace + " for the namespaced module " + (path.join('/'))));
-    }
-    store._modulesNamespaceMap[namespace] = module;
-  }
-
-  // set state
-  if (!isRoot && !hot) {
-    var parentState = getNestedState(rootState, path.slice(0, -1));
-    var moduleName = path[path.length - 1];
-    store._withCommit(function () {
-      if ((true)) {
-        if (moduleName in parentState) {
-          console.warn(
-            ("[vuex] state field \"" + moduleName + "\" was overridden by a module with the same name at \"" + (path.join('.')) + "\"")
-          );
-        }
-      }
-      Vue.set(parentState, moduleName, module.state);
-    });
-  }
-
-  var local = module.context = makeLocalContext(store, namespace, path);
-
-  module.forEachMutation(function (mutation, key) {
-    var namespacedType = namespace + key;
-    registerMutation(store, namespacedType, mutation, local);
-  });
-
-  module.forEachAction(function (action, key) {
-    var type = action.root ? key : namespace + key;
-    var handler = action.handler || action;
-    registerAction(store, type, handler, local);
-  });
-
-  module.forEachGetter(function (getter, key) {
-    var namespacedType = namespace + key;
-    registerGetter(store, namespacedType, getter, local);
-  });
-
-  module.forEachChild(function (child, key) {
-    installModule(store, rootState, path.concat(key), child, hot);
-  });
-}
-
-/**
- * make localized dispatch, commit, getters and state
- * if there is no namespace, just use root ones
- */
-function makeLocalContext (store, namespace, path) {
-  var noNamespace = namespace === '';
-
-  var local = {
-    dispatch: noNamespace ? store.dispatch : function (_type, _payload, _options) {
-      var args = unifyObjectStyle(_type, _payload, _options);
-      var payload = args.payload;
-      var options = args.options;
-      var type = args.type;
-
-      if (!options || !options.root) {
-        type = namespace + type;
-        if (( true) && !store._actions[type]) {
-          console.error(("[vuex] unknown local action type: " + (args.type) + ", global type: " + type));
-          return
-        }
-      }
-
-      return store.dispatch(type, payload)
-    },
-
-    commit: noNamespace ? store.commit : function (_type, _payload, _options) {
-      var args = unifyObjectStyle(_type, _payload, _options);
-      var payload = args.payload;
-      var options = args.options;
-      var type = args.type;
-
-      if (!options || !options.root) {
-        type = namespace + type;
-        if (( true) && !store._mutations[type]) {
-          console.error(("[vuex] unknown local mutation type: " + (args.type) + ", global type: " + type));
-          return
-        }
-      }
-
-      store.commit(type, payload, options);
-    }
-  };
-
-  // getters and state object must be gotten lazily
-  // because they will be changed by vm update
-  Object.defineProperties(local, {
-    getters: {
-      get: noNamespace
-        ? function () { return store.getters; }
-        : function () { return makeLocalGetters(store, namespace); }
-    },
-    state: {
-      get: function () { return getNestedState(store.state, path); }
-    }
-  });
-
-  return local
-}
-
-function makeLocalGetters (store, namespace) {
-  if (!store._makeLocalGettersCache[namespace]) {
-    var gettersProxy = {};
-    var splitPos = namespace.length;
-    Object.keys(store.getters).forEach(function (type) {
-      // skip if the target getter is not match this namespace
-      if (type.slice(0, splitPos) !== namespace) { return }
-
-      // extract local getter type
-      var localType = type.slice(splitPos);
-
-      // Add a port to the getters proxy.
-      // Define as getter property because
-      // we do not want to evaluate the getters in this time.
-      Object.defineProperty(gettersProxy, localType, {
-        get: function () { return store.getters[type]; },
-        enumerable: true
-      });
-    });
-    store._makeLocalGettersCache[namespace] = gettersProxy;
-  }
-
-  return store._makeLocalGettersCache[namespace]
-}
-
-function registerMutation (store, type, handler, local) {
-  var entry = store._mutations[type] || (store._mutations[type] = []);
-  entry.push(function wrappedMutationHandler (payload) {
-    handler.call(store, local.state, payload);
-  });
-}
-
-function registerAction (store, type, handler, local) {
-  var entry = store._actions[type] || (store._actions[type] = []);
-  entry.push(function wrappedActionHandler (payload) {
-    var res = handler.call(store, {
-      dispatch: local.dispatch,
-      commit: local.commit,
-      getters: local.getters,
-      state: local.state,
-      rootGetters: store.getters,
-      rootState: store.state
-    }, payload);
-    if (!isPromise(res)) {
-      res = Promise.resolve(res);
-    }
-    if (store._devtoolHook) {
-      return res.catch(function (err) {
-        store._devtoolHook.emit('vuex:error', err);
-        throw err
-      })
-    } else {
-      return res
-    }
-  });
-}
-
-function registerGetter (store, type, rawGetter, local) {
-  if (store._wrappedGetters[type]) {
-    if ((true)) {
-      console.error(("[vuex] duplicate getter key: " + type));
-    }
-    return
-  }
-  store._wrappedGetters[type] = function wrappedGetter (store) {
-    return rawGetter(
-      local.state, // local state
-      local.getters, // local getters
-      store.state, // root state
-      store.getters // root getters
-    )
-  };
-}
-
-function enableStrictMode (store) {
-  store._vm.$watch(function () { return this._data.$$state }, function () {
-    if ((true)) {
-      assert(store._committing, "do not mutate vuex store state outside mutation handlers.");
-    }
-  }, { deep: true, sync: true });
-}
-
-function getNestedState (state, path) {
-  return path.reduce(function (state, key) { return state[key]; }, state)
-}
-
-function unifyObjectStyle (type, payload, options) {
-  if (isObject(type) && type.type) {
-    options = payload;
-    payload = type;
-    type = type.type;
-  }
-
-  if ((true)) {
-    assert(typeof type === 'string', ("expects string as the type, but found " + (typeof type) + "."));
-  }
-
-  return { type: type, payload: payload, options: options }
-}
-
-function install (_Vue) {
-  if (Vue && _Vue === Vue) {
-    if ((true)) {
-      console.error(
-        '[vuex] already installed. Vue.use(Vuex) should be called only once.'
-      );
-    }
-    return
-  }
-  Vue = _Vue;
-  applyMixin(Vue);
-}
-
-/**
- * Reduce the code which written in Vue.js for getting the state.
- * @param {String} [namespace] - Module's namespace
- * @param {Object|Array} states # Object's item can be a function which accept state and getters for param, you can do something for state and getters in it.
- * @param {Object}
- */
-var mapState = normalizeNamespace(function (namespace, states) {
-  var res = {};
-  if (( true) && !isValidMap(states)) {
-    console.error('[vuex] mapState: mapper parameter must be either an Array or an Object');
-  }
-  normalizeMap(states).forEach(function (ref) {
-    var key = ref.key;
-    var val = ref.val;
-
-    res[key] = function mappedState () {
-      var state = this.$store.state;
-      var getters = this.$store.getters;
-      if (namespace) {
-        var module = getModuleByNamespace(this.$store, 'mapState', namespace);
-        if (!module) {
-          return
-        }
-        state = module.context.state;
-        getters = module.context.getters;
-      }
-      return typeof val === 'function'
-        ? val.call(this, state, getters)
-        : state[val]
-    };
-    // mark vuex getter for devtools
-    res[key].vuex = true;
-  });
-  return res
-});
-
-/**
- * Reduce the code which written in Vue.js for committing the mutation
- * @param {String} [namespace] - Module's namespace
- * @param {Object|Array} mutations # Object's item can be a function which accept `commit` function as the first param, it can accept another params. You can commit mutation and do any other things in this function. specially, You need to pass anthor params from the mapped function.
- * @return {Object}
- */
-var mapMutations = normalizeNamespace(function (namespace, mutations) {
-  var res = {};
-  if (( true) && !isValidMap(mutations)) {
-    console.error('[vuex] mapMutations: mapper parameter must be either an Array or an Object');
-  }
-  normalizeMap(mutations).forEach(function (ref) {
-    var key = ref.key;
-    var val = ref.val;
-
-    res[key] = function mappedMutation () {
-      var args = [], len = arguments.length;
-      while ( len-- ) args[ len ] = arguments[ len ];
-
-      // Get the commit method from store
-      var commit = this.$store.commit;
-      if (namespace) {
-        var module = getModuleByNamespace(this.$store, 'mapMutations', namespace);
-        if (!module) {
-          return
-        }
-        commit = module.context.commit;
-      }
-      return typeof val === 'function'
-        ? val.apply(this, [commit].concat(args))
-        : commit.apply(this.$store, [val].concat(args))
-    };
-  });
-  return res
-});
-
-/**
- * Reduce the code which written in Vue.js for getting the getters
- * @param {String} [namespace] - Module's namespace
- * @param {Object|Array} getters
- * @return {Object}
- */
-var mapGetters = normalizeNamespace(function (namespace, getters) {
-  var res = {};
-  if (( true) && !isValidMap(getters)) {
-    console.error('[vuex] mapGetters: mapper parameter must be either an Array or an Object');
-  }
-  normalizeMap(getters).forEach(function (ref) {
-    var key = ref.key;
-    var val = ref.val;
-
-    // The namespace has been mutated by normalizeNamespace
-    val = namespace + val;
-    res[key] = function mappedGetter () {
-      if (namespace && !getModuleByNamespace(this.$store, 'mapGetters', namespace)) {
-        return
-      }
-      if (( true) && !(val in this.$store.getters)) {
-        console.error(("[vuex] unknown getter: " + val));
-        return
-      }
-      return this.$store.getters[val]
-    };
-    // mark vuex getter for devtools
-    res[key].vuex = true;
-  });
-  return res
-});
-
-/**
- * Reduce the code which written in Vue.js for dispatch the action
- * @param {String} [namespace] - Module's namespace
- * @param {Object|Array} actions # Object's item can be a function which accept `dispatch` function as the first param, it can accept anthor params. You can dispatch action and do any other things in this function. specially, You need to pass anthor params from the mapped function.
- * @return {Object}
- */
-var mapActions = normalizeNamespace(function (namespace, actions) {
-  var res = {};
-  if (( true) && !isValidMap(actions)) {
-    console.error('[vuex] mapActions: mapper parameter must be either an Array or an Object');
-  }
-  normalizeMap(actions).forEach(function (ref) {
-    var key = ref.key;
-    var val = ref.val;
-
-    res[key] = function mappedAction () {
-      var args = [], len = arguments.length;
-      while ( len-- ) args[ len ] = arguments[ len ];
-
-      // get dispatch function from store
-      var dispatch = this.$store.dispatch;
-      if (namespace) {
-        var module = getModuleByNamespace(this.$store, 'mapActions', namespace);
-        if (!module) {
-          return
-        }
-        dispatch = module.context.dispatch;
-      }
-      return typeof val === 'function'
-        ? val.apply(this, [dispatch].concat(args))
-        : dispatch.apply(this.$store, [val].concat(args))
-    };
-  });
-  return res
-});
-
-/**
- * Rebinding namespace param for mapXXX function in special scoped, and return them by simple object
- * @param {String} namespace
- * @return {Object}
- */
-var createNamespacedHelpers = function (namespace) { return ({
-  mapState: mapState.bind(null, namespace),
-  mapGetters: mapGetters.bind(null, namespace),
-  mapMutations: mapMutations.bind(null, namespace),
-  mapActions: mapActions.bind(null, namespace)
-}); };
-
-/**
- * Normalize the map
- * normalizeMap([1, 2, 3]) => [ { key: 1, val: 1 }, { key: 2, val: 2 }, { key: 3, val: 3 } ]
- * normalizeMap({a: 1, b: 2, c: 3}) => [ { key: 'a', val: 1 }, { key: 'b', val: 2 }, { key: 'c', val: 3 } ]
- * @param {Array|Object} map
- * @return {Object}
- */
-function normalizeMap (map) {
-  if (!isValidMap(map)) {
-    return []
-  }
-  return Array.isArray(map)
-    ? map.map(function (key) { return ({ key: key, val: key }); })
-    : Object.keys(map).map(function (key) { return ({ key: key, val: map[key] }); })
-}
-
-/**
- * Validate whether given map is valid or not
- * @param {*} map
- * @return {Boolean}
- */
-function isValidMap (map) {
-  return Array.isArray(map) || isObject(map)
-}
-
-/**
- * Return a function expect two param contains namespace and map. it will normalize the namespace and then the param's function will handle the new namespace and the map.
- * @param {Function} fn
- * @return {Function}
- */
-function normalizeNamespace (fn) {
-  return function (namespace, map) {
-    if (typeof namespace !== 'string') {
-      map = namespace;
-      namespace = '';
-    } else if (namespace.charAt(namespace.length - 1) !== '/') {
-      namespace += '/';
-    }
-    return fn(namespace, map)
-  }
-}
-
-/**
- * Search a special module from store by namespace. if module not exist, print error message.
- * @param {Object} store
- * @param {String} helper
- * @param {String} namespace
- * @return {Object}
- */
-function getModuleByNamespace (store, helper, namespace) {
-  var module = store._modulesNamespaceMap[namespace];
-  if (( true) && !module) {
-    console.error(("[vuex] module namespace not found in " + helper + "(): " + namespace));
-  }
-  return module
-}
-
-// Credits: borrowed code from fcomb/redux-logger
-
-function createLogger (ref) {
-  if ( ref === void 0 ) ref = {};
-  var collapsed = ref.collapsed; if ( collapsed === void 0 ) collapsed = true;
-  var filter = ref.filter; if ( filter === void 0 ) filter = function (mutation, stateBefore, stateAfter) { return true; };
-  var transformer = ref.transformer; if ( transformer === void 0 ) transformer = function (state) { return state; };
-  var mutationTransformer = ref.mutationTransformer; if ( mutationTransformer === void 0 ) mutationTransformer = function (mut) { return mut; };
-  var actionFilter = ref.actionFilter; if ( actionFilter === void 0 ) actionFilter = function (action, state) { return true; };
-  var actionTransformer = ref.actionTransformer; if ( actionTransformer === void 0 ) actionTransformer = function (act) { return act; };
-  var logMutations = ref.logMutations; if ( logMutations === void 0 ) logMutations = true;
-  var logActions = ref.logActions; if ( logActions === void 0 ) logActions = true;
-  var logger = ref.logger; if ( logger === void 0 ) logger = console;
-
-  return function (store) {
-    var prevState = deepCopy(store.state);
-
-    if (typeof logger === 'undefined') {
-      return
-    }
-
-    if (logMutations) {
-      store.subscribe(function (mutation, state) {
-        var nextState = deepCopy(state);
-
-        if (filter(mutation, prevState, nextState)) {
-          var formattedTime = getFormattedTime();
-          var formattedMutation = mutationTransformer(mutation);
-          var message = "mutation " + (mutation.type) + formattedTime;
-
-          startMessage(logger, message, collapsed);
-          logger.log('%c prev state', 'color: #9E9E9E; font-weight: bold', transformer(prevState));
-          logger.log('%c mutation', 'color: #03A9F4; font-weight: bold', formattedMutation);
-          logger.log('%c next state', 'color: #4CAF50; font-weight: bold', transformer(nextState));
-          endMessage(logger);
-        }
-
-        prevState = nextState;
-      });
-    }
-
-    if (logActions) {
-      store.subscribeAction(function (action, state) {
-        if (actionFilter(action, state)) {
-          var formattedTime = getFormattedTime();
-          var formattedAction = actionTransformer(action);
-          var message = "action " + (action.type) + formattedTime;
-
-          startMessage(logger, message, collapsed);
-          logger.log('%c action', 'color: #03A9F4; font-weight: bold', formattedAction);
-          endMessage(logger);
-        }
-      });
-    }
-  }
-}
-
-function startMessage (logger, message, collapsed) {
-  var startMessage = collapsed
-    ? logger.groupCollapsed
-    : logger.group;
-
-  // render
-  try {
-    startMessage.call(logger, message);
-  } catch (e) {
-    logger.log(message);
-  }
-}
-
-function endMessage (logger) {
-  try {
-    logger.groupEnd();
-  } catch (e) {
-    logger.log('—— log end ——');
-  }
-}
-
-function getFormattedTime () {
-  var time = new Date();
-  return (" @ " + (pad(time.getHours(), 2)) + ":" + (pad(time.getMinutes(), 2)) + ":" + (pad(time.getSeconds(), 2)) + "." + (pad(time.getMilliseconds(), 3)))
-}
-
-function repeat (str, times) {
-  return (new Array(times + 1)).join(str)
-}
-
-function pad (num, maxLength) {
-  return repeat('0', maxLength - num.toString().length) + num
-}
-
-var index_cjs = {
-  Store: Store,
-  install: install,
-  version: '3.6.2',
-  mapState: mapState,
-  mapMutations: mapMutations,
-  mapGetters: mapGetters,
-  mapActions: mapActions,
-  createNamespacedHelpers: createNamespacedHelpers,
-  createLogger: createLogger
-};
-
-module.exports = index_cjs;
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3)))
 
 /***/ }),
 
@@ -22223,176 +22232,247 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 387:
-/*!********************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/register/validator.js ***!
-  \********************************************************************************************************************************/
+/***/ 394:
+/*!***********************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/api/modules/user.js ***!
+  \***********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.addFavorite = addFavorite;
+exports.checkFavorite = checkFavorite;
 exports.default = void 0;
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _password = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/common/password.js */ 388));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-var _default = _objectSpread({
-  "username": {
-    "rules": [{
-      required: true,
-      errorMessage: '请输入用户名'
-    }, {
-      minLength: 3,
-      maxLength: 32,
-      errorMessage: '用户名长度在 {minLength} 到 {maxLength} 个字符'
-    }, {
-      validateFunction: function validateFunction(rule, value, data, callback) {
-        // console.log(value);
-        if (/^1\d{10}$/.test(value) || /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(value)) {
-          callback('用户名不能是：手机号或邮箱');
-        }
-        ;
-        if (/^\d+$/.test(value)) {
-          callback('用户名不能为纯数字');
-        }
-        ;
-        if (/[\u4E00-\u9FA5\uF900-\uFA2D]{1,}/.test(value)) {
-          callback('用户名不能包含中文');
-        }
-        return true;
-      }
-    }],
-    "label": "用户名"
-  },
-  "nickname": {
-    "rules": [{
-      minLength: 3,
-      maxLength: 32,
-      errorMessage: '昵称长度在 {minLength} 到 {maxLength} 个字符'
-    }, {
-      validateFunction: function validateFunction(rule, value, data, callback) {
-        // console.log(value);
-        if (/^1\d{10}$/.test(value) || /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(value)) {
-          callback('昵称不能是：手机号或邮箱');
-        }
-        ;
-        if (/^\d+$/.test(value)) {
-          callback('昵称不能为纯数字');
-        }
-        ;
-        if (/[\u4E00-\u9FA5\uF900-\uFA2D]{1,}/.test(value)) {
-          callback('昵称不能包含中文');
-        }
-        return true;
-      }
-    }],
-    "label": "昵称"
-  }
-}, _password.default.getPwdRules());
-exports.default = _default;
+exports.getUserInfo = getUserInfo;
+exports.getWxOpenid = getWxOpenid;
+exports.login = login;
+exports.logout = logout;
+exports.removeFavorite = removeFavorite;
+exports.updatePhoneNumber = updatePhoneNumber;
+var _request = _interopRequireDefault(__webpack_require__(/*! ../request */ 91));
+var _token = __webpack_require__(/*! @/utils/token.js */ 142);
+/**
+ * 用户相关API
+ */
 
-/***/ }),
-
-/***/ 388:
-/*!***********************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/common/password.js ***!
-  \***********************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _config = _interopRequireDefault(__webpack_require__(/*! @/uni_modules/uni-id-pages/config.js */ 46));
-// 导入配置
-
-var passwordStrength = _config.default.passwordStrength;
-
-// 密码强度表达式
-var passwordRules = {
-  // 密码必须包含大小写字母、数字和特殊符号
-  super: /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/])[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{8,16}$/,
-  // 密码必须包含字母、数字和特殊符号
-  strong: /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/])[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{8,16}$/,
-  // 密码必须为字母、数字和特殊符号任意两种的组合
-  medium: /^(?![0-9]+$)(?![a-zA-Z]+$)(?![~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]+$)[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{8,16}$/,
-  // 密码必须包含字母和数字
-  weak: /^(?=.*[0-9])(?=.*[a-zA-Z])[0-9a-zA-Z~!@#$%^&*_\-+=`|\\(){}[\]:;"'<>,.?/]{6,16}$/
-};
-var ERROR = {
-  normal: {
-    noPwd: '请输入密码',
-    noRePwd: '再次输入密码',
-    rePwdErr: '两次输入密码不一致'
-  },
-  passwordStrengthError: {
-    super: '密码必须包含大小写字母、数字和特殊符号，密码长度必须在8-16位之间',
-    strong: '密码必须包含字母、数字和特殊符号，密码长度必须在8-16位之间',
-    medium: '密码必须为字母、数字和特殊符号任意两种的组合，密码长度必须在8-16位之间',
-    weak: '密码必须包含字母，密码长度必须在6-16位之间'
-  }
-};
-function validPwd(password) {
-  //强度校验
-  if (passwordStrength && passwordRules[passwordStrength]) {
-    if (!new RegExp(passwordRules[passwordStrength]).test(password)) {
-      return ERROR.passwordStrengthError[passwordStrength];
-    }
-  }
-  return true;
+/**
+ * 用户登录
+ * @param {Object} params - 登录参数
+ * @param {String} params.code - 微信登录code
+ * @param {Object} params.userInfo - 用户信息
+ * @param {String} params.loginType - 登录类型 wechat/phone
+ * @param {String} params.phoneNumber - 手机号(loginType为phone时必填)
+ * @returns {Promise} API请求Promise
+ */
+function login() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用login API，参数:', params);
+  return (0, _request.default)({
+    name: 'login',
+    data: params
+  });
 }
-function getPwdRules() {
-  var pwdName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'password';
-  var rePwdName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'password2';
-  var rules = {};
-  rules[pwdName] = {
-    rules: [{
-      required: true,
-      errorMessage: ERROR.normal.noPwd
-    }, {
-      validateFunction: function validateFunction(rule, value, data, callback) {
-        var checkRes = validPwd(value);
-        if (checkRes !== true) {
-          callback(checkRes);
-        }
-        return true;
-      }
-    }]
-  };
-  if (rePwdName) {
-    rules[rePwdName] = {
-      rules: [{
-        required: true,
-        errorMessage: ERROR.normal.noRePwd
-      }, {
-        validateFunction: function validateFunction(rule, value, data, callback) {
-          if (value != data[pwdName]) {
-            callback(ERROR.normal.rePwdErr);
-          }
-          return true;
-        }
-      }]
-    };
+
+/**
+ * 获取微信OpenID
+ * @param {Object} params - 请求参数
+ * @param {String} params.code - 微信登录code
+ * @returns {Promise} API请求Promise
+ */
+function getWxOpenid() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用getWxOpenid API，参数:', params);
+  if (!params.code) {
+    return Promise.reject(new Error('缺少code参数'));
   }
-  return rules;
+  return (0, _request.default)({
+    name: 'getWxOpenid',
+    data: params
+  });
+}
+
+/**
+ * 获取用户信息
+ * @returns {Promise} API请求Promise
+ */
+function getUserInfo() {
+  return (0, _request.default)({
+    name: 'getUserInfo',
+    data: {}
+  });
+}
+
+/**
+ * 退出登录
+ * @returns {Promise} API请求Promise
+ */
+function logout() {
+  return (0, _request.default)({
+    name: 'logout',
+    data: {}
+  });
+}
+
+/**
+ * 检查课程/讲座/老师是否已收藏
+ * @param {Object} params - 请求参数
+ * @param {String} params.userId - 用户ID
+ * @param {String} params.itemId - 项目ID
+ * @param {String} params.itemType - 项目类型(course/lecture/teacher)
+ * @returns {Promise} API请求Promise
+ */
+function checkFavorite() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用checkFavorite API，参数:', params);
+  if (!params.userId || !params.itemId || !params.itemType) {
+    console.error('检查收藏状态失败: 参数不完整', params);
+    return Promise.reject(new Error('参数不完整'));
+  }
+  return (0, _request.default)({
+    name: 'checkFavorite',
+    data: params
+  });
+}
+
+/**
+ * 添加收藏
+ * @param {Object} params - 请求参数
+ * @param {String} params.userId - 用户ID
+ * @param {String} params.itemId - 项目ID
+ * @param {String} params.itemType - 项目类型(course/lecture/teacher)
+ * @param {String} params.itemTitle - 项目标题
+ * @param {String} params.itemCover - 项目封面图
+ * @param {String} params.itemUrl - 项目URL
+ * @returns {Promise} API请求Promise
+ */
+function addFavorite() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用addFavorite API，参数:', params);
+  if (!params.userId || !params.itemId || !params.itemType) {
+    console.error('添加收藏失败: 参数不完整', params);
+    return Promise.reject(new Error('参数不完整'));
+  }
+  return (0, _request.default)({
+    name: 'addFavorite',
+    data: params
+  });
+}
+
+/**
+ * 删除收藏
+ * @param {String} favoriteId - 收藏记录ID
+ * @returns {Promise} API请求Promise
+ */
+function removeFavorite(favoriteId) {
+  console.log('调用removeFavorite API，参数:', favoriteId);
+  if (!favoriteId) {
+    console.error('删除收藏失败: 收藏ID不能为空');
+    return Promise.reject(new Error('收藏ID不能为空'));
+  }
+  return (0, _request.default)({
+    name: 'removeFavorite',
+    data: {
+      favoriteId: favoriteId
+    }
+  });
+}
+
+/**
+ * 更新用户手机号
+ * @param {Object} params - 请求参数
+ * @param {String} params.phoneNumber - 新的手机号码
+ * @returns {Promise} API请求Promise
+ */
+function updatePhoneNumber() {
+  var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  console.log('调用updatePhoneNumber API，参数:', params);
+  if (!params.phoneNumber) {
+    return Promise.reject(new Error('缺少phoneNumber参数'));
+  }
+
+  // 尝试获取所有可能的token
+  var uniIdToken = (0, _token.getToken)();
+  var token = uni.getStorageSync('token') || '';
+  var userToken = uni.getStorageSync('userToken') || '';
+
+  // 获取优先级: uniIdToken > token > userToken
+  var effectiveToken = uniIdToken || token || userToken;
+
+  // 获取可能的用户ID
+  var userId = '';
+  try {
+    var userInfoStr = uni.getStorageSync('userInfo');
+    if (userInfoStr) {
+      // 检查是否已经是对象，避免重复解析
+      var userInfo;
+      if (typeof userInfoStr === 'string') {
+        userInfo = JSON.parse(userInfoStr);
+      } else {
+        // 已经是对象
+        userInfo = userInfoStr;
+      }
+      userId = userInfo._id || userInfo.userId || userInfo.id || '';
+    }
+  } catch (e) {
+    console.error('获取用户ID失败:', e);
+  }
+  console.log('使用token:', {
+    'uni_id_token': !!uniIdToken,
+    'token': !!token,
+    'userToken': !!userToken,
+    'effectiveToken': !!effectiveToken,
+    'userId': userId
+  });
+  return (0, _request.default)({
+    name: 'updateUserInfo',
+    data: {
+      // 明确指定update对象中的mobile字段
+      update: {
+        mobile: params.phoneNumber,
+        phoneNumber: params.phoneNumber,
+        mobile_confirmed: 1
+      },
+      // 直接在根级别也提供mobile字段，以防update对象处理有问题
+      mobile: params.phoneNumber,
+      phoneNumber: params.phoneNumber,
+      mobile_confirmed: 1,
+      // 用户ID参数，使用多种可能的参数名增加成功率
+      uid: userId,
+      // uni-id标准用户ID参数
+      userId: userId,
+      // 常见用户ID参数
+      _id: userId,
+      // MongoDB文档ID
+      id: userId,
+      // 通用ID参数名
+      user_id: userId,
+      // 下划线格式ID
+
+      // token相关参数
+      uniIdToken: effectiveToken,
+      token: effectiveToken,
+      userToken: effectiveToken
+    }
+  });
 }
 var _default = {
-  ERROR: ERROR,
-  validPwd: validPwd,
-  getPwdRules: getPwdRules
+  login: login,
+  getWxOpenid: getWxOpenid,
+  getUserInfo: getUserInfo,
+  logout: logout,
+  updatePhoneNumber: updatePhoneNumber,
+  checkFavorite: checkFavorite,
+  addFavorite: addFavorite,
+  removeFavorite: removeFavorite
 };
 exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 
@@ -22544,55 +22624,6 @@ function normalizeComponent (
 
 /***/ }),
 
-/***/ 447:
-/*!********************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/index.js ***!
-  \********************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 448));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 449));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 450));
-var _default = {
-  en: _en.default,
-  'zh-Hans': _zhHans.default,
-  'zh-Hant': _zhHant.default
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 448:
-/*!*******************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/en.json ***!
-  \*******************************************************************************************************************************************/
-/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"Pull up to show more\",\"uni-load-more.contentrefresh\":\"loading...\",\"uni-load-more.contentnomore\":\"No more data\"}");
-
-/***/ }),
-
-/***/ 449:
-/*!************************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hans.json ***!
-  \************************************************************************************************************************************************/
-/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉显示更多\",\"uni-load-more.contentrefresh\":\"正在加载...\",\"uni-load-more.contentnomore\":\"没有更多数据了\"}");
-
-/***/ }),
-
 /***/ 45:
 /*!************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/init.js ***!
@@ -22730,17 +22761,6 @@ function _ref() {
 
 /***/ }),
 
-/***/ 450:
-/*!************************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hant.json ***!
-  \************************************************************************************************************************************************/
-/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉顯示更多\",\"uni-load-more.contentrefresh\":\"正在加載...\",\"uni-load-more.contentnomore\":\"沒有更多數據了\"}");
-
-/***/ }),
-
 /***/ 46:
 /*!**************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/config.js ***!
@@ -22784,108 +22804,6 @@ var _default = {
   setPasswordAfterLogin: false
 };
 exports.default = _default;
-
-/***/ }),
-
-/***/ 465:
-/*!*******************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
-  \*******************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = {
-  data: function data() {
-    return {};
-  },
-  created: function created() {
-    this.popup = this.getParent();
-  },
-  methods: {
-    /**
-     * 获取父元素实例
-     */
-    getParent: function getParent() {
-      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'uniPopup';
-      var parent = this.$parent;
-      var parentName = parent.$options.name;
-      while (parentName !== name) {
-        parent = parent.$parent;
-        if (!parent) return false;
-        parentName = parent.$options.name;
-      }
-      return parent;
-    }
-  }
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 466:
-/*!************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
-  \************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 467));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 468));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 469));
-var _default = {
-  en: _en.default,
-  'zh-Hans': _zhHans.default,
-  'zh-Hant': _zhHant.default
-};
-exports.default = _default;
-
-/***/ }),
-
-/***/ 467:
-/*!***********************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
-  \***********************************************************************************************************************************/
-/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\"ok\",\"uni-popup.placeholder\":\"pleace enter\",\"uni-popup.title\":\"Hint\",\"uni-popup.shareTitle\":\"Share to\"}");
-
-/***/ }),
-
-/***/ 468:
-/*!****************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
-  \****************************************************************************************************************************************/
-/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"确定\",\"uni-popup.placeholder\":\"请输入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
-
-/***/ }),
-
-/***/ 469:
-/*!****************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
-  \****************************************************************************************************************************************/
-/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
-/***/ (function(module) {
-
-module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"確定\",\"uni-popup.placeholder\":\"請輸入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
 
 /***/ }),
 
@@ -22933,7 +22851,7 @@ _vue.default.component('favorite-button', _favoriteButton.default);
 
 /***/ }),
 
-/***/ 477:
+/***/ 476:
 /*!**********************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/validate.js ***!
   \**********************************************************************************************************************************/
@@ -23625,7 +23543,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 478:
+/***/ 477:
 /*!*******************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-forms/components/uni-forms/utils.js ***!
   \*******************************************************************************************************************************/
@@ -23979,7 +23897,929 @@ module.exports = _slicedToArray, module.exports.__esModule = true, module.export
 
 /***/ }),
 
-/***/ 514:
+/***/ 541:
+/*!*******************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/popup.js ***!
+  \*******************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  data: function data() {
+    return {};
+  },
+  created: function created() {
+    this.popup = this.getParent();
+  },
+  methods: {
+    /**
+     * 获取父元素实例
+     */
+    getParent: function getParent() {
+      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'uniPopup';
+      var parent = this.$parent;
+      var parentName = parent.$options.name;
+      while (parentName !== name) {
+        parent = parent.$parent;
+        if (!parent) return false;
+        parentName = parent.$options.name;
+      }
+      return parent;
+    }
+  }
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 542:
+/*!************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/index.js ***!
+  \************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 543));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 544));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 545));
+var _default = {
+  en: _en.default,
+  'zh-Hans': _zhHans.default,
+  'zh-Hant': _zhHant.default
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 543:
+/*!***********************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/en.json ***!
+  \***********************************************************************************************************************************/
+/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-popup.cancel\":\"cancel\",\"uni-popup.ok\":\"ok\",\"uni-popup.placeholder\":\"pleace enter\",\"uni-popup.title\":\"Hint\",\"uni-popup.shareTitle\":\"Share to\"}");
+
+/***/ }),
+
+/***/ 544:
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hans.json ***!
+  \****************************************************************************************************************************************/
+/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"确定\",\"uni-popup.placeholder\":\"请输入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
+
+/***/ }),
+
+/***/ 545:
+/*!****************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-popup/components/uni-popup/i18n/zh-Hant.json ***!
+  \****************************************************************************************************************************************/
+/*! exports provided: uni-popup.cancel, uni-popup.ok, uni-popup.placeholder, uni-popup.title, uni-popup.shareTitle, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-popup.cancel\":\"取消\",\"uni-popup.ok\":\"確定\",\"uni-popup.placeholder\":\"請輸入\",\"uni-popup.title\":\"提示\",\"uni-popup.shareTitle\":\"分享到\"}");
+
+/***/ }),
+
+/***/ 560:
+/*!**************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
+  \**************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.calcImageOffset = calcImageOffset;
+exports.calcImageScale = calcImageScale;
+exports.calcImageSize = calcImageSize;
+exports.calcPythagoreanTheorem = calcPythagoreanTheorem;
+exports.clipTouchMoveOfCalculate = clipTouchMoveOfCalculate;
+exports.determineDirection = determineDirection;
+exports.imageTouchMoveOfCalcOffset = imageTouchMoveOfCalcOffset;
+/**
+ * 判断手指触摸位置
+ */
+function determineDirection(clipX, clipY, clipWidth, clipHeight, currentX, currentY) {
+  /*
+   * (右下>>1 右上>>2 左上>>3 左下>>4)
+   */
+  var corner;
+  /**
+   * 思路：（利用直角坐标系）
+   *  1.找出裁剪框中心点
+   *  2.如点击坐标在上方点与左方点区域内，则点击为左上角
+   *  3.如点击坐标在下方点与右方点区域内，则点击为右下角
+   *  4.其他角同理
+   */
+  var mainPoint = [clipX + clipWidth / 2, clipY + clipHeight / 2]; // 中心点
+  var currentPoint = [currentX, currentY]; // 触摸点
+
+  if (currentPoint[0] <= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
+    corner = 3; // 左上
+  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
+    corner = 2; // 右上
+  } else if (currentPoint[0] <= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
+    corner = 4; // 左下
+  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
+    corner = 1; // 右下
+  }
+
+  return corner;
+}
+
+/**
+ * 图片边缘检测检测时，计算图片偏移量
+ */
+function calcImageOffset(data, scale) {
+  var left = data.imageLeft;
+  var top = data.imageTop;
+  scale = scale || data.scale;
+  var imageWidth = data.imageWidth;
+  var imageHeight = data.imageHeight;
+  if (data.angle / 90 % 2) {
+    imageWidth = data.imageHeight;
+    imageHeight = data.imageWidth;
+  }
+  var clipX = data.clipX,
+    clipWidth = data.clipWidth,
+    clipY = data.clipY,
+    clipHeight = data.clipHeight;
+
+  // 当前图片宽度/高度
+  var currentImageSize = function currentImageSize(size) {
+    return size * scale / 2;
+  };
+  var currentImageWidth = currentImageSize(imageWidth);
+  var currentImageHeight = currentImageSize(imageHeight);
+  left = clipX + currentImageWidth >= left ? left : clipX + currentImageWidth;
+  left = clipX + clipWidth - currentImageWidth <= left ? left : clipX + clipWidth - currentImageWidth;
+  top = clipY + currentImageHeight >= top ? top : clipY + currentImageHeight;
+  top = clipY + clipHeight - currentImageHeight <= top ? top : clipY + clipHeight - currentImageHeight;
+  return {
+    left: left,
+    top: top,
+    scale: scale
+  };
+}
+
+/**
+ * 图片边缘检测时，计算图片缩放比例
+ */
+function calcImageScale(data, scale) {
+  scale = scale || data.scale;
+  var imageWidth = data.imageWidth,
+    imageHeight = data.imageHeight,
+    clipWidth = data.clipWidth,
+    clipHeight = data.clipHeight,
+    angle = data.angle;
+  if (angle / 90 % 2) {
+    imageWidth = imageHeight;
+    imageHeight = imageWidth;
+  }
+  if (imageWidth * scale < clipWidth) {
+    scale = clipWidth / imageWidth;
+  }
+  if (imageHeight * scale < clipHeight) {
+    scale = Math.max(scale, clipHeight / imageHeight);
+  }
+  return scale;
+}
+
+/**
+ * 计算图片尺寸
+ */
+function calcImageSize(width, height, data) {
+  var imageWidth = width,
+    imageHeight = height;
+  var clipWidth = data.clipWidth,
+    clipHeight = data.clipHeight,
+    sysinfo = data.sysinfo,
+    originWidth = data.width,
+    originHeight = data.height;
+  if (imageWidth && imageHeight) {
+    if (imageWidth / imageHeight > (clipWidth || originWidth) / (clipWidth || originHeight)) {
+      imageHeight = clipHeight || originHeight;
+      imageWidth = width / height * imageHeight;
+    } else {
+      imageWidth = clipWidth || originWidth;
+      imageHeight = height / width * imageWidth;
+    }
+  } else {
+    var sys = sysinfo || uni.getSystemInfoSync();
+    imageWidth = sys.windowWidth;
+    imageHeight = 0;
+  }
+  return {
+    imageWidth: imageWidth,
+    imageHeight: imageHeight
+  };
+}
+
+/**
+ * 勾股定理求斜边
+ */
+function calcPythagoreanTheorem(width, height) {
+  return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+}
+
+/**
+ * 拖动裁剪框时计算
+ */
+function clipTouchMoveOfCalculate(data, event) {
+  var clientX = event.touches[0].clientX;
+  var clientY = event.touches[0].clientY;
+  var clipWidth = data.clipWidth,
+    clipHeight = data.clipHeight,
+    oldClipY = data.clipY,
+    oldClipX = data.clipX,
+    clipStart = data.clipStart,
+    isLockRatio = data.isLockRatio,
+    maxWidth = data.maxWidth,
+    minWidth = data.minWidth,
+    maxHeight = data.maxHeight,
+    minHeight = data.minHeight;
+  maxWidth = maxWidth / 2;
+  minWidth = minWidth / 2;
+  minHeight = minHeight / 2;
+  maxHeight = maxHeight / 2;
+  var width = clipWidth,
+    height = clipHeight,
+    clipY = oldClipY,
+    clipX = oldClipX,
+    // 获取裁剪框实际宽度/高度
+    // 如果大于最大值则使用最大值
+    // 如果小于最小值则使用最小值
+    sizecorrect = function sizecorrect() {
+      width = width <= maxWidth ? width >= minWidth ? width : minWidth : maxWidth;
+      height = height <= maxHeight ? height >= minHeight ? height : minHeight : maxHeight;
+    },
+    sizeinspect = function sizeinspect() {
+      sizecorrect();
+      if ((width > maxWidth || width < minWidth || height > maxHeight || height < minHeight) && isLockRatio) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+  //if (clipStart.corner) {
+  height = clipStart.height + (clipStart.corner > 1 && clipStart.corner < 4 ? 1 : -1) * (clipStart.y - clientY);
+  //}
+  switch (clipStart.corner) {
+    case 1:
+      width = clipStart.width - clipStart.x + clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) return;
+      break;
+    case 2:
+      width = clipStart.width - clipStart.x + clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) {
+        return;
+      } else {
+        clipY = clipStart.clipY - (height - clipStart.height);
+      }
+      break;
+    case 3:
+      width = clipStart.width + clipStart.x - clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) {
+        return;
+      } else {
+        clipY = clipStart.clipY - (height - clipStart.height);
+        clipX = clipStart.clipX - (width - clipStart.width);
+      }
+      break;
+    case 4:
+      width = clipStart.width + clipStart.x - clientX;
+      if (isLockRatio) {
+        height = width / (clipWidth / clipHeight);
+      }
+      if (!sizeinspect()) {
+        return;
+      } else {
+        clipX = clipStart.clipX - (width - clipStart.width);
+      }
+      break;
+    default:
+      break;
+  }
+  return {
+    width: width,
+    height: height,
+    clipX: clipX,
+    clipY: clipY
+  };
+}
+
+/**
+ * 单指拖动图片计算偏移
+ */
+function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
+  var left = clientXForLeft - data.touchRelative[0].x,
+    top = clientYForLeft - data.touchRelative[0].y;
+  return {
+    left: left,
+    top: top
+  };
+}
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+
+/***/ 568:
+/*!*******************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
+  \*******************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fontData = void 0;
+var fontData = [{
+  "font_class": "arrow-down",
+  "unicode": "\uE6BE"
+}, {
+  "font_class": "arrow-left",
+  "unicode": "\uE6BC"
+}, {
+  "font_class": "arrow-right",
+  "unicode": "\uE6BB"
+}, {
+  "font_class": "arrow-up",
+  "unicode": "\uE6BD"
+}, {
+  "font_class": "auth",
+  "unicode": "\uE6AB"
+}, {
+  "font_class": "auth-filled",
+  "unicode": "\uE6CC"
+}, {
+  "font_class": "back",
+  "unicode": "\uE6B9"
+}, {
+  "font_class": "bars",
+  "unicode": "\uE627"
+}, {
+  "font_class": "calendar",
+  "unicode": "\uE6A0"
+}, {
+  "font_class": "calendar-filled",
+  "unicode": "\uE6C0"
+}, {
+  "font_class": "camera",
+  "unicode": "\uE65A"
+}, {
+  "font_class": "camera-filled",
+  "unicode": "\uE658"
+}, {
+  "font_class": "cart",
+  "unicode": "\uE631"
+}, {
+  "font_class": "cart-filled",
+  "unicode": "\uE6D0"
+}, {
+  "font_class": "chat",
+  "unicode": "\uE65D"
+}, {
+  "font_class": "chat-filled",
+  "unicode": "\uE659"
+}, {
+  "font_class": "chatboxes",
+  "unicode": "\uE696"
+}, {
+  "font_class": "chatboxes-filled",
+  "unicode": "\uE692"
+}, {
+  "font_class": "chatbubble",
+  "unicode": "\uE697"
+}, {
+  "font_class": "chatbubble-filled",
+  "unicode": "\uE694"
+}, {
+  "font_class": "checkbox",
+  "unicode": "\uE62B"
+}, {
+  "font_class": "checkbox-filled",
+  "unicode": "\uE62C"
+}, {
+  "font_class": "checkmarkempty",
+  "unicode": "\uE65C"
+}, {
+  "font_class": "circle",
+  "unicode": "\uE65B"
+}, {
+  "font_class": "circle-filled",
+  "unicode": "\uE65E"
+}, {
+  "font_class": "clear",
+  "unicode": "\uE66D"
+}, {
+  "font_class": "close",
+  "unicode": "\uE673"
+}, {
+  "font_class": "closeempty",
+  "unicode": "\uE66C"
+}, {
+  "font_class": "cloud-download",
+  "unicode": "\uE647"
+}, {
+  "font_class": "cloud-download-filled",
+  "unicode": "\uE646"
+}, {
+  "font_class": "cloud-upload",
+  "unicode": "\uE645"
+}, {
+  "font_class": "cloud-upload-filled",
+  "unicode": "\uE648"
+}, {
+  "font_class": "color",
+  "unicode": "\uE6CF"
+}, {
+  "font_class": "color-filled",
+  "unicode": "\uE6C9"
+}, {
+  "font_class": "compose",
+  "unicode": "\uE67F"
+}, {
+  "font_class": "contact",
+  "unicode": "\uE693"
+}, {
+  "font_class": "contact-filled",
+  "unicode": "\uE695"
+}, {
+  "font_class": "down",
+  "unicode": "\uE6B8"
+}, {
+  "font_class": "bottom",
+  "unicode": "\uE6B8"
+}, {
+  "font_class": "download",
+  "unicode": "\uE68D"
+}, {
+  "font_class": "download-filled",
+  "unicode": "\uE681"
+}, {
+  "font_class": "email",
+  "unicode": "\uE69E"
+}, {
+  "font_class": "email-filled",
+  "unicode": "\uE69A"
+}, {
+  "font_class": "eye",
+  "unicode": "\uE651"
+}, {
+  "font_class": "eye-filled",
+  "unicode": "\uE66A"
+}, {
+  "font_class": "eye-slash",
+  "unicode": "\uE6B3"
+}, {
+  "font_class": "eye-slash-filled",
+  "unicode": "\uE6B4"
+}, {
+  "font_class": "fire",
+  "unicode": "\uE6A1"
+}, {
+  "font_class": "fire-filled",
+  "unicode": "\uE6C5"
+}, {
+  "font_class": "flag",
+  "unicode": "\uE65F"
+}, {
+  "font_class": "flag-filled",
+  "unicode": "\uE660"
+}, {
+  "font_class": "folder-add",
+  "unicode": "\uE6A9"
+}, {
+  "font_class": "folder-add-filled",
+  "unicode": "\uE6C8"
+}, {
+  "font_class": "font",
+  "unicode": "\uE6A3"
+}, {
+  "font_class": "forward",
+  "unicode": "\uE6BA"
+}, {
+  "font_class": "gear",
+  "unicode": "\uE664"
+}, {
+  "font_class": "gear-filled",
+  "unicode": "\uE661"
+}, {
+  "font_class": "gift",
+  "unicode": "\uE6A4"
+}, {
+  "font_class": "gift-filled",
+  "unicode": "\uE6C4"
+}, {
+  "font_class": "hand-down",
+  "unicode": "\uE63D"
+}, {
+  "font_class": "hand-down-filled",
+  "unicode": "\uE63C"
+}, {
+  "font_class": "hand-up",
+  "unicode": "\uE63F"
+}, {
+  "font_class": "hand-up-filled",
+  "unicode": "\uE63E"
+}, {
+  "font_class": "headphones",
+  "unicode": "\uE630"
+}, {
+  "font_class": "heart",
+  "unicode": "\uE639"
+}, {
+  "font_class": "heart-filled",
+  "unicode": "\uE641"
+}, {
+  "font_class": "help",
+  "unicode": "\uE679"
+}, {
+  "font_class": "help-filled",
+  "unicode": "\uE674"
+}, {
+  "font_class": "home",
+  "unicode": "\uE662"
+}, {
+  "font_class": "home-filled",
+  "unicode": "\uE663"
+}, {
+  "font_class": "image",
+  "unicode": "\uE670"
+}, {
+  "font_class": "image-filled",
+  "unicode": "\uE678"
+}, {
+  "font_class": "images",
+  "unicode": "\uE650"
+}, {
+  "font_class": "images-filled",
+  "unicode": "\uE64B"
+}, {
+  "font_class": "info",
+  "unicode": "\uE669"
+}, {
+  "font_class": "info-filled",
+  "unicode": "\uE649"
+}, {
+  "font_class": "left",
+  "unicode": "\uE6B7"
+}, {
+  "font_class": "link",
+  "unicode": "\uE6A5"
+}, {
+  "font_class": "list",
+  "unicode": "\uE644"
+}, {
+  "font_class": "location",
+  "unicode": "\uE6AE"
+}, {
+  "font_class": "location-filled",
+  "unicode": "\uE6AF"
+}, {
+  "font_class": "locked",
+  "unicode": "\uE66B"
+}, {
+  "font_class": "locked-filled",
+  "unicode": "\uE668"
+}, {
+  "font_class": "loop",
+  "unicode": "\uE633"
+}, {
+  "font_class": "mail-open",
+  "unicode": "\uE643"
+}, {
+  "font_class": "mail-open-filled",
+  "unicode": "\uE63A"
+}, {
+  "font_class": "map",
+  "unicode": "\uE667"
+}, {
+  "font_class": "map-filled",
+  "unicode": "\uE666"
+}, {
+  "font_class": "map-pin",
+  "unicode": "\uE6AD"
+}, {
+  "font_class": "map-pin-ellipse",
+  "unicode": "\uE6AC"
+}, {
+  "font_class": "medal",
+  "unicode": "\uE6A2"
+}, {
+  "font_class": "medal-filled",
+  "unicode": "\uE6C3"
+}, {
+  "font_class": "mic",
+  "unicode": "\uE671"
+}, {
+  "font_class": "mic-filled",
+  "unicode": "\uE677"
+}, {
+  "font_class": "micoff",
+  "unicode": "\uE67E"
+}, {
+  "font_class": "micoff-filled",
+  "unicode": "\uE6B0"
+}, {
+  "font_class": "minus",
+  "unicode": "\uE66F"
+}, {
+  "font_class": "minus-filled",
+  "unicode": "\uE67D"
+}, {
+  "font_class": "more",
+  "unicode": "\uE64D"
+}, {
+  "font_class": "more-filled",
+  "unicode": "\uE64E"
+}, {
+  "font_class": "navigate",
+  "unicode": "\uE66E"
+}, {
+  "font_class": "navigate-filled",
+  "unicode": "\uE67A"
+}, {
+  "font_class": "notification",
+  "unicode": "\uE6A6"
+}, {
+  "font_class": "notification-filled",
+  "unicode": "\uE6C1"
+}, {
+  "font_class": "paperclip",
+  "unicode": "\uE652"
+}, {
+  "font_class": "paperplane",
+  "unicode": "\uE672"
+}, {
+  "font_class": "paperplane-filled",
+  "unicode": "\uE675"
+}, {
+  "font_class": "person",
+  "unicode": "\uE699"
+}, {
+  "font_class": "person-filled",
+  "unicode": "\uE69D"
+}, {
+  "font_class": "personadd",
+  "unicode": "\uE69F"
+}, {
+  "font_class": "personadd-filled",
+  "unicode": "\uE698"
+}, {
+  "font_class": "personadd-filled-copy",
+  "unicode": "\uE6D1"
+}, {
+  "font_class": "phone",
+  "unicode": "\uE69C"
+}, {
+  "font_class": "phone-filled",
+  "unicode": "\uE69B"
+}, {
+  "font_class": "plus",
+  "unicode": "\uE676"
+}, {
+  "font_class": "plus-filled",
+  "unicode": "\uE6C7"
+}, {
+  "font_class": "plusempty",
+  "unicode": "\uE67B"
+}, {
+  "font_class": "pulldown",
+  "unicode": "\uE632"
+}, {
+  "font_class": "pyq",
+  "unicode": "\uE682"
+}, {
+  "font_class": "qq",
+  "unicode": "\uE680"
+}, {
+  "font_class": "redo",
+  "unicode": "\uE64A"
+}, {
+  "font_class": "redo-filled",
+  "unicode": "\uE655"
+}, {
+  "font_class": "refresh",
+  "unicode": "\uE657"
+}, {
+  "font_class": "refresh-filled",
+  "unicode": "\uE656"
+}, {
+  "font_class": "refreshempty",
+  "unicode": "\uE6BF"
+}, {
+  "font_class": "reload",
+  "unicode": "\uE6B2"
+}, {
+  "font_class": "right",
+  "unicode": "\uE6B5"
+}, {
+  "font_class": "scan",
+  "unicode": "\uE62A"
+}, {
+  "font_class": "search",
+  "unicode": "\uE654"
+}, {
+  "font_class": "settings",
+  "unicode": "\uE653"
+}, {
+  "font_class": "settings-filled",
+  "unicode": "\uE6CE"
+}, {
+  "font_class": "shop",
+  "unicode": "\uE62F"
+}, {
+  "font_class": "shop-filled",
+  "unicode": "\uE6CD"
+}, {
+  "font_class": "smallcircle",
+  "unicode": "\uE67C"
+}, {
+  "font_class": "smallcircle-filled",
+  "unicode": "\uE665"
+}, {
+  "font_class": "sound",
+  "unicode": "\uE684"
+}, {
+  "font_class": "sound-filled",
+  "unicode": "\uE686"
+}, {
+  "font_class": "spinner-cycle",
+  "unicode": "\uE68A"
+}, {
+  "font_class": "staff",
+  "unicode": "\uE6A7"
+}, {
+  "font_class": "staff-filled",
+  "unicode": "\uE6CB"
+}, {
+  "font_class": "star",
+  "unicode": "\uE688"
+}, {
+  "font_class": "star-filled",
+  "unicode": "\uE68F"
+}, {
+  "font_class": "starhalf",
+  "unicode": "\uE683"
+}, {
+  "font_class": "trash",
+  "unicode": "\uE687"
+}, {
+  "font_class": "trash-filled",
+  "unicode": "\uE685"
+}, {
+  "font_class": "tune",
+  "unicode": "\uE6AA"
+}, {
+  "font_class": "tune-filled",
+  "unicode": "\uE6CA"
+}, {
+  "font_class": "undo",
+  "unicode": "\uE64F"
+}, {
+  "font_class": "undo-filled",
+  "unicode": "\uE64C"
+}, {
+  "font_class": "up",
+  "unicode": "\uE6B6"
+}, {
+  "font_class": "top",
+  "unicode": "\uE6B6"
+}, {
+  "font_class": "upload",
+  "unicode": "\uE690"
+}, {
+  "font_class": "upload-filled",
+  "unicode": "\uE68E"
+}, {
+  "font_class": "videocam",
+  "unicode": "\uE68C"
+}, {
+  "font_class": "videocam-filled",
+  "unicode": "\uE689"
+}, {
+  "font_class": "vip",
+  "unicode": "\uE6A8"
+}, {
+  "font_class": "vip-filled",
+  "unicode": "\uE6C6"
+}, {
+  "font_class": "wallet",
+  "unicode": "\uE6B1"
+}, {
+  "font_class": "wallet-filled",
+  "unicode": "\uE6C2"
+}, {
+  "font_class": "weibo",
+  "unicode": "\uE68B"
+}, {
+  "font_class": "weixin",
+  "unicode": "\uE691"
+}];
+
+// export const fontData = JSON.parse<IconsDataItem>(fontDataJson)
+exports.fontData = fontData;
+
+/***/ }),
+
+/***/ 576:
+/*!********************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/index.js ***!
+  \********************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 577));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 578));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 579));
+var _default = {
+  en: _en.default,
+  'zh-Hans': _zhHans.default,
+  'zh-Hant': _zhHant.default
+};
+exports.default = _default;
+
+/***/ }),
+
+/***/ 577:
+/*!*******************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/en.json ***!
+  \*******************************************************************************************************************************************/
+/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"Pull up to show more\",\"uni-load-more.contentrefresh\":\"loading...\",\"uni-load-more.contentnomore\":\"No more data\"}");
+
+/***/ }),
+
+/***/ 578:
+/*!************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hans.json ***!
+  \************************************************************************************************************************************************/
+/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉显示更多\",\"uni-load-more.contentrefresh\":\"正在加载...\",\"uni-load-more.contentnomore\":\"没有更多数据了\"}");
+
+/***/ }),
+
+/***/ 579:
+/*!************************************************************************************************************************************************!*\
+  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-load-more/components/uni-load-more/i18n/zh-Hant.json ***!
+  \************************************************************************************************************************************************/
+/*! exports provided: uni-load-more.contentdown, uni-load-more.contentrefresh, uni-load-more.contentnomore, default */
+/***/ (function(module) {
+
+module.exports = JSON.parse("{\"uni-load-more.contentdown\":\"上拉顯示更多\",\"uni-load-more.contentrefresh\":\"正在加載...\",\"uni-load-more.contentnomore\":\"沒有更多數據了\"}");
+
+/***/ }),
+
+/***/ 587:
 /*!************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/util.js ***!
   \************************************************************************************************************************************/
@@ -23997,7 +24837,7 @@ exports.default = void 0;
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
-var _calendar = _interopRequireDefault(__webpack_require__(/*! ./calendar.js */ 515));
+var _calendar = _interopRequireDefault(__webpack_require__(/*! ./calendar.js */ 588));
 var Calendar = /*#__PURE__*/function () {
   function Calendar() {
     var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -24395,7 +25235,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 515:
+/***/ 588:
 /*!****************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/calendar.js ***!
   \****************************************************************************************************************************************/
@@ -24911,7 +25751,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 516:
+/***/ 589:
 /*!******************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/index.js ***!
   \******************************************************************************************************************************************/
@@ -24926,9 +25766,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 517));
-var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 518));
-var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 519));
+var _en = _interopRequireDefault(__webpack_require__(/*! ./en.json */ 590));
+var _zhHans = _interopRequireDefault(__webpack_require__(/*! ./zh-Hans.json */ 591));
+var _zhHant = _interopRequireDefault(__webpack_require__(/*! ./zh-Hant.json */ 592));
 var _default = {
   en: _en.default,
   'zh-Hans': _zhHans.default,
@@ -24938,7 +25778,7 @@ exports.default = _default;
 
 /***/ }),
 
-/***/ 517:
+/***/ 590:
 /*!*****************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/en.json ***!
   \*****************************************************************************************************************************************/
@@ -24949,7 +25789,7 @@ module.exports = JSON.parse("{\"uni-calender.ok\":\"ok\",\"uni-calender.cancel\"
 
 /***/ }),
 
-/***/ 518:
+/***/ 591:
 /*!**********************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/zh-Hans.json ***!
   \**********************************************************************************************************************************************/
@@ -24960,7 +25800,7 @@ module.exports = JSON.parse("{\"uni-calender.ok\":\"确定\",\"uni-calender.canc
 
 /***/ }),
 
-/***/ 519:
+/***/ 592:
 /*!**********************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-calendar/components/uni-calendar/i18n/zh-Hant.json ***!
   \**********************************************************************************************************************************************/
@@ -24971,767 +25811,21 @@ module.exports = JSON.parse("{\"uni-calender.ok\":\"確定\",\"uni-calender.canc
 
 /***/ }),
 
-/***/ 527:
-/*!*******************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-icons/components/uni-icons/uniicons_file_vue.js ***!
-  \*******************************************************************************************************************************************/
+/***/ 6:
+/*!***************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
+  \***************************************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.fontData = void 0;
-var fontData = [{
-  "font_class": "arrow-down",
-  "unicode": "\uE6BE"
-}, {
-  "font_class": "arrow-left",
-  "unicode": "\uE6BC"
-}, {
-  "font_class": "arrow-right",
-  "unicode": "\uE6BB"
-}, {
-  "font_class": "arrow-up",
-  "unicode": "\uE6BD"
-}, {
-  "font_class": "auth",
-  "unicode": "\uE6AB"
-}, {
-  "font_class": "auth-filled",
-  "unicode": "\uE6CC"
-}, {
-  "font_class": "back",
-  "unicode": "\uE6B9"
-}, {
-  "font_class": "bars",
-  "unicode": "\uE627"
-}, {
-  "font_class": "calendar",
-  "unicode": "\uE6A0"
-}, {
-  "font_class": "calendar-filled",
-  "unicode": "\uE6C0"
-}, {
-  "font_class": "camera",
-  "unicode": "\uE65A"
-}, {
-  "font_class": "camera-filled",
-  "unicode": "\uE658"
-}, {
-  "font_class": "cart",
-  "unicode": "\uE631"
-}, {
-  "font_class": "cart-filled",
-  "unicode": "\uE6D0"
-}, {
-  "font_class": "chat",
-  "unicode": "\uE65D"
-}, {
-  "font_class": "chat-filled",
-  "unicode": "\uE659"
-}, {
-  "font_class": "chatboxes",
-  "unicode": "\uE696"
-}, {
-  "font_class": "chatboxes-filled",
-  "unicode": "\uE692"
-}, {
-  "font_class": "chatbubble",
-  "unicode": "\uE697"
-}, {
-  "font_class": "chatbubble-filled",
-  "unicode": "\uE694"
-}, {
-  "font_class": "checkbox",
-  "unicode": "\uE62B"
-}, {
-  "font_class": "checkbox-filled",
-  "unicode": "\uE62C"
-}, {
-  "font_class": "checkmarkempty",
-  "unicode": "\uE65C"
-}, {
-  "font_class": "circle",
-  "unicode": "\uE65B"
-}, {
-  "font_class": "circle-filled",
-  "unicode": "\uE65E"
-}, {
-  "font_class": "clear",
-  "unicode": "\uE66D"
-}, {
-  "font_class": "close",
-  "unicode": "\uE673"
-}, {
-  "font_class": "closeempty",
-  "unicode": "\uE66C"
-}, {
-  "font_class": "cloud-download",
-  "unicode": "\uE647"
-}, {
-  "font_class": "cloud-download-filled",
-  "unicode": "\uE646"
-}, {
-  "font_class": "cloud-upload",
-  "unicode": "\uE645"
-}, {
-  "font_class": "cloud-upload-filled",
-  "unicode": "\uE648"
-}, {
-  "font_class": "color",
-  "unicode": "\uE6CF"
-}, {
-  "font_class": "color-filled",
-  "unicode": "\uE6C9"
-}, {
-  "font_class": "compose",
-  "unicode": "\uE67F"
-}, {
-  "font_class": "contact",
-  "unicode": "\uE693"
-}, {
-  "font_class": "contact-filled",
-  "unicode": "\uE695"
-}, {
-  "font_class": "down",
-  "unicode": "\uE6B8"
-}, {
-  "font_class": "bottom",
-  "unicode": "\uE6B8"
-}, {
-  "font_class": "download",
-  "unicode": "\uE68D"
-}, {
-  "font_class": "download-filled",
-  "unicode": "\uE681"
-}, {
-  "font_class": "email",
-  "unicode": "\uE69E"
-}, {
-  "font_class": "email-filled",
-  "unicode": "\uE69A"
-}, {
-  "font_class": "eye",
-  "unicode": "\uE651"
-}, {
-  "font_class": "eye-filled",
-  "unicode": "\uE66A"
-}, {
-  "font_class": "eye-slash",
-  "unicode": "\uE6B3"
-}, {
-  "font_class": "eye-slash-filled",
-  "unicode": "\uE6B4"
-}, {
-  "font_class": "fire",
-  "unicode": "\uE6A1"
-}, {
-  "font_class": "fire-filled",
-  "unicode": "\uE6C5"
-}, {
-  "font_class": "flag",
-  "unicode": "\uE65F"
-}, {
-  "font_class": "flag-filled",
-  "unicode": "\uE660"
-}, {
-  "font_class": "folder-add",
-  "unicode": "\uE6A9"
-}, {
-  "font_class": "folder-add-filled",
-  "unicode": "\uE6C8"
-}, {
-  "font_class": "font",
-  "unicode": "\uE6A3"
-}, {
-  "font_class": "forward",
-  "unicode": "\uE6BA"
-}, {
-  "font_class": "gear",
-  "unicode": "\uE664"
-}, {
-  "font_class": "gear-filled",
-  "unicode": "\uE661"
-}, {
-  "font_class": "gift",
-  "unicode": "\uE6A4"
-}, {
-  "font_class": "gift-filled",
-  "unicode": "\uE6C4"
-}, {
-  "font_class": "hand-down",
-  "unicode": "\uE63D"
-}, {
-  "font_class": "hand-down-filled",
-  "unicode": "\uE63C"
-}, {
-  "font_class": "hand-up",
-  "unicode": "\uE63F"
-}, {
-  "font_class": "hand-up-filled",
-  "unicode": "\uE63E"
-}, {
-  "font_class": "headphones",
-  "unicode": "\uE630"
-}, {
-  "font_class": "heart",
-  "unicode": "\uE639"
-}, {
-  "font_class": "heart-filled",
-  "unicode": "\uE641"
-}, {
-  "font_class": "help",
-  "unicode": "\uE679"
-}, {
-  "font_class": "help-filled",
-  "unicode": "\uE674"
-}, {
-  "font_class": "home",
-  "unicode": "\uE662"
-}, {
-  "font_class": "home-filled",
-  "unicode": "\uE663"
-}, {
-  "font_class": "image",
-  "unicode": "\uE670"
-}, {
-  "font_class": "image-filled",
-  "unicode": "\uE678"
-}, {
-  "font_class": "images",
-  "unicode": "\uE650"
-}, {
-  "font_class": "images-filled",
-  "unicode": "\uE64B"
-}, {
-  "font_class": "info",
-  "unicode": "\uE669"
-}, {
-  "font_class": "info-filled",
-  "unicode": "\uE649"
-}, {
-  "font_class": "left",
-  "unicode": "\uE6B7"
-}, {
-  "font_class": "link",
-  "unicode": "\uE6A5"
-}, {
-  "font_class": "list",
-  "unicode": "\uE644"
-}, {
-  "font_class": "location",
-  "unicode": "\uE6AE"
-}, {
-  "font_class": "location-filled",
-  "unicode": "\uE6AF"
-}, {
-  "font_class": "locked",
-  "unicode": "\uE66B"
-}, {
-  "font_class": "locked-filled",
-  "unicode": "\uE668"
-}, {
-  "font_class": "loop",
-  "unicode": "\uE633"
-}, {
-  "font_class": "mail-open",
-  "unicode": "\uE643"
-}, {
-  "font_class": "mail-open-filled",
-  "unicode": "\uE63A"
-}, {
-  "font_class": "map",
-  "unicode": "\uE667"
-}, {
-  "font_class": "map-filled",
-  "unicode": "\uE666"
-}, {
-  "font_class": "map-pin",
-  "unicode": "\uE6AD"
-}, {
-  "font_class": "map-pin-ellipse",
-  "unicode": "\uE6AC"
-}, {
-  "font_class": "medal",
-  "unicode": "\uE6A2"
-}, {
-  "font_class": "medal-filled",
-  "unicode": "\uE6C3"
-}, {
-  "font_class": "mic",
-  "unicode": "\uE671"
-}, {
-  "font_class": "mic-filled",
-  "unicode": "\uE677"
-}, {
-  "font_class": "micoff",
-  "unicode": "\uE67E"
-}, {
-  "font_class": "micoff-filled",
-  "unicode": "\uE6B0"
-}, {
-  "font_class": "minus",
-  "unicode": "\uE66F"
-}, {
-  "font_class": "minus-filled",
-  "unicode": "\uE67D"
-}, {
-  "font_class": "more",
-  "unicode": "\uE64D"
-}, {
-  "font_class": "more-filled",
-  "unicode": "\uE64E"
-}, {
-  "font_class": "navigate",
-  "unicode": "\uE66E"
-}, {
-  "font_class": "navigate-filled",
-  "unicode": "\uE67A"
-}, {
-  "font_class": "notification",
-  "unicode": "\uE6A6"
-}, {
-  "font_class": "notification-filled",
-  "unicode": "\uE6C1"
-}, {
-  "font_class": "paperclip",
-  "unicode": "\uE652"
-}, {
-  "font_class": "paperplane",
-  "unicode": "\uE672"
-}, {
-  "font_class": "paperplane-filled",
-  "unicode": "\uE675"
-}, {
-  "font_class": "person",
-  "unicode": "\uE699"
-}, {
-  "font_class": "person-filled",
-  "unicode": "\uE69D"
-}, {
-  "font_class": "personadd",
-  "unicode": "\uE69F"
-}, {
-  "font_class": "personadd-filled",
-  "unicode": "\uE698"
-}, {
-  "font_class": "personadd-filled-copy",
-  "unicode": "\uE6D1"
-}, {
-  "font_class": "phone",
-  "unicode": "\uE69C"
-}, {
-  "font_class": "phone-filled",
-  "unicode": "\uE69B"
-}, {
-  "font_class": "plus",
-  "unicode": "\uE676"
-}, {
-  "font_class": "plus-filled",
-  "unicode": "\uE6C7"
-}, {
-  "font_class": "plusempty",
-  "unicode": "\uE67B"
-}, {
-  "font_class": "pulldown",
-  "unicode": "\uE632"
-}, {
-  "font_class": "pyq",
-  "unicode": "\uE682"
-}, {
-  "font_class": "qq",
-  "unicode": "\uE680"
-}, {
-  "font_class": "redo",
-  "unicode": "\uE64A"
-}, {
-  "font_class": "redo-filled",
-  "unicode": "\uE655"
-}, {
-  "font_class": "refresh",
-  "unicode": "\uE657"
-}, {
-  "font_class": "refresh-filled",
-  "unicode": "\uE656"
-}, {
-  "font_class": "refreshempty",
-  "unicode": "\uE6BF"
-}, {
-  "font_class": "reload",
-  "unicode": "\uE6B2"
-}, {
-  "font_class": "right",
-  "unicode": "\uE6B5"
-}, {
-  "font_class": "scan",
-  "unicode": "\uE62A"
-}, {
-  "font_class": "search",
-  "unicode": "\uE654"
-}, {
-  "font_class": "settings",
-  "unicode": "\uE653"
-}, {
-  "font_class": "settings-filled",
-  "unicode": "\uE6CE"
-}, {
-  "font_class": "shop",
-  "unicode": "\uE62F"
-}, {
-  "font_class": "shop-filled",
-  "unicode": "\uE6CD"
-}, {
-  "font_class": "smallcircle",
-  "unicode": "\uE67C"
-}, {
-  "font_class": "smallcircle-filled",
-  "unicode": "\uE665"
-}, {
-  "font_class": "sound",
-  "unicode": "\uE684"
-}, {
-  "font_class": "sound-filled",
-  "unicode": "\uE686"
-}, {
-  "font_class": "spinner-cycle",
-  "unicode": "\uE68A"
-}, {
-  "font_class": "staff",
-  "unicode": "\uE6A7"
-}, {
-  "font_class": "staff-filled",
-  "unicode": "\uE6CB"
-}, {
-  "font_class": "star",
-  "unicode": "\uE688"
-}, {
-  "font_class": "star-filled",
-  "unicode": "\uE68F"
-}, {
-  "font_class": "starhalf",
-  "unicode": "\uE683"
-}, {
-  "font_class": "trash",
-  "unicode": "\uE687"
-}, {
-  "font_class": "trash-filled",
-  "unicode": "\uE685"
-}, {
-  "font_class": "tune",
-  "unicode": "\uE6AA"
-}, {
-  "font_class": "tune-filled",
-  "unicode": "\uE6CA"
-}, {
-  "font_class": "undo",
-  "unicode": "\uE64F"
-}, {
-  "font_class": "undo-filled",
-  "unicode": "\uE64C"
-}, {
-  "font_class": "up",
-  "unicode": "\uE6B6"
-}, {
-  "font_class": "top",
-  "unicode": "\uE6B6"
-}, {
-  "font_class": "upload",
-  "unicode": "\uE690"
-}, {
-  "font_class": "upload-filled",
-  "unicode": "\uE68E"
-}, {
-  "font_class": "videocam",
-  "unicode": "\uE68C"
-}, {
-  "font_class": "videocam-filled",
-  "unicode": "\uE689"
-}, {
-  "font_class": "vip",
-  "unicode": "\uE6A8"
-}, {
-  "font_class": "vip-filled",
-  "unicode": "\uE6C6"
-}, {
-  "font_class": "wallet",
-  "unicode": "\uE6B1"
-}, {
-  "font_class": "wallet-filled",
-  "unicode": "\uE6C2"
-}, {
-  "font_class": "weibo",
-  "unicode": "\uE68B"
-}, {
-  "font_class": "weixin",
-  "unicode": "\uE691"
-}];
-
-// export const fontData = JSON.parse<IconsDataItem>(fontDataJson)
-exports.fontData = fontData;
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
 
-/***/ 584:
-/*!**************************************************************************************************************************************************!*\
-  !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-id-pages/pages/userinfo/cropImage/limeClipper/utils.js ***!
-  \**************************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.calcImageOffset = calcImageOffset;
-exports.calcImageScale = calcImageScale;
-exports.calcImageSize = calcImageSize;
-exports.calcPythagoreanTheorem = calcPythagoreanTheorem;
-exports.clipTouchMoveOfCalculate = clipTouchMoveOfCalculate;
-exports.determineDirection = determineDirection;
-exports.imageTouchMoveOfCalcOffset = imageTouchMoveOfCalcOffset;
-/**
- * 判断手指触摸位置
- */
-function determineDirection(clipX, clipY, clipWidth, clipHeight, currentX, currentY) {
-  /*
-   * (右下>>1 右上>>2 左上>>3 左下>>4)
-   */
-  var corner;
-  /**
-   * 思路：（利用直角坐标系）
-   *  1.找出裁剪框中心点
-   *  2.如点击坐标在上方点与左方点区域内，则点击为左上角
-   *  3.如点击坐标在下方点与右方点区域内，则点击为右下角
-   *  4.其他角同理
-   */
-  var mainPoint = [clipX + clipWidth / 2, clipY + clipHeight / 2]; // 中心点
-  var currentPoint = [currentX, currentY]; // 触摸点
-
-  if (currentPoint[0] <= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
-    corner = 3; // 左上
-  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] <= mainPoint[1]) {
-    corner = 2; // 右上
-  } else if (currentPoint[0] <= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
-    corner = 4; // 左下
-  } else if (currentPoint[0] >= mainPoint[0] && currentPoint[1] >= mainPoint[1]) {
-    corner = 1; // 右下
-  }
-
-  return corner;
-}
-
-/**
- * 图片边缘检测检测时，计算图片偏移量
- */
-function calcImageOffset(data, scale) {
-  var left = data.imageLeft;
-  var top = data.imageTop;
-  scale = scale || data.scale;
-  var imageWidth = data.imageWidth;
-  var imageHeight = data.imageHeight;
-  if (data.angle / 90 % 2) {
-    imageWidth = data.imageHeight;
-    imageHeight = data.imageWidth;
-  }
-  var clipX = data.clipX,
-    clipWidth = data.clipWidth,
-    clipY = data.clipY,
-    clipHeight = data.clipHeight;
-
-  // 当前图片宽度/高度
-  var currentImageSize = function currentImageSize(size) {
-    return size * scale / 2;
-  };
-  var currentImageWidth = currentImageSize(imageWidth);
-  var currentImageHeight = currentImageSize(imageHeight);
-  left = clipX + currentImageWidth >= left ? left : clipX + currentImageWidth;
-  left = clipX + clipWidth - currentImageWidth <= left ? left : clipX + clipWidth - currentImageWidth;
-  top = clipY + currentImageHeight >= top ? top : clipY + currentImageHeight;
-  top = clipY + clipHeight - currentImageHeight <= top ? top : clipY + clipHeight - currentImageHeight;
-  return {
-    left: left,
-    top: top,
-    scale: scale
-  };
-}
-
-/**
- * 图片边缘检测时，计算图片缩放比例
- */
-function calcImageScale(data, scale) {
-  scale = scale || data.scale;
-  var imageWidth = data.imageWidth,
-    imageHeight = data.imageHeight,
-    clipWidth = data.clipWidth,
-    clipHeight = data.clipHeight,
-    angle = data.angle;
-  if (angle / 90 % 2) {
-    imageWidth = imageHeight;
-    imageHeight = imageWidth;
-  }
-  if (imageWidth * scale < clipWidth) {
-    scale = clipWidth / imageWidth;
-  }
-  if (imageHeight * scale < clipHeight) {
-    scale = Math.max(scale, clipHeight / imageHeight);
-  }
-  return scale;
-}
-
-/**
- * 计算图片尺寸
- */
-function calcImageSize(width, height, data) {
-  var imageWidth = width,
-    imageHeight = height;
-  var clipWidth = data.clipWidth,
-    clipHeight = data.clipHeight,
-    sysinfo = data.sysinfo,
-    originWidth = data.width,
-    originHeight = data.height;
-  if (imageWidth && imageHeight) {
-    if (imageWidth / imageHeight > (clipWidth || originWidth) / (clipWidth || originHeight)) {
-      imageHeight = clipHeight || originHeight;
-      imageWidth = width / height * imageHeight;
-    } else {
-      imageWidth = clipWidth || originWidth;
-      imageHeight = height / width * imageWidth;
-    }
-  } else {
-    var sys = sysinfo || uni.getSystemInfoSync();
-    imageWidth = sys.windowWidth;
-    imageHeight = 0;
-  }
-  return {
-    imageWidth: imageWidth,
-    imageHeight: imageHeight
-  };
-}
-
-/**
- * 勾股定理求斜边
- */
-function calcPythagoreanTheorem(width, height) {
-  return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
-}
-
-/**
- * 拖动裁剪框时计算
- */
-function clipTouchMoveOfCalculate(data, event) {
-  var clientX = event.touches[0].clientX;
-  var clientY = event.touches[0].clientY;
-  var clipWidth = data.clipWidth,
-    clipHeight = data.clipHeight,
-    oldClipY = data.clipY,
-    oldClipX = data.clipX,
-    clipStart = data.clipStart,
-    isLockRatio = data.isLockRatio,
-    maxWidth = data.maxWidth,
-    minWidth = data.minWidth,
-    maxHeight = data.maxHeight,
-    minHeight = data.minHeight;
-  maxWidth = maxWidth / 2;
-  minWidth = minWidth / 2;
-  minHeight = minHeight / 2;
-  maxHeight = maxHeight / 2;
-  var width = clipWidth,
-    height = clipHeight,
-    clipY = oldClipY,
-    clipX = oldClipX,
-    // 获取裁剪框实际宽度/高度
-    // 如果大于最大值则使用最大值
-    // 如果小于最小值则使用最小值
-    sizecorrect = function sizecorrect() {
-      width = width <= maxWidth ? width >= minWidth ? width : minWidth : maxWidth;
-      height = height <= maxHeight ? height >= minHeight ? height : minHeight : maxHeight;
-    },
-    sizeinspect = function sizeinspect() {
-      sizecorrect();
-      if ((width > maxWidth || width < minWidth || height > maxHeight || height < minHeight) && isLockRatio) {
-        return false;
-      } else {
-        return true;
-      }
-    };
-  //if (clipStart.corner) {
-  height = clipStart.height + (clipStart.corner > 1 && clipStart.corner < 4 ? 1 : -1) * (clipStart.y - clientY);
-  //}
-  switch (clipStart.corner) {
-    case 1:
-      width = clipStart.width - clipStart.x + clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) return;
-      break;
-    case 2:
-      width = clipStart.width - clipStart.x + clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) {
-        return;
-      } else {
-        clipY = clipStart.clipY - (height - clipStart.height);
-      }
-      break;
-    case 3:
-      width = clipStart.width + clipStart.x - clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) {
-        return;
-      } else {
-        clipY = clipStart.clipY - (height - clipStart.height);
-        clipX = clipStart.clipX - (width - clipStart.width);
-      }
-      break;
-    case 4:
-      width = clipStart.width + clipStart.x - clientX;
-      if (isLockRatio) {
-        height = width / (clipWidth / clipHeight);
-      }
-      if (!sizeinspect()) {
-        return;
-      } else {
-        clipX = clipStart.clipX - (width - clipStart.width);
-      }
-      break;
-    default:
-      break;
-  }
-  return {
-    width: width,
-    height: height,
-    clipX: clipX,
-    clipY: clipY
-  };
-}
-
-/**
- * 单指拖动图片计算偏移
- */
-function imageTouchMoveOfCalcOffset(data, clientXForLeft, clientYForLeft) {
-  var left = clientXForLeft - data.touchRelative[0].x,
-    top = clientYForLeft - data.touchRelative[0].y;
-  return {
-    left: left,
-    top: top
-  };
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
-/***/ 592:
+/***/ 612:
 /*!***************************************************************************************************************************************************!*\
   !*** C:/Users/liuxingyu/Desktop/TurboTrainning-main/yueke/Siwei_chuzhong/uni_modules/uni-transition/components/uni-transition/createAnimation.js ***!
   \***************************************************************************************************************************************************/
@@ -25858,25 +25952,13 @@ animateTypes1.concat(animateTypes2, animateTypes3).forEach(function (type) {
   };
 });
 function createAnimation(option, _this) {
-  if (!_this) return;
-  clearTimeout(_this.timer);
+  if (!_this) return null;
+  if (typeof _this.timer !== 'undefined') {
+    clearTimeout(_this.timer);
+  }
   return new MPAnimation(option, _this);
 }
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
-
-/***/ }),
-
-/***/ 6:
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
 

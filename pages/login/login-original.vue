@@ -579,7 +579,7 @@ export default {
         console.log('准备跳转，重定向URL:', this.redirectUrl);
         
         // 判断是否是tabBar页面
-        const tabBarPages = ['/pages/index/index', '/pages/course/course', '/pages/user/user'];
+        const tabBarPages = ['/pages/index/index', '/pkgs/course/course', '/pages/user/user'];
         const isTabBarPage = tabBarPages.some(page => this.redirectUrl && this.redirectUrl.indexOf(page) === 0);
         
         if (this.redirectUrl) {

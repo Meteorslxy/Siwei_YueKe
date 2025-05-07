@@ -571,7 +571,7 @@ export const mutations = {
 			console.log('登录成功，跳转到个人中心页面');
 			setTimeout(() => {
 				uni.switchTab({
-					url: '/pages/user/user',
+					url: '/pkgs/user/user',
 					success: () => {
 						console.log('跳转到个人中心成功');
 					},

@@ -41,7 +41,7 @@
           class="schedule-item" 
           v-for="(item, index) in scheduleList" 
           :key="index"
-          @click="navigateTo(`/pages/course/detail?id=${item.courseId}`)">
+          @click="navigateTo(`/pkgs/course/detail?id=${item.courseId}`)">
           <view class="time-box">
             <text class="time">{{ item.startTime }} - {{ item.endTime }}</text>
           </view>

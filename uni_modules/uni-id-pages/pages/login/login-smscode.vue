@@ -95,7 +95,7 @@
 						autoBack: true,
 						toastText: '登录成功，跳转中...',
 						// 验证码登录成功后始终跳转到用户页面
-						uniIdRedirectUrl: '/pages/user/user'
+						uniIdRedirectUrl: '/pkgs/user/user'
 					});
 				}).catch(e => {
 					if (e.errCode == 'uni-id-captcha-required') {

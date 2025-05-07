@@ -1772,7 +1772,7 @@ export default {
     // 跳转到预约列表
     navigateToBookingList() {
       uni.navigateTo({
-        url: '/pages/user/booking?status=all'
+        url: '/pkgs/user/booking?status=all'
       });
     },
     

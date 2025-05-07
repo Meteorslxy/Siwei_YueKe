@@ -631,7 +631,7 @@ export default {
         if (successCount > 0 && failCount === 0) {
           setTimeout(() => {
             uni.navigateTo({
-              url: '/pages/user/booking'
+              url: '/pkgs/user/booking'
             });
           }, 2000);
         }
@@ -876,12 +876,12 @@ export default {
                   // 预约成功后，跳转到预约详情页
                   if (res.result.data && res.result.data.bookingId) {
                     uni.navigateTo({
-                      url: '/pages/user/booking-detail?id=' + res.result.data.bookingId
+                      url: '/pkgs/user/booking-detail?id=' + res.result.data.bookingId
                     });
                   } else {
                     // 跳转到预约列表页
                     uni.navigateTo({
-                      url: '/pages/user/booking'
+                      url: '/pkgs/user/booking'
                     });
                   }
                 }
@@ -1498,10 +1498,10 @@ export default {
         // 根据类型和ID构建URL
         switch (item.itemType) {
           case 'course':
-            url = `/pages/course/detail?id=${item.itemId}`;
+            url = `/pkgs/course/detail?id=${item.itemId}`;
             break;
           case 'lecture':
-            url = `/pages/course/lecture-detail?id=${item.itemId}`;
+            url = `/pkgs/course/lecture-detail?id=${item.itemId}`;
             break;
           case 'teacher':
             url = `/pages/teacher/detail?id=${item.itemId}`;

@@ -14,8 +14,58 @@
 </template>
 
 <script>
-// 引入一个简单的Markdown解析器
-import marked from '@/common/utils/marked.min.js';
+// 简单的Markdown解析
+function simpleMarkdown(markdownText) {
+  // 基本的markdown转HTML
+  let html = markdownText
+    // 标题转换
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
+    
+    // 列表转换
+    .replace(/^\* (.*$)/gm, '<ul><li>$1</li></ul>')
+    .replace(/^- (.*$)/gm, '<ul><li>$1</li></ul>')
+    .replace(/^[0-9]+\. (.*$)/gm, '<ol><li>$1</li></ol>')
+    
+    // 段落转换 - 连续的两个换行符表示段落
+    .replace(/\n\n/g, '</p><p>')
+    
+    // 强调和加粗
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    
+    // 链接
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+    
+    // 代码块
+    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    
+    // 行内代码
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    
+    // 水平线
+    .replace(/^\-\-\-$/gm, '<hr>')
+    
+    // 引用
+    .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+
+  // 修复列表标签问题
+  html = html
+    .replace(/<\/ul>\s*<ul>/g, '')
+    .replace(/<\/ol>\s*<ol>/g, '');
+  
+  // 确保整个内容被包裹在<p>标签内
+  if (!html.startsWith('<')) {
+    html = '<p>' + html;
+  }
+  if (!html.endsWith('>')) {
+    html += '</p>';
+  }
+  
+  return html;
+}
 
 export default {
   data() {
@@ -123,21 +173,8 @@ export default {
     // 渲染Markdown内容
     renderMarkdown(markdownText) {
       try {
-        // 如果有引入marked库
-        if (typeof marked === 'function') {
-          this.markdownHtml = marked(markdownText);
-        } else {
-          // 简单的处理，替换标题和段落
-          let html = markdownText
-            .replace(/^# (.*)/gm, '<h1>$1</h1>')
-            .replace(/^## (.*)/gm, '<h2>$1</h2>')
-            .replace(/^### (.*)/gm, '<h3>$1</h3>')
-            .replace(/\n\n/g, '<br><br>')
-            .replace(/\*\*(.*)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*)\*/g, '<em>$1</em>');
-          
-          this.markdownHtml = html;
-        }
+        // 使用内置的简单Markdown解析
+        this.markdownHtml = simpleMarkdown(markdownText);
       } catch (error) {
         console.error('渲染Markdown失败:', error);
         this.markdownHtml = '<div style="color: red;">渲染失败</div>';
@@ -249,102 +286,122 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    
-    .back-icon {
-      font-size: 40rpx;
-      color: #333;
-    }
+  }
+  
+  .back-icon {
+    font-size: 40rpx;
+    color: #333;
   }
   
   .title {
     flex: 1;
     text-align: center;
-    font-size: 36rpx;
+    font-size: 34rpx;
     font-weight: bold;
-    color: #333;
-    margin-right: 80rpx; /* 平衡左侧按钮宽度 */
+    margin-right: 80rpx;
   }
 }
 
 .content {
   padding: 30rpx;
   
-  /* Markdown样式 */
-  :deep(h1) {
-    font-size: 40rpx;
-    font-weight: bold;
-    margin-bottom: 30rpx;
-    color: #333;
-  }
-  
-  :deep(h2) {
-    font-size: 36rpx;
-    font-weight: bold;
-    margin: 24rpx 0;
-    color: #333;
-  }
-  
-  :deep(h3) {
-    font-size: 32rpx;
-    font-weight: bold;
-    margin: 20rpx 0;
-    color: #333;
-  }
-  
-  :deep(p) {
-    font-size: 30rpx;
-    line-height: 1.6;
-    margin-bottom: 20rpx;
-    color: #666;
-  }
-  
-  :deep(ul), :deep(ol) {
-    padding-left: 40rpx;
-    margin-bottom: 20rpx;
-  }
-  
-  :deep(li) {
-    font-size: 30rpx;
-    line-height: 1.6;
-    margin-bottom: 10rpx;
-    color: #666;
-  }
-  
-  :deep(a) {
-    color: #007AFF;
-    text-decoration: none;
-  }
-  
-  :deep(strong) {
-    font-weight: bold;
-  }
-  
-  :deep(em) {
-    font-style: italic;
-  }
-  
-  :deep(code) {
-    background-color: #f3f3f3;
-    padding: 4rpx 10rpx;
-    border-radius: 6rpx;
-    font-family: Consolas, Monaco, monospace;
-    font-size: 28rpx;
-  }
-  
-  :deep(pre) {
-    background-color: #f3f3f3;
-    padding: 20rpx;
-    border-radius: 8rpx;
-    overflow-x: auto;
-    margin-bottom: 20rpx;
-  }
-  
-  :deep(blockquote) {
-    border-left: 8rpx solid #ddd;
-    padding: 10rpx 20rpx;
-    margin: 20rpx 0;
-    color: #666;
-    background-color: #f9f9f9;
+  ::v-deep {
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: bold;
+      margin: 20rpx 0;
+      color: #333;
+    }
+    
+    h1 {
+      font-size: 40rpx;
+      margin-bottom: 30rpx;
+    }
+    
+    h2 {
+      font-size: 36rpx;
+      margin-top: 30rpx;
+      margin-bottom: 20rpx;
+    }
+    
+    h3 {
+      font-size: 32rpx;
+    }
+    
+    p {
+      margin: 16rpx 0;
+      line-height: 1.6;
+      font-size: 30rpx;
+      color: #333;
+    }
+    
+    ul, ol {
+      padding-left: 40rpx;
+      margin: 16rpx 0;
+    }
+    
+    li {
+      font-size: 30rpx;
+      line-height: 1.6;
+      color: #333;
+      margin: 10rpx 0;
+    }
+    
+    a {
+      color: #007aff;
+      text-decoration: none;
+    }
+    
+    strong {
+      font-weight: bold;
+    }
+    
+    em {
+      font-style: italic;
+    }
+    
+    code {
+      background-color: #f5f5f5;
+      padding: 4rpx 8rpx;
+      border-radius: 4rpx;
+      font-family: monospace;
+    }
+    
+    pre {
+      background-color: #f5f5f5;
+      padding: 20rpx;
+      border-radius: 8rpx;
+      overflow-x: auto;
+      margin: 20rpx 0;
+      
+      code {
+        background-color: transparent;
+        padding: 0;
+      }
+    }
+    
+    blockquote {
+      border-left: 8rpx solid #ddd;
+      padding: 10rpx 20rpx;
+      margin: 20rpx 0;
+      color: #666;
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20rpx 0;
+      
+      th, td {
+        border: 1rpx solid #ddd;
+        padding: 12rpx;
+        text-align: left;
+      }
+      
+      th {
+        background-color: #f5f5f5;
+        font-weight: bold;
+      }
+    }
   }
 }
 </style> 

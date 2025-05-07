@@ -185,7 +185,7 @@ var _default = {
   created: function created() {
     var _this = this;
     // 确保收藏表已初始化
-    // this.ensureFavoriteTableExists(); // 已注释，云函数initFavoriteTable已删除
+    this.ensureFavoriteTableExists();
 
     // 从父组件传入的initialFavorite进行初始化
     if (this.initialFavorite) {
@@ -228,14 +228,7 @@ var _default = {
             switch (_context.prev = _context.next) {
               case 0:
                 try {
-                  // 调用初始化云函数
-                  /* 
-                  const initResult = await uniCloud.callFunction({
-                    name: 'initFavoriteTable'
-                  });
-                  console.log('初始化收藏表结果:', initResult);
-                  */
-                  // 注释上述代码，因为云函数initFavoriteTable已被删除
+                  // 云函数initFavoriteTable已不存在，不再调用
                   console.log('收藏表初始化功能已禁用');
                 } catch (error) {
                   console.error('初始化收藏表失败:', error);
@@ -284,21 +277,14 @@ var _default = {
                 }
                 return _context2.abrupt("return");
               case 10:
-                /* 
-                const res = await this.$api.user.checkFavorite({
-                  userId,
-                  itemId: this.itemId,
-                  itemType: this.itemType
+                _context2.next = 12;
+                return _this2.$api.user.checkFavorite({
+                  userId: userId,
+                  itemId: _this2.itemId,
+                  itemType: _this2.itemType
                 });
-                */
-                // 注释上述代码，因为checkFavorite云函数已被删除
-                // 模拟返回结果
-                res = {
-                  code: 0,
-                  message: '模拟结果',
-                  data: null,
-                  isFavorite: false
-                };
+              case 12:
+                res = _context2.sent;
                 console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
                 if (res && res.code === 0) {
                   // 1. 优先检查结果对象中的isFavorite字段
@@ -325,18 +311,18 @@ var _default = {
                   _this2.isFavorite = false;
                   _this2.favoriteId = '';
                 }
-                _context2.next = 18;
+                _context2.next = 20;
                 break;
-              case 15:
-                _context2.prev = 15;
+              case 17:
+                _context2.prev = 17;
                 _context2.t0 = _context2["catch"](2);
                 console.error('检查收藏状态失败:', _context2.t0);
-              case 18:
+              case 20:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[2, 15]]);
+        }, _callee2, null, [[2, 17]]);
       }))();
     },
     // 检查是否已收藏
@@ -392,17 +378,10 @@ var _default = {
                 console.log('检查收藏状态，参数:', checkData);
 
                 // 调用API检查是否已收藏
-                /* 
-                const res = await this.$api.user.checkFavorite(checkData);
-                */
-                // 注释上述代码，因为checkFavorite云函数已被删除
-                // 模拟返回结果
-                res = {
-                  code: 0,
-                  message: '模拟结果',
-                  data: null,
-                  isFavorite: false
-                };
+                _context3.next = 22;
+                return _this3.$api.user.checkFavorite(checkData);
+              case 22:
+                res = _context3.sent;
                 console.log('检查收藏状态返回详细结果:', JSON.stringify(res));
                 if (res && res.code === 0) {
                   // 1. 优先检查结果对象中的isFavorite字段
@@ -429,27 +408,27 @@ var _default = {
                   _this3.isFavorite = false;
                   _this3.favoriteId = '';
                 }
-                _context3.next = 30;
+                _context3.next = 32;
                 break;
-              case 25:
-                _context3.prev = 25;
+              case 27:
+                _context3.prev = 27;
                 _context3.t0 = _context3["catch"](0);
                 console.error('检查收藏状态失败:', _context3.t0);
                 _this3.isFavorite = false;
                 _this3.favoriteId = '';
-              case 30:
+              case 32:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, null, [[0, 25]]);
+        }, _callee3, null, [[0, 27]]);
       }))();
     },
     // 添加到购物车
     addToCart: function addToCart(userId, userData) {
       var _this4 = this;
       return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4() {
-        var finalPrice, favoriteData, res;
+        var finalPrice, courseRes, course, classFee, materialFee, totalPrice, favoriteData, res;
         return _regenerator.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -457,29 +436,30 @@ var _default = {
                 _context4.prev = 0;
                 // 构建数据前先获取最新课程价格
                 finalPrice = parseFloat(_this4.price) || 0; // 如果是课程类型，尝试获取最新价格
-                if (_this4.itemType === 'course') {
-                  try {
-                    /* 
-                    const courseRes = await this.$api.course.getCourseDetail(this.itemId);
-                    if (courseRes && courseRes.code === 0 && courseRes.data) {
-                      const course = courseRes.data;
-                      // 计算课时费和材料费的总和
-                      const classFee = parseFloat(course.classFee || 0);
-                      const materialFee = parseFloat(course.materialFee || 0);
-                      const totalPrice = classFee + materialFee;
-                      
-                      // 如果计算得到的价格不为0，则使用计算得到的价格
-                      finalPrice = totalPrice > 0 ? totalPrice : (parseFloat(course.price) || finalPrice);
-                      console.log(`获取到课程 ${this.itemTitle} 的价格: ${finalPrice}`);
-                    }
-                    */
-                    // 注释上述代码，使用传入的价格
-                    console.log("\u4F7F\u7528\u4F20\u5165\u7684\u8BFE\u7A0B\u4EF7\u683C: ".concat(finalPrice));
-                  } catch (error) {
-                    console.error('获取课程价格失败，使用传入的价格:', error);
-                  }
+                if (!(_this4.itemType === 'course')) {
+                  _context4.next = 13;
+                  break;
                 }
-
+                _context4.prev = 3;
+                _context4.next = 6;
+                return _this4.$api.course.getCourseDetail(_this4.itemId);
+              case 6:
+                courseRes = _context4.sent;
+                if (courseRes && courseRes.code === 0 && courseRes.data) {
+                  course = courseRes.data; // 计算课时费和材料费的总和
+                  classFee = parseFloat(course.classFee || 0);
+                  materialFee = parseFloat(course.materialFee || 0);
+                  totalPrice = classFee + materialFee; // 如果计算得到的价格不为0，则使用计算得到的价格
+                  finalPrice = totalPrice > 0 ? totalPrice : parseFloat(course.price) || finalPrice;
+                  console.log("\u83B7\u53D6\u5230\u8BFE\u7A0B ".concat(_this4.itemTitle, " \u7684\u4EF7\u683C: ").concat(finalPrice));
+                }
+                _context4.next = 13;
+                break;
+              case 10:
+                _context4.prev = 10;
+                _context4.t0 = _context4["catch"](3);
+                console.error('获取课程价格失败，使用传入的价格:', _context4.t0);
+              case 13:
                 // 确保价格为数字类型
                 finalPrice = parseFloat(finalPrice) || 0;
 
@@ -506,22 +486,22 @@ var _default = {
                 } else if (_this4.itemType === 'teacher') {
                   favoriteData.itemUrl = "/pages/teacher/detail?id=".concat(_this4.itemId);
                 }
-                _context4.next = 9;
+                _context4.next = 19;
                 return _this4.$api.user.addFavorite(favoriteData);
-              case 9:
+              case 19:
                 res = _context4.sent;
                 return _context4.abrupt("return", res);
-              case 13:
-                _context4.prev = 13;
-                _context4.t0 = _context4["catch"](0);
-                console.error('添加购物车失败:', _context4.t0);
-                throw _context4.t0;
-              case 17:
+              case 23:
+                _context4.prev = 23;
+                _context4.t1 = _context4["catch"](0);
+                console.error('添加购物车失败:', _context4.t1);
+                throw _context4.t1;
+              case 27:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, null, [[0, 13]]);
+        }, _callee4, null, [[0, 23], [3, 10]]);
       }))();
     },
     // 点击收藏按钮
@@ -576,7 +556,7 @@ var _default = {
                   title: _this5.isFavorite ? '移出中' : '添加中'
                 });
                 if (!_this5.isFavorite) {
-                  _context5.next = 25;
+                  _context5.next = 27;
                   break;
                 }
                 if (_this5.favoriteId) {
@@ -591,16 +571,10 @@ var _default = {
                 });
                 return _context5.abrupt("return");
               case 21:
-                // 直接传递ID字符串，而不是包含ID的对象
-                /* 
-                const res = await this.$api.user.removeFavorite(this.favoriteId);
-                */
-                // 注释上述代码，因为removeFavorite云函数可能已被删除
-                // 模拟返回结果
-                res = {
-                  code: 0,
-                  message: '模拟移出成功'
-                };
+                _context5.next = 23;
+                return _this5.$api.user.removeFavorite(_this5.favoriteId);
+              case 23:
+                res = _context5.sent;
                 if (res && res.code === 0) {
                   _this5.isFavorite = false;
                   _this5.favoriteId = '';
@@ -623,22 +597,13 @@ var _default = {
                     icon: 'none'
                   });
                 }
-                _context5.next = 27;
+                _context5.next = 31;
                 break;
-              case 25:
-                // 添加到购物车
-                /* 
-                const res = await this.addToCart(userId, userData);
-                */
-                // 注释上述代码，因为addFavorite云函数可能已被删除
-                // 模拟返回结果
-                _res = {
-                  code: 0,
-                  message: '模拟添加成功',
-                  data: {
-                    _id: 'mock_favorite_id_' + Date.now()
-                  }
-                };
+              case 27:
+                _context5.next = 29;
+                return _this5.addToCart(userId, userData);
+              case 29:
+                _res = _context5.sent;
                 if (_res && _res.code === 0) {
                   _this5.isFavorite = true;
                   _this5.favoriteId = _res.data._id || _res.data.favoriteId || '';
@@ -665,11 +630,11 @@ var _default = {
                     console.error('加入购物车失败原因:', _res.message);
                   }
                 }
-              case 27:
-                _context5.next = 34;
+              case 31:
+                _context5.next = 38;
                 break;
-              case 29:
-                _context5.prev = 29;
+              case 33:
+                _context5.prev = 33;
                 _context5.t0 = _context5["catch"](13);
                 console.error('收藏操作失败:', _context5.t0);
                 uni.hideLoading();
@@ -677,12 +642,12 @@ var _default = {
                   title: '操作失败',
                   icon: 'none'
                 });
-              case 34:
+              case 38:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, null, [[13, 29]]);
+        }, _callee5, null, [[13, 33]]);
       }))();
     },
     // 手动更新收藏状态

@@ -1,0 +1,372 @@
+@charset "UTF-8";
+/* 使用CSS变量代替SCSS变量，以便在微信小程序中使用 */
+:root {
+  /* 主题色 */
+  --theme-color: #FF6B00;
+  --theme-color-light: #FFE9D6;
+  --theme-color-dark: #F37121;
+  /* 文字颜色 */
+  --text-color: #333333;
+  --text-color-inverse: #ffffff;
+  --text-color-grey: #666666;
+  --text-color-light: #999999;
+  /* 背景颜色 */
+  --bg-color: #F7F7F7;
+  --bg-color-white: #FFFFFF;
+  --bg-color-grey: #F2F2F2;
+  /* 边框颜色 */
+  --border-color: #DDDDDD;
+  --border-color-light: #EEEEEE;
+  /* 尺寸变量 */
+  --uni-size-grid: 8rpx;
+  /* 文字尺寸 */
+  --font-size-xs: 22rpx;
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 36rpx;
+  --font-size-xxl: 40rpx;
+  /* 图片尺寸 */
+  --img-size-sm: 80rpx;
+  --img-size-base: 120rpx;
+  --img-size-lg: 160rpx;
+  /* 水平间距 */
+  --spacing-xs: 10rpx;
+  --spacing-sm: 20rpx;
+  --spacing-base: 30rpx;
+  --spacing-lg: 40rpx;
+  --spacing-xl: 50rpx;
+  /* 垂直间距 */
+  --spacing-col-sm: 8rpx;
+  --spacing-col-base: 16rpx;
+  --spacing-col-lg: 24rpx;
+  /* 边框半径 */
+  --border-radius-sm: 4rpx;
+  --border-radius-base: 8rpx;
+  --border-radius-lg: 12rpx;
+  --border-radius-circle: 50%;
+  /* 阴影 */
+  --box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  --box-shadow-lg: 0 4rpx 10rpx rgba(0, 0, 0, 0.15);
+  /* 透明度 */
+  --opacity-disabled: 0.3;
+  /* 组件禁用态的透明度 */
+  /* 组件变量 */
+  /* 导航栏 */
+  --navbar-height: 88rpx;
+  --navbar-bg-color: #ffffff;
+  /* 选项卡 */
+  --tab-height: 100rpx;
+}
+/* 为了向后兼容，保留SCSS变量 */
+/* 阴影 */
+/* 透明度 */
+/* 组件变量 */
+/* 导航栏 */
+/* 选项卡 */
+.detail-container {
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+/* 课程封面 */
+.course-header {
+  position: relative;
+  height: 400rpx;
+}
+.course-header .course-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.course-header .course-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6));
+}
+.course-header .course-title {
+  position: absolute;
+  bottom: 40rpx;
+  left: 30rpx;
+  right: 90rpx;
+  color: #fff;
+  font-size: 38rpx;
+  font-weight: bold;
+  line-height: 1.4;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+/* 课程信息卡片 */
+.info-card {
+  margin: 20rpx;
+  padding: 30rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.info-card .info-price {
+  margin-bottom: 20rpx;
+}
+.info-card .info-price .price-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #FF3B30;
+}
+.info-card .info-price .price-label {
+  font-size: 24rpx;
+  color: var(--text-color-grey);
+  margin-left: 8rpx;
+}
+.info-card .info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.info-card .info-item:last-child {
+  margin-bottom: 0;
+}
+.info-card .info-item .item-icon {
+  font-size: 32rpx;
+  color: var(--theme-color);
+  margin-right: 10rpx;
+  width: 36rpx;
+  height: 36rpx;
+}
+.info-card .info-item .item-label {
+  font-size: 28rpx;
+  color: var(--text-color-grey);
+  width: 150rpx;
+}
+.info-card .info-item .item-value {
+  font-size: 28rpx;
+  color: var(--text-color);
+  flex: 1;
+}
+.info-card .info-item .teacher-title {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+  background-color: #f5f5f5;
+  padding: 6rpx 12rpx;
+  border-radius: 6rpx;
+  margin-left: 10rpx;
+}
+.info-card .info-item .teacher-title {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+  background-color: #f5f5f5;
+  padding: 6rpx 12rpx;
+  border-radius: 6rpx;
+  margin-left: 10rpx;
+}
+.info-card .info-item .price-details {
+  display: flex;
+  flex-direction: column;
+}
+.info-card .info-item .price-details text {
+  margin-bottom: 8rpx;
+}
+/* 课程详情和师资介绍 */
+.course-detail, .teacher-intro {
+  margin: 20rpx;
+  padding: 30rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.detail-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 20rpx;
+  position: relative;
+  padding-left: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.detail-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8rpx;
+  height: 32rpx;
+  width: 6rpx;
+  background-color: var(--theme-color);
+  border-radius: 3rpx;
+}
+.detail-title .title-hint {
+  font-size: 24rpx;
+  font-weight: normal;
+  color: var(--text-color-light);
+  margin-left: auto;
+}
+.detail-title .title-hint .iconfont {
+  font-size: 24rpx;
+}
+.detail-content {
+  font-size: 28rpx;
+  color: var(--text-color);
+  line-height: 1.8;
+}
+/* 师资介绍 */
+.teacher-card {
+  display: flex;
+  margin-top: 30rpx;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8rpx;
+  padding: 20rpx;
+}
+.teacher-card:hover, .teacher-card:active {
+  background-color: #f8f8f8;
+  -webkit-transform: translateY(-2rpx);
+          transform: translateY(-2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+.teacher-card .teacher-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-right: 20rpx;
+}
+.teacher-card .teacher-info {
+  flex: 1;
+}
+.teacher-card .teacher-info .teacher-header {
+  margin-bottom: 10rpx;
+}
+.teacher-card .teacher-info .teacher-header .teacher-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-color);
+  margin-right: 16rpx;
+}
+.teacher-card .teacher-info .teacher-header .teacher-title {
+  font-size: 24rpx;
+  color: var(--text-color-light);
+  background-color: #f5f5f5;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+}
+.teacher-card .teacher-info .teacher-desc {
+  font-size: 28rpx;
+  color: var(--text-color-grey);
+  line-height: 1.6;
+}
+/* 预约信息 */
+.booking-info {
+  margin: 20rpx;
+  padding: 30rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.booking-info .booking-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx 0;
+}
+.booking-info .booking-status .status-icon {
+  font-size: 48rpx;
+  color: #4CD964;
+  margin-right: 20rpx;
+}
+.booking-info .booking-status .status-text {
+  font-size: 32rpx;
+  color: var(--text-color);
+  font-weight: bold;
+}
+.booking-info .booking-tips {
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--text-color-grey);
+  padding-bottom: 30rpx;
+}
+.booking-info .booking-tips .tips-link {
+  color: var(--theme-color);
+}
+/* 底部栏 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background-color: #fff;
+  display: flex;
+  border-top: 1rpx solid var(--border-color-light);
+  z-index: 100;
+}
+.footer .contact-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120rpx;
+  border-right: 1rpx solid var(--border-color-light);
+}
+.footer .contact-btn .btn-icon {
+  font-size: 36rpx;
+  color: var(--text-color-grey);
+  width: 42rpx;
+  height: 42rpx;
+  margin-bottom: 4rpx;
+}
+.footer .contact-btn text {
+  font-size: 22rpx;
+  color: var(--text-color-grey);
+}
+.footer .book-btn, .footer .submit-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  background-color: #FF6B00;
+  /* 主题色 */
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 100rpx;
+  height: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+.footer .book-btn::after, .footer .submit-btn::after {
+  border: none;
+}
+.footer .book-btn.booked {
+  background-color: #4CD964;
+  position: relative;
+  overflow: hidden;
+}
+.footer .book-btn.booked::before {
+  content: "✓";
+  display: inline-block;
+  margin-right: 10rpx;
+  font-weight: bold;
+}
+.footer .book-btn.disabled {
+  background-color: #999;
+  color: #fff;
+  cursor: not-allowed;
+}
+/* 固定在右上角的收藏按钮 */
+.fixed-favorite-wrapper {
+  position: fixed;
+  right: 30rpx;
+  z-index: 9999;
+}
+.course-notes {
+  background-color: #fff;
+  border-radius: 20rpx;
+  margin: 30rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}

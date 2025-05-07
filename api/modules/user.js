@@ -2,6 +2,7 @@
  * 用户相关API
  */
 import request from '../request';
+import { getToken, addTokenToRequest } from '@/utils/token.js'
 
 /**
  * 用户登录
@@ -144,7 +145,7 @@ export function updatePhoneNumber(params = {}) {
   }
   
   // 尝试获取所有可能的token
-  const uniIdToken = uni.getStorageSync('uni_id_token') || '';
+  const uniIdToken = getToken();
   const token = uni.getStorageSync('token') || '';
   const userToken = uni.getStorageSync('userToken') || '';
   
